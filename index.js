@@ -1,11 +1,17 @@
 /**
  * 
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.0.0
+ * Version 1.1.0
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
  *
+ * 2021-02-10  Released version 1.1.0
+ *             - Add listener for MIDI inbound data
+ *             - Add function to autoset StreamDeck button status
+ *               from status of the mute button on SQ
+ *
+ * 2021-02-09  Released version 1.0.0
  */
 
 let tcp             = require('../../tcp');
@@ -13,8 +19,9 @@ let instance_skel   = require('../../instance_skel');
 let actions         = require('./actions');
 
 const level         = require('./level.json');
+const callback      = require('./callback.json');
 const MIDI          = 51325;
-
+var chks            = false;
 
 class instance extends instance_skel {
 
@@ -305,13 +312,50 @@ class instance extends instance_skel {
 		]
 	}
     
-    /*
-    getRemoteValue() {
-        if (cmd.port === MIDI && this.midiSocket !== undefined) {
-            this.midiSocket.write(Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x60, 0x7F ]));
+    getRemoteValue(data) {
+        
+        if ( this.midiSocket !== undefined && !chks ) {
+            this.midiSocket.write(Buffer.from([ 0xB0, 0x63, 0, 0xB0, 0x62, 0, 0xB0, 0x60, 0x7F ]));
+            chks = true;
         }
+        
+        if (typeof data == 'object') {
+            /* Schene Change */
+            if (data[3] == 192) {
+                //console.log("Scene: " + ((data[4] + 1) + data[2] * 127));
+            }
+            
+            /* Other */
+            if (data[3] == 176) {
+                var MSB = data[2];
+                var LSB = data[5];
+                var VC  = data[8];
+                var VF  = data[11];
+                
+                /* Mute */
+                if ( data[1] == 99 && data[4] == 98 && data[7] == 6 && data[8] == 0 ) {
+                    //console.log(MSB,LSB,VC,VF);
+                    
+                    system.emit('db_get', 'bank_actions', function(res) {
+                        let act = callback['mute'][MSB+'.'+LSB][0];
+                        let str = callback['mute'][MSB+'.'+LSB][1];
+                        //console.log(act,str);
+                        
+                        for ( let i = 1; i <= 99; i++ ) {
+                            for ( let j = 1; j <= 32; j++ ) {
+                                if ( typeof res[i][j] == 'object' && Object.keys(res[i][j]).length !== 0 && 'options' in res[i][j][0]) {
+                                    if ( res[i][j][0]['action'] == act && 'strip' in res[i][j][0]['options'] && res[i][j][0]['options']['strip'] == str ) {
+                                        system.emit('graphics_indicate_push', i, j, VF == 1 ? true : false);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        
     }
-    */
     
 	destroy() {
 
@@ -330,7 +374,7 @@ class instance extends instance_skel {
 	init() {
 
 		this.updateConfig(this.config);
-
+        
 	}
 
 	
@@ -354,6 +398,11 @@ class instance extends instance_skel {
 			this.midiSocket.on('connect', () => {
 				this.log('debug', `MIDI Connected to ${this.config.host}`);
 			});
+            
+            this.midiSocket.on('data', (data) => {
+                this.getRemoteValue(data);
+            });
+            
 		}
 	}
 
@@ -364,7 +413,7 @@ class instance extends instance_skel {
 		
 		this.actions();
 		this.init_tcp();
-
+        
 	}
 
 }

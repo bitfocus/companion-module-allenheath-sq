@@ -138,11 +138,25 @@ module.exports = {
 		actions['mute_input'] = {
 			label: 'Mute Input',
 			options: this.muteOptions('Input Channel', this.chCount, -1)
-		};	
+		};
+        
 		actions['mute_lr'] = {
 			label: 'Mute LR',
-			options: this.muteOptions('LR', 12, -1)
+			options: [{
+                type:    'dropdown',
+                label:   'LR',
+                id:      'strip',
+                default: 0,
+                choices: [{ label: `LR`, id: 0 }],
+                minChoicesForSearch: 99
+            },{
+                type:    'checkbox',
+                label:   'Mute',
+                id:      'mute',
+                default: true
+            }]
 		}
+        
 		actions['mute_aux'] = {
 			label: 'Mute Aux',
 			options: this.muteOptions('Aux', 12, -1)
