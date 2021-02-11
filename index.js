@@ -1,25 +1,30 @@
 /**
  * 
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.1.2
+ * Version 1.2.0
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
  *
- * 2021-02-11  Released version 1.1.2
+ * 2021-02-11  Version 1.2.0
+ *             - Add feedback for all mute actions
+ *
+ *             Version 1.1.2
  *             - Bug fix
  *
- * 2021-02-10  Released version 1.1.0
+ * 2021-02-10  Version 1.1.0
  *             - Add listener for MIDI inbound data
  *             - Add function to autoset StreamDeck button status
  *               from status of the mute button on SQ
  *
- * 2021-02-09  Released version 1.0.0
+ * 2021-02-09  Version 1.0.0
  */
 
 let tcp             = require('../../tcp');
 let instance_skel   = require('../../instance_skel');
 let actions         = require('./actions');
+let feedbacks       = require('./feedbacks');
+let variables       = require('./variables');
 
 const level         = require('./level.json');
 const callback      = require('./callback.json');
@@ -32,8 +37,11 @@ class instance extends instance_skel {
 		super(system, id, config);
 
 		Object.assign(this, {
-			...actions
+			...actions,
+            ...feedbacks,
+            ...variables
 		});
+        
 	}
 
 	actions(system) {
@@ -41,6 +49,18 @@ class instance extends instance_skel {
 		this.setActions(this.getActions());
 	
 	}
+    
+    feedbacks(system) {
+
+        this.setFeedbackDefinitions(this.getFeedbacks());
+    
+    }
+    
+    variables(system) {
+
+        this.setVariableDefinitions(this.getVariables());
+    
+    }
 
 	setRouting(ch, mix, ac, mc, oMB, oLB) {
         
@@ -259,6 +279,22 @@ class instance extends instance_skel {
 
 		if (cmd.buffers.length == 0) {
 			if (action.action.slice(0 ,4) == 'mute') {
+                this.setVariable(action.action + '_' + MSB + '.' + (LSB + strip), opt.mute ? true : false);
+                
+                system.emit('db_get', opt.mute ? 'bank_actions' : 'bank_release_actions', function(res) {
+                    for ( let i = 1; i <= 99; i++ ) {
+                        for ( let j = 1; j <= 32; j++ ) {
+                            if ( typeof res[i][j] == 'object' && Object.keys(res[i][j]).length !== 0 && 'options' in res[i][j][0]) {
+                                if ( res[i][j][0]['id'] == action.id ) {
+                                    system.emit('feedback_check_bank', i, j);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                //console.log(action);
 				cmd.buffers = [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, strip + LSB, 0xB0, 0x06, 0x00, 0xB0, 0x26, opt.mute ? 1 : 0 ]) ];
 			}
 		}
@@ -271,7 +307,6 @@ class instance extends instance_skel {
 		}
 
 	}
-
     
 	config_fields() {
 
@@ -324,7 +359,7 @@ class instance extends instance_skel {
     }
     
     getRemoteValue(data) {
-
+        
         if ( this.midiSocket !== undefined && !chks ) {
             this.getRemoteStatus('mute');
             chks = true;
@@ -342,6 +377,7 @@ class instance extends instance_skel {
                 var LSB = data[5];
                 var VC  = data[8];
                 var VF  = data[11];
+                var self = this;
                 
                 /* Mute */
                 if ( data[1] == 99 && data[4] == 98 && data[7] == 6 && data[8] == 0 ) {
@@ -357,6 +393,8 @@ class instance extends instance_skel {
                                 if ( typeof res[i][j] == 'object' && Object.keys(res[i][j]).length !== 0 && 'options' in res[i][j][0]) {
                                     if ( res[i][j][0]['action'] == act && 'strip' in res[i][j][0]['options'] && res[i][j][0]['options']['strip'] == str ) {
                                         system.emit('graphics_indicate_push', i, j, VF == 1 ? true : false);
+                                        self.setVariable(act + '_' + MSB + '.' + LSB, VF == 1 ? true : false);
+                                        system.emit('feedback_check_bank', i, j);
                                     }
                                 }
                             }
@@ -425,6 +463,7 @@ class instance extends instance_skel {
 		this.config = config;
 		
 		this.actions();
+        this.feedbacks();
 		this.init_tcp();
         
 	}
