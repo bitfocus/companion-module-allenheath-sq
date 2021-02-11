@@ -21,5 +21,5 @@ New in v.1.1.0
 
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Current version: 1.1.0
+Current version: 1.1.2
 

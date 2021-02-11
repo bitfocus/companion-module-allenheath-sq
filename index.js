@@ -1,10 +1,13 @@
 /**
  * 
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.1.0
+ * Version 1.1.2
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-02-11  Released version 1.1.2
+ *             - Bug fix
  *
  * 2021-02-10  Released version 1.1.0
  *             - Add listener for MIDI inbound data
@@ -312,10 +315,18 @@ class instance extends instance_skel {
 		]
 	}
     
-    getRemoteValue(data) {
+    getRemoteStatus(act) {
         
+        for (let key in callback[act]) {
+            let mblb = key.toString().split(".");
+            this.midiSocket.write(Buffer.from([ 0xB0, 0x63, mblb[0], 0xB0, 0x62, mblb[1], 0xB0, 0x60, 0x7F ]));
+        }
+    }
+    
+    getRemoteValue(data) {
+
         if ( this.midiSocket !== undefined && !chks ) {
-            this.midiSocket.write(Buffer.from([ 0xB0, 0x63, 0, 0xB0, 0x62, 0, 0xB0, 0x60, 0x7F ]));
+            this.getRemoteStatus('mute');
             chks = true;
         }
         
@@ -400,7 +411,9 @@ class instance extends instance_skel {
 			});
             
             this.midiSocket.on('data', (data) => {
-                this.getRemoteValue(data);
+                for ( let i = 0; i < data.length; i = i + 12) {
+                    this.getRemoteValue(data.slice(i, (i+1) * 12));
+                }
             });
             
 		}
