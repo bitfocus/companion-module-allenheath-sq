@@ -18,8 +18,13 @@ Controls the Allen & Heath SQ.
 New in v.1.1.0
 * Add listener for MIDI inbound data
 * Add function to autoset button status from status of the mute button on SQ
+  (first MIDI data from console send all mute status to Companion)
+
+New in v.1.2.0
+* Add feedback for all "mute" actions
+
 
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Current version: 1.1.2
+Current version: 1.2.0
 
