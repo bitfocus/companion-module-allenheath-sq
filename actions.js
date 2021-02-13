@@ -1,18 +1,21 @@
 const { config } = require("chai");
 const level      = require('./level.json');
+const sqconfig   = require('./sqconfig.json');
 
 module.exports = {
 
 	getActions() {
-		this.chCount    = 48;
-		this.mixCount   = 12;
-        this.grpCount   = 12;
-        this.fxrCount   = 8;
-        this.fxsCount   = 4;
-        this.mtxCount   = 3;
-        this.dcaCount   = 8;
-        this.SoftKey    = 16;
-		this.sceneCount = 300;
+		var sq = sqconfig['config'][this.config.model];
+		
+		this.chCount    = sq['chCount'];
+		this.mixCount   = sq['mixCount'];
+        this.grpCount   = sq['grpCount'];
+        this.fxrCount   = sq['fxrCount'];
+        this.fxsCount   = sq['fxsCount'];
+        this.mtxCount   = sq['mtxCount'];
+        this.dcaCount   = sq['dcaCount'];
+        this.SoftKey    = sq['SoftKey'];
+		this.sceneCount = sq['sceneCount'];
 		
 		let actions = {};
 
