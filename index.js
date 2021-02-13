@@ -1,10 +1,14 @@
 /**
  * 
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.2.0
+ * Version 1.2.3
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-02-13  Version 1.2.3
+ *             - Bug Fix
+ *             - Add presets for mute actions and talkback
  *
  * 2021-02-11  Version 1.2.0
  *             - Add feedback for all mute actions
@@ -25,6 +29,7 @@ let instance_skel   = require('../../instance_skel');
 let actions         = require('./actions');
 let feedbacks       = require('./feedbacks');
 let variables       = require('./variables');
+let presets         = require('./presets');
 
 const level         = require('./level.json');
 const callback      = require('./callback.json');
@@ -39,7 +44,8 @@ class instance extends instance_skel {
 		Object.assign(this, {
 			...actions,
             ...feedbacks,
-            ...variables
+            ...variables,
+            ...presets
 		});
         
 	}
@@ -59,6 +65,12 @@ class instance extends instance_skel {
     variables(system) {
 
         this.setVariableDefinitions(this.getVariables());
+    
+    }
+    
+    presets(system) {
+
+        this.setPresetDefinitions(this.getPresets());
     
     }
 
@@ -282,11 +294,11 @@ class instance extends instance_skel {
                 this.setVariable(action.action + '_' + MSB + '.' + (LSB + strip), opt.mute ? true : false);
                 
                 system.emit('db_get', opt.mute ? 'bank_actions' : 'bank_release_actions', function(res) {
-                    for ( let i = 1; i <= 99; i++ ) {
-                        for ( let j = 1; j <= 32; j++ ) {
-                            if ( typeof res[i][j] == 'object' && Object.keys(res[i][j]).length !== 0 && 'options' in res[i][j][0]) {
-                                if ( res[i][j][0]['id'] == action.id ) {
-                                    system.emit('feedback_check_bank', i, j);
+                    for ( let pag in res ) {
+                        for ( let bnk in res[pag] ) {
+                            if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
+                                if ( res[pag][bnk][0]['id'] == action.id ) {
+                                    system.emit('feedback_check_bank', pag, bnk);
                                     break;
                                 }
                             }
@@ -359,7 +371,6 @@ class instance extends instance_skel {
     }
     
     getRemoteValue(data) {
-        
         if ( this.midiSocket !== undefined && !chks ) {
             this.getRemoteStatus('mute');
             chks = true;
@@ -380,7 +391,7 @@ class instance extends instance_skel {
                 var self = this;
                 
                 /* Mute */
-                if ( data[1] == 99 && data[4] == 98 && data[7] == 6 && data[8] == 0 ) {
+                if ( data[1] == 99 && data[4] == 98 && data[7] == 6 && data[8] == 0 && (MSB == 0 || MSB == 2 || MSB == 4)) {
                     //console.log(MSB,LSB,VC,VF);
                     
                     system.emit('db_get', 'bank_actions', function(res) {
@@ -388,13 +399,13 @@ class instance extends instance_skel {
                         let str = callback['mute'][MSB+'.'+LSB][1];
                         //console.log(act,str);
                         
-                        for ( let i = 1; i <= 99; i++ ) {
-                            for ( let j = 1; j <= 32; j++ ) {
-                                if ( typeof res[i][j] == 'object' && Object.keys(res[i][j]).length !== 0 && 'options' in res[i][j][0]) {
-                                    if ( res[i][j][0]['action'] == act && 'strip' in res[i][j][0]['options'] && res[i][j][0]['options']['strip'] == str ) {
-                                        system.emit('graphics_indicate_push', i, j, VF == 1 ? true : false);
+                        for ( let pag in res ) {
+                            for ( let bnk in res[pag] ) {
+                                if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
+                                    if ( res[pag][bnk][0]['action'] == act && 'strip' in res[pag][bnk][0]['options'] && res[pag][bnk][0]['options']['strip'] == str ) {
+                                        system.emit('graphics_indicate_push', pag, bnk, VF == 1 ? true : false);
                                         self.setVariable(act + '_' + MSB + '.' + LSB, VF == 1 ? true : false);
-                                        system.emit('feedback_check_bank', i, j);
+                                        system.emit('feedback_check_bank', pag, bnk);
                                     }
                                 }
                             }
@@ -464,6 +475,7 @@ class instance extends instance_skel {
 		
 		this.actions();
         this.feedbacks();
+        this.presets();
 		this.init_tcp();
         
 	}

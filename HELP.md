@@ -23,8 +23,16 @@ New in v.1.1.0
 New in v.1.2.0
 * Add feedback for all "mute" actions
 
+New in v.1.2.3
+* Add presets for "mute"" actions and "talkback"
+
 
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Current version: 1.2.0
+Current version: 1.2.3
 
+## Presets
+
+"Talkback" macro preset simulate the native function talkback of SQ, but it works with "channel assign to mix" function
+in routing screen. With this preset you'll be able to talk to one specific AUX channels by pressing a button.
+Preset works with input channel 1, but you'll be able to change it with channel you want.
