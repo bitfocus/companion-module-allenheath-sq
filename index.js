@@ -1,10 +1,13 @@
 /**
  * 
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.2.3
+ * Version 1.2.4
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-02-14  Version 1.2.5
+ *             - Add scene step and current scene display
  *
  * 2021-02-13  Version 1.2.3
  *             - Bug Fix
@@ -31,8 +34,10 @@ let feedbacks       = require('./feedbacks');
 let variables       = require('./variables');
 let presets         = require('./presets');
 
+
 const level         = require('./level.json');
 const callback      = require('./callback.json');
+const sqconfig      = require('./sqconfig.json');
 const MIDI          = 51325;
 var chks            = false;
 
@@ -47,7 +52,6 @@ class instance extends instance_skel {
             ...variables,
             ...presets
 		});
-        
 	}
 
 	actions(system) {
@@ -116,6 +120,18 @@ class instance extends instance_skel {
         //console.log(ch + ':MSB/LSB/VC/VF: ' + MSB + '/' + LSB + '/' + VC + '/' + VF);
         return [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]) ];
     }
+    
+    setScene(val) {
+        var sq = sqconfig['config'][this.config.model];
+        var scn;
+        this.getVariable('currentScene', function(res) {
+            scn = parseInt(res) + val;
+            if (scn < 0) scn = 0;
+            if (scn > sq['sceneCount']) scn = sq['sceneCount'];
+        });
+        
+        return scn;
+    }
 
 	action(action) {
 
@@ -125,6 +141,7 @@ class instance extends instance_skel {
 		let LSB = 0;
 		let strip   = parseInt(opt.strip);
 		let cmd     = {port: MIDI, buffers:[]};
+		let sceneNumber;
 
 		switch (action.action) {
 			
@@ -178,11 +195,6 @@ class instance extends instance_skel {
 				let keyValu = (opt.pressedsk == '0' || opt.pressedsk == '1') ? true : false;
 				cmd.buffers = [ Buffer.from([ keyValu ? 0x90 : 0x80, 0x30 + softKey, keyValu ? 0x7F : 0 ]) ];
 				break;
-                
-            case 'scene_recall':
-                let sceneNumber = parseInt(opt.sceneNumber);
-                cmd.buffers = [ Buffer.from([ 0xB0, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
-                break;
                 
             case 'ch_to_mix':
                 cmd.buffers = this.setRouting(opt.inputChannel, opt.mixAssign, opt.mixActive, this.mixCount, [0x60,0x60], [0,0x44]);
@@ -287,6 +299,17 @@ class instance extends instance_skel {
             case 'pan_to_output':
                 cmd.buffers = this.setLevel(opt.input, 99, 0, opt.level, [0x5F,0], [0,0], 'PanBalance');
                 break;
+                
+            case 'scene_step':
+                sceneNumber = this.setScene(opt.scene);
+                cmd.buffers = [ Buffer.from([ 0xB0, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+                break;
+                
+            case 'current_scene':
+            case 'scene_recall':
+                sceneNumber = opt.scene - 1;
+                cmd.buffers = [ Buffer.from([ 0xB0, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+                break;
 		}
 
 		if (cmd.buffers.length == 0) {
@@ -320,48 +343,6 @@ class instance extends instance_skel {
 
 	}
     
-	config_fields() {
-
-		return [
-			{
-				type:  'text',
-				id:    'info',
-				width: 12,
-				label: 'Information',
-				value: 'This module is for the Allen & Heath SQ'
-			},
-			{
-				type:    'textinput',
-				id:      'host',
-				label:   'Target IP',
-				width:   6,
-				default: '192.168.0.5',
-				regex:   this.REGEX_IP
-			},
-			{
-				type:    'dropdown',
-				id:      'model',
-				label:   'Console Type',
-				width:   6,
-				default: 'SQ5',
-				choices: [
-					{id: 'SQ5', label: 'SQ 5'},
-					{id: 'SQ6', label: 'SQ 6'},
-					{id: 'SQ7', label: 'SQ 7'}]
-			},
-            {
-                type:    'dropdown',
-                id:      'level',
-                label:   'NRPN Fader Law',
-                width:   6,
-                default: 'LinearTaper',
-                choices: [
-                    {id: 'LinearTaper', label: 'Linear Taper'},
-                    {id: 'AudioTaper', label: 'Audio Taper'}]
-            }
-		]
-	}
-    
     getRemoteStatus(act) {
         
         for (let key in callback[act]) {
@@ -371,6 +352,8 @@ class instance extends instance_skel {
     }
     
     getRemoteValue(data) {
+        var self = this;
+        
         if ( this.midiSocket !== undefined && !chks ) {
             this.getRemoteStatus('mute');
             chks = true;
@@ -379,7 +362,21 @@ class instance extends instance_skel {
         if (typeof data == 'object') {
             /* Schene Change */
             if (data[3] == 192) {
-                //console.log("Scene: " + ((data[4] + 1) + data[2] * 127));
+                var csc = (data[4] + data[2] * 127);
+                self.setVariable('currentScene', csc);
+                
+                system.emit('db_get', 'bank_actions', function(res) {
+                    for ( let pag in res ) {
+                        for ( let bnk in res[pag] ) {
+                            if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
+                                if ( res[pag][bnk][0]['action'] == 'current_scene' ) {
+                                    system.emit('bank_changefield', pag, bnk, 'text', `Scene ${csc + 1}`);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
             }
             
             /* Other */
@@ -388,7 +385,6 @@ class instance extends instance_skel {
                 var LSB = data[5];
                 var VC  = data[8];
                 var VF  = data[11];
-                var self = this;
                 
                 /* Mute */
                 if ( data[1] == 99 && data[4] == 98 && data[7] == 6 && data[8] == 0 && (MSB == 0 || MSB == 2 || MSB == 4)) {
@@ -417,6 +413,57 @@ class instance extends instance_skel {
         
     }
     
+    config_fields() {
+        
+        this.CHOICES_INPUT_CHANNEL = [];
+		for (let i = 0; i < 48; i++) {
+			this.CHOICES_INPUT_CHANNEL.push({ label: `CH ${i + 1}`, id: i });
+		}
+		
+		return [
+			{
+				type:  'text',
+				id:    'info',
+				width: 12,
+				label: 'Information',
+				value: 'This module is for the Allen & Heath SQ'
+			},{
+				type:    'textinput',
+				id:      'host',
+				label:   'Target IP',
+				width:   6,
+				default: '192.168.0.5',
+				regex:   this.REGEX_IP
+			},{
+				type:    'dropdown',
+				id:      'model',
+				label:   'Console Type',
+				width:   6,
+				default: 'SQ5',
+				choices: [
+					{id: 'SQ5', label: 'SQ 5'},
+					{id: 'SQ6', label: 'SQ 6'},
+					{id: 'SQ7', label: 'SQ 7'}]
+			},{
+                type:    'dropdown',
+                id:      'level',
+                label:   'NRPN Fader Law',
+                width:   6,
+                default: 'LinearTaper',
+                choices: [
+                    {id: 'LinearTaper', label: 'Linear Taper'},
+                    {id: 'AudioTaper', label: 'Audio Taper'}]
+            },{
+				type:    'dropdown',
+				label:   'Default talkback input channel',
+				id:      'talkback',
+				default: '0',
+				choices: this.CHOICES_INPUT_CHANNEL,
+				minChoicesForSearch: 0
+			}
+		]
+	}
+    
 	destroy() {
 
 		if (this.tcpSocket !== undefined) {
@@ -434,6 +481,8 @@ class instance extends instance_skel {
 	init() {
 
 		this.updateConfig(this.config);
+        
+        this.setVariable('currentScene', 0);
         
 	}
 
