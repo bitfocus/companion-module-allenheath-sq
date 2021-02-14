@@ -1,4 +1,3 @@
-const { config } = require("chai");
 const level      = require('./level.json');
 const sqconfig   = require('./sqconfig.json');
 
