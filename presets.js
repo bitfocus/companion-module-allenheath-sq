@@ -79,28 +79,28 @@ module.exports = {
 					{
 						action: 'ch_to_mix',
 						options: {
-							inputChannel: '0',
+							inputChannel: `${this.config.talkback}`,
 							mixAssign: [`99`],
 							mixActive: false
 						}
 					},{
 						action: 'ch_to_mix',
 						options: {
-							inputChannel: '0',
+							inputChannel: `${this.config.talkback}`,
 							mixAssign: [`${i}`],
 							mixActive: true
 						}
 					},{
 						action: 'chlev_to_mix',
 						options: {
-							input: '0',
+							input: `${this.config.talkback}`,
 							assign: `${i}`,
 							level: '49'
 						}
 					},{
 						action: 'mute_input',
 						options: {
-							strip: 0,
+							strip: this.config.talkback,
 							mute: false
 						}
 					}
@@ -109,21 +109,21 @@ module.exports = {
 					{
 						action: 'ch_to_mix',
 						options: {
-							inputChannel: '0',
+							inputChannel: `${this.config.talkback}`,
 							mixAssign: [`${i}`],
 							mixActive: false
 						}
 					},{
 						action: 'chlev_to_mix',
 						options: {
-							input: '0',
+							input: `${this.config.talkback}`,
 							assign: `${i}`,
 							level: '0'
 						}
 					},{
 						action: 'mute_input',
 						options: {
-							strip: 0,
+							strip: this.config.talkback,
 							mute: true
 						}
 					}

@@ -7,14 +7,16 @@ module.exports = {
         var variables = [];
         
         for (let key in callback['mute']){
-            variables.push(
-               {
-                       label: 'Mute ' + callback['mute'][key][0] + ' ' + (callback['mute'][key][1] + 1),
-                       name:  callback['mute'][key][0] + '_' + key.toString()
-               }
-            );
-                           
+            variables.push({
+               label: 'Mute ' + callback['mute'][key][0] + ' ' + (callback['mute'][key][1] + 1),
+               name:  callback['mute'][key][0] + '_' + key.toString()
+           });              
         }
+        
+        variables.push({
+           label: 'Scene',
+           name:  'currentScene'
+       });
         
         return variables;
     }

@@ -216,18 +216,6 @@ module.exports = {
 				minChoicesForSearch: 5
 			}]
 		};
-        
-         actions['scene_recall'] = {
-             label: 'Scene recall',
-             options: [{
-                 type:    'dropdown',
-                 label:   'Scene Number',
-                 id:      'sceneNumber',
-                 default: '0',
-                 choices: this.CHOICES_SCENES,
-                 minChoicesForSearch: 0
-             }]
-         };
 	
 		actions['ch_to_mix'] = {
 			label: 'Assign channel to mix',
@@ -887,6 +875,46 @@ module.exports = {
                 multiple: false,
                 choices:  this.CHOICES_PANLEVEL,
                 minChoicesForSearch: 0
+            }]
+        };
+        
+        /* Scene */
+        actions['scene_recall'] = {
+			label: 'Scene recall',
+			options: [{
+				type:    'number',
+				label:   'Scene nr.',
+				id:      'scene',
+				default: 1,
+				min: 1,
+				max: 300,
+				required: true
+			}]
+		};
+         
+        actions['scene_step'] = {
+            label: 'Scene step',
+            options: [{
+                type:    'number',
+                label:   'Scene +/-',
+                id:      'scene',
+                default: 1,
+                min: -50,
+                max: 50,
+                required: true
+            }]
+        };
+        
+        actions['current_scene'] = {
+            label: 'Current scene',
+            options: [{
+                type:    'number',
+                label:   'Scene nr.',
+                id:      'scene',
+                default: 1,
+                min: 1,
+                max: 300,
+                required: true
             }]
         };
                          
