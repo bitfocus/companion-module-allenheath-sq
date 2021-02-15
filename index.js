@@ -142,6 +142,7 @@ class instance extends instance_skel {
 		let strip   = parseInt(opt.strip);
 		let cmd     = {port: MIDI, buffers:[]};
 		let sceneNumber;
+		var self = this;
 
 		switch (action.action) {
 			
@@ -319,10 +320,13 @@ class instance extends instance_skel {
                 system.emit('db_get', opt.mute ? 'bank_actions' : 'bank_release_actions', function(res) {
                     for ( let pag in res ) {
                         for ( let bnk in res[pag] ) {
-                            if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
-                                if ( res[pag][bnk][0]['id'] == action.id ) {
-                                    system.emit('feedback_check_bank', pag, bnk);
-                                    break;
+                            if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
+                                if ( res[pag][bnk][0]['instance'] == self.id && res[pag][bnk][0]['id'] == action.id ) {
+                                    system.emit('db_get', 'feedbacks', function(fdb) {
+                                        if (typeof fdb[pag][bnk] == 'object' && Object.keys(fdb[pag][bnk]).length !== 0 && 'options' in fdb[pag][bnk][0]) {
+                                            system.emit('feedback_check_bank', pag, bnk);
+                                        }
+                                    });
                                 }
                             }
                         }
@@ -369,7 +373,7 @@ class instance extends instance_skel {
                     for ( let pag in res ) {
                         for ( let bnk in res[pag] ) {
                             if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
-                                if ( res[pag][bnk][0]['action'] == 'current_scene' ) {
+                                if ( res[pag][bnk][0]['instance'] == self.id && res[pag][bnk][0]['action'] == 'current_scene' ) {
                                     system.emit('bank_changefield', pag, bnk, 'text', `Scene ${csc + 1}`);
                                     break;
                                 }
@@ -398,10 +402,15 @@ class instance extends instance_skel {
                         for ( let pag in res ) {
                             for ( let bnk in res[pag] ) {
                                 if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
-                                    if ( res[pag][bnk][0]['action'] == act && 'strip' in res[pag][bnk][0]['options'] && res[pag][bnk][0]['options']['strip'] == str ) {
+                                    if ( res[pag][bnk][0]['instance'] == self.id && res[pag][bnk][0]['action'] == act && 'strip' in res[pag][bnk][0]['options'] && res[pag][bnk][0]['options']['strip'] == str ) {
                                         system.emit('graphics_indicate_push', pag, bnk, VF == 1 ? true : false);
                                         self.setVariable(act + '_' + MSB + '.' + LSB, VF == 1 ? true : false);
-                                        system.emit('feedback_check_bank', pag, bnk);
+                                        
+                                        system.emit('db_get', 'feedbacks', function(fdb) {
+                                            if (typeof fdb[pag][bnk] == 'object' && Object.keys(fdb[pag][bnk]).length !== 0 && 'options' in fdb[pag][bnk][0]) {
+                                                system.emit('feedback_check_bank', pag, bnk);
+                                            }
+                                        });
                                     }
                                 }
                             }
