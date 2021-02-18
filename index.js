@@ -1,10 +1,13 @@
 /**
  * 
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.2.4
+ * Version 1.2.6
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-02-18  Version 1.2.6
+ *             - Improved code
  *
  * 2021-02-14  Version 1.2.5
  *             - Add scene step and current scene display
@@ -321,13 +324,15 @@ class instance extends instance_skel {
                     for ( let pag in res ) {
                         for ( let bnk in res[pag] ) {
                             if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
-                                if ( res[pag][bnk][0]['instance'] == self.id && res[pag][bnk][0]['id'] == action.id ) {
-                                    system.emit('db_get', 'feedbacks', function(fdb) {
-                                        if (typeof fdb[pag][bnk] == 'object' && Object.keys(fdb[pag][bnk]).length !== 0 && 'options' in fdb[pag][bnk][0]) {
-                                            system.emit('feedback_check_bank', pag, bnk);
-                                        }
-                                    });
-                                }
+								for (let i in res[pag][bnk]) {
+									if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['id'] == action.id ) {
+										system.emit('db_get', 'feedbacks', function(fdb) {
+											if (typeof fdb[pag][bnk] == 'object' && Object.keys(fdb[pag][bnk]).length !== 0) {
+												system.emit('feedback_check_bank', pag, bnk);
+											}
+										});
+									}
+								}
                             }
                         }
                     }
@@ -372,11 +377,13 @@ class instance extends instance_skel {
                 system.emit('db_get', 'bank_actions', function(res) {
                     for ( let pag in res ) {
                         for ( let bnk in res[pag] ) {
-                            if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
-                                if ( res[pag][bnk][0]['instance'] == self.id && res[pag][bnk][0]['action'] == 'current_scene' ) {
-                                    system.emit('bank_changefield', pag, bnk, 'text', `Scene ${csc + 1}`);
-                                    break;
-                                }
+                            if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
+								for (let i in res[pag][bnk]) {
+									if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['action'] == 'current_scene' ) {
+										system.emit('bank_changefield', pag, bnk, 'text', `Scene ${csc + 1}`);
+										break;
+									}
+								}
                             }
                         }
                     }
@@ -401,17 +408,19 @@ class instance extends instance_skel {
                         
                         for ( let pag in res ) {
                             for ( let bnk in res[pag] ) {
-                                if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
-                                    if ( res[pag][bnk][0]['instance'] == self.id && res[pag][bnk][0]['action'] == act && 'strip' in res[pag][bnk][0]['options'] && res[pag][bnk][0]['options']['strip'] == str ) {
-                                        system.emit('graphics_indicate_push', pag, bnk, VF == 1 ? true : false);
-                                        self.setVariable(act + '_' + MSB + '.' + LSB, VF == 1 ? true : false);
-                                        
-                                        system.emit('db_get', 'feedbacks', function(fdb) {
-                                            if (typeof fdb[pag][bnk] == 'object' && Object.keys(fdb[pag][bnk]).length !== 0 && 'options' in fdb[pag][bnk][0]) {
-                                                system.emit('feedback_check_bank', pag, bnk);
-                                            }
-                                        });
-                                    }
+                                if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 ) {
+									for (let i in res[pag][bnk]) {
+										if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['action'] == act && 'strip' in res[pag][bnk][i]['options'] && res[pag][bnk][i]['options']['strip'] == str ) {
+											system.emit('graphics_indicate_push', pag, bnk, VF == 1 ? true : false);
+											self.setVariable(act + '_' + MSB + '.' + LSB, VF == 1 ? true : false);
+											
+											system.emit('db_get', 'feedbacks', function(fdb) {
+												if (typeof fdb[pag][bnk] == 'object' && Object.keys(fdb[pag][bnk]).length !== 0) {
+													system.emit('feedback_check_bank', pag, bnk);
+												}
+											});
+										}
+									}
                                 }
                             }
                         }
@@ -466,6 +475,7 @@ class instance extends instance_skel {
 				type:    'dropdown',
 				label:   'Default talkback input channel',
 				id:      'talkback',
+				width:   6,
 				default: '0',
 				choices: this.CHOICES_INPUT_CHANNEL,
 				minChoicesForSearch: 0
@@ -490,7 +500,6 @@ class instance extends instance_skel {
 	init() {
 
 		this.updateConfig(this.config);
-        
         this.setVariable('currentScene', 0);
         
 	}
