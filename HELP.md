@@ -31,6 +31,8 @@ New in v.1.2.5
 
 New in v.1.2.6
 * Improved code
+* Add fader step increment
+* Add fader level dB get
 
 
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
@@ -39,6 +41,7 @@ Current version: 1.2.6
 
 ## Configuring:
 
+### New instance
 First step after adding SQ instance is to setting it up:
 
 *	Name: 					the name you want
@@ -46,6 +49,11 @@ First step after adding SQ instance is to setting it up:
 *	Model:					your SQ model
 *	NRPN Fader Law:			same as your MIDI configuration on console !! IMPORTANT !!
 *	Default talkback...:	channel number where is connected your talkback microphone
+
+### Soft keys 9 - 16 on SQ5
+To configure soft keys 9 - 16 on SQ5 you have to use MixPad application. After initially configuration, all settings 
+will be stored in SQ memory until next configuration or console reset. To avoid deleting the soft key configuration when change
+scene, set "block" in Scenes Global Filter.
 
 ## How to:
 
@@ -55,14 +63,19 @@ First step after adding SQ instance is to setting it up:
 	will be updating on first scene change performed by SQ or Stream Deck. If your console starts with a scene other than 1, 
 	set the number in the option of the button, the press that button to setting up your starts curent scene.
 	
-### Mute feedbacks from console
-*	First time launch Companion all buttons status are not will be displaing while you don't move a fader or press a mute on SQ
-	(or call scene change from Companion), then SQ will be sends all current mute configurations of all channels to Campanion.
+### Fader step increment
+*	There are two specifc values on level dropdown menu (at the top) when you configuring fader level.
+
+### Displaing fader level (dB Level)
+*	This function accept only 1 (one) button instance for any combination of the faders. Function shows dB level of the fader 
+	in real time. The button name can be any string and the function adds the level value to it. Example, if you set "Mic" the
+	function changes it to "Mic -4dB".
 
 ## Presets:
 
 ### Talkback
 *	This macro preset simulate the native function talkback of SQ, but it works with "channel assign to mix" function
 	in console routing screen. With this preset you'll be able to talk to one specific AUX channels by pressing a button.
-	This preset works with talkback input channel you set up on istance configuration.
+	This preset works with talkback input channel you set up on istance configuration. Initially, you have to remove the 
+	talback input channel from mix assign on the console.
 	

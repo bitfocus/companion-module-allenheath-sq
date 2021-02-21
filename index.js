@@ -6,8 +6,10 @@
  *
  * Based on allenheath-dlive module by Andrew Broughton
  *
- * 2021-02-18  Version 1.2.6
+ * 2021-02-20  Version 1.2.6
  *             - Improved code
+ *             - Add fader step increment
+ *             - Add fader level dB get
  *
  * 2021-02-14  Version 1.2.5
  *             - Add scene step and current scene display
@@ -105,11 +107,17 @@ class instance extends instance_skel {
 	}
     
     setLevel(ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
+        var self = this;
+        
+        let routingCmds = [];
         let tmp;
         let MSB;
         let LSB;
-        let VC = level[cnfg][lv][1];
-        let VF = level[cnfg][lv][2];
+        
+        if (lv < 998) {
+            var VC = level[cnfg][lv][1];
+            var VF = level[cnfg][lv][2];
+        }
         
         if (mx == 99) {
             MSB = oMB[0];
@@ -120,8 +128,34 @@ class instance extends instance_skel {
             LSB = tmp & 0x7F;
         }
         
-        //console.log(ch + ':MSB/LSB/VC/VF: ' + MSB + '/' + LSB + '/' + VC + '/' + VF);
-        return [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]) ];
+        if (lv < 998) {
+            routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]) );
+        } else {
+            /* Increment */
+            routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, lv == 998 ? 0x60 : 0x61, 0x00 ]) );
+        }
+        
+        self.getVariable('level_' + MSB +'_'+ LSB, function(res) {
+            if (res !== undefined) {
+                var txt;
+                let db = lv < 998 ? self.getDBValue(VC.toString(16),('0'+VF.toString(16)).slice(-2)) : (lv == 998 ? 1 : -1) + (res[2] == '-inf' ? -89 : res[2]);
+                if (db <= -89) db = '-inf';
+                if (db > 10) db = 10;
+                   
+                system.emit('db_get', 'bank', function(bnk) {
+                    txt = bnk[res[0]][res[1]]['text'];
+                });
+                
+                txt = txt.replace(/\s-?(inf|\d+)dB$/g, '');
+                
+                system.emit('bank_changefield', res[0], res[1], 'text', `${txt} ${db}dB`);
+                
+                res[2] = db;
+                self.setVariable('level_' + MSB +'_'+ LSB, res);
+            }
+        });
+        
+        return routingCmds;
     }
     
     setScene(val) {
@@ -135,16 +169,95 @@ class instance extends instance_skel {
         
         return scn;
     }
+    
+    getDBValue(vc, vf) {
+        var cnfg = this.config.level;
+        if ( cnfg == 'LinearTaper' ) {
+            let hx = `${vc}${vf}`;
+            let dc = parseInt(parseInt(hx, 16) / 127);
+            let sb = (258 - dc) / 2;
+            let el = (258 - dc) % 2;
+            let pt = parseInt(sb / 13);
+            if (el = 0) pt--;
+            
+            return 10 - (parseInt(sb) + pt);
+        } else {
+            var rt = -89;
+            let hx = parseInt(parseInt(`${vc}${vf}`, 16) / 127);
+            for ( let i = 0; i < level[cnfg].length; i++ ) {
+                let j  = i + 1 < level[cnfg].length ? i + 1 : 0; 
+                let lc = level[cnfg][i][1].substr(2,2);
+                let lf = level[cnfg][i][2].substr(2,2);
+                let vx = parseInt(parseInt(`${lc}${lf}`, 16) / 127);
+                
+                if ( (j == 0 && hx > vx) || (j == 1 && hx < vx) || (hx == vx) ) {
+                    rt = level[cnfg][i][0];
+                    break;
+                } else if ( j > 0 ) {
+                    let lc = level[cnfg][j][1].substr(2,2);
+                    let lf = level[cnfg][j][2].substr(2,2);
+                    let zx = parseInt(parseInt(`${lc}${lf}`, 16) / 127);
+                    
+                    if ( hx > vx && hx < zx ) {
+                        if ( hx - vx <= zx - hx ) {
+                            rt = level[cnfg][i][0];
+                        } else {
+                            rt = level[cnfg][j][0];
+                        }
+                        
+                        break;
+                    }
+                }
+            }
+            
+            return rt == '-inf' ? -89 : parseInt(rt);
+        }
+    }
+    
+    /*getDBHex(db) {
+        let lm = 258;
+        if (db = 10) lm = 257;
+        
+        let sb = db - 10;
+        let el = abs(sb) % 2;
+        let pt = parseInt(abs(sb) / 13);
+        if (el = 0) pt--;
+        sb = (((sb + pt) * 2) + lm) * 127;
+        let hx = sb.toString(16);
+        
+        return [hx.substr(0,2), hx.substr(2,2)];
+    }*/
+    
+    getLevel(ch, mx, ct, oMB, oLB) {
+        let tmp;
+        let MSB;
+        let LSB;
+        
+        if (mx == 99) {
+            MSB = oMB[0];
+            LSB = parseInt(oLB[0]) + parseInt(ch);
+        } else {
+            tmp = parseInt(ch * ct + oLB[1]) + parseInt(mx);
+            MSB = oMB[1] + ((tmp >> 7) & 0x0F);
+            LSB = tmp & 0x7F;
+        }
+        
+        return {
+            buffer:     [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x60, 0x7F ]) ],
+            channel:    [MSB,LSB]
+        };
+    }
 
 	action(action) {
 
-		let opt     = action.options;
+		var opt     = action.options;
 		let channel = parseInt(opt.inputChannel);
 		let MSB = 0;
 		let LSB = 0;
 		let strip   = parseInt(opt.strip);
 		let cmd     = {port: MIDI, buffers:[]};
 		let sceneNumber;
+		var rsp;
 		var self = this;
 
 		switch (action.action) {
@@ -314,6 +427,56 @@ class instance extends instance_skel {
                 sceneNumber = opt.scene - 1;
                 cmd.buffers = [ Buffer.from([ 0xB0, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
                 break;
+                
+            case 'db_chlev_to_mix':
+                rsp = this.getLevel(opt.input, opt.assign, this.mixCount, [0x40,0x40], [0,0x44]);
+                cmd.buffers = rsp['buffer'];
+                break;
+                
+            case 'db_grplev_to_mix':
+                rsp = this.getLevel(opt.input, opt.assign, this.mixCount, [0x40,0x45], [0x30,0x04]);
+                cmd.buffers = rsp['buffer'];
+                break;
+                
+            case 'db_fxrlev_to_mix':
+                rsp = this.getLevel(opt.input, opt.assign, this.mixCount, [0x40,0x46], [0x3C,0x14]);
+                cmd.buffers = rsp['buffer'];
+                break;
+                
+            case 'db_fxrlev_to_grp':
+                rsp = this.getLevel(opt.input, opt.assign, this.grpCount, [0,0x4B], [0,0x34]);
+                cmd.buffers = rsp['buffer'];
+                break;
+                
+            case 'db_chlev_to_fxs':
+                rsp = this.getLevel(opt.input, opt.assign, this.fxsCount, [0,0x4C], [0,0x14]);
+                cmd.buffers = rsp['buffer'];
+                break;
+                
+            case 'db_grplev_to_fxs':
+                rsp = this.getLevel(opt.input, opt.assign, this.fxsCount, [0,0x4D], [0,0x54]);
+                cmd.buffers = rsp['buffer'];
+                break;
+                
+            case 'db_fxrlev_to_fxs':
+                rsp = this.getLevel(opt.input, opt.assign, this.fxsCount, [0,0x4E], [0,0x04]);
+                cmd.buffers = rsp['buffer'];
+                break;
+                
+            case 'db_mixlev_to_mtx':
+                rsp = this.getLevel(opt.input, opt.assign, this.mtxCount, [0x4E,0x4E], [0x24,0x27]);
+                cmd.buffers = rsp['buffer'];
+                break;
+            
+            case 'db_grplev_to_mtx':
+                rsp = this.getLevel(opt.input, opt.assign, this.mtxCount, [0,0x4E], [0,0x4B]);
+                cmd.buffers = rsp['buffer'];
+                break;
+                
+            case 'db_level_to_output':
+                rsp = this.getLevel(opt.input, 99, 0, [0x4F,0], [0,0]);
+                cmd.buffers = rsp['buffer'];
+                break;
 		}
 
 		if (cmd.buffers.length == 0) {
@@ -342,18 +505,98 @@ class instance extends instance_skel {
 				cmd.buffers = [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, strip + LSB, 0xB0, 0x06, 0x00, 0xB0, 0x26, opt.mute ? 1 : 0 ]) ];
 			}
 		}
+		
+		if (typeof rsp == 'object' && Object.keys(rsp).length !== 0) {
+            system.emit('db_get', 'bank_actions', function(res) {
+                for ( let pag in res ) {
+                    for ( let bnk in res[pag] ) {
+                        if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
+							for (let i in res[pag][bnk]) {
+								if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['id'] == action.id ) {
+									self.setVariable('level_' + rsp['channel'][0] +'_'+ rsp['channel'][1], [pag,bnk]);
+								}
+							}
+                        }
+                    }
+                }
+            });
+        }
 
 		for (let i = 0; i < cmd.buffers.length; i++) {
 			if (cmd.port === MIDI && this.midiSocket !== undefined) {
-				this.log('debug', `sending ${cmd.buffers[i].toString('hex')} via MIDI @${this.config.host}`);
+				//this.log('debug', `sending ${cmd.buffers[i].toString('hex')} via MIDI @${this.config.host}`);
 				this.midiSocket.write(cmd.buffers[i]);
 			}
 		}
-
+	}
+	
+	getRemoteLevel() {
+	    var self = this;
+	    system.emit('db_get', 'bank_actions', function(res) {
+            for ( let pag in res ) {
+                for ( let bnk in res[pag] ) {
+                    if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
+						for (let i in res[pag][bnk]) {
+						    let opt = res[pag][bnk][i]['options'];
+						    let rsp;
+						    
+						    switch(res[pag][bnk][i]['action']) {
+    						    case 'db_chlev_to_mix':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.mixCount, [0x40,0x40], [0,0x44]);
+                                    break;
+                                    
+                                case 'db_grplev_to_mix':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.mixCount, [0x40,0x45], [0x30,0x04]);
+                                    break;
+                                    
+                                case 'db_fxrlev_to_mix':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.mixCount, [0x40,0x46], [0x3C,0x14]);
+                                    break;
+                                    
+                                case 'db_fxrlev_to_grp':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.grpCount, [0,0x4B], [0,0x34]);
+                                    break;
+                                    
+                                case 'db_chlev_to_fxs':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.fxsCount, [0,0x4C], [0,0x14]);
+                                    break;
+                                    
+                                case 'db_grplev_to_fxs':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.fxsCount, [0,0x4D], [0,0x54]);
+                                    break;
+                                    
+                                case 'db_fxrlev_to_fxs':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.fxsCount, [0,0x4E], [0,0x04]);
+                                    break;
+                                    
+                                case 'db_mixlev_to_mtx':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.mtxCount, [0x4E,0x4E], [0x24,0x27]);
+                                    break;
+                                
+                                case 'db_grplev_to_mtx':
+                                    rsp = self.getLevel(opt.input, opt.assign, self.mtxCount, [0,0x4E], [0,0x4B]);
+                                    break;
+                                    
+                                case 'db_level_to_output':
+                                    rsp = self.getLevel(opt.input, 99, 0, [0x4F,0], [0,0]);
+                                    break;
+                            }
+                            
+                            if (typeof rsp == 'object' && Object.keys(rsp).length !== 0) {
+                                self.setVariable('level_' + rsp['channel'][0] +'_'+ rsp['channel'][1], [pag,bnk]);
+                                if (self.midiSocket !== undefined) {
+                    				self.midiSocket.write(rsp['buffer'][0]);
+                    			}
+                    		}
+						}
+				    }
+				}
+			}
+		});
 	}
     
     getRemoteStatus(act) {
-        
+        chks = true;
         for (let key in callback[act]) {
             let mblb = key.toString().split(".");
             this.midiSocket.write(Buffer.from([ 0xB0, 0x63, mblb[0], 0xB0, 0x62, mblb[1], 0xB0, 0x60, 0x7F ]));
@@ -363,8 +606,9 @@ class instance extends instance_skel {
     getRemoteValue(data) {
         var self = this;
         
-        if ( this.midiSocket !== undefined && !chks ) {
-            this.getRemoteStatus('mute');
+        if ( self.midiSocket !== undefined && !chks ) {
+            self.getRemoteStatus('mute');
+            self.getRemoteLevel();
             chks = true;
         }
         
@@ -423,6 +667,28 @@ class instance extends instance_skel {
 									}
                                 }
                             }
+                        }
+                    });
+                }
+                
+                /* Fader Level*/
+                if ( data[1] == 99 && data[4] == 98 && data[7] == 6 && VC > 0 && data[10] == 38 && VF > 0 ) {
+                    var db = self.getDBValue(VC.toString(16),('0'+VF.toString(16)).slice(-2));
+                    if (db <= -89) db = '-inf';
+                    
+                    self.getVariable('level_' + MSB +'_'+ LSB, function(res) {
+                        if (res !== undefined) {
+                            var txt;
+                                
+                            system.emit('db_get', 'bank', function(bnk) {
+                                txt = bnk[res[0]][res[1]]['text'];
+                            });
+                            
+                            txt = txt.replace(/\s-?(inf|\d+)dB$/g, '');
+                            system.emit('bank_changefield', res[0], res[1], 'text', `${txt} ${db}dB`);
+                            
+                            res[2] = db;
+                            self.setVariable('level_' + MSB +'_'+ LSB, res);
                         }
                     });
                 }
@@ -498,10 +764,17 @@ class instance extends instance_skel {
 
 	
 	init() {
-
-		this.updateConfig(this.config);
-        this.setVariable('currentScene', 0);
+        var self = this;
         
+		self.updateConfig(this.config);
+        self.setVariable('currentScene', 0);
+        
+        setTimeout(
+            function(){
+                self.getRemoteStatus('mute');
+                self.getRemoteLevel();
+            }, 2000
+        );
 	}
 
 	

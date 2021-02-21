@@ -54,7 +54,10 @@ module.exports = {
             this.CHOICES_MTX.push({ label: `MATRIX ${i + 1}`, id: i });
         }
 
-		this.CHOICES_LEVEL = [];
+		this.CHOICES_LEVEL = [
+			{ label: `Step +1 dB`, id: 998 },
+			{ label: `Step -1 dB`, id: 999 }
+		];
         for (let i = 0; i < level[this.config.level].length; i++) {
             let dbStr = level[this.config.level][i][0];
 			this.CHOICES_LEVEL.push({ label: `${dbStr} dB`, id: i})
@@ -76,7 +79,7 @@ module.exports = {
 			this.CHOICES_SOFT.push({ label: `SOFTKEY ${i + 1}`, id: i });
 		}
         
-        /* All fader choices */
+        /* All fader mix choices */
         this.CHOICES_ALLFADER = [];
         this.CHOICES_ALLFADER.push({ label: `LR`, id: 0 });
         for (let i = 0; i < this.mixCount; i++) {
@@ -91,7 +94,7 @@ module.exports = {
         for (let i = 0; i < this.dcaCount; i++) {
             this.CHOICES_ALLFADER.push({ label: `DCA ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount + this.mtxCount });
         }
-        /* */
+        /**/
 
 		this.muteOptions = (name, qty, ofs) => {
 			this.CHOICES = [];
@@ -916,6 +919,192 @@ module.exports = {
                 required: true
             }]
         };
+        /**/
+        
+        /* Current dB */
+        actions['db_chlev_to_mix'] = {
+            label: 'dB Level - Channel to mix',
+            options: [{
+                type:    'dropdown',
+                label:   'Input channel',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_INPUT_CHANNEL,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'Mix',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_MIX,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_grplev_to_mix'] = {
+            label: 'dB Level - Group to mix',
+            options: [{
+                type:    'dropdown',
+                label:   'Group',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_GRP,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'Mix',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_MIX,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_fxrlev_to_mix'] = {
+            label: 'dB Level - FX return to mix',
+            options: [{
+                type:    'dropdown',
+                label:   'FX return',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_FXR,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'Mix',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_MIX,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_fxrlev_to_grp'] = {
+            label: 'dB Level - FX return to group',
+            options: [{
+                type:    'dropdown',
+                label:   'FX return',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_FXR,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'Group',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_GRP,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_chlev_to_fxs'] = {
+            label: 'dB Level - Channel to FX send',
+            options: [{
+                type:    'dropdown',
+                label:   'Input channel',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_INPUT_CHANNEL,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'FX Send',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_FXS,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_grplev_to_fxs'] = {
+            label: 'dB Level - Group to FX send',
+            options: [{
+                type:    'dropdown',
+                label:   'Group',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_GRP,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'FX Send',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_FXS,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_fxslev_to_fxs'] = {
+            label: 'dB Level - FX return to FX send',
+            options: [{
+                type:    'dropdown',
+                label:   'FX return',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_FXR,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'FX Send',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_FXS,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_mixlev_to_mtx'] = {
+            label: 'dB Level - Mix to matrix',
+            options: [{
+                type:    'dropdown',
+                label:   'Mix',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_MIX,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'Matrix',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_MTX,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_grplev_to_mtx'] = {
+            label: 'dB Level - Group to matrix',
+            options: [{
+                type:    'dropdown',
+                label:   'Group',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_GRP,
+                minChoicesForSearch: 0
+            },{
+                type:    'dropdown',
+                label:   'Matrix',
+                id:      'assign',
+                default: '0',
+                choices: this.CHOICES_MTX,
+                minChoicesForSearch: 0
+            }]
+        };
+        
+        actions['db_level_to_output'] = {
+            label: 'dB Level - Output',
+            options: [{
+                type:    'dropdown',
+                label:   'Fader',
+                id:      'input',
+                default: '0',
+                choices: this.CHOICES_ALLFADER,
+                minChoicesForSearch: 0
+            }]
+        };
+        /**/
                          
         return actions;
 	
