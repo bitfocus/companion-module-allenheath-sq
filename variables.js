@@ -16,7 +16,7 @@ module.exports = {
         variables.push({
            label: 'Scene',
            name:  'currentScene'
-       });
+        });
         
         return variables;
     }

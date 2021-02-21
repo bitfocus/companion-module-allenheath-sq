@@ -200,23 +200,26 @@ module.exports = {
     
     feedbackStatus : function(feedback, bank, typ, ofs) {
         var ret = {};
-        var pg, bk, strip;
+        var pg, bk, ii, strip;
         
         system.emit('db_get', 'feedbacks', function(res) {
             for ( let pag in res ) {
                 for ( let bnk in res[pag] ) {
-                    if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 && 'options' in res[pag][bnk][0]) {
-                        if ( res[pag][bnk][0]['id'] == feedback.id ) {
-                            pg = pag;
-                            bk = bnk;
-                        }
+                    if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 ) {
+						for (let i in res[pag][bnk]) {
+							if ( res[pag][bnk][i]['id'] == feedback.id ) {
+								pg = pag;
+								bk = bnk;
+								ii = i;
+							}
+						}
                     }
                 }
             }
         });
         
         system.emit('db_get', 'bank_actions', function(res) {
-            strip = res[pg][bk][0]['options']['strip'];
+            strip = res[pg][bk][ii]['options']['strip'];
         });
         
         this.getVariable(typ + (ofs + parseInt(strip)), function(res) {
@@ -226,6 +229,7 @@ module.exports = {
                     ret = { color: bank.color, bgcolor: bank.bgcolor };
             }
         });
+        
         
         return ret;
     }
