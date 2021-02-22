@@ -1,7 +1,7 @@
 {
 	"name": "allenheath-sq",
-	"version": "1.0.0",
-	"api_version": "1.0.0",
+	"version": "1.2.6",
+	"api_version": "1.2.6",
 	"keywords": ["SQ5","SQ6","SQ7"],
 	"manufacturer": "Allen & Heath",
 	"product": ["SQ5","SQ6","SQ7"],
@@ -11,6 +11,6 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "",
+	"author": "Max Kiusso",
 	"license": "MIT"
 }
