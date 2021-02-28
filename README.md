@@ -8,4 +8,4 @@ via MIDI commands over IP
 Created by Max Kiusso in 2021 from original allenheath-dlive module. 
 
 
-Current Version 1.2.6
+Current Version 1.2.7

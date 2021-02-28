@@ -6,6 +6,10 @@
  *
  * Based on allenheath-dlive module by Andrew Broughton
  *
+ * 2021-02-29  Version 1.2.7
+ *             - Improved TCP connection
+ *             - Fix dB value display
+ *
  * 2021-02-20  Version 1.2.6
  *             - Improved code
  *             - Add fader step increment
@@ -146,9 +150,8 @@ class instance extends instance_skel {
                     txt = bnk[res[0]][res[1]]['text'];
                 });
                 
-                txt = txt.replace(/\s-?(inf|\d+)dB$/g, '');
-                
-                system.emit('bank_changefield', res[0], res[1], 'text', `${txt} ${db}dB`);
+                txt = txt.replace(/[\s\\n]+-?(inf|\d+)dB$/g, '');
+                system.emit('bank_changefield', res[0], res[1], 'text', `${txt}\\n${db}dB`);
                 
                 res[2] = db;
                 self.setVariable('level_' + MSB +'_'+ LSB, res);
@@ -531,7 +534,9 @@ class instance extends instance_skel {
 	}
 	
 	getRemoteLevel() {
+	    
 	    var self = this;
+	    
 	    system.emit('db_get', 'bank_actions', function(res) {
             for ( let pag in res ) {
                 for ( let bnk in res[pag] ) {
@@ -593,6 +598,7 @@ class instance extends instance_skel {
 				}
 			}
 		});
+		
 	}
     
     getRemoteStatus(act) {
@@ -606,12 +612,6 @@ class instance extends instance_skel {
     getRemoteValue(data) {
         var self = this;
         
-        if ( self.midiSocket !== undefined && !chks ) {
-            self.getRemoteStatus('mute');
-            self.getRemoteLevel();
-            chks = true;
-        }
-        
         if (typeof data == 'object') {
             /* Schene Change */
             if (data[3] == 192) {
@@ -624,7 +624,7 @@ class instance extends instance_skel {
                             if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
 								for (let i in res[pag][bnk]) {
 									if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['action'] == 'current_scene' ) {
-										system.emit('bank_changefield', pag, bnk, 'text', `Scene ${csc + 1}`);
+										system.emit('bank_changefield', pag, bnk, 'text', `Scene\n${csc + 1}`);
 										break;
 									}
 								}
@@ -684,8 +684,8 @@ class instance extends instance_skel {
                                 txt = bnk[res[0]][res[1]]['text'];
                             });
                             
-                            txt = txt.replace(/\s-?(inf|\d+)dB$/g, '');
-                            system.emit('bank_changefield', res[0], res[1], 'text', `${txt} ${db}dB`);
+                            txt = txt.replace(/[\s\\n]+-?(inf|\d+)dB$/g, '');
+                            system.emit('bank_changefield', res[0], res[1], 'text', `${txt}\\n${db}dB`);
                             
                             res[2] = db;
                             self.setVariable('level_' + MSB +'_'+ LSB, res);
@@ -764,21 +764,15 @@ class instance extends instance_skel {
 
 	
 	init() {
-        var self = this;
         
-		self.updateConfig(this.config);
-        self.setVariable('currentScene', 0);
+		this.updateConfig(this.config);
+        this.setVariable('currentScene', 0);
         
-        setTimeout(
-            function(){
-                self.getRemoteStatus('mute');
-                self.getRemoteLevel();
-            }, 2000
-        );
 	}
 
 	
 	init_tcp() {
+	    
 		if (this.midiSocket !== undefined) {
 			this.midiSocket.destroy();
 			delete this.midiSocket;
@@ -797,6 +791,8 @@ class instance extends instance_skel {
 
 			this.midiSocket.on('connect', () => {
 				this.log('debug', `MIDI Connected to ${this.config.host}`);
+				this.getRemoteStatus('mute');
+                this.getRemoteLevel();
 			});
             
             this.midiSocket.on('data', (data) => {
