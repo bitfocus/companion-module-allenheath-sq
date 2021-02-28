@@ -1,12 +1,12 @@
 {
 	"name": "allenheath-sq",
-	"version": "1.2.7",
-	"api_version": "1.0.0",
+	"version": "1.2.6",
+	"api_version": "1.2.6",
 	"keywords": ["SQ5","SQ6","SQ7"],
 	"manufacturer": "Allen & Heath",
 	"product": ["SQ5","SQ6","SQ7"],
 	"shortname": "SQ",
-	"description" : "Allen & Heath SQ module for Companion",
+	"description" : "SQ module for Companion",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
