@@ -34,10 +34,14 @@ New in v.1.2.6
 * Add fader step increment
 * Add fader level dB get
 
+New in v.1.2.7
+* Improved TCP connection
+* Fix dB value display
+
 
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Current version: 1.2.6
+Current version: 1.2.7
 
 ## Configuring:
 
