@@ -15,6 +15,14 @@ Controls the Allen & Heath SQ.
 * Assign FX return to Mix, Group, FX send
 * Assign Mix to Matrix
 
+## Special Functions:
+
+* Current scene display variable
+* Current dB Fader Level display variables
+* Talkback macro
+* Scene step increment
+
+
 New in v.1.1.0
 * Add listener for MIDI inbound data
 * Add function to autoset button status from status of the mute button on SQ
@@ -38,10 +46,21 @@ New in v.1.2.7
 * Improved TCP connection
 * Fix dB value display
 
+New in v.1.3.0
+* Change Mute logics
+* Change dB Fader Level logics
+* Add Current Scene variable
+* Add all dB Fader Level variables
+* New presets
+* Improved receiving data function
+* Cleaning the code
+
 
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Current version: 1.2.7
+Last update (d/m/y): 06/03/2021
+
+Current version: 1.3.0
 
 ## Configuring:
 
@@ -62,24 +81,38 @@ scene, set "block" in Scenes Global Filter.
 ## How to:
 
 ### Scene step and current scene display
-*	"Scene step" ammits a value between -50 and 50 in order to create forward and rewind scene call.
-	"Current scene" display current scene receiving by SQ and show a text like "Scene 13". The value of display
-	will be updating on first scene change performed by SQ or Stream Deck. If your console starts with a scene other than 1, 
-	set the number in the option of the button, the press that button to setting up your starts curent scene.
+"Scene step" ammits a value between -50 and 50 in order to create forward and rewind scene call. 
+"Current scene" set the current scene of your console to Companion into a variable (from version 1.3.0) then you'll be able to use it on any 
+button text field. The value of the variable will be updating on first scene change performed by SQ or Companion. If your console starts with 
+a scene other than 1, set the number in the option of the button, the press that button to setting up your starts curent scene. To recall 
+the variable on a button, type on button text field <b>$(</b> and Companion show you a list of SQ variables, then select "Scene - Current" 
+(or digit <b>$(SQ:currentScene)</b>).
 	
 ### Fader step increment
-*	There are two specifc values on level dropdown menu (at the top) when you configuring fader level.
+There are two specifc values on level dropdown menu (at the top) when you configuring fader level.
 
 ### Displaing fader level (dB Level)
-*	This function accept only 1 (one) button instance for any combination of the faders. Function shows dB level of the fader 
-	in real time. The button name can be any string and the function adds the level value to it. Example, if you set "Mic" the
-	function changes it to "Mic -4dB".
+From version 1.3.0 fader dB level being a variable. Like the current scene variable, you you'll be able to use it on any button text field 
+and the value will be updating on every level change on the console (or via Companion). To use the variable, start typing <b>$(</b> on button 
+text field and Companion show you a list of SQ variables, then select a level dB you want. If you want to use multi-line text, using <b>\n</b>
+for a new line.
+
+Example: Showing up a dB fader level (-2) from channel 1 (Mic) to LR
+
+Mic\n$(SQ:level_64_0) dB
+
+the button show on display:
+
+	 Mic
+	-2 dB
+	
+On same button, if you want, you can attach a Mute function for channel 1.
 
 ## Presets:
 
 ### Talkback
-*	This macro preset simulate the native function talkback of SQ, but it works with "channel assign to mix" function
-	in console routing screen. With this preset you'll be able to talk to one specific AUX channels by pressing a button.
-	This preset works with talkback input channel you set up on istance configuration. Initially, you have to remove the 
-	talback input channel from mix assign on the console.
+This macro preset simulate the native function talkback of SQ, but it works with "channel assign to mix" function
+in console routing screen. With this preset you'll be able to talk to one specific AUX channels by pressing a button.
+This preset works with talkback input channel you set up on istance configuration. Initially, you have to remove the 
+talback input channel from mix assign on the console.
 	

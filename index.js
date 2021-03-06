@@ -1,10 +1,19 @@
 /**
  * 
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.2.6
+ * Version 1.3.0
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-03-06  Version 1.3.0
+ *             - Change Mute logics
+ *             - Change dB Fader Level logics
+ *             - Add Current Scene variable
+ *             - Add all dB Fader Level variables
+ *             - New presets 
+ *             - Improved receiving data function
+ *             - Cleaning the code
  *
  * 2021-02-29  Version 1.2.7
  *             - Improved TCP connection
@@ -56,11 +65,14 @@ class instance extends instance_skel {
 		super(system, id, config);
 
 		Object.assign(this, {
+		    ...variables,
 			...actions,
             ...feedbacks,
-            ...variables,
             ...presets
 		});
+		
+		this.fdbState = {};
+		
 	}
 
 	actions(system) {
@@ -103,7 +115,6 @@ class instance extends instance_skel {
                 LSB = tmp & 0x7F;
             }
 			
-            //console.log(mix[i] + ':MSB/LSB: ' + MSB + '/' + LSB);
 			routingCmds.push(Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, 0, 0xB0, 0x26, ac ? 1 : 0]));
 		}
 		
@@ -139,22 +150,14 @@ class instance extends instance_skel {
             routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, lv == 998 ? 0x60 : 0x61, 0x00 ]) );
         }
         
-        self.getVariable('level_' + MSB +'_'+ LSB, function(res) {
+        self.getVariable('level_' + MSB +'.'+ LSB, function(res) {
             if (res !== undefined) {
                 var txt;
-                let db = lv < 998 ? self.getDBValue(VC.toString(16),('0'+VF.toString(16)).slice(-2)) : (lv == 998 ? 1 : -1) + (res[2] == '-inf' ? -89 : res[2]);
+                let db = lv < 998 ? self.getDBValue(VC.toString(16),('0'+VF.toString(16)).slice(-2)) : (lv == 998 ? 1 : -1) + (res == '-inf' ? -89 : res);
                 if (db <= -89) db = '-inf';
                 if (db > 10) db = 10;
                    
-                system.emit('db_get', 'bank', function(bnk) {
-                    txt = bnk[res[0]][res[1]]['text'];
-                });
-                
-                txt = txt.replace(/[\s\\n]+-?(inf|\d+)dB$/g, '');
-                system.emit('bank_changefield', res[0], res[1], 'text', `${txt}\\n${db}dB`);
-                
-                res[2] = db;
-                self.setVariable('level_' + MSB +'_'+ LSB, res);
+                self.setVariable('level_' + MSB +'.'+ LSB, db);
             }
         });
         
@@ -165,7 +168,7 @@ class instance extends instance_skel {
         var sq = sqconfig['config'][this.config.model];
         var scn;
         this.getVariable('currentScene', function(res) {
-            scn = parseInt(res) + val;
+            scn = parseInt(res) - 1 + val;
             if (scn < 0) scn = 0;
             if (scn > sq['sceneCount']) scn = sq['sceneCount'];
         });
@@ -431,103 +434,24 @@ class instance extends instance_skel {
                 cmd.buffers = [ Buffer.from([ 0xB0, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
                 break;
                 
-            case 'db_chlev_to_mix':
-                rsp = this.getLevel(opt.input, opt.assign, this.mixCount, [0x40,0x40], [0,0x44]);
-                cmd.buffers = rsp['buffer'];
-                break;
-                
-            case 'db_grplev_to_mix':
-                rsp = this.getLevel(opt.input, opt.assign, this.mixCount, [0x40,0x45], [0x30,0x04]);
-                cmd.buffers = rsp['buffer'];
-                break;
-                
-            case 'db_fxrlev_to_mix':
-                rsp = this.getLevel(opt.input, opt.assign, this.mixCount, [0x40,0x46], [0x3C,0x14]);
-                cmd.buffers = rsp['buffer'];
-                break;
-                
-            case 'db_fxrlev_to_grp':
-                rsp = this.getLevel(opt.input, opt.assign, this.grpCount, [0,0x4B], [0,0x34]);
-                cmd.buffers = rsp['buffer'];
-                break;
-                
-            case 'db_chlev_to_fxs':
-                rsp = this.getLevel(opt.input, opt.assign, this.fxsCount, [0,0x4C], [0,0x14]);
-                cmd.buffers = rsp['buffer'];
-                break;
-                
-            case 'db_grplev_to_fxs':
-                rsp = this.getLevel(opt.input, opt.assign, this.fxsCount, [0,0x4D], [0,0x54]);
-                cmd.buffers = rsp['buffer'];
-                break;
-                
-            case 'db_fxrlev_to_fxs':
-                rsp = this.getLevel(opt.input, opt.assign, this.fxsCount, [0,0x4E], [0,0x04]);
-                cmd.buffers = rsp['buffer'];
-                break;
-                
-            case 'db_mixlev_to_mtx':
-                rsp = this.getLevel(opt.input, opt.assign, this.mtxCount, [0x4E,0x4E], [0x24,0x27]);
-                cmd.buffers = rsp['buffer'];
-                break;
-            
-            case 'db_grplev_to_mtx':
-                rsp = this.getLevel(opt.input, opt.assign, this.mtxCount, [0,0x4E], [0,0x4B]);
-                cmd.buffers = rsp['buffer'];
-                break;
-                
-            case 'db_level_to_output':
-                rsp = this.getLevel(opt.input, 99, 0, [0x4F,0], [0,0]);
-                cmd.buffers = rsp['buffer'];
-                break;
 		}
 
 		if (cmd.buffers.length == 0) {
 			if (action.action.slice(0 ,4) == 'mute') {
-                this.setVariable(action.action + '_' + MSB + '.' + (LSB + strip), opt.mute ? true : false);
+                if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false;
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true;
+				}
+				
+                this.checkFeedbacks(action.action);
                 
-                system.emit('db_get', opt.mute ? 'bank_actions' : 'bank_release_actions', function(res) {
-                    for ( let pag in res ) {
-                        for ( let bnk in res[pag] ) {
-                            if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
-								for (let i in res[pag][bnk]) {
-									if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['id'] == action.id ) {
-										system.emit('db_get', 'feedbacks', function(fdb) {
-											if (typeof fdb[pag][bnk] == 'object' && Object.keys(fdb[pag][bnk]).length !== 0) {
-												system.emit('feedback_check_bank', pag, bnk);
-											}
-										});
-									}
-								}
-                            }
-                        }
-                    }
-                });
-                
-                //console.log(action);
-				cmd.buffers = [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, strip + LSB, 0xB0, 0x06, 0x00, 0xB0, 0x26, opt.mute ? 1 : 0 ]) ];
+				cmd.buffers = [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, strip + LSB, 0xB0, 0x06, 0x00, 0xB0, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ];
 			}
 		}
-		
-		if (typeof rsp == 'object' && Object.keys(rsp).length !== 0) {
-            system.emit('db_get', 'bank_actions', function(res) {
-                for ( let pag in res ) {
-                    for ( let bnk in res[pag] ) {
-                        if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
-							for (let i in res[pag][bnk]) {
-								if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['id'] == action.id ) {
-									self.setVariable('level_' + rsp['channel'][0] +'_'+ rsp['channel'][1], [pag,bnk]);
-								}
-							}
-                        }
-                    }
-                }
-            });
-        }
 
 		for (let i = 0; i < cmd.buffers.length; i++) {
 			if (cmd.port === MIDI && this.midiSocket !== undefined) {
-				//this.log('debug', `sending ${cmd.buffers[i].toString('hex')} via MIDI @${this.config.host}`);
 				this.midiSocket.write(cmd.buffers[i]);
 			}
 		}
@@ -536,68 +460,116 @@ class instance extends instance_skel {
 	getRemoteLevel() {
 	    
 	    var self = this;
+	    var buff = [];
+	    let rsp;
 	    
-	    system.emit('db_get', 'bank_actions', function(res) {
-            for ( let pag in res ) {
-                for ( let bnk in res[pag] ) {
-                    if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
-						for (let i in res[pag][bnk]) {
-						    let opt = res[pag][bnk][i]['options'];
-						    let rsp;
-						    
-						    switch(res[pag][bnk][i]['action']) {
-    						    case 'db_chlev_to_mix':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.mixCount, [0x40,0x40], [0,0x44]);
-                                    break;
-                                    
-                                case 'db_grplev_to_mix':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.mixCount, [0x40,0x45], [0x30,0x04]);
-                                    break;
-                                    
-                                case 'db_fxrlev_to_mix':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.mixCount, [0x40,0x46], [0x3C,0x14]);
-                                    break;
-                                    
-                                case 'db_fxrlev_to_grp':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.grpCount, [0,0x4B], [0,0x34]);
-                                    break;
-                                    
-                                case 'db_chlev_to_fxs':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.fxsCount, [0,0x4C], [0,0x14]);
-                                    break;
-                                    
-                                case 'db_grplev_to_fxs':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.fxsCount, [0,0x4D], [0,0x54]);
-                                    break;
-                                    
-                                case 'db_fxrlev_to_fxs':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.fxsCount, [0,0x4E], [0,0x04]);
-                                    break;
-                                    
-                                case 'db_mixlev_to_mtx':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.mtxCount, [0x4E,0x4E], [0x24,0x27]);
-                                    break;
-                                
-                                case 'db_grplev_to_mtx':
-                                    rsp = self.getLevel(opt.input, opt.assign, self.mtxCount, [0,0x4E], [0,0x4B]);
-                                    break;
-                                    
-                                case 'db_level_to_output':
-                                    rsp = self.getLevel(opt.input, 99, 0, [0x4F,0], [0,0]);
-                                    break;
-                            }
-                            
-                            if (typeof rsp == 'object' && Object.keys(rsp).length !== 0) {
-                                self.setVariable('level_' + rsp['channel'][0] +'_'+ rsp['channel'][1], [pag,bnk]);
-                                if (self.midiSocket !== undefined) {
-                    				self.midiSocket.write(rsp['buffer'][0]);
-                    			}
-                    		}
-						}
-				    }
-				}
+	    for (let i = 0; i < self.chCount; i++) {
+	        let tmp = self.CHOICES_MIX;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x40], [0,0x44]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		}
+		
+		for (let i = 0; i < self.grpCount; i++) {
+	        let tmp = self.CHOICES_MIX;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x45], [0x30,0x04]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		}
+		
+		for (let i = 0; i < self.fxrCount; i++) {
+	        let tmp = self.CHOICES_MIX;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x46], [0x3C,0x14]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		}
+		
+		for (let i = 0; i < self.fxrCount; i++) {
+		    let tmp = self.CHOICES_GRP;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.grpCount, [0,0x4B], [0,0x34]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		}
+
+        for (let i = 0; i < self.chCount; i++) {
+            let tmp = self.CHOICES_FXS;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4C], [0,0x14]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		}  
+		
+		for (let i = 0; i < self.grpCount; i++) {
+	        let tmp = self.CHOICES_FXS;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4D], [0,0x54]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		}   
+		
+		for (let i = 0; i < self.fxrCount; i++) {
+	        let tmp = self.CHOICES_FXS;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4E], [0,0x04]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		}  
+		
+		let tmp = self.CHOICES_MTX;
+        for ( let j = 0; j < tmp.length; j++ ) {
+		    rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x24]);
+		    buff.push(rsp['buffer'][0]);
+	    }
+	    
+		for (let i = 0; i < self.mixCount; i++) {
+		    let tmp = self.CHOICES_MTX;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x27]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		}  
+		
+		for (let i = 0; i < self.grpCount; i++) {
+	        let tmp = self.CHOICES_MTX;
+	        for ( let j = 0; j < tmp.length; j++ ) {
+			    rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x4B]);
+			    buff.push(rsp['buffer'][0]);
+		    }
+		} 
+		
+		tmp = [];
+        tmp.push({ label: `LR`, id: 0 });
+        for (let i = 0; i < this.mixCount; i++) {
+            tmp.push({ label: `AUX ${i + 1}`, id: i + 1 });
+        }
+        for (let i = 0; i < this.fxsCount; i++) {
+            tmp.push({ label: `FX SEND ${i + 1}`, id: i + 1 + this.mixCount });
+        }
+        for (let i = 0; i < this.mtxCount; i++) {
+            tmp.push({ label: `MATRIX ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount });
+        }
+	    for ( let j = 0; j < tmp.length; j++ ) {
+		    rsp = self.getLevel(tmp[j].id, 99, 0, [0x4F,0], [0,0]);
+		    buff.push(rsp['buffer'][0]);
+		}  
+		
+		tmp = this.CHOICES_DCA;
+		for ( let j = 0; j < tmp.length; j++ ) {
+		    rsp = self.getLevel(tmp[j].id, 99, 0, [0x4F,0], [0x20,0]);
+		    buff.push(rsp['buffer'][0]);
+		}
+            
+        if ( buff.length > 0 ) {
+            if ( self.midiSocket !== undefined ) {
+                for ( let i = 0; i < buff.length; i++ ) {
+                    self.midiSocket.write(buff[i]);
+                }
 			}
-		});
+		}
 		
 	}
     
@@ -613,84 +585,41 @@ class instance extends instance_skel {
         var self = this;
         
         if (typeof data == 'object') {
-            /* Schene Change */
-            if (data[3] == 192) {
-                var csc = (data[4] + data[2] * 127);
-                self.setVariable('currentScene', csc);
-                
-                system.emit('db_get', 'bank_actions', function(res) {
-                    for ( let pag in res ) {
-                        for ( let bnk in res[pag] ) {
-                            if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0) {
-								for (let i in res[pag][bnk]) {
-									if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['action'] == 'current_scene' ) {
-										system.emit('bank_changefield', pag, bnk, 'text', `Scene\n${csc + 1}`);
-										break;
-									}
-								}
-                            }
-                        }
-                    }
-                });
-            }
+            var dt, j;
             
-            /* Other */
-            if (data[3] == 176) {
-                var MSB = data[2];
-                var LSB = data[5];
-                var VC  = data[8];
-                var VF  = data[11];
-                
-                /* Mute */
-                if ( data[1] == 99 && data[4] == 98 && data[7] == 6 && data[8] == 0 && (MSB == 0 || MSB == 2 || MSB == 4)) {
-                    //console.log(MSB,LSB,VC,VF);
+            for ( let b = 0; b < data.length; b++) {
+                /* Schene Change */
+                if ( data[b] == 176 && data[b+1] == 0 ) {
+                    dt = data.slice(b, (b + 5));
                     
-                    system.emit('db_get', 'bank_actions', function(res) {
-                        let act = callback['mute'][MSB+'.'+LSB][0];
-                        let str = callback['mute'][MSB+'.'+LSB][1];
-                        //console.log(act,str);
-                        
-                        for ( let pag in res ) {
-                            for ( let bnk in res[pag] ) {
-                                if ( typeof res[pag][bnk] == 'object' && Object.keys(res[pag][bnk]).length !== 0 ) {
-									for (let i in res[pag][bnk]) {
-										if ( res[pag][bnk][i]['instance'] == self.id && res[pag][bnk][i]['action'] == act && 'strip' in res[pag][bnk][i]['options'] && res[pag][bnk][i]['options']['strip'] == str ) {
-											system.emit('graphics_indicate_push', pag, bnk, VF == 1 ? true : false);
-											self.setVariable(act + '_' + MSB + '.' + LSB, VF == 1 ? true : false);
-											
-											system.emit('db_get', 'feedbacks', function(fdb) {
-												if (typeof fdb[pag][bnk] == 'object' && Object.keys(fdb[pag][bnk]).length !== 0) {
-													system.emit('feedback_check_bank', pag, bnk);
-												}
-											});
-										}
-									}
-                                }
-                            }
-                        }
-                    });
+                    var csc = (dt[4] + dt[2] * 127);
+                    self.setVariable('currentScene', csc + 1);
                 }
                 
-                /* Fader Level*/
-                if ( data[1] == 99 && data[4] == 98 && data[7] == 6 && VC > 0 && data[10] == 38 && VF > 0 ) {
-                    var db = self.getDBValue(VC.toString(16),('0'+VF.toString(16)).slice(-2));
-                    if (db <= -89) db = '-inf';
+                /* Other */
+                if ( data[b] == 176 && data[b+1] == 99 ) {
+                    dt = data.slice(b, (b + 12));
                     
-                    self.getVariable('level_' + MSB +'_'+ LSB, function(res) {
-                        if (res !== undefined) {
-                            var txt;
-                                
-                            system.emit('db_get', 'bank', function(bnk) {
-                                txt = bnk[res[0]][res[1]]['text'];
-                            });
-                            
-                            txt = txt.replace(/[\s\\n]+-?(inf|\d+)dB$/g, '');
-                            system.emit('bank_changefield', res[0], res[1], 'text', `${txt}\\n${db}dB`);
-                            
-                            res[2] = db;
-                            self.setVariable('level_' + MSB +'_'+ LSB, res);
+                    if ( dt.length == 12) {
+                        var MSB = dt[2];
+                        var LSB = dt[5];
+                        var VC  = dt[8];
+                        var VF  = dt[11];
+                        
+                        /* Mute */
+                        if ( MSB == 0 || MSB == 2 || MSB == 4 ) {
+                            this.fdbState['mute_' + MSB + '.' + LSB] = VF == 1 ? true : false;
+        					self.checkFeedbacks( callback['mute'][MSB+'.'+LSB][0] );
                         }
-                    });
+                        
+                        /* Level */
+                        if ( MSB >= 0x40 && MSB <= 0x4F ) {
+                            let db = self.getDBValue(VC.toString(16),('0'+VF.toString(16)).slice(-2));
+                            if (db <= -89) db = '-inf';
+                            
+                            self.setVariable('level_' + MSB +'.'+ LSB, db);
+                        }
+                    }   
                 }
             }
         }
@@ -766,7 +695,7 @@ class instance extends instance_skel {
 	init() {
         
 		this.updateConfig(this.config);
-        this.setVariable('currentScene', 0);
+        this.setVariable('currentScene', 1);
         
 	}
 
@@ -792,13 +721,19 @@ class instance extends instance_skel {
 			this.midiSocket.on('connect', () => {
 				this.log('debug', `MIDI Connected to ${this.config.host}`);
 				this.getRemoteStatus('mute');
-                this.getRemoteLevel();
+				this.getRemoteLevel();
+				
+				var ij = 1;
+                var gInt = setInterval(
+                    () => {
+                        this.getRemoteLevel();
+                        if ( ij == 2 ) clearInterval(gInt);
+                        ij++;
+                    }, 10000);
 			});
             
             this.midiSocket.on('data', (data) => {
-                for ( let i = 0; i < data.length; i = i + 12) {
-                    this.getRemoteValue(data.slice(i, (i+1) * 12));
-                }
+                this.getRemoteValue(JSON.parse(JSON.stringify(data))['data']);
             });
             
 		}
@@ -810,6 +745,7 @@ class instance extends instance_skel {
 		this.config = config;
 		
 		this.actions();
+		this.variables();
         this.feedbacks();
         this.presets();
 		this.init_tcp();
