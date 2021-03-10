@@ -26,7 +26,7 @@ module.exports = {
 								strip: i,
 								mute: 0,
 							}
-						},
+						}
 					],
 					feedbacks: [
 						{
@@ -34,7 +34,7 @@ module.exports = {
 							options: {
 								channel: i,
 							}
-						},
+						}
 					],
 				}
 
@@ -93,7 +93,7 @@ module.exports = {
 							strip: self.config.talkback,
 							mute: 2,
 						},
-					},
+					}
 				],
 				release_actions: [
 					{
@@ -116,8 +116,8 @@ module.exports = {
 							strip: self.config.talkback,
 							mute: 1,
 						},
-					},
-				],
+					}
+				]
 			}
 
 			presets.push(pst)
@@ -143,7 +143,7 @@ module.exports = {
 							strip: ch,
 							mute: 0,
 						},
-					},
+					}
 				],
 				feedbacks: [
 					{
@@ -151,8 +151,8 @@ module.exports = {
 						options: {
 							channel: ch,
 						},
-					},
-				],
+					}
+				]
 			}
 
 			presets.push(pst)
@@ -167,7 +167,7 @@ module.exports = {
 					`Mt+dB CH-${tmp[j].label}`,
 					`CH ${i + 1}\\n${tmp[j].label}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
 					'mute_input',
-					i,
+					i
 				)
 			}
 		}

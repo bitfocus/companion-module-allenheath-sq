@@ -1,5 +1,5 @@
 module.exports = {
-	getVariables() {
+	getVariables : function() {
 		var variables = []
 		var self = this
 		let rsp

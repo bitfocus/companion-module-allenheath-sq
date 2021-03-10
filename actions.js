@@ -2,7 +2,7 @@ const level      = require('./level.json')
 const sqconfig   = require('./sqconfig.json')
 
 module.exports = {
-	getActions() {
+	getActions : function() {
 		var sq = sqconfig['config'][this.config.model]
 
 		this.chCount    = sq['chCount']
@@ -56,7 +56,7 @@ module.exports = {
 
 		this.CHOICES_LEVEL = [
 			{ label: `Step +1 dB`, id: 998 },
-			{ label: `Step -1 dB`, id: 999 },
+			{ label: `Step -1 dB`, id: 999 }
 		]
 		for (let i = 0; i < level[this.config.level].length; i++) {
 			let dbStr = level[this.config.level][i][0]
@@ -84,7 +84,7 @@ module.exports = {
 			this.CHOICES_SOFT.push({ label: `SOFTKEY ${i + 1}`, id: i })
 		}
 
-		/* All fader mix choices */
+		// All fader mix choices
 		this.CHOICES_ALLFADER = []
 		this.CHOICES_ALLFADER.push({ label: `LR`, id: 0 })
 		for (let i = 0; i < this.mixCount; i++) {
@@ -99,7 +99,6 @@ module.exports = {
 		for (let i = 0; i < this.dcaCount; i++) {
 			this.CHOICES_ALLFADER.push({ label: `DCA ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount + this.mtxCount })
 		}
-		/**/
 
 		this.muteOptions = (name, qty, ofs) => {
 			this.CHOICES = []
@@ -123,9 +122,9 @@ module.exports = {
 					choices:	[
 						{label: 'Toggle', id: 0},
 						{label: 'On', id: 1},
-						{label: 'Off', id: 2},
+						{label: 'Off', id: 2}
 					],
-				},
+				}
 			]
 		}
 
@@ -150,7 +149,7 @@ module.exports = {
 					default:	0,
 					choices:	this.CHOICES_FADER,
 					minChoicesForSearch: 0,
-				},
+				}
 			]
 		}
 
@@ -168,7 +167,7 @@ module.exports = {
 					id:		'strip',
 					default:	0,
 					choices:	[
-						{ label: `LR`, id: 0 },
+						{ label: `LR`, id: 0 }
 					],
 					minChoicesForSearch: 99,
 				},{
@@ -179,9 +178,9 @@ module.exports = {
 					choices:	[
 						{label: 'Toggle', id: 0},
 						{label: 'On', id: 1},
-						{label: 'Off', id: 2},
+						{label: 'Off', id: 2}
 					],
-				},
+				}
 			],
 		}
 
@@ -215,7 +214,7 @@ module.exports = {
 		}
 
 		if (this.config.model == 'SQ6' || this.config.model == 'SQ7') {
-			/* Soft Rotary */
+			// Soft Rotary
 		}
 
 		actions['key_soft'] = {
@@ -236,10 +235,10 @@ module.exports = {
 					choices:	[
 						{id: '0', label: 'Toggle'},
 						{id: '1', label: 'Press'},
-						{id: '2', label: 'Release'},
+						{id: '2', label: 'Release'}
 					],
 					minChoicesForSearch: 5,
-				},
+				}
 			],
 		}
 
@@ -265,7 +264,7 @@ module.exports = {
 					label:	'Active',
 					id:		'mixActive',
 					default:	true,
-				},
+				}
 			],
 		}
 
@@ -291,7 +290,7 @@ module.exports = {
 					label:	'Active',
 					id:		'grpActive',
 					default:	true,
-				},
+				}
 			],
 		};
 
@@ -317,7 +316,7 @@ module.exports = {
 					label:	'Active',
 					id:		'mixActive',
 					default:	true,
-				},
+				}
 			],
 		}
 
@@ -343,7 +342,7 @@ module.exports = {
 					label:	'Active',
 					id:		'grpActive',
 					default:	true,
-				},
+				}
 			],
 		}
 
@@ -369,7 +368,7 @@ module.exports = {
 					label:	'Active',
 					id:		'fxsActive',
 					default:	true,
-				},
+				}
 			],
 		}
 
@@ -395,7 +394,7 @@ module.exports = {
 					label:	'Active',
 					id:		'fxsActive',
 					default:	true,
-				},
+				}
 			],
 		}
 
@@ -421,7 +420,7 @@ module.exports = {
 					label:	'Active',
 					id:		'fxsActive',
 					default:	true,
-				},
+				}
 			],
 		}
 
@@ -447,8 +446,8 @@ module.exports = {
 					label:	'Active',
 					id:		'mtxActive',
 					default:	true,
-				},
-			]
+				}
+			],
 		}
 
 		actions['grp_to_mtx'] = {
@@ -473,7 +472,7 @@ module.exports = {
 					label:	'Active',
 					id:		'mtxActive',
 					default:	true,
-				},
+				}
 			],
 		}
 
@@ -502,7 +501,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -531,7 +530,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -560,7 +559,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -589,7 +588,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -618,7 +617,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -647,7 +646,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -676,7 +675,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -705,7 +704,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -734,7 +733,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -756,7 +755,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -785,7 +784,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -814,7 +813,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -843,7 +842,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -872,7 +871,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -901,7 +900,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -930,7 +929,7 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
@@ -952,11 +951,11 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
-				},
+				}
 			],
 		}
 
-		/* Scene */
+		// Scene
 		actions['scene_recall'] = {
 			label: 'Scene recall',
 			options: [
@@ -968,7 +967,7 @@ module.exports = {
 					min:		1,
 					max:		this.sceneCount,
 					required:	true,
-				},
+				}
 			],
 		}
 
@@ -983,7 +982,7 @@ module.exports = {
 					min:		-50,
 					max:		50,
 					required:	true,
-				},
+				}
 			],
 		}
 
@@ -998,10 +997,9 @@ module.exports = {
 					min:		1,
 					max:		this.sceneCount,
 					required:	true,
-				},
+				}
 			],
 		}
-		/**/
 
 		return actions
 	},

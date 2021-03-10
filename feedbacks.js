@@ -27,13 +27,13 @@ module.exports = {
 						default: 0,
 						choices: chs,
 						minChoicesForSearch: 0,
-					},
+					}
 				],
 				callback: (feedback, bank) => {
 					return this.feedbackStatus(
 						feedback,
 						bank,
-						`${typ.toLowerCase()}_${msb}.` + (parseInt(feedback.options.channel) + ofs),
+						`${typ.toLowerCase()}_${msb}.` + (parseInt(feedback.options.channel) + ofs)
 					)
 				},
 			}
@@ -59,12 +59,12 @@ module.exports = {
 		if ( this.fdbState[val] ) {
 			ret = {
 				color: feedback.options.fg,
-				bgcolor: feedback.options.bg,
+				bgcolor: feedback.options.bg
 			}
 		} else {
 			ret = {
 				color: bank.color,
-				bgcolor: bank.bgcolor,
+				bgcolor: bank.bgcolor
 			}
 		}
 

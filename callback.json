@@ -103,6 +103,6 @@
 		"4.4" : ["mute_mutegroup",4],
 		"4.5" : ["mute_mutegroup",5],
 		"4.6" : ["mute_mutegroup",6],
-		"4.7" : ["mute_mutegroup",7],
-	},
+		"4.7" : ["mute_mutegroup",7]
+	}
 }

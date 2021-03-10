@@ -243,7 +243,7 @@ class instance extends instance_skel {
 
 		return {
 			buffer:     [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x60, 0x7F ]) ],
-			channel:    [MSB,LSB],
+			channel:    [MSB,LSB]
 		}
 	}
 
@@ -602,7 +602,7 @@ class instance extends instance_skel {
 				choices: [
 					{id: 'SQ5', label: 'SQ 5'},
 					{id: 'SQ6', label: 'SQ 6'},
-					{id: 'SQ7', label: 'SQ 7'},
+					{id: 'SQ7', label: 'SQ 7'}
 				],
 			},{
 				type:    'dropdown',
@@ -612,7 +612,7 @@ class instance extends instance_skel {
 				default: 'LinearTaper',
 				choices: [
 					{id: 'LinearTaper', label: 'Linear Taper'},
-					{id: 'AudioTaper', label: 'Audio Taper'},
+					{id: 'AudioTaper', label: 'Audio Taper'}
 				],
 			},{
 				type:    'dropdown',
@@ -622,7 +622,7 @@ class instance extends instance_skel {
 				default: '0',
 				choices: this.CHOICES_INPUT_CHANNEL,
 				minChoicesForSearch: 0,
-			},
+			}
 		]
 	}
 
