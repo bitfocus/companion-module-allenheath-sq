@@ -1,43 +1,43 @@
 {
 	"config" : {
 		"SQ5" : {
-			"chCount"	: 48,
-			"mixCount"	: 12,
-			"grpCount"	: 12,
-			"fxrCount"	: 8,
-			"fxsCount"	: 4,
-			"mtxCount"	: 3,
-			"dcaCount"	: 8,
-			"muteGroup"	: 8,
-			"SoftKey"	: 16,
-			"RotaryKey"	: 0,
-			"sceneCount": 300
+			"chCount":	48,
+			"mixCount":	12,
+			"grpCount":	12,
+			"fxrCount":	8,
+			"fxsCount":	4,
+			"mtxCount":	3,
+			"dcaCount":	8,
+			"muteGroup":	8,
+			"SoftKey":	16,
+			"RotaryKey":	0,
+			"sceneCount":	300
 		},
 		"SQ6" : {
-			"chCount"	: 48,
-			"mixCount"	: 12,
-			"grpCount"	: 12,
-			"fxrCount"	: 8,
-			"fxsCount"	: 4,
-			"mtxCount"	: 3,
-			"dcaCount"	: 8,
-			"muteGroup"	: 8,
-			"SoftKey"	: 16,
-			"RotaryKey"	: 4,
-			"sceneCount": 300
+			"chCount":	48,
+			"mixCount":	12,
+			"grpCount":	12,
+			"fxrCount":	8,
+			"fxsCount":	4,
+			"mtxCount":	3,
+			"dcaCount":	8,
+			"muteGroup":	8,
+			"SoftKey":	16,
+			"RotaryKey":	4,
+			"sceneCount":	300
 		},
 		"SQ7" : {
-			"channel"	: 48,
-			"mixCount"	: 12,
-			"grpCount"	: 12,
-			"fxrCount"	: 8,
-			"fxsCount"	: 4,
-			"mtxCount"	: 3,
-			"dcaCount"	: 8,
-			"muteGroup"	: 8,
-			"SoftKey"	: 16,
-			"RotaryKey"	: 4,
-			"sceneCount": 300
+			"channel":	48,
+			"mixCount":	12,
+			"grpCount":	12,
+			"fxrCount":	8,
+			"fxsCount":	4,
+			"mtxCount":	3,
+			"dcaCount":	8,
+			"muteGroup":	8,
+			"SoftKey":	16,
+			"RotaryKey":	4,
+			"sceneCount":	300
 		}
 	}
 }
