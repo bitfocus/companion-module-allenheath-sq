@@ -97,7 +97,7 @@ module.exports = {
 			this.CHOICES_ALLFADER.push({ label: `MATRIX ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount })
 		}
 		for (let i = 0; i < this.dcaCount; i++) {
-			this.CHOICES_ALLFADER.push({ label: `DCA ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount + this.mtxCount })
+			this.CHOICES_ALLFADER.push({ label: `DCA ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount + this.mtxCount + 12 })
 		}
 
 		this.muteOptions = (name, qty, ofs) => {

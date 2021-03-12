@@ -1,10 +1,13 @@
 /**
  *
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.3.1
+ * Version 1.3.2
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-03-12  Version 1.3.2
+ *             - Fix DCA level output
  *
  * 2021-03-10  Version 1.3.1
  *             - Beautify code

@@ -59,11 +59,15 @@ New in v.1.3.1
 * Beautify code
 * Fix level variables
 
+New in v.1.3.2
+* Fix DCA level output
+
+
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Last update (d/m/y): 10/03/2021
+Last update (d/m/y): 12/03/2021
 
-Current version: 1.3.1
+Current version: 1.3.2
 
 ## Configuring:
 
