@@ -2,7 +2,9 @@ module.exports = {
 	addUpgradeScripts : function() {
 		// From version 1.3.2 => 1.3.3
 		this.addUpgradeScript((config, actions, releaseActions, feedbacks) => {
-			let checkUpgrade = ((action) => {
+			let changed = false
+
+			let checkUpgrade = ((action, changed) => {
 				switch (action.action) {
 					case 'chlev_to_mix':
 					case 'grplev_to_mix':
@@ -20,17 +22,19 @@ module.exports = {
 						}
 						break;
 				}
+
+				return changed
 			})
 
 			for (let k in actions) {
-				checkUpgrade(actions[k])
+				changed = checkUpgrade(actions[k], changed)
 			}
 
 			for (let k in releaseActions) {
-				checkUpgrade(releaseActions[k])
+				changed = checkUpgrade(releaseActions[k], changed)
 			}
 
-			return true
+			return changed
 		})
 	}
 }
