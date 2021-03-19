@@ -62,12 +62,16 @@ New in v.1.3.1
 New in v.1.3.2
 * Fix DCA level output
 
+New in v.1.3.3
+* Add "Last dB value"
+* Add fading option
+
 
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Last update (d/m/y): 12/03/2021
+Last update (d/m/y): 16/03/2021
 
-Current version: 1.3.2
+Current version: 1.3.3
 
 ## Configuring:
 
@@ -114,6 +118,13 @@ the button show on display:
 	-2 dB
 
 On same button, if you want, you can attach a Mute function for channel 1.
+
+### Last dB value
+This option set at the release action of a Fader Level allows you to return to the last dB value level of that fader.
+Example: If the fader level was +2 dB and you want to momentarily set it to -20 dB, set the Press / On action fader level option to "-20 dB", then the Release / Off action of the fader level option to "Last dB value". When the button is pressed the level drops to -20 dB and when the button is released the level returns to +2 dB.
+
+### Fading
+This option available on any fader level allow you to reach set dB fader level using fading in/out mode. The speed of the fader route is selectable between 1 and 3 seconds.
 
 ## Presets:
 
