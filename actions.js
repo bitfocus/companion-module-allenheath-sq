@@ -55,6 +55,7 @@ module.exports = {
 		}
 
 		this.CHOICES_LEVEL = [
+			{ label: `Last dB value`, id: 1000 },
 			{ label: `Step +1 dB`, id: 998 },
 			{ label: `Step -1 dB`, id: 999 }
 		]
@@ -128,6 +129,20 @@ module.exports = {
 			]
 		}
 
+		this.fadeObj = {
+			type:	'dropdown',
+			label:	'Fading',
+			id:		'fade',
+			default:	0,
+			choices:	[
+				{label: `Off`, id: 0},
+				{label: `1s`, id: 1},
+				{label: `2s`, id: 2},
+				{label: `3s`, id: 3},
+			],
+			minChoicesForSearch: 0,
+		}
+
 		this.faderOptions = (name, qty, ofs) => {
 			this.CHOICES = []
 			for (let i = 1; i <= qty; i++) {
@@ -149,7 +164,8 @@ module.exports = {
 					default:	0,
 					choices:	this.CHOICES_FADER,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			]
 		}
 
@@ -476,6 +492,7 @@ module.exports = {
 			],
 		}
 
+		/* Level */
 		actions['chlev_to_mix'] = {
 			label: 'Fader channel level to mix',
 			options: [
@@ -501,7 +518,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -530,7 +548,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -559,7 +578,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -588,7 +608,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -617,7 +638,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -646,7 +668,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -675,7 +698,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -704,7 +728,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -733,7 +758,8 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
@@ -755,10 +781,12 @@ module.exports = {
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
-				}
+				},
+				this.fadeObj,
 			],
 		}
 
+		/* Pan Balance */
 		actions['chpan_to_mix'] = {
 			label: 'Pan/Bal channel level to mix',
 			options: [
