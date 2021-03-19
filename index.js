@@ -304,7 +304,7 @@ class instance extends instance_skel {
 
 	fadeLevel(fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
-		if (fd == 0) {
+		if (fd == 0 || fd === undefined) {
 			return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 		} else {
 			if (this.midiSocket !== undefined) {
