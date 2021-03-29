@@ -60,7 +60,9 @@ module.exports = {
 			{ label: `Step -1 dB`, id: 999 }
 		]
 		for (let i = -90; i <= -40; i = i + 5) {
-			if (i == -90) i = '-inf'
+			if (i == -90) {
+				i = '-inf'
+			}
 			this.CHOICES_LEVEL.push({ label: `${i} dB`, id: i})
 		}
 		for (let i = -39; i <= -10; i = i + 1) {
