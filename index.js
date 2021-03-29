@@ -93,6 +93,8 @@ class instance extends instance_skel {
 
 		this.fdbState = {}
 		this.lastValue = {}
+		
+		this.addUpgradeScripts()
 	}
 
 	actions(system) {
@@ -765,7 +767,6 @@ class instance extends instance_skel {
 		this.feedbacks()
 		this.presets()
 		this.init_tcp()
-		this.addUpgradeScripts()
 	}
 }
 
