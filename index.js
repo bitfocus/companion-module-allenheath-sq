@@ -1,10 +1,17 @@
 /**
  *
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.3.3
+ * Version 1.3.4
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-03-29  Version 1.3.4
+ *             - Improve fader level
+ *             - Improve pan level
+ *             - Improve fading
+ *			- Add Pan step increment
+ *			- Add Pan level variables
  *
  * 2021-03-18  Version 1.3.3
  *             - Add "Last dB value"
@@ -56,20 +63,20 @@
  * 2021-02-09  Version 1.0.0
  */
 
-let tcp             = require('../../tcp')
-let instance_skel   = require('../../instance_skel')
-let actions         = require('./actions')
-let feedbacks       = require('./feedbacks')
-let variables       = require('./variables')
-let presets         = require('./presets')
-let upgrade         = require('./upgrade')
+let tcp			= require('../../tcp')
+let instance_skel	= require('../../instance_skel')
+let actions		= require('./actions')
+let feedbacks		= require('./feedbacks')
+let variables		= require('./variables')
+let presets		= require('./presets')
+let upgrade		= require('./upgrade')
+let utils			= require('./utils')
 
-
-const level         = require('./level.json')
-const callback      = require('./callback.json')
-const sqconfig      = require('./sqconfig.json')
-const MIDI          = 51325
-var chks            = false
+const level		= require('./level.json')
+const callback		= require('./callback.json')
+const sqconfig		= require('./sqconfig.json')
+const MIDI		= 51325
+var chks			= false
 
 class instance extends instance_skel {
 	constructor(system, id, config) {
@@ -81,12 +88,11 @@ class instance extends instance_skel {
 			...feedbacks,
 			...presets,
 			...upgrade,
+			...utils,
 		})
 
 		this.fdbState = {}
 		this.lastValue = {}
-
-		this.addUpgradeScripts()
 	}
 
 	actions(system) {
@@ -134,9 +140,10 @@ class instance extends instance_skel {
 		let MSB
 		let LSB
 
-		if (lv < 998) {
-			var VC = level[cnfg][lv][1]
-			var VF = level[cnfg][lv][2]
+		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1) {
+			let tm = self.dBToDec(lv, cnfg)
+			var VC = tm[0]
+			var VF = tm[1]
 		}
 
 		if (mx == 99) {
@@ -148,12 +155,12 @@ class instance extends instance_skel {
 			LSB = tmp & 0x7F
 		}
 
-		if (lv < 998) {
+		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1) {
 			routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]) )
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
-				let rtn = self.getDBHex(self.lastValue['level_' + MSB +'.'+ LSB])
+				let rtn = self.dBToDec(self.lastValue['level_' + MSB +'.'+ LSB], cnfg)
 				VC = rtn[0]
 				VF = rtn[1]
 				lv = 997
@@ -165,16 +172,8 @@ class instance extends instance_skel {
 			}
 		}
 
-		self.getVariable('level_' + MSB +'.'+ LSB, function(res) {
-			if (res !== undefined) {
-				var txt
-				let db = lv < 998 ? self.getDBValue(VC.toString(16),('0'+VF.toString(16)).slice(-2)) : (lv == 998 ? 1 : -1) + (res == '-inf' ? -89 : res)
-				if (db <= -89) db = '-inf'
-				if (db > 10) db = 10
-
-				self.setVariable('level_' + MSB +'.'+ LSB, db)
-			}
-		})
+		// Retrive value after set command
+		routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x60, 0x7F ]) )
 
 		return routingCmds
 	}
@@ -189,89 +188,6 @@ class instance extends instance_skel {
 		})
 
 		return scn
-	}
-
-	getDBValue(vc, vf) {
-		var cnfg = this.config.level
-		if ( cnfg == 'LinearTaper' ) {
-			let hx = `${vc}${vf}`
-			let dc = parseInt(parseInt(hx, 16) / 127)
-			let sb = (258 - dc) / 2
-			let el = (258 - dc) % 2
-			let pt = parseInt(sb / 13)
-			if (el = 0) pt--
-
-			return 10 - (parseInt(sb) + pt)
-		} else {
-			var rt = -89
-			let hx = parseInt(parseInt(`${vc}${vf}`, 16) / 127)
-			for ( let i = 0; i < level[cnfg].length; i++ ) {
-				let j  = i + 1 < level[cnfg].length ? i + 1 : 0
-				let lc = level[cnfg][i][1].substr(2,2)
-				let lf = level[cnfg][i][2].substr(2,2)
-				let vx = parseInt(parseInt(`${lc}${lf}`, 16) / 127)
-
-				if ( (j == 0 && hx > vx) || (j == 1 && hx < vx) || (hx == vx) ) {
-					rt = level[cnfg][i][0]
-					break
-				} else if ( j > 0 ) {
-					let lc = level[cnfg][j][1].substr(2,2)
-					let lf = level[cnfg][j][2].substr(2,2)
-					let zx = parseInt(parseInt(`${lc}${lf}`, 16) / 127)
-
-					if ( hx > vx && hx < zx ) {
-						if ( hx - vx <= zx - hx ) {
-							rt = level[cnfg][i][0]
-						} else {
-							rt = level[cnfg][j][0]
-						}
-
-						break
-					}
-				}
-			}
-
-			return rt == '-inf' ? -89 : parseInt(rt)
-		}
-	}
-
-	getDBHex(rc) {
-		let lv = level[this.config.level]
-		let rt, zx
-
-		for (let i = 0; i < lv.length; i++) {
-			let j = i + 1 < lv.length ? i + 1 : 0
-			let db = lv[i][0]
-			if (db == "-inf") db = -100
-			db = parseInt(db)
-
-			let va = parseInt(lv[i][1], 16)
-			let vb = parseInt(lv[i][2], 16)
-			let vl = [va, vb]
-
-			if (j == 0) {
-				rt = vl
-				break
-			} else if (j > 0) {
-				zx = lv[j][0]
-				if (zx == "-inf") zx = -100
-				zx = parseInt(zx)
-
-				if (db <= rc && rc <= zx) {
-					if (rc - db <= zx - rc) {
-						rt = vl
-					} else {
-						let xa = parseInt(lv[j][1], 16)
-						let xb = parseInt(lv[j][2], 16)
-						rt = [xa, xb]
-					}
-
-					break
-				}
-			}
-		}
-
-		return rt
 	}
 
 	getLevel(ch, mx, ct, oMB, oLB) {
@@ -304,15 +220,45 @@ class instance extends instance_skel {
 
 	fadeLevel(fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
-		if (fd == 0 || fd === undefined) {
+		if (fd == 0) {
 			return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 		} else {
 			if (this.midiSocket !== undefined) {
-				let setFade = (MSB, LSB, lv) => {
-					let val = lv.toString(16)
-					let VC = parseInt(val.substr(0,2), 16);
-					let VF = parseInt(val.substr(2,2), 16);
+				var setFade = (MSB, LSB, lv) => {
+					let val = self.dBToDec(lv)
+					let VC = val[0];
+					let VF = val[1];
 					self.midiSocket.write(Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]))
+
+					lv = parseFloat(lv).toFixed(1)
+					if (lv < -89) lv = '-inf'
+					self.setVariable('level_' + MSB +'.'+ LSB, lv)
+				}
+
+				let fading = async (str, end, step, MSB, LSB) => {
+					var db = parseFloat(str)
+					if (db < -50) db = -50
+
+					end = parseFloat(end)
+					var bk = false
+					if (end < -50) bk = true
+
+					var itvFade = setInterval(
+						() => {
+							db = db - step
+							if ((str < end && db > parseFloat(end)) || (str > end && db < parseFloat(end))) {
+								db = end
+							}
+							setFade(MSB, LSB, db)
+
+							if (db == end) {
+								clearInterval(itvFade)
+							} else {
+								if (db <= -50 && bk) db = -89
+							}
+						},
+						50
+					)
 				}
 
 				let rm = self.getLevel(ch, mx, ct, oMB, oLB)
@@ -320,68 +266,41 @@ class instance extends instance_skel {
 				var LSB = rm.channel[1]
 				let VC
 				let VF
+				var end
+
+				if (lv == '-inf') lv = -90
 
 				if (lv < 998) {
-					VC = parseInt(level[cnfg][lv][1])
-					VF = parseInt(level[cnfg][lv][2])
+					end = lv
 				} else {
 					if (lv == 1000) {
 						/* Last dB value */
-						let db = self.lastValue['level_' + MSB +'.'+ LSB]
-						if (db == '-inf') db = -100;
-						let rtn = self.getDBHex(db)
-						VC = rtn[0]
-						VF = rtn[1]
+						end = self.lastValue['level_' + MSB +'.'+ LSB]
 					} else {
 						return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 					}
 				}
 
-				var end = parseInt(VC.toString(16) + VF.toString(16), 16)
-				var rnd = end;
-				if ( end == 0 ) end = 18476
-
 				var str
 				self.getVariable('level_' + MSB +'.'+ LSB, function(res) {
-					if (res == '-inf') res = -100
-					let rtn = self.getDBHex(res)
-					str = parseInt(rtn[0].toString(16) + rtn[1].toString(16), 16)
+					str = res
 				})
-				var rtr = str
-				if ( str == 0 ) str = 18476
 
-				let step = parseInt(Math.abs(str - end) / (fd * 50))
-				str = str - (Math.abs(str - end) - (step * fd * 50))
+				if (str == '-inf') str = -90
+				if (end == '-inf') end = -90
+				if (parseInt(str) == parseInt(end)) return []
 
-				if (str > end) {
-					for (let k = str; k >= end; k = k - step) {
-						setFade(MSB, LSB, k)
-						self.sleep(20)
-					}
-					self.sleep(20)
-					setFade(MSB, LSB, rnd)
-					end = rnd
-				} else {
-					setFade(MSB, LSB, rtr)
-					self.sleep(20)
-					for (let k = str; k <= end; k = k + step) {
-						setFade(MSB, LSB, k)
-						self.sleep(20)
-					}
-				}
-
-				let val = end.toString(16)
-				VC = val.substr(0,2);
-				VF = val.substr(2,2);
-
-				let db = self.getDBValue(VC,VF)
-				if (db <= -89) db = '-inf'
-				if (db > 10) db = 10
-
-				self.setVariable('level_' + MSB +'.'+ LSB, db)
+				let step = ((parseFloat(str) - parseFloat(end)) / (fd * 20)).toFixed(1)
+				fading(str, end, step, MSB, LSB)
 			}
 
 			return [];
+		}
+	}
+
+	sendSocket(buff) {
+		if (this.midiSocket !== undefined) {
+			this.midiSocket.write(buff)
 		}
 	}
 
@@ -450,71 +369,71 @@ class instance extends instance_skel {
 				break
 			/* Level */
 			case 'chlev_to_mix':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.level, [0x40,0x40], [0,0x44])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.leveldb, [0x40,0x40], [0,0x44])
 				break
 
 			case 'grplev_to_mix':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.level, [0x40,0x45], [0x30,0x04])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.leveldb, [0x40,0x45], [0x30,0x04])
 				break
 
 			case 'fxrlev_to_mix':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.level, [0x40,0x46], [0x3C,0x14])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.leveldb, [0x40,0x46], [0x3C,0x14])
 				break
 
 			case 'fxrlev_to_grp':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.grpCount, opt.level, [0,0x4B], [0,0x34])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.grpCount, opt.leveldb, [0,0x4B], [0,0x34])
 				break
 
 			case 'chlev_to_fxs':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.level, [0,0x4C], [0,0x14])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.leveldb, [0,0x4C], [0,0x14])
 				break
 
 			case 'grplev_to_fxs':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.level, [0,0x4D], [0,0x54])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.leveldb, [0,0x4D], [0,0x54])
 				break
 
 			case 'fxrlev_to_fxs':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.level, [0,0x4E], [0,0x04])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.leveldb, [0,0x4E], [0,0x04])
 				break
 
 			case 'mixlev_to_mtx':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mtxCount, opt.level, [0x4E,0x4E], [0x24,0x27])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mtxCount, opt.leveldb, [0x4E,0x4E], [0x24,0x27])
 				break
 
 			case 'grplev_to_mtx':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mtxCount, opt.level, [0,0x4E], [0,0x4B])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mtxCount, opt.leveldb, [0,0x4E], [0,0x4B])
 				break
 
 			case 'level_to_output':
-				cmd.buffers = this.fadeLevel(opt.fade, opt.input, 99, 0, opt.level, [0x4F,0], [0,0])
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, 99, 0, opt.leveldb, [0x4F,0], [0,0])
 				break
 			/* Pan Balance */
 			case 'chpan_to_mix':
-				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.level, [0x50,0x50], [0,0x44], 'PanBalance')
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.leveldb, [0x50,0x50], [0,0x44], 'PanBalance')
 				break
 
 			case 'grppan_to_mix':
-				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.level, [0x50,0x55], [0x30,0x04], 'PanBalance')
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.leveldb, [0x50,0x55], [0x30,0x04], 'PanBalance')
 				break
 
 			case 'fxrpan_to_mix':
-				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.level, [0x50,0x56], [0x3C,0x14], 'PanBalance')
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.leveldb, [0x50,0x56], [0x3C,0x14], 'PanBalance')
 				break
 
 			case 'fxrpan_to_grp':
-				cmd.buffers = this.setLevel(opt.input, opt.assign, this.grpCount, opt.level, [0,0x5B], [0,0x34], 'PanBalance')
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.grpCount, opt.leveldb, [0,0x5B], [0,0x34], 'PanBalance')
 				break
 
 			case 'mixpan_to_mtx':
-				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mtxCount, opt.level, [0x5E,0x5E], [0x24,0x27], 'PanBalance')
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mtxCount, opt.leveldb, [0x5E,0x5E], [0x24,0x27], 'PanBalance')
 				break;
 
 			case 'grppan_to_mtx':
-				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mtxCount, opt.level, [0,0x5E], [0,0x4B], 'PanBalance')
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mtxCount, opt.leveldb, [0,0x5E], [0,0x4B], 'PanBalance')
 				break
 
 			case 'pan_to_output':
-				cmd.buffers = this.setLevel(opt.input, 99, 0, opt.level, [0x5F,0], [0,0], 'PanBalance')
+				cmd.buffers = this.setLevel(opt.input, 99, 0, opt.leveldb, [0x5F,0], [0,0], 'PanBalance')
 				break
 
 			case 'scene_step':
@@ -543,9 +462,8 @@ class instance extends instance_skel {
 		}
 
 		for (let i = 0; i < cmd.buffers.length; i++) {
-			if (this.midiSocket !== undefined) {
-				this.midiSocket.write(cmd.buffers[i])
-			}
+			this.sendSocket(cmd.buffers[i])
+			this.sleep(200)
 		}
 	}
 
@@ -656,16 +574,24 @@ class instance extends instance_skel {
 
 		if ( buff.length > 0 && self.midiSocket !== undefined ) {
 			for ( let i = 0; i < buff.length; i++ ) {
-				self.midiSocket.write(buff[i])
+				self.sendSocket(buff[i])
 			}
 		}
+
+		self.subscribeActions('chpan_to_mix')
+		self.subscribeActions('grppan_to_mix')
+		self.subscribeActions('fxrpan_to_mix')
+		self.subscribeActions('fxrpan_to_grp')
+		self.subscribeActions('mixpan_to_mtx')
+		self.subscribeActions('grppan_to_mtx')
+		self.subscribeActions('pan_to_output')
 	}
 
 	getRemoteStatus(act) {
 		chks = true;
 		for (let key in callback[act]) {
 			let mblb = key.toString().split(".")
-			this.midiSocket.write(Buffer.from([ 0xB0, 0x63, mblb[0], 0xB0, 0x62, mblb[1], 0xB0, 0x60, 0x7F ]))
+			this.sendSocket(Buffer.from([ 0xB0, 0x63, mblb[0], 0xB0, 0x62, mblb[1], 0xB0, 0x60, 0x7F ]))
 		}
 	}
 
@@ -699,7 +625,7 @@ class instance extends instance_skel {
 							self.checkFeedbacks( callback['mute'][MSB+'.'+LSB][0] )
 						}
 
-						/* Level */
+						/* Fader Level */
 						if ( MSB >= 0x40 && MSB <= 0x4F ) {
 							var ost = false
 							self.getVariable('level_' + MSB +'.'+ LSB, function(res) {
@@ -709,13 +635,19 @@ class instance extends instance_skel {
 								}
 							})
 
-							let db = self.getDBValue(VC.toString(16),('0'+VF.toString(16)).slice(-2))
+							let db = self.decTodB(VC, VF)
 							if (db <= -89) db = '-inf'
 							self.setVariable('level_' + MSB +'.'+ LSB, db)
 
 							if (! ost) {
 								self.lastValue['level_' + MSB +'.'+ LSB] = db
 							}
+						}
+
+						/* Pan Level */
+						if ( MSB >= 0x50 && MSB <= 0x5E ) {
+							let db = self.decTodB(VC, VF, 'PanBalance')
+							self.setVariable('pan_' + MSB +'.'+ LSB, db)
 						}
 					}
 				}
@@ -833,6 +765,7 @@ class instance extends instance_skel {
 		this.feedbacks()
 		this.presets()
 		this.init_tcp()
+		this.addUpgradeScripts()
 	}
 }
 

@@ -12,7 +12,7 @@ module.exports = {
 		this.fxsCount   = sq['fxsCount']
 		this.mtxCount   = sq['mtxCount']
 		this.dcaCount   = sq['dcaCount']
-		this.muteGroup	= sq['muteGroup']
+		this.muteGroup	 = sq['muteGroup']
 		this.SoftKey    = sq['SoftKey']
 		this.sceneCount = sq['sceneCount']
 
@@ -59,15 +59,24 @@ module.exports = {
 			{ label: `Step +1 dB`, id: 998 },
 			{ label: `Step -1 dB`, id: 999 }
 		]
-		for (let i = 0; i < level[this.config.level].length; i++) {
-			let dbStr = level[this.config.level][i][0]
-			this.CHOICES_LEVEL.push({ label: `${dbStr} dB`, id: i})
+		for (let i = -90; i <= -40; i = i + 5) {
+			if (i == -90) i = '-inf'
+			this.CHOICES_LEVEL.push({ label: `${i} dB`, id: i})
+		}
+		for (let i = -39; i <= -10; i = i + 1) {
+			this.CHOICES_LEVEL.push({ label: `${i} dB`, id: i})
+		}
+		for (let i = -9.5; i <= 10; i = i + 0.5) {
+			this.CHOICES_LEVEL.push({ label: `${i} dB`, id: i})
 		}
 
-		this.CHOICES_PANLEVEL = []
-		for (let i = 0; i < level['PanBalance'].length; i++) {
-			let dbStr = level['PanBalance'][i][0]
-			this.CHOICES_PANLEVEL.push({ label: `${dbStr}`, id: i})
+		this.CHOICES_PANLEVEL = [
+			{ label: `Step Right`, id: 998 },
+			{ label: `Step Left`, id: 999 }
+		]
+		for (let i = -100; i <= 100; i = i + 5) {
+			let pos = i < 0 ? `L${Math.abs(i)}` : i == 0 ? `CTR` : `R${Math.abs(i)}`
+			this.CHOICES_PANLEVEL.push({ label: `${pos}`, id: `${pos}`})
 		}
 
 		this.CHOICES_DCA = []
@@ -513,7 +522,7 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
+					id:		'leveldb',
 					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
@@ -543,7 +552,7 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
+					id:		'leveldb',
 					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
@@ -573,7 +582,7 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
+					id:		'leveldb',
 					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
@@ -603,7 +612,7 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
+					id:		'leveldb',
 					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
@@ -633,7 +642,7 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
+					id:		'leveldb',
 					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
@@ -663,7 +672,7 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
+					id:		'leveldb',
 					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
@@ -693,7 +702,7 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
+					id:		'leveldb',
 					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
@@ -723,8 +732,8 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'49',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
@@ -753,8 +762,8 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'49',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
@@ -776,8 +785,8 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'49',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_LEVEL,
 					minChoicesForSearch: 0,
@@ -807,13 +816,24 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'12',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
+				},{
+					type:	'textinput',
+					label:	'Variable to show level (click config button to refresh)',
+					id:		'showvar',
+					default:	'',
 				}
 			],
+			subscribe: (action) => {
+				let opt = action.options
+				let val = this.getLevel(opt.input, opt.assign, this.mixCount, [0x50,0x50], [0,0x44])
+				this.sendSocket(val.buffer[0])
+				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			},
 		}
 
 		actions['grppan_to_mix'] = {
@@ -836,13 +856,24 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'12',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
+				},{
+					type:	'textinput',
+					label:	'Variable to show level (click config button to refresh)',
+					id:		'showvar',
+					default:	'',
 				}
 			],
+			subscribe: (action) => {
+				let opt = action.options
+				let val = this.getLevel(opt.input, opt.assign, this.mixCount, [0x50,0x55], [0x30,0x04])
+				this.sendSocket(val.buffer[0])
+				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			},
 		}
 
 		actions['fxrpan_to_mix'] = {
@@ -865,13 +896,24 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'12',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
+				},{
+					type:	'textinput',
+					label:	'Variable to show level (click config button to refresh)',
+					id:		'showvar',
+					default:	'',
 				}
 			],
+			subscribe: (action) => {
+				let opt = action.options
+				let val = this.getLevel(opt.input, opt.assign, this.mixCount, [0x50,0x56], [0x3C,0x14])
+				this.sendSocket(val.buffer[0])
+				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			},
 		}
 
 		actions['fxrpan_to_grp'] = {
@@ -894,13 +936,24 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'12',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
+				},{
+					type:	'textinput',
+					label:	'Variable to show level (click config button to refresh)',
+					id:		'showvar',
+					default:	'',
 				}
 			],
+			subscribe: (action) => {
+				let opt = action.options
+				let val = this.getLevel(opt.input, opt.assign, this.grpCount, [0,0x5B], [0,0x34])
+				this.sendSocket(val.buffer[0])
+				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			},
 		}
 
 		actions['mixpan_to_mtx'] = {
@@ -923,13 +976,24 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'12',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
+				},{
+					type:	'textinput',
+					label:	'Variable to show level (click config button to refresh)',
+					id:		'showvar',
+					default:	'',
 				}
 			],
+			subscribe: (action) => {
+				let opt = action.options
+				let val = this.getLevel(opt.input, opt.assign, this.mtxCount, [0x5E,0x5E], [0x24,0x27])
+				this.sendSocket(val.buffer[0])
+				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			},
 		}
 
 		actions['grppan_to_mtx'] = {
@@ -952,13 +1016,24 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'12',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
+				},{
+					type:	'textinput',
+					label:	'Variable to show level (click config button to refresh)',
+					id:		'showvar',
+					default:	'',
 				}
 			],
+			subscribe: (action) => {
+				let opt = action.options
+				let val = this.getLevel(opt.input, opt.assign, this.mtxCount, [0,0x5E], [0,0x4B])
+				this.sendSocket(val.buffer[0])
+				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			},
 		}
 
 		actions['pan_to_output'] = {
@@ -974,13 +1049,24 @@ module.exports = {
 				},{
 					type:	'dropdown',
 					label:	'Level',
-					id:		'level',
-					default:	'12',
+					id:		'leveldb',
+					default:	'0',
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
+				},{
+					type:	'textinput',
+					label:	'Variable to show level (click config button to refresh)',
+					id:		'showvar',
+					default:	'',
 				}
 			],
+			subscribe: (action) => {
+				let opt = action.options
+				let val = this.getLevel(opt.input, 99, 0, [0x5F,0], [0,0])
+				this.sendSocket(val.buffer[0])
+				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			},
 		}
 
 		// Scene
