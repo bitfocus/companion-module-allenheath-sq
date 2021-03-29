@@ -93,7 +93,7 @@ class instance extends instance_skel {
 
 		this.fdbState = {}
 		this.lastValue = {}
-		
+
 		this.addUpgradeScripts()
 	}
 
@@ -233,17 +233,23 @@ class instance extends instance_skel {
 					self.midiSocket.write(Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]))
 
 					lv = parseFloat(lv).toFixed(1)
-					if (lv < -89) lv = '-inf'
+					if (lv < -89) {
+						lv = '-inf'
+					}
 					self.setVariable('level_' + MSB +'.'+ LSB, lv)
 				}
 
 				let fading = async (str, end, step, MSB, LSB) => {
 					var db = parseFloat(str)
-					if (db < -50) db = -50
+					if (db < -50) {
+						db = -50
+					}
 
 					end = parseFloat(end)
 					var bk = false
-					if (end < -50) bk = true
+					if (end < -50) {
+						bk = true
+					}
 
 					var itvFade = setInterval(
 						() => {
@@ -256,7 +262,9 @@ class instance extends instance_skel {
 							if (db == end) {
 								clearInterval(itvFade)
 							} else {
-								if (db <= -50 && bk) db = -89
+								if (db <= -50 && bk) {
+									db = -89
+								}
 							}
 						},
 						50
@@ -270,7 +278,9 @@ class instance extends instance_skel {
 				let VF
 				var end
 
-				if (lv == '-inf') lv = -90
+				if (lv == '-inf') {
+					lv = -90
+				}
 
 				if (lv < 998) {
 					end = lv
@@ -288,9 +298,15 @@ class instance extends instance_skel {
 					str = res
 				})
 
-				if (str == '-inf') str = -90
-				if (end == '-inf') end = -90
-				if (parseInt(str) == parseInt(end)) return []
+				if (str == '-inf') {
+					str = -90
+				}
+				if (end == '-inf') {
+					end = -90
+				}
+				if (parseInt(str) == parseInt(end)) {
+					return []
+				}
 
 				let step = ((parseFloat(str) - parseFloat(end)) / (fd * 20)).toFixed(1)
 				fading(str, end, step, MSB, LSB)
@@ -638,7 +654,9 @@ class instance extends instance_skel {
 							})
 
 							let db = self.decTodB(VC, VF)
-							if (db <= -89) db = '-inf'
+							if (db <= -89) {
+								db = '-inf'
+							}
 							self.setVariable('level_' + MSB +'.'+ LSB, db)
 
 							if (! ost) {
@@ -749,7 +767,9 @@ class instance extends instance_skel {
 				var gInt = setInterval(
 					() => {
 						this.getRemoteLevel()
-						if ( ij == 2 ) clearInterval(gInt)
+						if ( ij == 2 ) {
+							clearInterval(gInt)
+						}
 						ij++
 					}, 3000)
 			})

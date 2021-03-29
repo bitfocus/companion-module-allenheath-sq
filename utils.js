@@ -47,8 +47,12 @@ module.exports = {
 				}
 				val = Math.round(8191 + lv * 81.9)
 				val = val > 8191 ? val + 221 : val + 100
-				if (val < 5) val = 0
-				if (val > 16380) val = 16383
+				if (val < 5) {
+					val = 0
+				}
+				if (val > 16380) {
+					val = 16383
+				}
 				bin = ('00000000000000' + val.toString(2)).slice(-14)
 
 				VC = parseInt(bin.slice(0, -7), 2)
@@ -66,8 +70,12 @@ module.exports = {
 			case 'LinearTaper':
 				dec = parseInt(VC.toString(2) + ('0000000' + VF.toString(2)).slice(-7), 2)
 				val = parseFloat((dec - 15196) / 119).toFixed(1)
-				if (val > 10) val = 10
-				if (val < -89 ) val = '-inf'
+				if (val > 10) {
+					val = 10
+				}
+				if (val < -89 ) {
+					val = '-inf'
+				}
 				break
 
 			case 'AudioTaper':
@@ -89,9 +97,15 @@ module.exports = {
 			case 'PanBalance':
 				dec = parseInt(VC.toString(2) + ('0000000' + VF.toString(2)).slice(-7), 2)
 				val = parseFloat((dec - 8191) / 81.9).toFixed(0)
-				if (val > 100) val = 100
-				if (val < -100) val = -100
-				if (val == 0) return 'CTR'
+				if (val > 100) {
+					val = 100
+				}
+				if (val < -100) {
+					val = -100
+				}
+				if (val == 0) {
+					return 'CTR'
+				}
 				val = (val < 0 ? 'L' : 'R') + Math.abs(val).toString()
 				break
 		}
