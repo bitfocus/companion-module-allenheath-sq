@@ -1,5 +1,3 @@
-const level      = require('./level.json')
-
 module.exports = {
 	dBToDec : function(lv, typ = this.config.level) {
 		let VC, VF, val, bin
@@ -8,7 +6,7 @@ module.exports = {
 		switch (typ) {
 			case 'LinearTaper':
 				lv = parseFloat(lv)
-				val = 15196 + (lv * 119)
+				val = 15196 + (lv * 118.775)
 				bin = Math.round(val).toString(2)
 				VC = parseInt(bin.slice(0, -7), 2)
 				VF = parseInt(bin.slice(-7), 2)
@@ -69,7 +67,7 @@ module.exports = {
 		switch (typ) {
 			case 'LinearTaper':
 				dec = parseInt(VC.toString(2) + ('0000000' + VF.toString(2)).slice(-7), 2)
-				val = parseFloat((dec - 15196) / 119).toFixed(1)
+				val = parseFloat((dec - 15196) / 118.775).toFixed(1)
 				if (val > 10) {
 					val = 10
 				}
@@ -111,5 +109,13 @@ module.exports = {
 		}
 
 		return val
+	},
+
+	sleep : function(ml) {
+		const dt = Date.now()
+		let cd = null
+		do {
+			cd = Date.now()
+		} while (cd - dt < ml)
 	},
 }

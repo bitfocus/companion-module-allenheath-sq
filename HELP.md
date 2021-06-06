@@ -74,11 +74,16 @@ New in v.1.3.4
 * Add Pan step increment
 * Add Pan level variables
 
+New in v.1.3.5
+* Improve dB level
+* Add MIDI channel configuration
+* Add Retrieve status configuration
+
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Last update (d/m/y): 29/03/2021
+Last update (d/m/y): 06/06/2021
 
-Current version: 1.3.4
+Current version: 1.3.5
 
 ## Configuring:
 
@@ -90,6 +95,8 @@ First step after adding SQ instance is to setting it up:
 *	Model:				your SQ model
 *	NRPN Fader Law:		same as your MIDI configuration on console !! IMPORTANT !!
 *	Default talkback...:	channel number where is connected your talkback microphone
+*	MIDI channel:			MIDI channel used to communicate with SQ !! IMPORTANT !!
+*	Retrieve console...:	Modality to retrieve console status
 
 ### Soft keys 9 - 16 on SQ5
 To configure soft keys 9 - 16 on SQ5 you have to use MixPad application. After initially configuration, all settings will be stored in SQ memory until next configuration or console reset. To avoid deleting the soft key configuration when change scene, set "block" in Scenes Global Filter.
@@ -124,7 +131,7 @@ Example: If the fader level was +2 dB and you want to momentarily set it to -20 
 ### Fading
 This option available on any fader level allow you to reach set dB fader level using fading in/out mode. The speed of the fader route is selectable between 1 and 3 seconds.
 
-### Pan display getVariables
+### Pan display level
 When configuring a button with one of the Pan functions appear an only read option that shows name of variable to use on button text to show up value of Pan/Balance. After select option for input and destination you need to press configuring button once to refresh variable value before use it.
 
 ## Presets:

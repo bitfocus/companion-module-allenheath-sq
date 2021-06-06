@@ -1,10 +1,15 @@
 /**
  *
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.3.4
+ * Version 1.3.5
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-06-06  Version 1.3.5
+ *			- Improve dB level
+ *			- Add MIDI channel configuration
+ *			- Add Retrive status configuration
  *
  * 2021-03-29  Version 1.3.4
  *             - Improve fader level
@@ -77,6 +82,7 @@ const callback		= require('./callback.json')
 const sqconfig		= require('./sqconfig.json')
 const MIDI		= 51325
 var chks			= false
+var mch			= 0xB0
 
 class instance extends instance_skel {
 	constructor(system, id, config) {
@@ -129,7 +135,7 @@ class instance extends instance_skel {
 				LSB = tmp & 0x7F
 			}
 
-			routingCmds.push(Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, 0, 0xB0, 0x26, ac ? 1 : 0]))
+			routingCmds.push(Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, 0x06, 0, mch, 0x26, ac ? 1 : 0]))
 		}
 
 		return routingCmds
@@ -137,7 +143,7 @@ class instance extends instance_skel {
 
 	setLevel(ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
-		let routingCmds = []
+		let levelCmds = []
 		let tmp
 		let MSB
 		let LSB
@@ -158,7 +164,7 @@ class instance extends instance_skel {
 		}
 
 		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1) {
-			routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]) )
+			levelCmds.push( Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, 0x06, VC, mch, 0x26, VF ]) )
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
@@ -167,17 +173,17 @@ class instance extends instance_skel {
 				VF = rtn[1]
 				lv = 997
 
-				routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]) )
+				levelCmds.push( Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, 0x06, VC, mch, 0x26, VF ]) )
 			} else {
 				/* Increment */
-				routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, lv == 998 ? 0x60 : 0x61, 0x00 ]) )
+				levelCmds.push( Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, lv == 998 ? 0x60 : 0x61, 0x00 ]) )
 			}
 		}
 
 		// Retrive value after set command
-		routingCmds.push( Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x60, 0x7F ]) )
+		levelCmds.push( Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, 0x60, 0x7F ]) )
 
-		return routingCmds
+		return levelCmds
 	}
 
 	setScene(val) {
@@ -185,8 +191,12 @@ class instance extends instance_skel {
 		var scn
 		this.getVariable('currentScene', function(res) {
 			scn = parseInt(res) - 1 + val
-			if (scn < 0) scn = 0
-			if (scn > sq['sceneCount']) scn = sq['sceneCount']
+			if (scn < 0) {
+				scn = 0
+			}
+			if (scn > sq['sceneCount']) {
+				scn = sq['sceneCount']
+			}
 		})
 
 		return scn
@@ -207,17 +217,9 @@ class instance extends instance_skel {
 		}
 
 		return {
-			buffer:     [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x60, 0x7F ]) ],
+			buffer:     [ Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, 0x60, 0x7F ]) ],
 			channel:    [MSB,LSB]
 		}
-	}
-
-	sleep(ml) {
-		const dt = Date.now()
-		let cd = null
-		do {
-			cd = Date.now()
-		} while (cd - dt < ml)
 	}
 
 	fadeLevel(fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
@@ -230,7 +232,7 @@ class instance extends instance_skel {
 					let val = self.dBToDec(lv)
 					let VC = val[0];
 					let VF = val[1];
-					self.midiSocket.write(Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, LSB, 0xB0, 0x06, VC, 0xB0, 0x26, VF ]))
+					self.midiSocket.write(Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, 0x06, VC, mch, 0x26, VF ]))
 
 					lv = parseFloat(lv).toFixed(1)
 					if (lv < -89) {
@@ -347,7 +349,8 @@ class instance extends instance_skel {
 			case 'key_soft':
 				let softKey = parseInt(opt.softKey)
 				let keyValu = (opt.pressedsk == '0' || opt.pressedsk == '1') ? true : false
-				cmd.buffers = [ Buffer.from([ keyValu ? 0x90 : 0x80, 0x30 + softKey, keyValu ? 0x7F : 0 ]) ]
+				let tch = parseInt((keyValu ? '0x9' : '0x8') + (mch).toString(16))
+				cmd.buffers = [ Buffer.from([ tch, 0x30 + softKey, keyValu ? 0x7F : 0 ]) ]
 				break
 
 			case 'ch_to_mix':
@@ -456,13 +459,13 @@ class instance extends instance_skel {
 
 			case 'scene_step':
 				sceneNumber = this.setScene(opt.scene)
-				cmd.buffers = [ Buffer.from([ 0xB0, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+				cmd.buffers = [ Buffer.from([ mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
 				break
 
 			case 'current_scene':
 			case 'scene_recall':
 				sceneNumber = opt.scene - 1
-				cmd.buffers = [ Buffer.from([ 0xB0, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+				cmd.buffers = [ Buffer.from([ mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
 				break
 		}
 
@@ -475,7 +478,7 @@ class instance extends instance_skel {
 				}
 
 				this.checkFeedbacks(action.action)
-				cmd.buffers = [ Buffer.from([ 0xB0, 0x63, MSB, 0xB0, 0x62, strip + LSB, 0xB0, 0x06, 0x00, 0xB0, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				cmd.buffers = [ Buffer.from([ mch, 0x63, MSB, mch, 0x62, strip + LSB, mch, 0x06, 0x00, mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 			}
 		}
 
@@ -591,17 +594,43 @@ class instance extends instance_skel {
 		}
 
 		if ( buff.length > 0 && self.midiSocket !== undefined ) {
+			let ctr = 0
 			for ( let i = 0; i < buff.length; i++ ) {
 				self.sendSocket(buff[i])
+				ctr++
+				if (this.config.status == 'delay') {
+					if (ctr == 20) {
+						ctr = 0
+						this.sleep(300)
+					}
+				}
 			}
 		}
 
 		self.subscribeActions('chpan_to_mix')
+		if (this.config.status == 'delay') {
+			this.sleep(300)
+		}
 		self.subscribeActions('grppan_to_mix')
+		if (this.config.status == 'delay') {
+			this.sleep(300)
+		}
 		self.subscribeActions('fxrpan_to_mix')
+		if (this.config.status == 'delay') {
+			this.sleep(300)
+		}
 		self.subscribeActions('fxrpan_to_grp')
+		if (this.config.status == 'delay') {
+			this.sleep(300)
+		}
 		self.subscribeActions('mixpan_to_mtx')
+		if (this.config.status == 'delay') {
+			this.sleep(300)
+		}
 		self.subscribeActions('grppan_to_mtx')
+		if (this.config.status == 'delay') {
+			this.sleep(300)
+		}
 		self.subscribeActions('pan_to_output')
 	}
 
@@ -609,7 +638,7 @@ class instance extends instance_skel {
 		chks = true;
 		for (let key in callback[act]) {
 			let mblb = key.toString().split(".")
-			this.sendSocket(Buffer.from([ 0xB0, 0x63, mblb[0], 0xB0, 0x62, mblb[1], 0xB0, 0x60, 0x7F ]))
+			this.sendSocket(Buffer.from([ mch, 0x63, mblb[0], mch, 0x62, mblb[1], mch, 0x60, 0x7F ]))
 		}
 	}
 
@@ -621,14 +650,14 @@ class instance extends instance_skel {
 
 			for ( let b = 0; b < data.length; b++) {
 				/* Schene Change */
-				if ( data[b] == 176 && data[b+1] == 0 ) {
+				if ( data[b] == mch && data[b+1] == 0 ) {
 					dt = data.slice(b, (b + 5))
 					var csc = (dt[4] + dt[2] * 127);
 					self.setVariable('currentScene', csc + 1)
 				}
 
 				/* Other */
-				if ( data[b] == 176 && data[b+1] == 99 ) {
+				if ( data[b] == mch && data[b+1] == 99 ) {
 					dt = data.slice(b, (b + 12))
 
 					if ( dt.length == 12) {
@@ -654,9 +683,6 @@ class instance extends instance_skel {
 							})
 
 							let db = self.decTodB(VC, VF)
-							if (db <= -89) {
-								db = '-inf'
-							}
 							self.setVariable('level_' + MSB +'.'+ LSB, db)
 
 							if (! ost) {
@@ -724,6 +750,25 @@ class instance extends instance_skel {
 				default: '0',
 				choices: this.CHOICES_INPUT_CHANNEL,
 				minChoicesForSearch: 0,
+			},{
+				type:    'textinput',
+				id:      'midich',
+				label:   'MIDI channel',
+				width:   6,
+				min: 1,
+				max: 16,
+				default: 1,
+			},{
+				type:    'dropdown',
+				id:      'status',
+				label:   'Retrieve console status',
+				width:   6,
+				default: 'full',
+				choices: [
+					{id: 'full', label: 'Fully at startup'},
+					{id: 'delay', label: 'Delayed at startup'},
+					{id: 'nosts', label: 'Not at startup'}
+				],
 			}
 		]
 	}
@@ -760,18 +805,23 @@ class instance extends instance_skel {
 
 			this.midiSocket.on('connect', () => {
 				this.log('debug', `MIDI Connected to ${this.config.host}`)
-				this.getRemoteStatus('mute')
-				this.getRemoteLevel()
+				if (this.config.status != 'nosts') {
+					this.getRemoteStatus('mute')
+					this.sleep(300);
+					this.getRemoteLevel()
 
-				var ij = 1
-				var gInt = setInterval(
-					() => {
-						this.getRemoteLevel()
-						if ( ij == 2 ) {
-							clearInterval(gInt)
-						}
-						ij++
-					}, 3000)
+					if (this.config.status == 'fully') {
+						var ij = 1
+						var gInt = setInterval(
+							() => {
+								this.getRemoteLevel()
+								if ( ij == 2 ) {
+									clearInterval(gInt)
+								}
+								ij++
+							}, 3000)
+					}
+				}
 			})
 
 			this.midiSocket.on('data', (data) => {
@@ -782,6 +832,7 @@ class instance extends instance_skel {
 
 	updateConfig(config) {
 		this.config = config
+		mch = parseInt('0xB' + (this.config.midich - 1).toString(16))
 		this.actions()
 		this.variables()
 		this.feedbacks()
