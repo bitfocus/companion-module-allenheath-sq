@@ -154,6 +154,16 @@ module.exports = {
 			minChoicesForSearch: 0,
 		}
 
+		this.levelObj = {
+			type:	'dropdown',
+			label:	'Level',
+			id:		'leveldb',
+			default:	'0',
+			multiple:	false,
+			choices:	this.CHOICES_LEVEL,
+			minChoicesForSearch: 0,
+		}
+
 		this.faderOptions = (name, qty, ofs) => {
 			this.CHOICES = []
 			for (let i = 1; i <= qty; i++) {
@@ -168,14 +178,8 @@ module.exports = {
 					default:	1 + ofs,
 					choices:	this.CHOICES,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'level',
-					default:	0,
-					choices:	this.CHOICES_FADER,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			]
 		}
@@ -521,15 +525,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_MIX,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -551,15 +548,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_MIX,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -581,15 +571,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_MIX,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -611,15 +594,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_GRP,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -641,15 +617,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_FXS,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -671,15 +640,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_FXS,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -701,15 +663,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_FXS,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -731,15 +686,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_MTX,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -761,15 +709,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_MTX,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
@@ -784,15 +725,8 @@ module.exports = {
 					default:	'0',
 					choices:	this.CHOICES_ALLFADER,
 					minChoicesForSearch: 0,
-				},{
-					type:	'dropdown',
-					label:	'Level',
-					id:		'leveldb',
-					default:	'0',
-					multiple:	false,
-					choices:	this.CHOICES_LEVEL,
-					minChoicesForSearch: 0,
 				},
+				this.levelObj,
 				this.fadeObj,
 			],
 		}
