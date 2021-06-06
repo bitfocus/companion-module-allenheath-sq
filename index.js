@@ -320,6 +320,7 @@ class instance extends instance_skel {
 
 	sendSocket(buff) {
 		if (this.midiSocket !== undefined) {
+			this.log('debug', `Sending : ${JSON.parse(JSON.stringify(buff))['data']} from ${this.config.host}`)
 			this.midiSocket.write(buff)
 		}
 	}
@@ -654,6 +655,7 @@ class instance extends instance_skel {
 					dt = data.slice(b, (b + 5))
 					var csc = (dt[4] + dt[2] * 127);
 					self.setVariable('currentScene', csc + 1)
+					this.log('debug', `Scene Received : ${dt} from ${self.config.host}`)
 				}
 
 				/* Other */
@@ -670,6 +672,7 @@ class instance extends instance_skel {
 						if ( MSB == 0 || MSB == 2 || MSB == 4 ) {
 							this.fdbState['mute_' + MSB + '.' + LSB] = VF == 1 ? true : false
 							self.checkFeedbacks( callback['mute'][MSB+'.'+LSB][0] )
+							this.log('debug', `Mute Received : ${dt} from ${self.config.host}`)
 						}
 
 						/* Fader Level */
@@ -688,12 +691,15 @@ class instance extends instance_skel {
 							if (! ost) {
 								self.lastValue['level_' + MSB +'.'+ LSB] = db
 							}
+
+							this.log('debug', `Fader Received : ${dt} from ${self.config.host}`)
 						}
 
 						/* Pan Level */
 						if ( MSB >= 0x50 && MSB <= 0x5E ) {
 							let db = self.decTodB(VC, VF, 'PanBalance')
 							self.setVariable('pan_' + MSB +'.'+ LSB, db)
+							this.log('debug', `Pan Received : ${dt} from ${self.config.host}`)
 						}
 					}
 				}
