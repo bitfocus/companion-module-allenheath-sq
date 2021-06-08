@@ -74,7 +74,7 @@ let actions		= require('./actions')
 let feedbacks		= require('./feedbacks')
 let variables		= require('./variables')
 let presets		= require('./presets')
-let upgrade		= require('./upgrade')
+let upgradeScripts  = require('./upgrade')
 let utils			= require('./utils')
 
 const level		= require('./level.json')
@@ -93,14 +93,15 @@ class instance extends instance_skel {
 			...actions,
 			...feedbacks,
 			...presets,
-			...upgrade,
 			...utils,
 		})
 
 		this.fdbState = {}
 		this.lastValue = {}
-
-		this.addUpgradeScripts()
+	}
+	
+	static GetUpgradeScripts() {
+		return upgradeScripts
 	}
 
 	actions(system) {
