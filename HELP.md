@@ -79,11 +79,20 @@ New in v.1.3.5
 * Add MIDI channel configuration
 * Add Retrieve status configuration
 
+New in v.1.3.6
+* Converted code to new upgrade script
+
+New in v.1.3.7
+* Corrected sqconfig.json
+* Corrected status request
+* Add missing upgrade script for 1.3.5
+
+
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Last update (d/m/y): 06/06/2021
+Last update (d/m/y): 14/06/2021
 
-Current version: 1.3.5
+Current version: 1.3.7
 
 ## Configuring:
 

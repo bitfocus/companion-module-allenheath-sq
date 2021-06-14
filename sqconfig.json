@@ -25,7 +25,7 @@
 			"SoftKey":	16,
 			"RotaryKey":	4,
 			"sceneCount":	300
-		},
+		}, 
 		"SQ7" : {
 			"chCount":	48,
 			"mixCount":	12,
