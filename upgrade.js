@@ -118,9 +118,14 @@ module.exports = [
 
 	// From version 1.3.4 => 1.3.5
 	function(context, config, actions, feedbacks) {
-		config.status = (typeof config.status == 'undefined' || config.status == '') ? 'full' : config.status;
-		config.midich = (typeof config.midich == 'undefined' || isNaN(parseInt(config.midich))) ? 1 : config.midich;
+		let changed = false
 
-		return true;
+		if (config) {
+			config.status = (typeof config.status == 'undefined' || config.status == '') ? 'full' : config.status
+			config.midich = (typeof config.midich == 'undefined' || isNaN(parseInt(config.midich))) ? 1 : config.midich
+			changed = true
+		}
+
+		return changed
 	},
 ]
