@@ -1,10 +1,15 @@
 /**
  *
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.3.5
+ * Version 1.3.7
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-06-14	Version 1.3.7
+ * 			- Corrected sqconfig.json
+ * 			- Corrected status request
+ *			- Add missing upgrade script for 1.3.5
  *
  * 2021-06-06  Version 1.3.5
  *			- Improve dB level
@@ -99,7 +104,7 @@ class instance extends instance_skel {
 		this.fdbState = {}
 		this.lastValue = {}
 	}
-	
+
 	static GetUpgradeScripts() {
 		return upgradeScripts
 	}
@@ -817,16 +822,11 @@ class instance extends instance_skel {
 					this.sleep(300);
 					this.getRemoteLevel()
 
-					if (this.config.status == 'fully') {
-						var ij = 1
-						var gInt = setInterval(
+					if (this.config.status == 'full') {
+						var gInt = setTimeout(
 							() => {
 								this.getRemoteLevel()
-								if ( ij == 2 ) {
-									clearInterval(gInt)
-								}
-								ij++
-							}, 3000)
+							}, 4000)
 					}
 				}
 			})
