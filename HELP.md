@@ -87,12 +87,15 @@ New in v.1.3.7
 * Corrected status request
 * Add missing upgrade script for 1.3.5
 
+New in v.1.3.8
+* Fix issue #25
+
 
 Created by referring to all controls in the "SQ Midi Protocol Issue 3 - Firmware v. 1.5.0 or later" manual.
 
-Last update (d/m/y): 14/06/2021
+Last update (d/m/y): 21/07/2021
 
-Current version: 1.3.7
+Current version: 1.3.8
 
 ## Configuring:
 

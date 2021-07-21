@@ -1,10 +1,13 @@
 /**
  *
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.3.7
+ * Version 1.3.8
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-07-21	Version 1.3.8
+ * 			- Fix issue #25
  *
  * 2021-06-14	Version 1.3.7
  * 			- Corrected sqconfig.json
@@ -154,7 +157,7 @@ class instance extends instance_skel {
 		let MSB
 		let LSB
 
-		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1) {
+		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1 || lv == '-inf') {
 			let tm = self.dBToDec(lv, cnfg)
 			var VC = tm[0]
 			var VF = tm[1]
@@ -169,7 +172,7 @@ class instance extends instance_skel {
 			LSB = tmp & 0x7F
 		}
 
-		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1) {
+		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1 || lv == '-inf') {
 			levelCmds.push( Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, 0x06, VC, mch, 0x26, VF ]) )
 		} else {
 			if (lv == 1000) {
@@ -230,6 +233,7 @@ class instance extends instance_skel {
 
 	fadeLevel(fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
+
 		if (fd == 0) {
 			return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 		} else {
