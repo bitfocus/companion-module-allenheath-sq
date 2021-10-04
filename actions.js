@@ -753,7 +753,7 @@ module.exports = {
 					type:	'dropdown',
 					label:	'Level',
 					id:		'leveldb',
-					default:	'0',
+					default:	'CTR',
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,

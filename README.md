@@ -7,6 +7,6 @@ via MIDI commands over IP
 
 Created by Max Kiusso in 2021 inspirating by allenheath-dlive module.
 
-Last update (d/m/y): 21/07/2021
+Last update (d/m/y): 04/10/2021
 
-Current Version 1.3.8
+Current Version 1.3.9

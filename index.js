@@ -6,91 +6,95 @@
  *
  * Based on allenheath-dlive module by Andrew Broughton
  *
- * 2021-07-21	Version 1.3.8
- * 			- Fix issue #25
+ * 2021-10-04   Version 1.3.9
+ *              - Fix issue #28
+ *              - Corrected some stuff
  *
- * 2021-06-14	Version 1.3.7
- * 			- Corrected sqconfig.json
- * 			- Corrected status request
- *			- Add missing upgrade script for 1.3.5
+ * 2021-07-21   Version 1.3.8
+ *              - Fix issue #25
  *
- * 2021-06-06  Version 1.3.5
- *			- Improve dB level
- *			- Add MIDI channel configuration
- *			- Add Retrive status configuration
+ * 2021-06-14   Version 1.3.7
+ *              - Corrected sqconfig.json
+ *              - Corrected status request
+ *              - Add missing upgrade script for 1.3.5
  *
- * 2021-03-29  Version 1.3.4
- *             - Improve fader level
- *             - Improve pan level
- *             - Improve fading
- *			- Add Pan step increment
- *			- Add Pan level variables
+ * 2021-06-06   Version 1.3.5
+ *              - Improve dB level
+ *              - Add MIDI channel configuration
+ *              - Add Retrive status configuration
  *
- * 2021-03-18  Version 1.3.3
- *             - Add "Last dB value"
- *             - Add fading option
+ * 2021-03-29   Version 1.3.4
+ *              - Improve fader level
+ *              - Improve pan level
+ *              - Improve fading
+ *              - Add Pan step increment
+ *              - Add Pan level variables
  *
- * 2021-03-12  Version 1.3.2
- *             - Fix DCA level output
+ * 2021-03-18   Version 1.3.3
+ *              - Add "Last dB value"
+ *              - Add fading option
  *
- * 2021-03-10  Version 1.3.1
- *             - Beautify code
- *			- Fix level variables
+ * 2021-03-12   Version 1.3.2
+ *              - Fix DCA level output
  *
- * 2021-03-06  Version 1.3.0
- *             - Change Mute logics
- *             - Change dB Fader Level logics
- *             - Add Current Scene variable
- *             - Add all dB Fader Level variables
- *             - New presets
- *             - Improved receiving data function
- *             - Cleaning the code
+ * 2021-03-10   Version 1.3.1
+ *              - Beautify code
+ *              - Fix level variables
  *
- * 2021-02-29  Version 1.2.7
- *             - Improved TCP connection
- *             - Fix dB value display
+ * 2021-03-06   Version 1.3.0
+ *              - Change Mute logics
+ *              - Change dB Fader Level logics
+ *              - Add Current Scene variable
+ *              - Add all dB Fader Level variables
+ *              - New presets
+ *              - Improved receiving data function
+ *              - Cleaning the code
  *
- * 2021-02-20  Version 1.2.6
- *             - Improved code
- *             - Add fader step increment
- *             - Add fader level dB get
+ * 2021-02-29   Version 1.2.7
+ *              - Improved TCP connection
+ *              - Fix dB value display
  *
- * 2021-02-14  Version 1.2.5
- *             - Add scene step and current scene display
+ * 2021-02-20   Version 1.2.6
+ *              - Improved code
+ *              - Add fader step increment
+ *              - Add fader level dB get
  *
- * 2021-02-13  Version 1.2.3
- *             - Bug Fix
- *             - Add presets for mute actions and talkback
+ * 2021-02-14   Version 1.2.5
+ *              - Add scene step and current scene display
  *
- * 2021-02-11  Version 1.2.0
- *             - Add feedback for all mute actions
+ * 2021-02-13   Version 1.2.3
+ *              - Bug Fix
+ *              - Add presets for mute actions and talkback
  *
- *             Version 1.1.2
- *             - Bug fix
+ * 2021-02-11   Version 1.2.0
+ *              - Add feedback for all mute actions
  *
- * 2021-02-10  Version 1.1.0
- *             - Add listener for MIDI inbound data
- *             - Add function to autoset StreamDeck button status
- *               from status of the mute button on SQ
+ *              Version 1.1.2
+ *              - Bug fix
  *
- * 2021-02-09  Version 1.0.0
+ * 2021-02-10   Version 1.1.0
+ *              - Add listener for MIDI inbound data
+ *              - Add function to autoset StreamDeck button status
+ *                from status of the mute button on SQ
+ *
+ * 2021-02-09   Version 1.0.0
  */
 
-let tcp			= require('../../tcp')
+let tcp             = require('../../tcp')
 let instance_skel	= require('../../instance_skel')
-let actions		= require('./actions')
+let actions         = require('./actions')
 let feedbacks		= require('./feedbacks')
 let variables		= require('./variables')
-let presets		= require('./presets')
+let presets         = require('./presets')
 let upgradeScripts  = require('./upgrade')
 let utils			= require('./utils')
 
-const level		= require('./level.json')
+const level         = require('./level.json')
 const callback		= require('./callback.json')
 const sqconfig		= require('./sqconfig.json')
-const MIDI		= 51325
+const MIDI          = 51325
 var chks			= false
-var mch			= 0xB0
+var mch             = 0xB0
 
 class instance extends instance_skel {
 	constructor(system, id, config) {
@@ -157,7 +161,7 @@ class instance extends instance_skel {
 		let MSB
 		let LSB
 
-		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1 || lv == '-inf') {
+		if (lv < 998 || ['L','R','C'].indexOf(lv.toString().slice(0,1)) != -1 || lv == '-inf') {
 			let tm = self.dBToDec(lv, cnfg)
 			var VC = tm[0]
 			var VF = tm[1]
@@ -172,7 +176,7 @@ class instance extends instance_skel {
 			LSB = tmp & 0x7F
 		}
 
-		if (lv < 998 || ['L','R','C'].indexOf(lv.slice(0,1)) != -1 || lv == '-inf') {
+		if (lv < 998 || ['L','R','C'].indexOf(lv.toString().slice(0,1)) != -1 || lv == '-inf') {
 			levelCmds.push( Buffer.from([ mch, 0x63, MSB, mch, 0x62, LSB, mch, 0x06, VC, mch, 0x26, VF ]) )
 		} else {
 			if (lv == 1000) {
