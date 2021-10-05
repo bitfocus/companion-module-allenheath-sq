@@ -1,10 +1,13 @@
 /**
  *
  * Companion instance class for the Allen & Heath SQ.
- * Version 1.3.8
+ * Version 1.3.9
  * Author Max Kiusso <max@kiusso.net>
  *
  * Based on allenheath-dlive module by Andrew Broughton
+ *
+ * 2021-10-05   Version 1.3.9
+ *              - Fix issue #31
  *
  * 2021-10-04   Version 1.3.9
  *              - Fix issue #28
@@ -364,7 +367,7 @@ class instance extends instance_skel {
 			case 'key_soft':
 				let softKey = parseInt(opt.softKey)
 				let keyValu = (opt.pressedsk == '0' || opt.pressedsk == '1') ? true : false
-				let tch = parseInt((keyValu ? '0x9' : '0x8') + (mch).toString(16))
+				let tch = parseInt((keyValu ? '0x9' : '0x8') + (mch - 176).toString(16))
 				cmd.buffers = [ Buffer.from([ tch, 0x30 + softKey, keyValu ? 0x7F : 0 ]) ]
 				break
 
