@@ -850,6 +850,11 @@ class instance extends instance_skel {
 
 	updateConfig(config) {
 		this.config = config
+
+		if (this.config.model === undefined) {
+			this.config.model = "SQ7"
+		}
+		
 		mch = parseInt('0xB' + (this.config.midich - 1).toString(16))
 		this.actions()
 		this.variables()
