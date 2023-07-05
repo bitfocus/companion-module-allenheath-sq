@@ -54,20 +54,13 @@ module.exports = {
 	},
 
 	feedbackStatus : function(feedback, bank, val) {
-		var ret = {}
-
 		if ( this.fdbState[val] ) {
-			ret = {
+			return {
 				color: feedback.options.fg,
 				bgcolor: feedback.options.bg
 			}
 		} else {
-			ret = {
-				color: bank.color,
-				bgcolor: bank.bgcolor
-			}
+			return {}
 		}
-
-		return ret
 	},
 }
