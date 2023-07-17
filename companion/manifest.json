@@ -1,0 +1,38 @@
+{
+	"id": "allenheath-sq",
+	"name": "allenheath-sq",
+	"shortname": "SQ",
+	"description": "Allen & Heath SQ module for Companion",
+	"version": "0.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-allenheath-sq.git",
+	"bugs": "https://github.com/bitfocus/companion-module-allenheath-sq/issues",
+	"maintainers": [
+		{
+			"name": "Max Kiusso",
+			"email": "max@kiusso.net"
+		},
+		{
+			"name": "Joseph Adams",
+			"email": "josephdadams@gmail.com"
+		}
+	],
+	"legacyIds": [],
+	"runtime": {
+		"type": "node18",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../index.js"
+	},
+	"manufacturer": "Allen & Heath",
+	"products": [
+		"SQ5",
+		"SQ6",
+		"SQ7"
+	],
+	"keywords": [
+		"SQ5",
+		"SQ6",
+		"SQ7"
+	]
+}

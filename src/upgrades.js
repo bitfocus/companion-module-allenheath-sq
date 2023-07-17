@@ -1,3 +1,13 @@
+module.exports = [
+	function (context, props) {
+		return {
+			updatedConfig: null,
+			updatedActions: [],
+			updatedFeedbacks: [],
+		}
+	}
+]
+/*
 const level      = require('./level.json')
 
 module.exports = [
@@ -129,3 +139,4 @@ module.exports = [
 		return changed
 	},
 ]
+*/

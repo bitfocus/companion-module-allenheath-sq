@@ -1,12 +1,14 @@
 module.exports = {
-	getVariables : function() {
-		var variables = []
-		var self = this
-		let rsp
+	initVariables : function() {
+		let self = this;
+
+		let variables = [];
+		
+		let rsp;
 
 		variables.push({
-			label: 'Scene - Current',
-			name: 'currentScene',
+			name: 'Scene - Current',
+			variableId: 'currentScene',
 		})
 
 		for (let i = 0; i < self.chCount; i++) {
@@ -15,8 +17,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x40], [0,0x44])
 
 				variables.push({
-					label: `CH ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `CH ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -27,8 +29,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x45], [0x30,0x04])
 
 				variables.push({
-					label: `Group ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `Group ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -39,8 +41,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x46], [0x3C,0x14])
 
 				variables.push({
-					label: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -51,8 +53,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.grpCount, [0,0x4B], [0,0x34])
 
 				variables.push({
-					label: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -63,8 +65,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4C], [0,0x14])
 
 				variables.push({
-					label: `CH ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `CH ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -75,8 +77,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4D], [0,0x54])
 
 				variables.push({
-					label: `Group ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `Group ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -87,8 +89,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4E], [0,0x04])
 
 				variables.push({
-					label: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -98,8 +100,8 @@ module.exports = {
 			rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x24])
 
 			variables.push({
-				label: `LR -> ${tmp[j].label} Level`,
-				name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				name: `LR -> ${tmp[j].label} Level`,
+				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 			})
 		}
 		for (let i = 0; i < self.mixCount; i++) {
@@ -108,8 +110,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0x4E,0x4E], [0x24,0x27])
 
 				variables.push({
-					label: `Mix ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `Mix ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -120,8 +122,8 @@ module.exports = {
 				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x4B])
 
 				variables.push({
-					label: `Group ${i + 1} -> ${tmp[j].label} Level`,
-					name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+					name: `Group ${i + 1} -> ${tmp[j].label} Level`,
+					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
 		}
@@ -141,8 +143,8 @@ module.exports = {
 			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4F,0], [0,0])
 
 			variables.push({
-				label: `${tmp[j].label} Output Level`,
-				name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				name: `${tmp[j].label} Output Level`,
+				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 			})
 		}
 
@@ -151,11 +153,11 @@ module.exports = {
 			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4F,0], [0x20,0])
 
 			variables.push({
-				label: `${tmp[j].label} Output Level`,
-				name: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				name: `${tmp[j].label} Output Level`,
+				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 			})
 		}
 
-		return variables
+		self.setVariableDefinitions(variables);
 	},
 }

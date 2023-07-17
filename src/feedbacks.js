@@ -1,13 +1,16 @@
+const { combineRgb } = require('@companion-module/base');
+
 module.exports = {
-	getFeedbacks : function() {
+	initFeedbacks : function() {
 		var feedbacks = {}
 
 		const createtFdb = (nam, typ, lab, col, chs, msb, ofs) => {
-			let fg = this.rgb(col['fg'][0], col['fg'][1], col['fg'][2])
-			let bg = this.rgb(col['bg'][0], col['bg'][1], col['bg'][2])
+			let fg = combineRgb(col['fg'][0], col['fg'][1], col['fg'][2])
+			let bg = combineRgb(col['bg'][0], col['bg'][1], col['bg'][2])
 
 			feedbacks[nam] = {
-				label: `${typ} ${lab}`,
+				type: 'advanced',
+				name: `${typ} ${lab}`,
 				description: 'Change colour',
 				options: [
 					{
@@ -50,7 +53,7 @@ module.exports = {
 		createtFdb('mute_fx_send', 'Mute', 'FX Send', {'fg':[255, 255, 255], 'bg':[153, 0, 51]}, this.CHOICES_FXS, 0, 81)
 		createtFdb('mute_mutegroup', 'Mute', 'MuteGroup', {'fg':[255, 255, 255], 'bg':[153, 0, 51]}, this.CHOICES_MUTEGRP, 4, 0)
 
-		return feedbacks
+		this.setFeedbackDefinitions(feedbacks);
 	},
 
 	feedbackStatus : function(feedback, bank, val) {

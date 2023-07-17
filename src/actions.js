@@ -2,7 +2,9 @@ const level      = require('./level.json')
 const sqconfig   = require('./sqconfig.json')
 
 module.exports = {
-	getActions : function() {
+	initActions : function() {
+		let self = this;
+
 		var sq = sqconfig['config'][this.config.model]
 
 		this.chCount    = sq['chCount']
@@ -17,6 +19,9 @@ module.exports = {
 		this.sceneCount = sq['sceneCount']
 
 		let actions = {}
+
+		var cmd = {};
+		var strip;
 
 		this.CHOICES_INPUT_CHANNEL = []
 		for (let i = 0; i < this.chCount; i++) {
@@ -57,7 +62,11 @@ module.exports = {
 		this.CHOICES_LEVEL = [
 			{ label: `Last dB value`, id: 1000 },
 			{ label: `Step +1 dB`, id: 998 },
-			{ label: `Step -1 dB`, id: 999 }
+			{ label: `Step +3 dB`, id: 1001 }, //added
+			{ label: `Step +6 dB`, id: 1002 }, //added
+			{ label: `Step -1 dB`, id: 999 },
+			{ label: `Step -3 dB`, id: 1003 }, //added
+			{ label: `Step -6 dB`, id: 1004 } //added
 		]
 		for (let i = -90; i <= -40; i = i + 5) {
 			if (i == -90) {
@@ -185,12 +194,27 @@ module.exports = {
 		}
 
 		actions['mute_input'] = {
-			label: 'Mute Input',
+			name: 'Mute Input',
 			options: this.muteOptions('Input Channel', this.chCount, -1),
+			callback: async (action) => {
+				let opt = action.options;
+				MSB = 0;
+				LSB = 0;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['mute_lr'] = {
-			label: 'Mute LR',
+			name: 'Mute LR',
 			options: [
 				{
 					type:	'dropdown',
@@ -213,35 +237,155 @@ module.exports = {
 					],
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				MSB = 0;
+				LSB = 0x44;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['mute_aux'] = {
-			label: 'Mute Aux',
+			name: 'Mute Aux',
 			options: this.muteOptions('Aux', 12, -1),
+			callback: async (action) => {
+				let opt = action.options;
+				MSB = 0;
+				LSB = 0x45;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 		actions['mute_group'] = {
-			label: 'Mute Group',
+			name: 'Mute Group',
 			options: this.muteOptions('Aux', 12, -1),
+			callback: async (action) => {
+				let opt = action.options;
+				MSB = 0;
+				LSB = 0x30;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 		actions['mute_matrix'] = {
-			label: 'Mute Matrix',
+			name: 'Mute Matrix',
 			options: this.muteOptions('Matrix', 3, -1),
+			callback: async (action) => {
+				let opt = action.options;
+				MSB = 0;
+				LSB = 0x55;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 		actions['mute_fx_send'] = {
-			label: 'Mute FX Send',
+			name: 'Mute FX Send',
 			options: this.muteOptions('FX Send', 4, -1),
+			callback: async (action) => {
+				let opt = action.options;
+				MSB = 0;
+				LSB = 0x51;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 		actions['mute_fx_return'] = {
-			label: 'Mute FX Return',
+			name: 'Mute FX Return',
 			options: this.muteOptions('FX Return', 8, -1),
+			callback: async (action) => {
+				let opt = action.options;
+				MSB = 0;
+				LSB = 0x3C;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 		actions['mute_dca'] = {
-			label: 'Mute DCA',
+			name: 'Mute DCA',
 			options: this.muteOptions('DCA', 8, -1),
+			callback: async (action) => {
+				let opt = action.options;
+				MSB = 0x02;
+				LSB = 0;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 		actions['mute_mutegroup'] = {
-			label: 'Mute MuteGroup',
-			options: this.muteOptions('Mute MuteGroup', 8, -1),
+			name: 'Mute MuteGroup',
+			options: this.muteOptions('Mute MuteGroup', 8, -1)
+			,callback: async (action) => {
+				let opt = action.options;
+				MSB = 0x04;
+				LSB = 0;
+
+				if ( parseInt(opt.mute) > 0 ) {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				} else {
+					this.fdbState['mute_' + MSB + '.' + (LSB + strip)] = this.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				}
+	
+				this.checkFeedbacks(action.action)
+				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, this.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		if (this.config.model == 'SQ6' || this.config.model == 'SQ7') {
@@ -249,7 +393,7 @@ module.exports = {
 		}
 
 		actions['key_soft'] = {
-			label:	'Press Softkey',
+			name:	'Press Softkey',
 			options:	[
 				{
 					type:	'dropdown',
@@ -271,10 +415,18 @@ module.exports = {
 					minChoicesForSearch: 5,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				let softKey = parseInt(opt.softKey)
+				let keyValu = (opt.pressedsk == '0' || opt.pressedsk == '1') ? true : false
+				let tch = parseInt((keyValu ? '0x9' : '0x8') + (self.mch - 176).toString(16))
+				cmd.buffers = [ Buffer.from([ tch, 0x30 + softKey, keyValu ? 0x7F : 0 ]) ]
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['ch_to_mix'] = {
-			label: 'Assign channel to mix',
+			name: 'Assign channel to mix',
 			options: [
 				{
 					type:	'dropdown',
@@ -297,10 +449,15 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputChannel, opt.mixAssign, opt.mixActive, this.mixCount, [0x60,0x60], [0,0x44])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['ch_to_grp'] = {
-			label: 'Assign channel to group',
+			name: 'Assign channel to group',
 			options: [
 				{
 					type:	'dropdown',
@@ -323,10 +480,15 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputChannel, opt.grpAssign, opt.grpActive, this.grpCount, [0,0x66], [0,0x74])
+				self.sendBuffers(cmd.buffers);
+			}
 		};
 
 		actions['grp_to_mix'] = {
-			label: 'Assign group to mix',
+			name: 'Assign group to mix',
 			options: [
 				{
 					type:	'dropdown',
@@ -349,10 +511,15 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputGrp, opt.mixAssign, opt.mixActive, this.mixCount, [0x60,0x65], [0x30,0x04])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['fxr_to_grp'] = {
-			label: 'Assign FX Return to group',
+			name: 'Assign FX Return to group',
 			options: [
 				{
 					type:	'dropdown',
@@ -375,10 +542,15 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputFxr, opt.grpAssign, opt.grpActive, this.grpCount, [0,0x6B], [0,0x34])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['ch_to_fxs'] = {
-			label: 'Assign channel to FX Send',
+			name: 'Assign channel to FX Send',
 			options: [
 				{
 					type:	'dropdown',
@@ -401,10 +573,15 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputChannel, opt.fxsAssign, opt.fxsActive, this.fxsCount, [0,0x6C], [0,0x14])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['grp_to_fxs'] = {
-			label: 'Assign group to FX send',
+			name: 'Assign group to FX send',
 			options: [
 				{
 					type:	'dropdown',
@@ -427,10 +604,15 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputGrp, opt.fxsAssign, opt.fxsActive, this.fxsCount, [0,0x6D], [0,0x54])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['fxr_to_fxs'] = {
-			label: 'Assign FX return to FX send',
+			name: 'Assign FX return to FX send',
 			options: [
 				{
 					type:	'dropdown',
@@ -453,10 +635,15 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputFxr, opt.fxsAssign, opt.fxsActive, this.fxsCount, [0,0x6E], [0,0x04])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['mix_to_mtx'] = {
-			label: 'Assign mix to matrix',
+			name: 'Assign mix to matrix',
 			options: [
 				{
 					type:	'dropdown',
@@ -479,10 +666,15 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputMix, opt.mtxAssign, opt.mtxActive, this.mtxCount, [0x6E,0x6E], [0x24,0x27])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['grp_to_mtx'] = {
-			label: 'Assign group to matrix',
+			name: 'Assign group to matrix',
 			options: [
 				{
 					type:	'dropdown',
@@ -505,11 +697,16 @@ module.exports = {
 					default:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.setRouting(opt.inputGrp, opt.mtxAssign, opt.mtxActive, this.mtxCount, [0,0x6E], [0,0x4B])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		/* Level */
 		actions['chlev_to_mix'] = {
-			label: 'Fader channel level to mix',
+			name: 'Fader channel level to mix',
 			options: [
 				{
 					type:	'dropdown',
@@ -529,10 +726,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.leveldb, [0x40,0x40], [0,0x44])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['grplev_to_mix'] = {
-			label: 'Fader group level to mix',
+			name: 'Fader group level to mix',
 			options: [
 				{
 					type:	'dropdown',
@@ -552,10 +754,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.leveldb, [0x40,0x45], [0x30,0x04])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['fxrlev_to_mix'] = {
-			label: 'Fader FX return level to mix',
+			name: 'Fader FX return level to mix',
 			options: [
 				{
 					type:	'dropdown',
@@ -575,10 +782,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mixCount, opt.leveldb, [0x40,0x46], [0x3C,0x14])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['fxrlev_to_grp'] = {
-			label: 'Fader FX return level to group',
+			name: 'Fader FX return level to group',
 			options: [
 				{
 					type:	'dropdown',
@@ -598,10 +810,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.grpCount, opt.leveldb, [0,0x4B], [0,0x34])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['chlev_to_fxs'] = {
-			label: 'Fader channel level to FX send',
+			name: 'Fader channel level to FX send',
 			options: [
 				{
 					type:	'dropdown',
@@ -621,10 +838,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.leveldb, [0,0x4C], [0,0x14])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['grplev_to_fxs'] = {
-			label: 'Fader group level to FX send',
+			name: 'Fader group level to FX send',
 			options: [
 				{
 					type:	'dropdown',
@@ -644,10 +866,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.leveldb, [0,0x4D], [0,0x54])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['fxslev_to_fxs'] = {
-			label: 'Fader FX return level to FX send',
+			name: 'Fader FX return level to FX send',
 			options: [
 				{
 					type:	'dropdown',
@@ -667,10 +894,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.fxsCount, opt.leveldb, [0,0x4E], [0,0x04])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['mixlev_to_mtx'] = {
-			label: 'Fader mix level to matrix',
+			name: 'Fader mix level to matrix',
 			options: [
 				{
 					type:	'dropdown',
@@ -690,10 +922,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mtxCount, opt.leveldb, [0x4E,0x4E], [0x24,0x27])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['grplev_to_mtx'] = {
-			label: 'Fader group level to matrix',
+			name: 'Fader group level to matrix',
 			options: [
 				{
 					type:	'dropdown',
@@ -713,10 +950,15 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, opt.assign, this.mtxCount, opt.leveldb, [0,0x4E], [0,0x4B])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['level_to_output'] = {
-			label: 'Fader level to output',
+			name: 'Fader level to output',
 			options: [
 				{
 					type:	'dropdown',
@@ -729,11 +971,16 @@ module.exports = {
 				this.levelObj,
 				this.fadeObj,
 			],
+			callback: async (action) => {
+				let opt = action.options;
+				cmd.buffers = this.fadeLevel(opt.fade, opt.input, 99, 0, opt.leveldb, [0x4F,0], [0,0])
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		/* Pan Balance */
 		actions['chpan_to_mix'] = {
-			label: 'Pan/Bal channel level to mix',
+			name: 'Pan/Bal channel level to mix',
 			options: [
 				{
 					type:	'dropdown',
@@ -764,16 +1011,21 @@ module.exports = {
 					default:	'',
 				}
 			],
-			subscribe: (action) => {
+			subscribe: async (action) => {
 				let opt = action.options
 				let val = this.getLevel(opt.input, opt.assign, this.mixCount, [0x50,0x50], [0,0x44])
 				this.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
+			callback: (action) => {
+				let opt = action.options
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.leveldb, [0x50,0x50], [0,0x44], 'PanBalance')
+				self.sendBuffers(cmd.buffers);
+			},
 		}
 
 		actions['grppan_to_mix'] = {
-			label: 'Pan/Bal group level to mix',
+			name: 'Pan/Bal group level to mix',
 			options: [
 				{
 					type:	'dropdown',
@@ -793,7 +1045,7 @@ module.exports = {
 					type:	'dropdown',
 					label:	'Level',
 					id:		'leveldb',
-					default:	'0',
+					default:	0,
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
@@ -804,16 +1056,21 @@ module.exports = {
 					default:	'',
 				}
 			],
-			subscribe: (action) => {
+			subscribe: async (action) => {
 				let opt = action.options
 				let val = this.getLevel(opt.input, opt.assign, this.mixCount, [0x50,0x55], [0x30,0x04])
 				this.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
+			callback: (action) => {
+				let opt = action.options
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.leveldb, [0x50,0x55], [0x30,0x04], 'PanBalance')
+				self.sendBuffers(cmd.buffers);
+			},
 		}
 
 		actions['fxrpan_to_mix'] = {
-			label: 'Pan/Bal FX return level to mix',
+			name: 'Pan/Bal FX return level to mix',
 			options: [
 				{
 					type:	'dropdown',
@@ -833,7 +1090,7 @@ module.exports = {
 					type:	'dropdown',
 					label:	'Level',
 					id:		'leveldb',
-					default:	'0',
+					default:	0,
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
@@ -844,16 +1101,21 @@ module.exports = {
 					default:	'',
 				}
 			],
-			subscribe: (action) => {
+			subscribe: async (action) => {
 				let opt = action.options
 				let val = this.getLevel(opt.input, opt.assign, this.mixCount, [0x50,0x56], [0x3C,0x14])
 				this.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
+			callback: (action) => {
+				let opt = action.options
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mixCount, opt.leveldb, [0x50,0x56], [0x3C,0x14], 'PanBalance')
+				self.sendBuffers(cmd.buffers);
+			},
 		}
 
 		actions['fxrpan_to_grp'] = {
-			label: 'Fader FX return level to group',
+			name: 'Fader FX return level to group',
 			options: [
 				{
 					type:	'dropdown',
@@ -873,7 +1135,7 @@ module.exports = {
 					type:	'dropdown',
 					label:	'Level',
 					id:		'leveldb',
-					default:	'0',
+					default:	0,
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
@@ -884,16 +1146,21 @@ module.exports = {
 					default:	'',
 				}
 			],
-			subscribe: (action) => {
+			subscribe: async (action) => {
 				let opt = action.options
 				let val = this.getLevel(opt.input, opt.assign, this.grpCount, [0,0x5B], [0,0x34])
 				this.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
+			callback: (action) => {
+				let opt = action.options
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.grpCount, opt.leveldb, [0,0x5B], [0,0x34], 'PanBalance')
+				self.sendBuffers(cmd.buffers);
+			},
 		}
 
 		actions['mixpan_to_mtx'] = {
-			label: 'Pan/Bal mix level to matrix',
+			name: 'Pan/Bal mix level to matrix',
 			options: [
 				{
 					type:	'dropdown',
@@ -913,7 +1180,7 @@ module.exports = {
 					type:	'dropdown',
 					label:	'Level',
 					id:		'leveldb',
-					default:	'0',
+					default:	0,
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
@@ -924,16 +1191,21 @@ module.exports = {
 					default:	'',
 				}
 			],
-			subscribe: (action) => {
+			subscribe: async (action) => {
 				let opt = action.options
 				let val = this.getLevel(opt.input, opt.assign, this.mtxCount, [0x5E,0x5E], [0x24,0x27])
 				this.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
+			callback: (action) => {
+				let opt = action.options
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mtxCount, opt.leveldb, [0x5E,0x5E], [0x24,0x27], 'PanBalance')
+				self.sendBuffers(cmd.buffers);
+			},
 		}
 
 		actions['grppan_to_mtx'] = {
-			label: 'Pan/Bal group level to matrix',
+			name: 'Pan/Bal group level to matrix',
 			options: [
 				{
 					type:	'dropdown',
@@ -953,7 +1225,7 @@ module.exports = {
 					type:	'dropdown',
 					label:	'Level',
 					id:		'leveldb',
-					default:	'0',
+					default:	0,
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
@@ -964,16 +1236,21 @@ module.exports = {
 					default:	'',
 				}
 			],
-			subscribe: (action) => {
+			subscribe: async (action) => {
 				let opt = action.options
 				let val = this.getLevel(opt.input, opt.assign, this.mtxCount, [0,0x5E], [0,0x4B])
 				this.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
+			callback: (action) => {
+				let opt = action.options
+				cmd.buffers = this.setLevel(opt.input, opt.assign, this.mtxCount, opt.leveldb, [0,0x5E], [0,0x4B], 'PanBalance')
+				self.sendBuffers(cmd.buffers);
+			},
 		}
 
 		actions['pan_to_output'] = {
-			label: 'Pan/Bal level to output',
+			name: 'Pan/Bal level to output',
 			options: [
 				{
 					type:	'dropdown',
@@ -986,7 +1263,7 @@ module.exports = {
 					type:	'dropdown',
 					label:	'Level',
 					id:		'leveldb',
-					default:	'0',
+					default:	0,
 					multiple:	false,
 					choices:	this.CHOICES_PANLEVEL,
 					minChoicesForSearch: 0,
@@ -997,17 +1274,22 @@ module.exports = {
 					default:	'',
 				}
 			],
-			subscribe: (action) => {
+			subscribe: async (action) => {
 				let opt = action.options
 				let val = this.getLevel(opt.input, 99, 0, [0x5F,0], [0,0])
 				this.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${this.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
+			callback: (action) => {
+				let opt = action.options
+				cmd.buffers = this.setLevel(opt.input, 99, 0, opt.leveldb, [0x5F,0], [0,0], 'PanBalance')
+				self.sendBuffers(cmd.buffers);
+			},
 		}
 
 		// Scene
 		actions['scene_recall'] = {
-			label: 'Scene recall',
+			name: 'Scene recall',
 			options: [
 				{
 					type:	'number',
@@ -1019,10 +1301,18 @@ module.exports = {
 					required:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+
+				sceneNumber = opt.scene - 1
+				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['scene_step'] = {
-			label: 'Scene step',
+			name: 'Scene step',
 			options: [
 				{
 					type:	'number',
@@ -1034,10 +1324,18 @@ module.exports = {
 					required:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+
+				sceneNumber = this.setScene(opt.scene)
+				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
 		actions['current_scene'] = {
-			label: 'Current scene',
+			name: 'Current scene',
 			options: [
 				{
 					type:	'number',
@@ -1049,8 +1347,16 @@ module.exports = {
 					required:	true,
 				}
 			],
+			callback: async (action) => {
+				let opt = action.options;
+
+				sceneNumber = opt.scene - 1
+				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+
+				self.sendBuffers(cmd.buffers);
+			}
 		}
 
-		return actions
+		self.setActionDefinitions(actions);
 	},
 }

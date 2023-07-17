@@ -1,5 +1,5 @@
 module.exports = {
-	dBToDec : function(lv, typ = this.config.level) {
+	dBToDec: function(lv, typ = this.config.level) {
 		let VC, VF, val, bin
 		if (lv == '-inf') return [0,0]
 
@@ -61,7 +61,7 @@ module.exports = {
 		return [VC,VF]
 	},
 
-	decTodB : function(VC, VF, typ = this.config.level) {
+	decTodB: function(VC, VF, typ = this.config.level) {
 		let dec, val
 
 		switch (typ) {
@@ -111,7 +111,7 @@ module.exports = {
 		return val
 	},
 
-	sleep : function(ml) {
+	sleep: function(ml) {
 		const dt = Date.now()
 		let cd = null
 		do {
