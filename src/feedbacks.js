@@ -9,21 +9,11 @@ module.exports = {
 			let bg = combineRgb(col['bg'][0], col['bg'][1], col['bg'][2])
 
 			feedbacks[nam] = {
-				type: 'advanced',
+				type: 'boolean',
 				name: `${typ} ${lab}`,
 				description: 'Change colour',
 				options: [
 					{
-						type: 'colorpicker',
-						label: 'Foreground color',
-						id: 'fg',
-						default: fg,
-					},{
-						type: 'colorpicker',
-						label: 'Background color',
-						id: 'bg',
-						default: bg,
-					},{
 						type:    'dropdown',
 						label:   lab,
 						id:      'channel',
@@ -32,6 +22,10 @@ module.exports = {
 						minChoicesForSearch: 0,
 					}
 				],
+				defaultStyle: {
+					color: fg,
+					bgcolor: bg,
+				},
 				callback: (feedback, bank) => {
 					return this.feedbackStatus(
 						feedback,
@@ -58,12 +52,8 @@ module.exports = {
 
 	feedbackStatus : function(feedback, bank, val) {
 		if ( this.fdbState[val] ) {
-			return {
-				color: feedback.options.fg,
-				bgcolor: feedback.options.bg
-			}
-		} else {
-			return {}
+			return true;
 		}
+		return false;
 	},
 }
