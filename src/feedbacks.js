@@ -2,6 +2,8 @@ const { combineRgb } = require('@companion-module/base');
 
 module.exports = {
 	initFeedbacks : function() {
+		let self = this;
+
 		var feedbacks = {}
 
 		const createtFdb = (nam, typ, lab, col, chs, msb, ofs) => {
@@ -38,7 +40,7 @@ module.exports = {
 
 		/* Mute */
 		createtFdb('mute_input', 'Mute', 'Input', {'fg':[255, 255, 255], 'bg':[153, 0, 51]}, this.CHOICES_INPUT_CHANNEL, 0, 0)
-		createtFdb('mute_lr', 'Mute', 'LR', {'fg':[255, 255, 255], 'bg':[153, 0, 51]}, this.CHOICES_LR, 0, 68)
+		createtFdb('mute_lr', 'Mute', 'LR', {'fg':[255, 255, 255], 'bg':[153, 0, 51]}, [{ label: `LR`, id: 0 }], 0, 68)
 		createtFdb('mute_aux', 'Mute', 'Aux', {'fg':[255, 255, 255], 'bg':[153, 0, 51]}, this.CHOICES_MIX, 0, 69)
 		createtFdb('mute_group', 'Mute', 'Group', {'fg':[255, 255, 255], 'bg':[153, 0, 51]}, this.CHOICES_GRP, 0, 48)
 		createtFdb('mute_matrix', 'Mute', 'Matrix', {'fg':[255, 255, 255], 'bg':[153, 0, 51]}, this.CHOICES_MTX, 0, 85)

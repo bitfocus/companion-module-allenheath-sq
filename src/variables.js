@@ -158,6 +158,8 @@ module.exports = {
 			})
 		}
 
+		//mute input, LR, aux, group, matrix, dca, fx return, fx send, mute group
+
 		self.setVariableDefinitions(variables);
 	},
 }

@@ -63,12 +63,14 @@ module.exports = {
 
 		self.CHOICES_LEVEL = [
 			{ label: `Last dB value`, id: 1000 },
-			{ label: `Step +1 dB`, id: 998 },
-			{ label: `Step +3 dB`, id: 1001 }, //added
-			{ label: `Step +6 dB`, id: 1002 }, //added
-			{ label: `Step -1 dB`, id: 999 },
-			{ label: `Step -3 dB`, id: 1003 }, //added
-			{ label: `Step -6 dB`, id: 1004 } //added
+			{ label: `Step +0.1 dB`, id: 'step+0.1' }, //added
+			{ label: `Step +1 dB`, id: 'step+1' },
+			{ label: `Step +3 dB`, id: 'step+3' }, //added
+			{ label: `Step +6 dB`, id: 'step+6' }, //added
+			{ label: `Step -0.1 dB`, id: 'step-0.1' }, //added
+			{ label: `Step -1 dB`, id: 'step-1' },
+			{ label: `Step -3 dB`, id: 'step-3' }, //added
+			{ label: `Step -6 dB`, id: 'step-6' } //added
 		]
 		for (let i = -90; i <= -40; i = i + 5) {
 			if (i == -90) {
@@ -161,6 +163,8 @@ module.exports = {
 				{label: `1s`, id: 1},
 				{label: `2s`, id: 2},
 				{label: `3s`, id: 3},
+				//{label: `4s`, id: 4}, //added
+				//{label: `5s`, id: 5}, //added
 			],
 			minChoicesForSearch: 0,
 		}
@@ -203,13 +207,15 @@ module.exports = {
 				MSB = 0;
 				LSB = 0;
 
+				let strip = opt.strip;
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -244,13 +250,15 @@ module.exports = {
 				MSB = 0;
 				LSB = 0x44;
 
+				let strip = parseInt(opt.strip);
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -264,13 +272,15 @@ module.exports = {
 				MSB = 0;
 				LSB = 0x45;
 
+				let strip = parseInt(opt.strip);
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -283,13 +293,15 @@ module.exports = {
 				MSB = 0;
 				LSB = 0x30;
 
+				let strip = parseInt(opt.strip);
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -302,13 +314,15 @@ module.exports = {
 				MSB = 0;
 				LSB = 0x55;
 
+				let strip = parseInt(opt.strip);
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -321,13 +335,15 @@ module.exports = {
 				MSB = 0;
 				LSB = 0x51;
 
+				let strip = parseInt(opt.strip);
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -340,13 +356,15 @@ module.exports = {
 				MSB = 0;
 				LSB = 0x3C;
 
+				let strip = parseInt(opt.strip);
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -359,13 +377,15 @@ module.exports = {
 				MSB = 0x02;
 				LSB = 0;
 
+				let strip = parseInt(opt.strip);
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -378,13 +398,15 @@ module.exports = {
 				MSB = 0x04;
 				LSB = 0;
 
+				let strip = parseInt(opt.strip);
+
 				if ( parseInt(opt.mute) > 0 ) {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
 				} else {
 					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
 				}
 	
-				self.checkFeedbacks(action.action)
+				self.checkFeedbacks()
 				cmd.buffers = [ Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState['mute_' + MSB + '.' + (LSB + strip)] ]) ]
 				self.sendBuffers(cmd.buffers);
 			}
@@ -730,7 +752,13 @@ module.exports = {
 			],
 			callback: async (action) => {
 				let opt = action.options;
-				cmd.buffers = self.fadeLevel(opt.fade, opt.input, opt.assign, self.mixCount, opt.leveldb, [0x40,0x40], [0,0x44])
+				if (opt.fade == 0) {
+					//make it super short like 0.2
+					opt.fade = 0.2;
+				}
+
+				cmd.buffers = await self.fadeLevel(opt.fade, opt.input, opt.assign, self.mixCount, opt.leveldb, [0x40,0x40], [0,0x44])
+				console.log('cmd.buffers', cmd.buffers)
 				self.sendBuffers(cmd.buffers);
 			}
 		}
@@ -1019,9 +1047,9 @@ module.exports = {
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
-			callback: (action) => {
+			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setLevel(opt.input, opt.assign, self.mixCount, opt.leveldb, [0x50,0x50], [0,0x44], 'PanBalance')
+				cmd.buffers = await self.setLevel(opt.input, opt.assign, self.mixCount, opt.leveldb, [0x50,0x50], [0,0x44], 'PanBalance')
 				self.sendBuffers(cmd.buffers);
 			},
 		}
@@ -1064,9 +1092,9 @@ module.exports = {
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
-			callback: (action) => {
+			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setLevel(opt.input, opt.assign, self.mixCount, opt.leveldb, [0x50,0x55], [0x30,0x04], 'PanBalance')
+				cmd.buffers = await self.setLevel(opt.input, opt.assign, self.mixCount, opt.leveldb, [0x50,0x55], [0x30,0x04], 'PanBalance')
 				self.sendBuffers(cmd.buffers);
 			},
 		}
@@ -1109,9 +1137,9 @@ module.exports = {
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
-			callback: (action) => {
+			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setLevel(opt.input, opt.assign, self.mixCount, opt.leveldb, [0x50,0x56], [0x3C,0x14], 'PanBalance')
+				cmd.buffers = await self.setLevel(opt.input, opt.assign, self.mixCount, opt.leveldb, [0x50,0x56], [0x3C,0x14], 'PanBalance')
 				self.sendBuffers(cmd.buffers);
 			},
 		}
@@ -1154,9 +1182,9 @@ module.exports = {
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
-			callback: (action) => {
+			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setLevel(opt.input, opt.assign, self.grpCount, opt.leveldb, [0,0x5B], [0,0x34], 'PanBalance')
+				cmd.buffers = await self.setLevel(opt.input, opt.assign, self.grpCount, opt.leveldb, [0,0x5B], [0,0x34], 'PanBalance')
 				self.sendBuffers(cmd.buffers);
 			},
 		}
@@ -1199,9 +1227,9 @@ module.exports = {
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
-			callback: (action) => {
+			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setLevel(opt.input, opt.assign, self.mtxCount, opt.leveldb, [0x5E,0x5E], [0x24,0x27], 'PanBalance')
+				cmd.buffers = await self.setLevel(opt.input, opt.assign, self.mtxCount, opt.leveldb, [0x5E,0x5E], [0x24,0x27], 'PanBalance')
 				self.sendBuffers(cmd.buffers);
 			},
 		}
@@ -1244,9 +1272,9 @@ module.exports = {
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
-			callback: (action) => {
+			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setLevel(opt.input, opt.assign, self.mtxCount, opt.leveldb, [0,0x5E], [0,0x4B], 'PanBalance')
+				cmd.buffers = await self.setLevel(opt.input, opt.assign, self.mtxCount, opt.leveldb, [0,0x5E], [0,0x4B], 'PanBalance')
 				self.sendBuffers(cmd.buffers);
 			},
 		}
@@ -1282,9 +1310,9 @@ module.exports = {
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
-			callback: (action) => {
+			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setLevel(opt.input, 99, 0, opt.leveldb, [0x5F,0], [0,0], 'PanBalance')
+				cmd.buffers = await self.setLevel(opt.input, 99, 0, opt.leveldb, [0x5F,0], [0,0], 'PanBalance')
 				self.sendBuffers(cmd.buffers);
 			},
 		}

@@ -29,19 +29,13 @@ module.exports = {
 		return routingCmds
 	},
 	
-	setLevel: function(ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
+	setLevel: async function(ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
 		let levelCmds = []
 		let tmp
 		let MSB
 		let LSB
-	
-		if (lv < 998 || ['L','R','C'].indexOf(lv.toString().slice(0,1)) != -1 || lv == '-inf') {
-			let tm = self.dBToDec(lv, cnfg)
-			var VC = tm[0]
-			var VF = tm[1]
-		}
-	
+
 		if (mx == 99) {
 			MSB = oMB[0]
 			LSB = parseInt(oLB[0]) + parseInt(ch)
@@ -49,6 +43,74 @@ module.exports = {
 			tmp = parseInt(ch * ct + oLB[1]) + parseInt(mx)
 			MSB = oMB[1] + ((tmp >> 7) & 0x0F)
 			LSB = tmp & 0x7F
+		}
+
+		console.log('old lv: ' + lv)
+
+		if (lv.toString().indexOf('step') > -1) {
+			let currentLevel = await self.getVariableValue('level_' + MSB +'.'+ LSB);
+			if (currentLevel == '-inf') {
+				currentLevel = -90;
+			}
+			else {
+				currentLevel = parseFloat(currentLevel);
+			}
+
+			console.log('current level: ' + currentLevel)
+			let newLevel = currentLevel;
+
+			//replace this with a switch case
+			
+			switch(lv) {
+				case 'step+0.1':
+					newLevel += 0.1;
+					break;
+				case 'step+1':
+					newLevel += 1;
+					break;
+				case 'step+3':
+					newLevel += 3;
+					break;
+				case 'step+6':
+					newLevel += 6;
+					break;
+				case 'step-0.1':
+					newLevel -= 0.1;
+					break;
+				case 'step-3':
+					newLevel -= 3;
+					break;
+				case 'step-6':
+					newLevel -= 6;
+					break;
+				case 'step-1':
+					newLevel -= 1;
+					break;
+				default:
+					break;
+			}
+
+			//make sure the new level is within the bounds of the mixer
+			if (newLevel < -90) {
+				newLevel = -90;
+			}
+			else if (newLevel > 10) {
+				newLevel = 10;
+			}
+
+			lv = newLevel;
+		}
+
+		console.log('new level: ' + lv)
+
+		let variableObj = {};
+		variableObj['level_' + MSB +'.'+ LSB] = lv.toFixed(1);
+		self.setVariableValues(variableObj);
+	
+		if (lv < 998 || ['L','R','C'].indexOf(lv.toString().slice(0,1)) != -1 || lv == '-inf') {
+			let tm = self.dBToDec(lv, cnfg)
+			var VC = tm[0]
+			var VF = tm[1]
 		}
 	
 		if (lv < 998 || ['L','R','C'].indexOf(lv.toString().slice(0,1)) != -1 || lv == '-inf') {
@@ -64,18 +126,10 @@ module.exports = {
 	
 				levelCmds.push( Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF ]) )
 			}
-			else if (lv == 1001) { //+3dB
-			}
-			else if (lv == 1002) { //+6dB
-			}
-			else if (lv == 1003) { //-3dB
-			}
-			else if (lv == 1004) { //-6dB
-			}
-			else {
-				/* Increment */
-				levelCmds.push( Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, lv == 998 ? 0x60 : 0x61, 0x00 ]) )
-			}
+			//else {
+				/* Increment +1 */
+			//	levelCmds.push( Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, lv == 998 ? 0x60 : 0x61, 0x00 ]) )
+		//	}
 		}
 	
 		// Retrive value after set command
@@ -123,15 +177,15 @@ module.exports = {
 	fadeLevel: async function(fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
 	
-		if (fd == 0) {
-			return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
+		if (fd == 0) { //if the user did not choose a fade time
+			return await self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 		} else {
 			if (this.midiSocket !== undefined) {
-				var setFade = (MSB, LSB, lv) => {
+				let setFade = (MSB, LSB, lv) => {
 					let val = self.dBToDec(lv)
 					let VC = val[0];
 					let VF = val[1];
-					self.midiSocket.send(Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF ]))
+					self.midiSocket.send(Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, LSB, self.mch, 0x06, VC, self.mch, 0x26, VF ]))
 	
 					lv = parseFloat(lv).toFixed(1)
 					if (lv < -89) {
@@ -143,18 +197,18 @@ module.exports = {
 				}
 	
 				let fading = async (str, end, step, MSB, LSB) => {
-					var db = parseFloat(str)
+					let db = parseFloat(str)
 					if (db < -50) {
 						db = -50
 					}
 	
 					end = parseFloat(end)
-					var bk = false
+					let bk = false
 					if (end < -50) {
 						bk = true
 					}
 	
-					var itvFade = setInterval(
+					let itvFade = setInterval(
 						() => {
 							db = db - step
 							if ((str < end && db > parseFloat(end)) || (str > end && db < parseFloat(end))) {
@@ -162,7 +216,7 @@ module.exports = {
 							}
 							setFade(MSB, LSB, db)
 	
-							if (db == end) {
+							if ((db == end) || (db < -89)) {
 								clearInterval(itvFade)
 							} else {
 								if (db <= -50 && bk) {
@@ -180,24 +234,58 @@ module.exports = {
 				let VC
 				let VF
 				var end
-	
+				
 				if (lv == '-inf') {
 					lv = -90
 				}
 	
 				if (lv < 998) {
 					end = lv
-				} else {
+				}
+				else {
 					if (lv == 1000) {
 						/* Last dB value */
 						end = self.lastValue['level_' + MSB +'.'+ LSB]
-					} else {
-						return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
+					}
+					else {
+						end = await self.getVariableValue('level_' + MSB +'.'+ LSB);
+
+						if (end == '-inf') {
+							end = -90
+						}
+						else {
+							end = parseFloat(end);
+						}					
+
+						if (lv == 'step+3') { //+3dB
+							end += 3
+						}
+						else if (lv == 'step+6') { //+6dB
+							end += 6
+						}
+						else if (lv == 'step-3') { //-3dB
+							end -= 3
+						}
+						else if (lv == 'step-6') { //-6dB
+							end -= 6
+						}
+						else {
+							//it's a +1/-1 (or less) step command, so just immediately step without fading
+							return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
+						}
+
+						//make sure the new level is within the bounds of the mixer
+						if (end < -90) {
+							end = -90;
+						}
+						else if (end > 10) {
+							end = 10;
+						}
 					}
 				}
 	
-				var str
-				var res = await self.getVariableValue('level_' + MSB +'.'+ LSB);
+				let str //start value
+				let res = await self.getVariableValue('level_' + MSB +'.'+ LSB);
 				str = res
 	
 				if (str == '-inf') {
@@ -207,9 +295,12 @@ module.exports = {
 					end = -90
 				}
 				if (parseInt(str) == parseInt(end)) {
-					return []
+					return [] //no change in level so no need to fade
 				}
-	
+
+				//calculate the step
+				//start - end = difference
+				//divide difference by fade time
 				let step = ((parseFloat(str) - parseFloat(end)) / (fd * 20)).toFixed(1)
 				fading(str, end, step, MSB, LSB)
 			}
@@ -497,6 +588,7 @@ module.exports = {
 		  }
 
 		for (let i = 0; i < buffers.length; i++) {
+			this.log('debug', `Sending : ${JSON.parse(JSON.stringify(buffers[i]))['data']} from ${this.config.host}`)
 			self.sendSocket(buffers[i])
 			await sleepSend(200)
 		}
