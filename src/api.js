@@ -98,7 +98,7 @@ module.exports = {
 				newLevel = 10;
 			}
 
-			lv = newLevel;
+			lv = newLevel.toFixed(1);
 		}
 
 		console.log('new level: ' + lv)
@@ -197,12 +197,13 @@ module.exports = {
 				}
 	
 				let fading = async (str, end, step, MSB, LSB) => {
-					let db = parseFloat(str)
+					let db = parseFloat(str)//.toFixed(1)
+
 					if (db < -50) {
 						db = -50
 					}
 	
-					end = parseFloat(end)
+					end = parseFloat(end)//.toFixed(1)
 					let bk = false
 					if (end < -50) {
 						bk = true
@@ -211,7 +212,7 @@ module.exports = {
 					let itvFade = setInterval(
 						() => {
 							db = db - step
-							if ((str < end && db > parseFloat(end)) || (str > end && db < parseFloat(end))) {
+							if ((str < end && db > parseFloat(end).toFixed(1)) || (str > end && db < parseFloat(end).toFixed(1))) {
 								db = end
 							}
 							setFade(MSB, LSB, db)
@@ -298,10 +299,34 @@ module.exports = {
 					return [] //no change in level so no need to fade
 				}
 
-				//calculate the step
-				//start - end = difference
-				//divide difference by fade time
-				let step = ((parseFloat(str) - parseFloat(end)) / (fd * 20)).toFixed(1)
+				//calculate the steps
+
+				let difference = parseFloat(str).toFixed(1) - parseFloat(end).toFixed(1); //the difference is the start value minus the end value
+				//difference = Math.abs(difference); //make it an absolute value
+
+				//determine the number of steps needed to get to the end value if the interval runs every 50ms and the fade time is fd
+				let step = difference / (fd * 20); //take the difference between the two decibel values and divide it by the fade time to determine the total number of steps needed to get to the end value
+				
+				//now determine the step size
+				//let step = difference / steps; //divide the difference by the number of steps to determine the individual step size
+
+				//now we have the steps in seconds, but we need the number of steps in 50ms intervals
+				//step = step / 20; //divide the step size by 20 to get the number of steps in 50ms intervals (50ms * 20 = 1 second)
+				//step = Math.abs(step); //make it an absolute value
+
+				//fixed position of 1 decimal
+				//step = step.toFixed(1);
+
+				//step = (difference / (fd * 20))//.toFixed(1)
+
+
+				console.log('difference dB: ' + difference);
+				console.log('fade time: ' + fd);
+				//console.log('steps: ' + steps);
+				console.log('step: ' + step);
+				console.log('str: ' + str);
+				console.log('end: ' + end);
+
 				fading(str, end, step, MSB, LSB)
 			}
 	

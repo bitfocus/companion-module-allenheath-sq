@@ -165,6 +165,7 @@ module.exports = {
 				{label: `3s`, id: 3},
 				//{label: `4s`, id: 4}, //added
 				//{label: `5s`, id: 5}, //added
+				//{label: `10s`, id: 10}, //added
 			],
 			minChoicesForSearch: 0,
 		}
