@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	dBToDec: function (lv, typ = this.config.level) {
 		let VC, VF, val, bin
 		if (lv == '-inf') return [0, 0]

@@ -1,6 +1,6 @@
-const { combineRgb } = require('@companion-module/base')
+import { combineRgb } from '@companion-module/base'
 
-module.exports = {
+export default {
 	initPresets: function () {
 		var presets = []
 		var self = this
@@ -181,7 +181,7 @@ module.exports = {
 		for (let i = 0; i < self.chCount; i++) {
 			let tmp = self.CHOICES_MIX
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x40], [0, 0x44])
+				const rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x40], [0, 0x44])
 				createtMuteLevel(
 					`Mt+dB CH-${tmp[j].label}`,
 					`CH ${i + 1}\\n${tmp[j].label}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,

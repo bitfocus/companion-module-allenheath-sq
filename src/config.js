@@ -1,6 +1,6 @@
-const { Regex } = require('@companion-module/base')
+import { Regex } from '@companion-module/base'
 
-module.exports = {
+export default {
 	getConfigFields() {
 		this.CHOICES_INPUT_CHANNEL = []
 		for (let i = 0; i < 48; i++) {

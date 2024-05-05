@@ -1,6 +1,6 @@
-const { combineRgb } = require('@companion-module/base')
+import { combineRgb } from '@companion-module/base'
 
-module.exports = {
+export default {
 	initFeedbacks: function () {
 		let self = this
 

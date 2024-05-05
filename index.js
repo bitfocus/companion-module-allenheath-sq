@@ -1,20 +1,21 @@
 // Allen & Heath SQ Series
 
-const { InstanceBase, InstanceStatus, runEntrypoint } = require('@companion-module/base')
-const UpgradeScripts = require('./src/upgrades')
+import { InstanceBase, InstanceStatus, runEntrypoint } from '@companion-module/base'
+import { UpgradeScripts } from './src/upgrades.js'
 
-const config = require('./src/config')
-const actions = require('./src/actions')
-const feedbacks = require('./src/feedbacks')
-const variables = require('./src/variables')
-const presets = require('./src/presets')
+import config from './src/config.js'
 
-const utils = require('./src/utils')
-const api = require('./src/api')
+import actions from './src/actions.js'
+import feedbacks from './src/feedbacks.js'
+import variables from './src/variables.js'
+import presets from './src/presets.js'
 
-const level = require('./src/level.json')
-const callback = require('./src/callback.json')
-const sqconfig = require('./src/sqconfig.json')
+import utils from './src/utils.js'
+import api from './src/api.js'
+
+import level from './src/level.js'
+import callback from './src/callback.js'
+import sqconfig from './src/sqconfig.js'
 
 class sqInstance extends InstanceBase {
 	constructor(internal) {
