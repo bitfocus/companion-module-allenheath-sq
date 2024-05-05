@@ -5,7 +5,7 @@ module.exports = [
 			updatedActions: [],
 			updatedFeedbacks: [],
 		}
-	}
+	},
 ]
 /*
 const level      = require('./level.json')

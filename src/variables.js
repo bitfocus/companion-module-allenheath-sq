@@ -1,10 +1,10 @@
 module.exports = {
-	initVariables : function() {
-		let self = this;
+	initVariables: function () {
+		let self = this
 
-		let variables = [];
-		
-		let rsp;
+		let variables = []
+
+		let rsp
 
 		variables.push({
 			name: 'Scene - Current',
@@ -13,8 +13,8 @@ module.exports = {
 
 		for (let i = 0; i < self.chCount; i++) {
 			let tmp = self.CHOICES_MIX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x40], [0,0x44])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x40], [0, 0x44])
 
 				variables.push({
 					name: `CH ${i + 1} -> ${tmp[j].label} Level`,
@@ -25,8 +25,8 @@ module.exports = {
 
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_MIX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x45], [0x30,0x04])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x45], [0x30, 0x04])
 
 				variables.push({
 					name: `Group ${i + 1} -> ${tmp[j].label} Level`,
@@ -37,8 +37,8 @@ module.exports = {
 
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_MIX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x46], [0x3C,0x14])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x46], [0x3c, 0x14])
 
 				variables.push({
 					name: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
@@ -49,8 +49,8 @@ module.exports = {
 
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_GRP
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.grpCount, [0,0x4B], [0,0x34])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.grpCount, [0, 0x4b], [0, 0x34])
 
 				variables.push({
 					name: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
@@ -61,8 +61,8 @@ module.exports = {
 
 		for (let i = 0; i < self.chCount; i++) {
 			let tmp = self.CHOICES_FXS
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4C], [0,0x14])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4c], [0, 0x14])
 
 				variables.push({
 					name: `CH ${i + 1} -> ${tmp[j].label} Level`,
@@ -73,8 +73,8 @@ module.exports = {
 
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_FXS
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4D], [0,0x54])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4d], [0, 0x54])
 
 				variables.push({
 					name: `Group ${i + 1} -> ${tmp[j].label} Level`,
@@ -85,8 +85,8 @@ module.exports = {
 
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_FXS
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4E], [0,0x04])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4e], [0, 0x04])
 
 				variables.push({
 					name: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
@@ -96,8 +96,8 @@ module.exports = {
 		}
 
 		let tmp = self.CHOICES_MTX
-		for ( let j = 0; j < tmp.length; j++ ) {
-			rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x24])
+		for (let j = 0; j < tmp.length; j++) {
+			rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x24])
 
 			variables.push({
 				name: `LR -> ${tmp[j].label} Level`,
@@ -106,8 +106,8 @@ module.exports = {
 		}
 		for (let i = 0; i < self.mixCount; i++) {
 			let tmp = self.CHOICES_MTX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0x4E,0x4E], [0x24,0x27])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0x4e, 0x4e], [0x24, 0x27])
 
 				variables.push({
 					name: `Mix ${i + 1} -> ${tmp[j].label} Level`,
@@ -118,8 +118,8 @@ module.exports = {
 
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_MTX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x4B])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x4b])
 
 				variables.push({
 					name: `Group ${i + 1} -> ${tmp[j].label} Level`,
@@ -139,8 +139,8 @@ module.exports = {
 		for (let i = 0; i < this.mtxCount; i++) {
 			tmp.push({ label: `MATRIX ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount })
 		}
-		for ( let j = 0; j < tmp.length; j++ ) {
-			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4F,0], [0,0])
+		for (let j = 0; j < tmp.length; j++) {
+			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
 
 			variables.push({
 				name: `${tmp[j].label} Output Level`,
@@ -149,8 +149,8 @@ module.exports = {
 		}
 
 		tmp = this.CHOICES_DCA
-		for ( let j = 0; j < tmp.length; j++ ) {
-			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4F,0], [0x20,0])
+		for (let j = 0; j < tmp.length; j++) {
+			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0x20, 0])
 
 			variables.push({
 				name: `${tmp[j].label} Output Level`,
@@ -160,6 +160,6 @@ module.exports = {
 
 		//mute input, LR, aux, group, matrix, dca, fx return, fx send, mute group
 
-		self.setVariableDefinitions(variables);
+		self.setVariableDefinitions(variables)
 	},
 }
