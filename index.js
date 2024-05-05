@@ -10,8 +10,9 @@ import feedbacks from './src/feedbacks.js'
 import variables from './src/variables.js'
 import presets from './src/presets.js'
 
-import utils from './src/utils.js'
 import api from './src/api.js'
+
+import { dBToDec, decTodB } from './src/utils.js'
 
 class sqInstance extends InstanceBase {
 	constructor(internal) {
@@ -23,7 +24,6 @@ class sqInstance extends InstanceBase {
 			...feedbacks,
 			...variables,
 			...presets,
-			...utils,
 			...api,
 		})
 
@@ -31,6 +31,14 @@ class sqInstance extends InstanceBase {
 		this.lastValue = {}
 
 		this.mch = 0xb0
+	}
+
+	dBToDec(lv, typ = this.config.level) {
+		return dBToDec(lv, typ)
+	}
+
+	decTodB(VC, VF, typ = this.config.level) {
+		return decTodB(VC, VF, typ)
 	}
 
 	async destroy() {

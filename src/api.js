@@ -3,6 +3,7 @@ import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import callback from './callback.js'
 
 import { SQModels } from './mixer/models.js'
+import { sleep } from './utils.js'
 
 const MIDI = 51325
 
@@ -455,7 +456,7 @@ export default {
 				if (this.config.status == 'delay') {
 					if (ctr == 20) {
 						ctr = 0
-						this.sleep(300)
+						sleep(300)
 					}
 				}
 			}
@@ -463,27 +464,27 @@ export default {
 
 		self.subscribeActions('chpan_to_mix')
 		if (this.config.status == 'delay') {
-			this.sleep(300)
+			sleep(300)
 		}
 		self.subscribeActions('grppan_to_mix')
 		if (this.config.status == 'delay') {
-			this.sleep(300)
+			sleep(300)
 		}
 		self.subscribeActions('fxrpan_to_mix')
 		if (this.config.status == 'delay') {
-			this.sleep(300)
+			sleep(300)
 		}
 		self.subscribeActions('fxrpan_to_grp')
 		if (this.config.status == 'delay') {
-			this.sleep(300)
+			sleep(300)
 		}
 		self.subscribeActions('mixpan_to_mtx')
 		if (this.config.status == 'delay') {
-			this.sleep(300)
+			sleep(300)
 		}
 		self.subscribeActions('grppan_to_mtx')
 		if (this.config.status == 'delay') {
-			this.sleep(300)
+			sleep(300)
 		}
 		self.subscribeActions('pan_to_output')
 	},
@@ -582,7 +583,7 @@ export default {
 				self.updateStatus(InstanceStatus.Ok)
 				if (self.config.status != 'nosts') {
 					self.getRemoteStatus('mute')
-					self.sleep(300)
+					sleep(300)
 					self.getRemoteLevel()
 
 					if (self.config.status == 'full') {
