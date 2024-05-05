@@ -1,13 +1,13 @@
-const { combineRgb } = require('@companion-module/base');
+const { combineRgb } = require('@companion-module/base')
 
 module.exports = {
-	initPresets: function() {
+	initPresets: function () {
 		var presets = []
 		var self = this
 
 		/* MUTE */
 		const createtMute = (cat, lab, typ, cnt, nr = true) => {
-			var tmp = [];
+			var tmp = []
 
 			for (var i = 0; i < cnt; i++) {
 				let pst = {
@@ -28,19 +28,19 @@ module.exports = {
 									options: {
 										strip: i,
 										mute: 0,
-									}
-								}
+									},
+								},
 							],
-							up: []
-						}
+							up: [],
+						},
 					],
 					feedbacks: [
 						{
 							feedbackId: typ,
 							options: {
 								channel: i,
-							}
-						}
+							},
+						},
 					],
 				}
 
@@ -80,27 +80,30 @@ module.exports = {
 									mixAssign: [`99`],
 									mixActive: false,
 								},
-							},{
+							},
+							{
 								actionId: 'ch_to_mix',
 								options: {
 									inputChannel: `${self.config.talkback}`,
 									mixAssign: [`${i}`],
 									mixActive: true,
 								},
-							},{
+							},
+							{
 								actionId: 'chlev_to_mix',
 								options: {
 									input: `${self.config.talkback}`,
 									assign: `${i}`,
 									level: '49',
 								},
-							},{
+							},
+							{
 								actionId: 'mute_input',
 								options: {
 									strip: self.config.talkback,
 									mute: 2,
 								},
-							}
+							},
 						],
 						up: [
 							{
@@ -110,24 +113,26 @@ module.exports = {
 									mixAssign: [`${i}`],
 									mixActive: false,
 								},
-							},{
+							},
+							{
 								actionId: 'chlev_to_mix',
 								options: {
 									input: `${self.config.talkback}`,
 									assign: `${i}`,
 									level: '0',
 								},
-							},{
+							},
+							{
 								actionId: 'mute_input',
 								options: {
 									strip: self.config.talkback,
 									mute: 1,
 								},
-							}
-						]
-					}
+							},
+						],
+					},
 				],
-				feedbacks: []
+				feedbacks: [],
 			}
 
 			presets.push(pst)
@@ -153,11 +158,11 @@ module.exports = {
 								options: {
 									strip: ch,
 									mute: 0,
-								}
-							}
+								},
+							},
 						],
-						up: []
-					}
+						up: [],
+					},
 				],
 				feedbacks: [
 					{
@@ -165,8 +170,8 @@ module.exports = {
 						options: {
 							channel: ch,
 						},
-					}
-				]
+					},
+				],
 			}
 
 			presets.push(pst)
@@ -175,13 +180,13 @@ module.exports = {
 		// Input -> Mix
 		for (let i = 0; i < self.chCount; i++) {
 			let tmp = self.CHOICES_MIX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x40], [0,0x44])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x40], [0, 0x44])
 				createtMuteLevel(
 					`Mt+dB CH-${tmp[j].label}`,
 					`CH ${i + 1}\\n${tmp[j].label}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
 					'mute_input',
-					i
+					i,
 				)
 			}
 		}

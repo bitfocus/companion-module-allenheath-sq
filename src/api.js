@@ -1,35 +1,37 @@
-const { InstanceStatus, TCPHelper } = require('@companion-module/base');
+const { InstanceStatus, TCPHelper } = require('@companion-module/base')
 
-const level      = require('./level.json')
-const sqconfig   = require('./sqconfig.json')
-const callback = require('./callback.json');
+const level = require('./level.json')
+const sqconfig = require('./sqconfig.json')
+const callback = require('./callback.json')
 
-const MIDI = 51325;
+const MIDI = 51325
 
 module.exports = {
-	setRouting: function(ch, mix, ac, mc, oMB, oLB) {
+	setRouting: function (ch, mix, ac, mc, oMB, oLB) {
 		let routingCmds = []
 		let MSB
 		let LSB
 		let tmp
-	
+
 		for (let i = 0; i < mix.length; i++) {
 			if (mix[i] == 99) {
 				MSB = oMB[0]
 				LSB = parseInt(oLB[0]) + parseInt(ch)
 			} else {
 				tmp = parseInt(ch * mc + oLB[1]) + parseInt(mix[i])
-				MSB = oMB[1] + ((tmp >> 7) & 0x0F)
-				LSB = tmp & 0x7F
+				MSB = oMB[1] + ((tmp >> 7) & 0x0f)
+				LSB = tmp & 0x7f
 			}
-	
-			routingCmds.push(Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, 0, this.mch, 0x26, ac ? 1 : 0]))
+
+			routingCmds.push(
+				Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, 0, this.mch, 0x26, ac ? 1 : 0]),
+			)
 		}
-	
+
 		return routingCmds
 	},
-	
-	setLevel: async function(ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
+
+	setLevel: async function (ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
 		let levelCmds = []
 		let tmp
@@ -41,111 +43,108 @@ module.exports = {
 			LSB = parseInt(oLB[0]) + parseInt(ch)
 		} else {
 			tmp = parseInt(ch * ct + oLB[1]) + parseInt(mx)
-			MSB = oMB[1] + ((tmp >> 7) & 0x0F)
-			LSB = tmp & 0x7F
+			MSB = oMB[1] + ((tmp >> 7) & 0x0f)
+			LSB = tmp & 0x7f
 		}
 
 		console.log('old lv: ' + lv)
 
 		if (lv.toString().indexOf('step') > -1) {
-			let currentLevel = await self.getVariableValue('level_' + MSB +'.'+ LSB);
+			let currentLevel = await self.getVariableValue('level_' + MSB + '.' + LSB)
 			if (currentLevel == '-inf') {
-				currentLevel = -90;
-			}
-			else {
-				currentLevel = parseFloat(currentLevel);
+				currentLevel = -90
+			} else {
+				currentLevel = parseFloat(currentLevel)
 			}
 
 			console.log('current level: ' + currentLevel)
-			let newLevel = currentLevel;
+			let newLevel = currentLevel
 
 			//replace this with a switch case
-			
-			switch(lv) {
+
+			switch (lv) {
 				case 'step+0.1':
-					newLevel += 0.1;
-					break;
+					newLevel += 0.1
+					break
 				case 'step+1':
-					newLevel += 1;
-					break;
+					newLevel += 1
+					break
 				case 'step+3':
-					newLevel += 3;
-					break;
+					newLevel += 3
+					break
 				case 'step+6':
-					newLevel += 6;
-					break;
+					newLevel += 6
+					break
 				case 'step-0.1':
-					newLevel -= 0.1;
-					break;
+					newLevel -= 0.1
+					break
 				case 'step-3':
-					newLevel -= 3;
-					break;
+					newLevel -= 3
+					break
 				case 'step-6':
-					newLevel -= 6;
-					break;
+					newLevel -= 6
+					break
 				case 'step-1':
-					newLevel -= 1;
-					break;
+					newLevel -= 1
+					break
 				default:
-					break;
+					break
 			}
 
 			//make sure the new level is within the bounds of the mixer
 			if (newLevel < -90) {
-				newLevel = -90;
-			}
-			else if (newLevel > 10) {
-				newLevel = 10;
+				newLevel = -90
+			} else if (newLevel > 10) {
+				newLevel = 10
 			}
 
-			lv = newLevel.toFixed(1);
+			lv = newLevel.toFixed(1)
 		}
 
 		console.log('new level: ' + lv)
 
 		//ensure it's a number
-		lv = parseFloat(lv);
+		lv = parseFloat(lv)
 
-		let variableObj = {};
-		variableObj['level_' + MSB +'.'+ LSB] = lv.toFixed(1);
-		self.setVariableValues(variableObj);
-	
-		if (lv < 998 || ['L','R','C'].indexOf(lv.toString().slice(0,1)) != -1 || lv == '-inf') {
+		let variableObj = {}
+		variableObj['level_' + MSB + '.' + LSB] = lv.toFixed(1)
+		self.setVariableValues(variableObj)
+
+		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
 			let tm = self.dBToDec(lv, cnfg)
 			var VC = tm[0]
 			var VF = tm[1]
 		}
-	
-		if (lv < 998 || ['L','R','C'].indexOf(lv.toString().slice(0,1)) != -1 || lv == '-inf') {
-			levelCmds.push( Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF ]) )
-		}
-		else {
+
+		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
+			levelCmds.push(Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF]))
+		} else {
 			if (lv == 1000) {
 				/* Last dB value */
-				let rtn = self.dBToDec(self.lastValue['level_' + MSB +'.'+ LSB], cnfg)
+				let rtn = self.dBToDec(self.lastValue['level_' + MSB + '.' + LSB], cnfg)
 				VC = rtn[0]
 				VF = rtn[1]
 				lv = 997
-	
-				levelCmds.push( Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF ]) )
+
+				levelCmds.push(Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF]))
 			}
 			//else {
-				/* Increment +1 */
+			/* Increment +1 */
 			//	levelCmds.push( Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, lv == 998 ? 0x60 : 0x61, 0x00 ]) )
-		//	}
+			//	}
 		}
-	
+
 		// Retrive value after set command
-		levelCmds.push( Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7F ]) )
-	
+		levelCmds.push(Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f]))
+
 		return levelCmds
 	},
-	
-	setScene: async function(val) {
+
+	setScene: async function (val) {
 		var sq = sqconfig['config'][this.config.model]
 		var scn
-		var res = await this.getVariableValue('currentScene');
-		
+		var res = await this.getVariableValue('currentScene')
+
 		scn = parseInt(res) - 1 + val
 		if (scn < 0) {
 			scn = 0
@@ -153,145 +152,141 @@ module.exports = {
 		if (scn > sq['sceneCount']) {
 			scn = sq['sceneCount']
 		}
-	
+
 		return scn
 	},
-	
-	getLevel: function(ch, mx, ct, oMB, oLB) {
+
+	getLevel: function (ch, mx, ct, oMB, oLB) {
 		let tmp
 		let MSB
 		let LSB
-	
+
 		if (mx == 99) {
 			MSB = oMB[0]
 			LSB = parseInt(oLB[0]) + parseInt(ch)
 		} else {
 			tmp = parseInt(ch * ct + oLB[1]) + parseInt(mx)
-			MSB = oMB[1] + ((tmp >> 7) & 0x0F)
-			LSB = tmp & 0x7F
+			MSB = oMB[1] + ((tmp >> 7) & 0x0f)
+			LSB = tmp & 0x7f
 		}
-	
+
 		return {
-			buffer:     [ Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7F ]) ],
-			channel:    [MSB,LSB]
+			buffer: [Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f])],
+			channel: [MSB, LSB],
 		}
 	},
-	
-	fadeLevel: async function(fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
+
+	fadeLevel: async function (fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
-	
-		if (fd == 0) { //if the user did not choose a fade time
+
+		if (fd == 0) {
+			//if the user did not choose a fade time
 			return await self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 		} else {
 			if (this.midiSocket !== undefined) {
 				let setFade = (MSB, LSB, lv) => {
 					let val = self.dBToDec(lv)
-					let VC = val[0];
-					let VF = val[1];
-					self.midiSocket.send(Buffer.from([ self.mch, 0x63, MSB, self.mch, 0x62, LSB, self.mch, 0x06, VC, self.mch, 0x26, VF ]))
-	
+					let VC = val[0]
+					let VF = val[1]
+					self.midiSocket.send(
+						Buffer.from([self.mch, 0x63, MSB, self.mch, 0x62, LSB, self.mch, 0x06, VC, self.mch, 0x26, VF]),
+					)
+
 					lv = parseFloat(lv).toFixed(1)
 					if (lv < -89) {
 						lv = '-inf'
 					}
-					let variableObj = {};
-					variableObj['level_' + MSB +'.'+ LSB] = lv;
-					self.setVariableValues(variableObj);
+					let variableObj = {}
+					variableObj['level_' + MSB + '.' + LSB] = lv
+					self.setVariableValues(variableObj)
 				}
-	
+
 				let fading = async (str, end, step, MSB, LSB) => {
-					let db = parseFloat(str)//.toFixed(1)
+					let db = parseFloat(str) //.toFixed(1)
 
 					if (db < -50) {
 						db = -50
 					}
-	
-					end = parseFloat(end)//.toFixed(1)
+
+					end = parseFloat(end) //.toFixed(1)
 					let bk = false
 					if (end < -50) {
 						bk = true
 					}
-	
-					let itvFade = setInterval(
-						() => {
-							db = db - step
-							if ((str < end && db > parseFloat(end).toFixed(1)) || (str > end && db < parseFloat(end).toFixed(1))) {
-								db = end
+
+					let itvFade = setInterval(() => {
+						db = db - step
+						if ((str < end && db > parseFloat(end).toFixed(1)) || (str > end && db < parseFloat(end).toFixed(1))) {
+							db = end
+						}
+						setFade(MSB, LSB, db)
+
+						if (db == end || db < -89) {
+							clearInterval(itvFade)
+						} else {
+							if (db <= -50 && bk) {
+								db = -89
 							}
-							setFade(MSB, LSB, db)
-	
-							if ((db == end) || (db < -89)) {
-								clearInterval(itvFade)
-							} else {
-								if (db <= -50 && bk) {
-									db = -89
-								}
-							}
-						},
-						50
-					)
+						}
+					}, 50)
 				}
-	
+
 				let rm = self.getLevel(ch, mx, ct, oMB, oLB)
 				var MSB = rm.channel[0]
 				var LSB = rm.channel[1]
 				let VC
 				let VF
 				var end
-				
+
 				if (lv == '-inf') {
 					lv = -90
 				}
-	
+
 				if (lv < 998) {
 					end = lv
-				}
-				else {
+				} else {
 					if (lv == 1000) {
 						/* Last dB value */
-						end = self.lastValue['level_' + MSB +'.'+ LSB]
-					}
-					else {
-						end = await self.getVariableValue('level_' + MSB +'.'+ LSB);
+						end = self.lastValue['level_' + MSB + '.' + LSB]
+					} else {
+						end = await self.getVariableValue('level_' + MSB + '.' + LSB)
 
 						if (end == '-inf') {
 							end = -90
+						} else {
+							end = parseFloat(end)
 						}
-						else {
-							end = parseFloat(end);
-						}					
 
-						if (lv == 'step+3') { //+3dB
+						if (lv == 'step+3') {
+							//+3dB
 							end += 3
-						}
-						else if (lv == 'step+6') { //+6dB
+						} else if (lv == 'step+6') {
+							//+6dB
 							end += 6
-						}
-						else if (lv == 'step-3') { //-3dB
+						} else if (lv == 'step-3') {
+							//-3dB
 							end -= 3
-						}
-						else if (lv == 'step-6') { //-6dB
+						} else if (lv == 'step-6') {
+							//-6dB
 							end -= 6
-						}
-						else {
+						} else {
 							//it's a +1/-1 (or less) step command, so just immediately step without fading
 							return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 						}
 
 						//make sure the new level is within the bounds of the mixer
 						if (end < -90) {
-							end = -90;
-						}
-						else if (end > 10) {
-							end = 10;
+							end = -90
+						} else if (end > 10) {
+							end = 10
 						}
 					}
 				}
-	
+
 				let str //start value
-				let res = await self.getVariableValue('level_' + MSB +'.'+ LSB);
+				let res = await self.getVariableValue('level_' + MSB + '.' + LSB)
 				str = res
-	
+
 				if (str == '-inf') {
 					str = -90
 				}
@@ -304,12 +299,12 @@ module.exports = {
 
 				//calculate the steps
 
-				let difference = parseFloat(str).toFixed(1) - parseFloat(end).toFixed(1); //the difference is the start value minus the end value
+				let difference = parseFloat(str).toFixed(1) - parseFloat(end).toFixed(1) //the difference is the start value minus the end value
 				//difference = Math.abs(difference); //make it an absolute value
 
 				//determine the number of steps needed to get to the end value if the interval runs every 50ms and the fade time is fd
-				let step = difference / (fd * 20); //take the difference between the two decibel values and divide it by the fade time to determine the total number of steps needed to get to the end value
-				
+				let step = difference / (fd * 20) //take the difference between the two decibel values and divide it by the fade time to determine the total number of steps needed to get to the end value
+
 				//now determine the step size
 				//let step = difference / steps; //divide the difference by the number of steps to determine the individual step size
 
@@ -322,111 +317,110 @@ module.exports = {
 
 				//step = (difference / (fd * 20))//.toFixed(1)
 
-
-				console.log('difference dB: ' + difference);
-				console.log('fade time: ' + fd);
+				console.log('difference dB: ' + difference)
+				console.log('fade time: ' + fd)
 				//console.log('steps: ' + steps);
-				console.log('step: ' + step);
-				console.log('str: ' + str);
-				console.log('end: ' + end);
+				console.log('step: ' + step)
+				console.log('str: ' + str)
+				console.log('end: ' + end)
 
 				fading(str, end, step, MSB, LSB)
 			}
-	
-			return [];
+
+			return []
 		}
 	},
-	
-	sendSocket: function(buff) {
+
+	sendSocket: function (buff) {
 		if (this.midiSocket !== undefined && this.midiSocket.isConnected) {
 			this.log('debug', `Sending : ${JSON.parse(JSON.stringify(buff))['data']} from ${this.config.host}`)
 			this.midiSocket.send(buff)
 		}
-	},	
-	
-	getRemoteLevel: function() {
+	},
+
+	getRemoteLevel: function () {
 		var self = this
 		var buff = []
 		let rsp
-	
+
 		for (let i = 0; i < self.chCount; i++) {
 			let tmp = self.CHOICES_MIX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x40], [0,0x44])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x40], [0, 0x44])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_MIX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x45], [0x30,0x04])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x45], [0x30, 0x04])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_MIX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40,0x46], [0x3C,0x14])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x46], [0x3c, 0x14])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_GRP
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.grpCount, [0,0x4B], [0,0x34])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.grpCount, [0, 0x4b], [0, 0x34])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		for (let i = 0; i < self.chCount; i++) {
 			let tmp = self.CHOICES_FXS
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4C], [0,0x14])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4c], [0, 0x14])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_FXS
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4D], [0,0x54])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4d], [0, 0x54])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_FXS
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0,0x4E], [0,0x04])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4e], [0, 0x04])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		let tmp = self.CHOICES_MTX
-		for ( let j = 0; j < tmp.length; j++ ) {
-			rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x24])
+		for (let j = 0; j < tmp.length; j++) {
+			rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x24])
 			buff.push(rsp['buffer'][0])
 		}
-	
+
 		for (let i = 0; i < self.mixCount; i++) {
 			let tmp = self.CHOICES_MTX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x27])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x27])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_MTX
-			for ( let j = 0; j < tmp.length; j++ ) {
-				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0,0x4E], [0,0x4B])
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x4b])
 				buff.push(rsp['buffer'][0])
 			}
 		}
-	
+
 		tmp = []
 		tmp.push({ label: `LR`, id: 0 })
 		for (let i = 0; i < this.mixCount; i++) {
@@ -438,20 +432,20 @@ module.exports = {
 		for (let i = 0; i < this.mtxCount; i++) {
 			tmp.push({ label: `MATRIX ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount })
 		}
-		for ( let j = 0; j < tmp.length; j++ ) {
-			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4F,0], [0,0])
+		for (let j = 0; j < tmp.length; j++) {
+			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
 			buff.push(rsp['buffer'][0])
 		}
-	
+
 		tmp = this.CHOICES_DCA
-		for ( let j = 0; j < tmp.length; j++ ) {
-			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4F,0], [0x20,0])
+		for (let j = 0; j < tmp.length; j++) {
+			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0x20, 0])
 			buff.push(rsp['buffer'][0])
 		}
-	
-		if ( buff.length > 0 && self.midiSocket !== undefined ) {
+
+		if (buff.length > 0 && self.midiSocket !== undefined) {
 			let ctr = 0
-			for ( let i = 0; i < buff.length; i++ ) {
+			for (let i = 0; i < buff.length; i++) {
 				self.sendSocket(buff[i])
 				ctr++
 				if (this.config.status == 'delay') {
@@ -462,7 +456,7 @@ module.exports = {
 				}
 			}
 		}
-	
+
 		self.subscribeActions('chpan_to_mix')
 		if (this.config.status == 'delay') {
 			this.sleep(300)
@@ -489,116 +483,115 @@ module.exports = {
 		}
 		self.subscribeActions('pan_to_output')
 	},
-	
-	getRemoteStatus: function(act) {
-		chks = true;
+
+	getRemoteStatus: function (act) {
+		chks = true
 		for (let key in callback[act]) {
-			let mblb = key.toString().split(".")
-			this.sendSocket(Buffer.from([ this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7F ]))
+			let mblb = key.toString().split('.')
+			this.sendSocket(Buffer.from([this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7f]))
 		}
 	},
-	
-	getRemoteValue: async function(data) {
+
+	getRemoteValue: async function (data) {
 		var self = this
-	
+
 		if (typeof data == 'object') {
 			var dt, j
-	
-			for ( let b = 0; b < data.length; b++) {
+
+			for (let b = 0; b < data.length; b++) {
 				/* Schene Change */
-				if ( data[b] == this.mch && data[b+1] == 0 ) {
-					dt = data.slice(b, (b + 5))
-					var csc = (dt[4] + dt[2] * 127);
+				if (data[b] == this.mch && data[b + 1] == 0) {
+					dt = data.slice(b, b + 5)
+					var csc = dt[4] + dt[2] * 127
 					let variableObj = {}
 					variableObj['currentScene'] = csc + 1
-					self.setVariableValues(variableObj);
+					self.setVariableValues(variableObj)
 					this.log('debug', `Scene Received : ${dt} from ${self.config.host}`)
 				}
-	
+
 				/* Other */
-				if ( data[b] == this.mch && data[b+1] == 99 ) {
-					dt = data.slice(b, (b + 12))
-	
-					if ( dt.length == 12) {
+				if (data[b] == this.mch && data[b + 1] == 99) {
+					dt = data.slice(b, b + 12)
+
+					if (dt.length == 12) {
 						var MSB = dt[2]
 						var LSB = dt[5]
-						var VC  = dt[8]
-						var VF  = dt[11]
-	
+						var VC = dt[8]
+						var VF = dt[11]
+
 						/* Mute */
-						if ( MSB == 0 || MSB == 2 || MSB == 4 ) {
+						if (MSB == 0 || MSB == 2 || MSB == 4) {
 							this.fdbState['mute_' + MSB + '.' + LSB] = VF == 1 ? true : false
-							self.checkFeedbacks( callback['mute'][MSB+'.'+LSB][0] )
+							self.checkFeedbacks(callback['mute'][MSB + '.' + LSB][0])
 							this.log('debug', `Mute Received : ${dt} from ${self.config.host}`)
 						}
-	
+
 						/* Fader Level */
-						if ( MSB >= 0x40 && MSB <= 0x4F ) {
+						if (MSB >= 0x40 && MSB <= 0x4f) {
 							var ost = false
-							var res = await self.getVariableValue('level_' + MSB +'.'+ LSB)
+							var res = await self.getVariableValue('level_' + MSB + '.' + LSB)
 							if (res !== undefined) {
-								self.lastValue['level_' + MSB +'.'+ LSB] = res
+								self.lastValue['level_' + MSB + '.' + LSB] = res
 								ost = true
 							}
-	
+
 							let db = self.decTodB(VC, VF)
 							let variableObj = {}
-							variableObj['level_' + MSB +'.'+ LSB] = db
-							self.setVariableValues(variableObj);
-	
-							if (! ost) {
-								self.lastValue['level_' + MSB +'.'+ LSB] = db
+							variableObj['level_' + MSB + '.' + LSB] = db
+							self.setVariableValues(variableObj)
+
+							if (!ost) {
+								self.lastValue['level_' + MSB + '.' + LSB] = db
 							}
-	
+
 							this.log('debug', `Fader Received : ${dt} from ${self.config.host}`)
 						}
-	
+
 						/* Pan Level */
-						if ( MSB >= 0x50 && MSB <= 0x5E ) {
+						if (MSB >= 0x50 && MSB <= 0x5e) {
 							let db = self.decTodB(VC, VF, 'PanBalance')
-							let variableObj = {};
-							variableObj['pan_' + MSB +'.'+ LSB] = db
-							self.setVariableValues(variableObj);
+							let variableObj = {}
+							variableObj['pan_' + MSB + '.' + LSB] = db
+							self.setVariableValues(variableObj)
 							this.log('debug', `Pan Received : ${dt} from ${self.config.host}`)
 						}
 					}
 				}
 			}
 		}
-	},	
-	
-	initTCP: function() {
-		let self = this;
+	},
+
+	initTCP: function () {
+		let self = this
 
 		if (self.midiSocket !== undefined) {
 			self.midiSocket.destroy()
 			delete self.midiSocket
 		}
-	
+
 		if (self.config.host) {
 			self.midiSocket = new TCPHelper(this.config.host, MIDI)
-	
+
 			self.midiSocket.on('error', (err) => {
-				self.log('error', "Error: " + err.message)
-			});
-	
+				self.log('error', 'Error: ' + err.message)
+			})
+
 			self.midiSocket.on('connect', () => {
 				self.log('debug', `Connected to ${self.config.host}`)
-				self.updateStatus(InstanceStatus.Ok);
+				self.updateStatus(InstanceStatus.Ok)
 				if (self.config.status != 'nosts') {
 					self.getRemoteStatus('mute')
-					self.sleep(300);
+					self.sleep(300)
 					self.getRemoteLevel()
-	
+
 					if (self.config.status == 'full') {
-						var gInt = setTimeout(
-							() => {
-								self.getRemoteLevel()
-							}, 4000)
+						var gInt = setTimeout(() => {
+							self.getRemoteLevel()
+						}, 4000)
 					}
 				}
 			})
-	
+
 			self.midiSocket.on('data', (data) => {
 				self.getRemoteValue(JSON.parse(JSON.stringify(data))['data'])
 			})
@@ -606,19 +599,19 @@ module.exports = {
 	},
 
 	//new send command
-	sendBuffers: async function(buffers) {
-		let self = this;
+	sendBuffers: async function (buffers) {
+		let self = this
 
 		function sleepSend(ms) {
 			return new Promise((resolve) => {
-			  setTimeout(resolve, ms);
-			});
-		  }
+				setTimeout(resolve, ms)
+			})
+		}
 
 		for (let i = 0; i < buffers.length; i++) {
 			this.log('debug', `Sending : ${JSON.parse(JSON.stringify(buffers[i]))['data']} from ${this.config.host}`)
 			self.sendSocket(buffers[i])
 			await sleepSend(200)
 		}
-	}
+	},
 }

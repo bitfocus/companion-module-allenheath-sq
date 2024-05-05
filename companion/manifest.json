@@ -25,14 +25,6 @@
 		"entrypoint": "../index.js"
 	},
 	"manufacturer": "Allen & Heath",
-	"products": [
-		"SQ5",
-		"SQ6",
-		"SQ7"
-	],
-	"keywords": [
-		"SQ5",
-		"SQ6",
-		"SQ7"
-	]
+	"products": ["SQ5", "SQ6", "SQ7"],
+	"keywords": ["SQ5", "SQ6", "SQ7"]
 }
