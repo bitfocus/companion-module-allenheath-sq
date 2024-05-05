@@ -1,4 +1,4 @@
-module.exports = [
+export const UpgradeScripts = [
 	function (context, props) {
 		return {
 			updatedConfig: null,

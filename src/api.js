@@ -1,12 +1,11 @@
-const { InstanceStatus, TCPHelper } = require('@companion-module/base')
+import { InstanceStatus, TCPHelper } from '@companion-module/base'
 
-const level = require('./level.json')
-const sqconfig = require('./sqconfig.json')
-const callback = require('./callback.json')
+import sqconfig from './sqconfig.js'
+import callback from './callback.js'
 
 const MIDI = 51325
 
-module.exports = {
+export default {
 	setRouting: function (ch, mix, ac, mc, oMB, oLB) {
 		let routingCmds = []
 		let MSB
@@ -485,7 +484,6 @@ module.exports = {
 	},
 
 	getRemoteStatus: function (act) {
-		chks = true
 		for (let key in callback[act]) {
 			let mblb = key.toString().split(':')
 			this.sendSocket(Buffer.from([this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7f]))

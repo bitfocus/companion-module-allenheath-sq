@@ -1,7 +1,6 @@
-const level = require('./level.json')
-const sqconfig = require('./sqconfig.json')
+import sqconfig from './sqconfig.js'
 
-module.exports = {
+export default {
 	initActions: function () {
 		let self = this
 
