@@ -1,12 +1,26 @@
+/**
+ * A do-nothing upgrade script.
+ *
+ * Because Companion records last-upgrade-performed status by index into the
+ * `UpgradeScripts` array, this function can't be deleted even though it does
+ * nothing.
+ * @param {import('@companion-module/base').CompanionUpgradeContext} _context
+ * @param {import('@companion-module/base').CompanionStaticUpgradeProps} _props
+ * @returns {import('@companion-module/base').CompanionStaticUpgradeResult}
+ */
+function DummyUpgradeScript(_context, _props) {
+	return {
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
+	}
+}
+
 export const UpgradeScripts = [
-	function (context, props) {
-		return {
-			updatedConfig: null,
-			updatedActions: [],
-			updatedFeedbacks: [],
-		}
-	},
+	DummyUpgradeScript,
+	// placeholder comment to force array contents to format one entry per line
 ]
+
 /*
 const level      = require('./level.json')
 
