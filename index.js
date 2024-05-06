@@ -15,7 +15,6 @@ import api from './src/api.js'
 
 import level from './src/level.js'
 import callback from './src/callback.js'
-import sqconfig from './src/sqconfig.js'
 
 class sqInstance extends InstanceBase {
 	constructor(internal) {
@@ -32,7 +31,6 @@ class sqInstance extends InstanceBase {
 			...api,
 			...level,
 			...callback,
-			...sqconfig,
 		})
 
 		this.fdbState = {}
