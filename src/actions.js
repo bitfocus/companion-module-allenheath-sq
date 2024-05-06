@@ -1,10 +1,10 @@
-import sqconfig from './sqconfig.js'
+import { SQModels } from './mixer/models.js'
 
 export default {
 	initActions: function () {
 		let self = this
 
-		var sq = sqconfig['config'][self.config.model]
+		var sq = SQModels[self.config.model]
 
 		self.chCount = sq['chCount']
 		self.mixCount = sq['mixCount']

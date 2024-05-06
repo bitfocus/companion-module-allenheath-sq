@@ -1,7 +1,8 @@
 import { InstanceStatus, TCPHelper } from '@companion-module/base'
 
-import sqconfig from './sqconfig.js'
 import callback from './callback.js'
+
+import { SQModels } from './mixer/models.js'
 
 const MIDI = 51325
 
@@ -140,7 +141,7 @@ export default {
 	},
 
 	setScene: async function (val) {
-		var sq = sqconfig['config'][this.config.model]
+		var sq = SQModels[this.config.model]
 		var scn
 		var res = await this.getVariableValue('currentScene')
 
