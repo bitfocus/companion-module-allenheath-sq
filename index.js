@@ -13,9 +13,6 @@ import presets from './src/presets.js'
 import utils from './src/utils.js'
 import api from './src/api.js'
 
-import level from './src/level.js'
-import callback from './src/callback.js'
-
 class sqInstance extends InstanceBase {
 	constructor(internal) {
 		super(internal)
@@ -29,8 +26,6 @@ class sqInstance extends InstanceBase {
 			...presets,
 			...utils,
 			...api,
-			...level,
-			...callback,
 		})
 
 		this.fdbState = {}
