@@ -46,11 +46,6 @@ export default {
 			self.CHOICES_MUTEGRP.push({ label: `MuteGroup ${i + 1}`, id: i })
 		}
 
-		self.CHOICES_SOFT = []
-		for (let i = 0; i < model.SoftKey; i++) {
-			self.CHOICES_SOFT.push({ label: `SOFTKEY ${i + 1}`, id: i })
-		}
-
 		// All fader mix choices
 		self.CHOICES_ALLFADER = []
 		self.CHOICES_ALLFADER.push({ label: `LR`, id: 0 })
@@ -502,7 +497,7 @@ export default {
 					label: 'Soft Key',
 					id: 'softKey',
 					default: 0,
-					choices: self.CHOICES_SOFT,
+					choices: choices.softKeys,
 					minChoicesForSearch: 0,
 				},
 				{

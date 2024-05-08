@@ -9,7 +9,7 @@ export class Model {
 	mtxCount
 	dcaCount
 	muteGroup
-	SoftKey
+	softKeyCount
 	sceneCount
 
 	/**
@@ -30,7 +30,7 @@ export class Model {
 		this.mtxCount = sqModel['mtxCount']
 		this.dcaCount = sqModel['dcaCount']
 		this.muteGroup = sqModel['muteGroup']
-		this.SoftKey = sqModel['SoftKey']
+		this.softKeyCount = sqModel['SoftKey']
 		this.sceneCount = sqModel['sceneCount']
 	}
 
@@ -82,5 +82,30 @@ export class Model {
 	forEachMixAndLR(f) {
 		f(99, 'LR', 'LR')
 		this.forEachMix(f)
+	}
+
+	#softKeyLabel(key) {
+		return `SOFTKEY ${key + 1}`
+	}
+
+	#softKeyDesc(key) {
+		return `SoftKey ${key + 1}`
+	}
+
+	#softKeyLabels = []
+
+	forEachSoftKey(f) {
+		const softKeyLabels = this.#softKeyLabels
+		if (softKeyLabels.length === 0) {
+			for (let softKey = 0; softKey < this.softKeyCount; softKey++) {
+				const label = this.#softKeyLabel(softKey)
+				const desc = this.#softKeyDesc(softKey)
+				softKeyLabels.push([label, desc])
+			}
+		}
+
+		softKeyLabels.forEach(([label, desc], softKey) => {
+			f(softKey, label, desc)
+		})
 	}
 }

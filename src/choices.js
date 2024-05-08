@@ -38,6 +38,19 @@ function createMixesAndLR(model) {
 	return mixesAndLR
 }
 
+/**
+ * @param {import('./mixer/model.js').Model} model
+ * @returns {{ label: string, id: number }[]}
+ */
+function createSoftKeys(model) {
+	/** @type {{ label: string, id: number }[]} */
+	const softKeys = []
+	model.forEachSoftKey((softKey, softKeyLabel) => {
+		softKeys.push({ label: softKeyLabel, id: softKey })
+	})
+	return softKeys
+}
+
 function createLevels() {
 	const levels = []
 	levels.push(
@@ -70,6 +83,7 @@ export class Choices {
 	inputChannels
 	mixes
 	mixesAndLR
+	softKeys
 	levels
 
 	/**
@@ -79,6 +93,7 @@ export class Choices {
 		this.inputChannels = createInputChannels(model)
 		this.mixes = createMixes(model)
 		this.mixesAndLR = createMixesAndLR(model)
+		this.softKeys = createSoftKeys(model)
 		this.levels = createLevels()
 	}
 }
