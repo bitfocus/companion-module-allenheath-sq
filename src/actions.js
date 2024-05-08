@@ -1,21 +1,6 @@
-import { SQModels } from './mixer/models.js'
-
 export default {
 	initActions: function () {
 		let self = this
-
-		var sq = SQModels[self.config.model]
-
-		self.chCount = sq['chCount']
-		self.mixCount = sq['mixCount']
-		self.grpCount = sq['grpCount']
-		self.fxrCount = sq['fxrCount']
-		self.fxsCount = sq['fxsCount']
-		self.mtxCount = sq['mtxCount']
-		self.dcaCount = sq['dcaCount']
-		self.muteGroup = sq['muteGroup']
-		self.SoftKey = sq['SoftKey']
-		self.sceneCount = sq['sceneCount']
 
 		let actions = {}
 

@@ -12,9 +12,45 @@ import presets from './src/presets.js'
 
 import api from './src/api.js'
 
+import { Model } from './src/mixer/model.js'
 import { dBToDec, decTodB } from './src/utils.js'
 
 class sqInstance extends InstanceBase {
+	model
+
+	// shorthands to be removed later
+
+	get chCount() {
+		return this.model.chCount
+	}
+	get mixCount() {
+		return this.model.mixCount
+	}
+	get grpCount() {
+		return this.model.grpCount
+	}
+	get fxrCount() {
+		return this.model.fxrCount
+	}
+	get fxsCount() {
+		return this.model.fxsCount
+	}
+	get mtxCount() {
+		return this.model.mtxCount
+	}
+	get dcaCount() {
+		return this.model.dcaCount
+	}
+	get muteGroup() {
+		return this.model.muteGroup
+	}
+	get SoftKey() {
+		return this.model.SoftKey
+	}
+	get sceneCount() {
+		return this.model.sceneCount
+	}
+
 	constructor(internal) {
 		super(internal)
 
@@ -65,6 +101,9 @@ class sqInstance extends InstanceBase {
 		this.mch = parseInt('0xB' + (this.config.midich - 1).toString(16))
 
 		this.updateStatus(InstanceStatus.Connecting)
+
+		const model = new Model(config.model)
+		this.model = model
 
 		this.initActions()
 		this.initFeedbacks()
