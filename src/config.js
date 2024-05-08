@@ -1,13 +1,40 @@
 import { Regex } from '@companion-module/base'
-import { DefaultModel } from './mixer/models.js'
+import { DefaultModel, SQModels } from './mixer/models.js'
+
+function createDefaultTalkbackChannelOption() {
+	// The number of input channels depends on how many input channels the
+	// user's chosen SQ model has.  Currently all SQs have the same number
+	// of input channels, so use that count.
+	let inputChannelCount = -1
+	for (const { chCount } of Object.values(SQModels)) {
+		if (inputChannelCount < 0) {
+			inputChannelCount = chCount
+		} else if (inputChannelCount !== chCount) {
+			throw new Error('update this now that SQs have different input channel counts')
+		}
+	}
+	if (inputChannelCount < 0) {
+		throw new Error('missing SQ models?')
+	}
+
+	const DefaultTalkbackInputChannelChoices = []
+	for (let i = 0; i < inputChannelCount; i++) {
+		DefaultTalkbackInputChannelChoices.push({ label: `CH ${i + 1}`, id: i })
+	}
+
+	return {
+		type: 'dropdown',
+		label: 'Default talkback input channel',
+		id: 'talkback',
+		width: 6,
+		default: 0,
+		choices: DefaultTalkbackInputChannelChoices,
+		minChoicesForSearch: 0,
+	}
+}
 
 export default {
 	getConfigFields() {
-		this.CHOICES_INPUT_CHANNEL = []
-		for (let i = 0; i < 48; i++) {
-			this.CHOICES_INPUT_CHANNEL.push({ label: `CH ${i + 1}`, id: i })
-		}
-
 		return [
 			{
 				type: 'static-text',
@@ -47,15 +74,7 @@ export default {
 					{ id: 'AudioTaper', label: 'Audio Taper' },
 				],
 			},
-			{
-				type: 'dropdown',
-				label: 'Default talkback input channel',
-				id: 'talkback',
-				width: 6,
-				default: '0',
-				choices: this.CHOICES_INPUT_CHANNEL,
-				minChoicesForSearch: 0,
-			},
+			createDefaultTalkbackChannelOption(),
 			{
 				type: 'textinput',
 				id: 'midich',
