@@ -2,7 +2,6 @@ import { InstanceStatus, TCPHelper } from '@companion-module/base'
 
 import callback from './callback.js'
 
-import { SQModels } from './mixer/models.js'
 import { asyncSleep, sleep } from './utils.js'
 
 const MIDI = 51325
@@ -142,16 +141,15 @@ export default {
 	},
 
 	setScene: async function (val) {
-		var sq = SQModels[this.config.model]
-		var scn
-		var res = await this.getVariableValue('currentScene')
+		const model = this.model
 
-		scn = parseInt(res) - 1 + val
+		const res = await this.getVariableValue('currentScene')
+		let scn = parseInt(res) - 1 + val
 		if (scn < 0) {
 			scn = 0
 		}
-		if (scn > sq['sceneCount']) {
-			scn = sq['sceneCount']
+		if (scn > model.sceneCount) {
+			scn = model.sceneCount
 		}
 
 		return scn
