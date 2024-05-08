@@ -3,7 +3,7 @@
 import { InstanceBase, InstanceStatus, runEntrypoint } from '@companion-module/base'
 import { UpgradeScripts } from './src/upgrades.js'
 
-import config from './src/config.js'
+import { GetConfigFields } from './src/config.js'
 
 import actions from './src/actions.js'
 import feedbacks from './src/feedbacks.js'
@@ -19,7 +19,6 @@ class sqInstance extends InstanceBase {
 
 		// Assign the methods from the listed files to this class
 		Object.assign(this, {
-			...config,
 			...actions,
 			...feedbacks,
 			...variables,
@@ -42,6 +41,10 @@ class sqInstance extends InstanceBase {
 
 	async init(config) {
 		this.configUpdated(config)
+	}
+
+	getConfigFields() {
+		return GetConfigFields()
 	}
 
 	async configUpdated(config) {
