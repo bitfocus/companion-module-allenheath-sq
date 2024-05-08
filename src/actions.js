@@ -153,7 +153,7 @@ export default {
 			]
 		}
 
-		self.fadeObj = {
+		const FadingOption = {
 			type: 'dropdown',
 			label: 'Fading',
 			id: 'fade',
@@ -927,7 +927,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -970,7 +970,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -1007,7 +1007,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -1044,7 +1044,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -1081,7 +1081,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -1118,7 +1118,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -1155,7 +1155,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -1192,7 +1192,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -1229,7 +1229,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
@@ -1258,7 +1258,7 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				self.levelObj,
-				self.fadeObj,
+				FadingOption,
 			],
 			callback: async (action) => {
 				let opt = action.options
