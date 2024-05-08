@@ -105,7 +105,7 @@ export default {
 			})
 		}
 
-		self.muteOptions = (name, qty, ofs) => {
+		function muteOptions(name, qty, ofs) {
 			const muteChoices = []
 			for (let i = 1; i <= qty; i++) {
 				muteChoices.push({ label: `${name} ${i}`, id: i + ofs })
@@ -171,7 +171,7 @@ export default {
 
 		actions['mute_input'] = {
 			name: 'Mute Input',
-			options: self.muteOptions('Input Channel', model.chCount, -1),
+			options: muteOptions('Input Channel', model.chCount, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0
@@ -267,7 +267,7 @@ export default {
 
 		actions['mute_aux'] = {
 			name: 'Mute Aux',
-			options: self.muteOptions('Aux', 12, -1),
+			options: muteOptions('Aux', 12, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0
@@ -304,7 +304,7 @@ export default {
 		}
 		actions['mute_group'] = {
 			name: 'Mute Group',
-			options: self.muteOptions('Aux', 12, -1),
+			options: muteOptions('Aux', 12, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0
@@ -341,7 +341,7 @@ export default {
 		}
 		actions['mute_matrix'] = {
 			name: 'Mute Matrix',
-			options: self.muteOptions('Matrix', 3, -1),
+			options: muteOptions('Matrix', 3, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0
@@ -378,7 +378,7 @@ export default {
 		}
 		actions['mute_fx_send'] = {
 			name: 'Mute FX Send',
-			options: self.muteOptions('FX Send', 4, -1),
+			options: muteOptions('FX Send', 4, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0
@@ -415,7 +415,7 @@ export default {
 		}
 		actions['mute_fx_return'] = {
 			name: 'Mute FX Return',
-			options: self.muteOptions('FX Return', 8, -1),
+			options: muteOptions('FX Return', 8, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0
@@ -452,7 +452,7 @@ export default {
 		}
 		actions['mute_dca'] = {
 			name: 'Mute DCA',
-			options: self.muteOptions('DCA', 8, -1),
+			options: muteOptions('DCA', 8, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0x02
@@ -489,7 +489,7 @@ export default {
 		}
 		actions['mute_mutegroup'] = {
 			name: 'Mute MuteGroup',
-			options: self.muteOptions('Mute MuteGroup', 8, -1),
+			options: muteOptions('Mute MuteGroup', 8, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0x04
