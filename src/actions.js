@@ -7,12 +7,6 @@ export default {
 
 		var sceneNumber
 
-		self.CHOICES_MIX = []
-		self.CHOICES_MIX.push({ label: `LR`, id: 99 })
-		for (let i = 0; i < model.mixCount; i++) {
-			self.CHOICES_MIX.push({ label: `AUX ${i + 1}`, id: i })
-		}
-
 		self.CHOICES_GRP = []
 		for (let i = 0; i < model.grpCount; i++) {
 			self.CHOICES_GRP.push({ label: `GROUP ${i + 1}`, id: i })
@@ -60,9 +54,9 @@ export default {
 		// All fader mix choices
 		self.CHOICES_ALLFADER = []
 		self.CHOICES_ALLFADER.push({ label: `LR`, id: 0 })
-		for (let i = 0; i < model.mixCount; i++) {
-			self.CHOICES_ALLFADER.push({ label: `AUX ${i + 1}`, id: i + 1 })
-		}
+		model.forEachMix((mix, mixLabel) => {
+			self.CHOICES_ALLFADER.push({ label: mixLabel, id: mix + 1 })
+		})
 		for (let i = 0; i < model.fxsCount; i++) {
 			self.CHOICES_ALLFADER.push({ label: `FX SEND ${i + 1}`, id: i + 1 + model.mixCount })
 		}
@@ -550,7 +544,7 @@ export default {
 					label: 'Mix',
 					id: 'mixAssign',
 					default: [],
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 				},
 				{
 					type: 'checkbox',
@@ -628,7 +622,7 @@ export default {
 					label: 'Mix',
 					id: 'mixAssign',
 					default: [],
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 				},
 				{
 					type: 'checkbox',
@@ -815,7 +809,7 @@ export default {
 					label: 'Mix',
 					id: 'inputMix',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -902,7 +896,7 @@ export default {
 					label: 'Mix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -945,7 +939,7 @@ export default {
 					label: 'Mix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -982,7 +976,7 @@ export default {
 					label: 'Mix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -1159,7 +1153,7 @@ export default {
 					label: 'Mix',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1263,7 +1257,7 @@ export default {
 					label: 'Mix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				PanLevelOption,
@@ -1311,7 +1305,7 @@ export default {
 					label: 'Mix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				PanLevelOption,
@@ -1359,7 +1353,7 @@ export default {
 					label: 'Mix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				PanLevelOption,
@@ -1447,7 +1441,7 @@ export default {
 					label: 'Mix',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_MIX,
+					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
 				},
 				{

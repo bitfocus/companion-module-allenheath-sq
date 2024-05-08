@@ -346,27 +346,24 @@ export default {
 		var buff = []
 
 		model.forEachInputChannel((channel) => {
-			let tmp = self.CHOICES_MIX
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(channel, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
+			model.forEachMixAndLR((mix) => {
+				const rsp = self.getLevel(channel, mix, model.mixCount, [0x40, 0x40], [0, 0x44])
 				buff.push(rsp['buffer'][0])
-			}
+			})
 		})
 
 		for (let i = 0; i < model.grpCount; i++) {
-			let tmp = self.CHOICES_MIX
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.mixCount, [0x40, 0x45], [0x30, 0x04])
+			model.forEachMixAndLR((mix) => {
+				const rsp = self.getLevel(i, mix, model.mixCount, [0x40, 0x45], [0x30, 0x04])
 				buff.push(rsp['buffer'][0])
-			}
+			})
 		}
 
 		for (let i = 0; i < model.fxrCount; i++) {
-			let tmp = self.CHOICES_MIX
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.mixCount, [0x40, 0x46], [0x3c, 0x14])
+			model.forEachMixAndLR((mix) => {
+				const rsp = self.getLevel(i, mix, model.mixCount, [0x40, 0x46], [0x3c, 0x14])
 				buff.push(rsp['buffer'][0])
-			}
+			})
 		}
 
 		for (let i = 0; i < model.fxrCount; i++) {
@@ -408,13 +405,14 @@ export default {
 				buff.push(rsp['buffer'][0])
 			}
 		}
-		for (let i = 0; i < model.mixCount; i++) {
+
+		model.forEachMix((mix) => {
 			let tmp = self.CHOICES_MTX
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.mtxCount, [0, 0x4e], [0, 0x27])
+				const rsp = self.getLevel(mix, tmp[j].id, model.mtxCount, [0, 0x4e], [0, 0x27])
 				buff.push(rsp['buffer'][0])
 			}
-		}
+		})
 
 		for (let i = 0; i < model.grpCount; i++) {
 			let tmp = self.CHOICES_MTX
@@ -427,9 +425,9 @@ export default {
 		{
 			const tmp = []
 			tmp.push({ label: `LR`, id: 0 })
-			for (let i = 0; i < model.mixCount; i++) {
-				tmp.push({ label: `AUX ${i + 1}`, id: i + 1 })
-			}
+			model.forEachMix((mix, mixLabel) => {
+				tmp.push({ label: mixLabel, id: mix + 1 })
+			})
 			for (let i = 0; i < model.fxsCount; i++) {
 				tmp.push({ label: `FX SEND ${i + 1}`, id: i + 1 + model.mixCount })
 			}

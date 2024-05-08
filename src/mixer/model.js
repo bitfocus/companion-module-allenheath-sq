@@ -53,4 +53,34 @@ export class Model {
 			f(channel, label, label)
 		})
 	}
+
+	#mixLabel(mix) {
+		return `AUX ${mix + 1}`
+	}
+
+	#mixDesc(mix) {
+		return `Aux ${mix + 1}`
+	}
+
+	#mixLabels = []
+
+	forEachMix(f) {
+		const mixLabels = this.#mixLabels
+		if (mixLabels.length === 0) {
+			for (let mix = 0; mix < this.mixCount; mix++) {
+				const label = this.#mixLabel(mix)
+				const desc = this.#mixDesc(mix)
+				mixLabels.push([label, desc])
+			}
+		}
+
+		mixLabels.forEach(([label, desc], mix) => {
+			f(mix, label, desc)
+		})
+	}
+
+	forEachMixAndLR(f) {
+		f(99, 'LR', 'LR')
+		this.forEachMix(f)
+	}
 }

@@ -60,13 +60,13 @@ export default {
 		createtMute('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', model.muteGroup)
 
 		/* TALKBACK*/
-		for (var i = 0; i < model.mixCount; i++) {
+		model.forEachMix((mix, mixLabel, mixDesc) => {
 			let pst = {
 				type: 'button',
 				category: 'Talkback',
-				name: 'Talk to AUX ' + (i + 1),
+				name: `Talk to ${mixDesc}`,
 				style: {
-					text: 'Talk to AUX ' + (i + 1),
+					text: `Talk to ${mixLabel}`,
 					size: 'auto',
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(0, 0, 0),
@@ -86,7 +86,7 @@ export default {
 								actionId: 'ch_to_mix',
 								options: {
 									inputChannel: `${self.config.talkback}`,
-									mixAssign: [`${i}`],
+									mixAssign: [`${mix}`],
 									mixActive: true,
 								},
 							},
@@ -94,7 +94,7 @@ export default {
 								actionId: 'chlev_to_mix',
 								options: {
 									input: `${self.config.talkback}`,
-									assign: `${i}`,
+									assign: `${mix}`,
 									level: '49',
 								},
 							},
@@ -111,7 +111,7 @@ export default {
 								actionId: 'ch_to_mix',
 								options: {
 									inputChannel: `${self.config.talkback}`,
-									mixAssign: [`${i}`],
+									mixAssign: [`${mix}`],
 									mixActive: false,
 								},
 							},
@@ -119,7 +119,7 @@ export default {
 								actionId: 'chlev_to_mix',
 								options: {
 									input: `${self.config.talkback}`,
-									assign: `${i}`,
+									assign: `${mix}`,
 									level: '0',
 								},
 							},
@@ -137,7 +137,7 @@ export default {
 			}
 
 			presets.push(pst)
-		}
+		})
 
 		/* MUTE + FADER LEVEL */
 		const createtMuteLevel = (cat, lab, typ, ch) => {
@@ -180,16 +180,15 @@ export default {
 
 		// Input -> Mix
 		model.forEachInputChannel((channel, channelLabel) => {
-			let tmp = self.CHOICES_MIX
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(channel, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
+			model.forEachMixAndLR((mix, mixLabel) => {
+				const rsp = self.getLevel(channel, mix, model.mixCount, [0x40, 0x40], [0, 0x44])
 				createtMuteLevel(
-					`Mt+dB CH-${tmp[j].label}`,
-					`${channelLabel}\\n${tmp[j].label}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
+					`Mt+dB CH-${mixLabel}`,
+					`${channelLabel}\\n${mixLabel}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
 					'mute_input',
 					channel,
 				)
-			}
+			})
 		})
 		/**/
 

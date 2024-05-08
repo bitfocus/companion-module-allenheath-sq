@@ -12,6 +12,32 @@ function createInputChannels(model) {
 	return inputChannels
 }
 
+/**
+ * @param {import('./mixer/model.js').Model} model
+ * @returns {{ label: string, id: number }[]}
+ */
+function createMixes(model) {
+	/** @type {{ label: string, id: number }[]} */
+	const mixes = []
+	model.forEachMix((id, label) => {
+		mixes.push({ label, id })
+	})
+	return mixes
+}
+
+/**
+ * @param {import('./mixer/model.js').Model} model
+ * @returns {{ label: string, id: number }[]}
+ */
+function createMixesAndLR(model) {
+	/** @type {{ label: string, id: number }[]} */
+	const mixesAndLR = []
+	model.forEachMixAndLR((id, label) => {
+		mixesAndLR.push({ label, id })
+	})
+	return mixesAndLR
+}
+
 function createLevels() {
 	const levels = []
 	levels.push(
@@ -42,6 +68,8 @@ function createLevels() {
 
 export class Choices {
 	inputChannels
+	mixes
+	mixesAndLR
 	levels
 
 	/**
@@ -49,6 +77,8 @@ export class Choices {
 	 */
 	constructor(model) {
 		this.inputChannels = createInputChannels(model)
+		this.mixes = createMixes(model)
+		this.mixesAndLR = createMixesAndLR(model)
 		this.levels = createLevels()
 	}
 }
