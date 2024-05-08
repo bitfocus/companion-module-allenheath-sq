@@ -36,11 +36,6 @@ export default {
 			self.CHOICES_PANLEVEL.push({ label: `${pos}`, id: `${pos}` })
 		}
 
-		self.CHOICES_DCA = []
-		for (let i = 0; i < model.dcaCount; i++) {
-			self.CHOICES_DCA.push({ label: `DCA ${i + 1}`, id: i })
-		}
-
 		self.CHOICES_MUTEGRP = []
 		for (let i = 0; i < model.muteGroup; i++) {
 			self.CHOICES_MUTEGRP.push({ label: `MuteGroup ${i + 1}`, id: i })
@@ -58,12 +53,12 @@ export default {
 		for (let i = 0; i < model.mtxCount; i++) {
 			self.CHOICES_ALLFADER.push({ label: `MATRIX ${i + 1}`, id: i + 1 + model.mixCount + model.fxsCount })
 		}
-		for (let i = 0; i < model.dcaCount; i++) {
+		model.forEachDCA((dca, dcaLabel) => {
 			self.CHOICES_ALLFADER.push({
-				label: `DCA ${i + 1}`,
-				id: i + 1 + model.mixCount + model.fxsCount + model.mtxCount + 12,
+				label: dcaLabel,
+				id: dca + 1 + model.mixCount + model.fxsCount + model.mtxCount + 12,
 			})
-		}
+		})
 
 		function muteOptions(name, qty, ofs) {
 			const muteChoices = []

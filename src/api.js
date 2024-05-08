@@ -440,13 +440,10 @@ export default {
 			}
 		}
 
-		{
-			const tmp = this.CHOICES_DCA
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0x20, 0])
-				buff.push(rsp['buffer'][0])
-			}
-		}
+		model.forEachDCA((dca) => {
+			const rsp = self.getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
+			buff.push(rsp['buffer'][0])
+		})
 
 		if (buff.length > 0 && self.midiSocket !== undefined) {
 			let ctr = 0

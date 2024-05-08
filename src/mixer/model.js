@@ -108,4 +108,24 @@ export class Model {
 			f(softKey, label, desc)
 		})
 	}
+
+	#dcaLabel(dca) {
+		return `DCA ${dca + 1}`
+	}
+
+	#dcaLabels = []
+
+	forEachDCA(f) {
+		const dcaLabels = this.#dcaLabels
+		if (dcaLabels.length === 0) {
+			for (let dca = 0; dca < this.dcaCount; dca++) {
+				const label = this.#dcaLabel(dca)
+				dcaLabels.push(label)
+			}
+		}
+
+		dcaLabels.forEach((label, dca) => {
+			f(dca, label, label)
+		})
+	}
 }

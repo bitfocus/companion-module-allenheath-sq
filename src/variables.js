@@ -147,17 +147,15 @@ export default {
 				})
 			}
 		}
-		{
-			const tmp = this.CHOICES_DCA
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0x20, 0])
+		model.forEachDCA((dca, dcaLabel) => {
+			const rsp = self.getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
 
-				variables.push({
-					name: `${tmp[j].label} Output Level`,
-					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
-				})
-			}
-		}
+			variables.push({
+				name: `${dcaLabel} Output Level`,
+				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+			})
+		})
+
 		//mute input, LR, aux, group, matrix, dca, fx return, fx send, mute group
 
 		self.setVariableDefinitions(variables)
