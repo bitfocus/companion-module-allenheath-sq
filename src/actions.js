@@ -7,11 +7,6 @@ export default {
 
 		var sceneNumber
 
-		self.CHOICES_GRP = []
-		for (let i = 0; i < model.grpCount; i++) {
-			self.CHOICES_GRP.push({ label: `GROUP ${i + 1}`, id: i })
-		}
-
 		self.CHOICES_FXR = []
 		for (let i = 0; i < model.fxrCount; i++) {
 			self.CHOICES_FXR.push({ label: `FX RETURN ${i + 1}`, id: i })
@@ -573,7 +568,7 @@ export default {
 					label: 'Group',
 					id: 'grpAssign',
 					default: [],
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 				},
 				{
 					type: 'checkbox',
@@ -604,7 +599,7 @@ export default {
 					label: 'Group',
 					id: 'inputGrp',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -651,7 +646,7 @@ export default {
 					label: 'Group',
 					id: 'grpAssign',
 					default: [],
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 				},
 				{
 					type: 'checkbox',
@@ -721,7 +716,7 @@ export default {
 					label: 'Group',
 					id: 'inputGrp',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -838,7 +833,7 @@ export default {
 					label: 'Group',
 					id: 'inputGrp',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -921,7 +916,7 @@ export default {
 					label: 'Group',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1003,7 +998,7 @@ export default {
 					label: 'Group',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -1069,7 +1064,7 @@ export default {
 					label: 'Group',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1180,7 +1175,7 @@ export default {
 					label: 'Group',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1287,7 +1282,7 @@ export default {
 					label: 'Group',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1391,7 +1386,7 @@ export default {
 					label: 'Group',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				PanLevelOption,
@@ -1479,7 +1474,7 @@ export default {
 					label: 'Group',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_GRP,
+					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
 				{

@@ -84,6 +84,31 @@ export class Model {
 		this.forEachMix(f)
 	}
 
+	#groupLabel(group) {
+		return `GROUP ${group + 1}`
+	}
+
+	#groupDesc(group) {
+		return `Group ${group + 1}`
+	}
+
+	#groupLabels = []
+
+	forEachGroup(f) {
+		const groupLabels = this.#groupLabels
+		if (groupLabels.length === 0) {
+			for (let group = 0; group < this.grpCount; group++) {
+				const label = this.#groupLabel(group)
+				const desc = this.#groupDesc(group)
+				groupLabels.push([label, desc])
+			}
+		}
+
+		groupLabels.forEach(([label, desc], group) => {
+			f(group, label, desc)
+		})
+	}
+
 	#softKeyLabel(key) {
 		return `SOFTKEY ${key + 1}`
 	}

@@ -352,12 +352,12 @@ export default {
 			})
 		})
 
-		for (let i = 0; i < model.grpCount; i++) {
+		model.forEachGroup((group) => {
 			model.forEachMixAndLR((mix) => {
-				const rsp = self.getLevel(i, mix, model.mixCount, [0x40, 0x45], [0x30, 0x04])
+				const rsp = self.getLevel(group, mix, model.mixCount, [0x40, 0x45], [0x30, 0x04])
 				buff.push(rsp['buffer'][0])
 			})
-		}
+		})
 
 		for (let i = 0; i < model.fxrCount; i++) {
 			model.forEachMixAndLR((mix) => {
@@ -367,11 +367,10 @@ export default {
 		}
 
 		for (let i = 0; i < model.fxrCount; i++) {
-			let tmp = self.CHOICES_GRP
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.grpCount, [0, 0x4b], [0, 0x34])
+			model.forEachGroup((group) => {
+				const rsp = self.getLevel(i, group, model.grpCount, [0, 0x4b], [0, 0x34])
 				buff.push(rsp['buffer'][0])
-			}
+			})
 		}
 
 		model.forEachInputChannel((channel) => {
@@ -382,13 +381,13 @@ export default {
 			}
 		})
 
-		for (let i = 0; i < model.grpCount; i++) {
+		model.forEachGroup((group) => {
 			let tmp = self.CHOICES_FXS
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.fxsCount, [0, 0x4d], [0, 0x54])
+				const rsp = self.getLevel(group, tmp[j].id, model.fxsCount, [0, 0x4d], [0, 0x54])
 				buff.push(rsp['buffer'][0])
 			}
-		}
+		})
 
 		for (let i = 0; i < model.fxrCount; i++) {
 			let tmp = self.CHOICES_FXS
@@ -414,13 +413,13 @@ export default {
 			}
 		})
 
-		for (let i = 0; i < model.grpCount; i++) {
+		model.forEachGroup((group) => {
 			let tmp = self.CHOICES_MTX
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.mtxCount, [0, 0x4e], [0, 0x4b])
+				const rsp = self.getLevel(group, tmp[j].id, model.mtxCount, [0, 0x4e], [0, 0x4b])
 				buff.push(rsp['buffer'][0])
 			}
-		}
+		})
 
 		{
 			const tmp = []

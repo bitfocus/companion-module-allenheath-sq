@@ -42,6 +42,19 @@ function createMixesAndLR(model) {
  * @param {import('./mixer/model.js').Model} model
  * @returns {{ label: string, id: number }[]}
  */
+function createGroups(model) {
+	/** @type {{ label: string, id: number }[]} */
+	const groups = []
+	model.forEachGroup((group, groupLabel) => {
+		groups.push({ label: groupLabel, id: group })
+	})
+	return groups
+}
+
+/**
+ * @param {import('./mixer/model.js').Model} model
+ * @returns {{ label: string, id: number }[]}
+ */
 function createDCAs(model) {
 	/** @type {{ label: string, id: number }[]} */
 	const dcas = []
@@ -96,6 +109,7 @@ export class Choices {
 	inputChannels
 	mixes
 	mixesAndLR
+	groups
 	dcas
 	softKeys
 	levels
@@ -107,6 +121,7 @@ export class Choices {
 		this.inputChannels = createInputChannels(model)
 		this.mixes = createMixes(model)
 		this.mixesAndLR = createMixesAndLR(model)
+		this.groups = createGroups(model)
 		this.dcas = createDCAs(model)
 		this.softKeys = createSoftKeys(model)
 		this.levels = createLevels()
