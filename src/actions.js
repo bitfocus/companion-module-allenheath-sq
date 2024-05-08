@@ -33,30 +33,6 @@ export default {
 			self.CHOICES_MTX.push({ label: `MATRIX ${i + 1}`, id: i })
 		}
 
-		self.CHOICES_LEVEL = [
-			{ label: `Last dB value`, id: 1000 },
-			{ label: `Step +0.1 dB`, id: 'step+0.1' }, //added
-			{ label: `Step +1 dB`, id: 'step+1' },
-			{ label: `Step +3 dB`, id: 'step+3' }, //added
-			{ label: `Step +6 dB`, id: 'step+6' }, //added
-			{ label: `Step -0.1 dB`, id: 'step-0.1' }, //added
-			{ label: `Step -1 dB`, id: 'step-1' },
-			{ label: `Step -3 dB`, id: 'step-3' }, //added
-			{ label: `Step -6 dB`, id: 'step-6' }, //added
-		]
-		for (let i = -90; i <= -40; i = i + 5) {
-			if (i == -90) {
-				i = '-inf'
-			}
-			self.CHOICES_LEVEL.push({ label: `${i} dB`, id: i })
-		}
-		for (let i = -39; i <= -10; i = i + 1) {
-			self.CHOICES_LEVEL.push({ label: `${i} dB`, id: i })
-		}
-		for (let i = -9.5; i <= 10; i = i + 0.5) {
-			self.CHOICES_LEVEL.push({ label: `${i} dB`, id: i })
-		}
-
 		self.CHOICES_PANLEVEL = [
 			{ label: `Step Right`, id: 998 },
 			{ label: `Step Left`, id: 999 },
@@ -151,7 +127,7 @@ export default {
 			label: 'Level',
 			id: 'leveldb',
 			default: 0,
-			choices: self.CHOICES_LEVEL,
+			choices: choices.levels,
 			minChoicesForSearch: 0,
 		}
 
