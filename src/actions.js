@@ -180,26 +180,6 @@ export default {
 			minChoicesForSearch: 0,
 		}
 
-		self.faderOptions = (name, qty, ofs) => {
-			self.CHOICES = []
-			for (let i = 1; i <= qty; i++) {
-				self.CHOICES.push({ label: `${name} ${i}`, id: i + ofs })
-			}
-
-			return [
-				{
-					type: 'dropdown',
-					label: name,
-					id: 'strip',
-					default: 1 + ofs,
-					choices: self.CHOICES,
-					minChoicesForSearch: 0,
-				},
-				self.levelObj,
-				self.fadeObj,
-			]
-		}
-
 		actions['mute_input'] = {
 			name: 'Mute Input',
 			options: self.muteOptions('Input Channel', self.chCount, -1),
