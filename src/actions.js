@@ -170,7 +170,7 @@ export default {
 			minChoicesForSearch: 0,
 		}
 
-		self.levelObj = {
+		const LevelOption = {
 			type: 'dropdown',
 			label: 'Level',
 			id: 'leveldb',
@@ -926,7 +926,7 @@ export default {
 					choices: self.CHOICES_MIX,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -969,7 +969,7 @@ export default {
 					choices: self.CHOICES_MIX,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -1006,7 +1006,7 @@ export default {
 					choices: self.CHOICES_MIX,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -1043,7 +1043,7 @@ export default {
 					choices: self.CHOICES_GRP,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -1080,7 +1080,7 @@ export default {
 					choices: self.CHOICES_FXS,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -1117,7 +1117,7 @@ export default {
 					choices: self.CHOICES_FXS,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -1154,7 +1154,7 @@ export default {
 					choices: self.CHOICES_FXS,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -1191,7 +1191,7 @@ export default {
 					choices: self.CHOICES_MTX,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -1228,7 +1228,7 @@ export default {
 					choices: self.CHOICES_MTX,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
@@ -1257,7 +1257,7 @@ export default {
 					choices: self.CHOICES_ALLFADER,
 					minChoicesForSearch: 0,
 				},
-				self.levelObj,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async (action) => {
