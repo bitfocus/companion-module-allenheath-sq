@@ -12,11 +12,6 @@ export default {
 			self.CHOICES_INPUT_CHANNEL.push({ label: `CH ${i + 1}`, id: i })
 		}
 
-		self.CHOICES_SCENES = []
-		for (let i = 0; i < model.sceneCount; i++) {
-			self.CHOICES_SCENES.push({ label: `SCENE ${i + 1}`, id: i })
-		}
-
 		self.CHOICES_MIX = []
 		self.CHOICES_MIX.push({ label: `LR`, id: 99 })
 		for (let i = 0; i < model.mixCount; i++) {
