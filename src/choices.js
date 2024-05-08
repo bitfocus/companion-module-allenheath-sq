@@ -68,6 +68,19 @@ function createDCAs(model) {
  * @param {import('./mixer/model.js').Model} model
  * @returns {{ label: string, id: number }[]}
  */
+function createMuteGroups(model) {
+	/** @type {{ label: string, id: number }[]} */
+	const muteGroups = []
+	model.forEachMuteGroup((muteGroup, muteGroupLabel) => {
+		muteGroups.push({ label: muteGroupLabel, id: muteGroup })
+	})
+	return muteGroups
+}
+
+/**
+ * @param {import('./mixer/model.js').Model} model
+ * @returns {{ label: string, id: number }[]}
+ */
 function createSoftKeys(model) {
 	/** @type {{ label: string, id: number }[]} */
 	const softKeys = []
@@ -111,6 +124,7 @@ export class Choices {
 	mixesAndLR
 	groups
 	dcas
+	muteGroups
 	softKeys
 	levels
 
@@ -123,6 +137,7 @@ export class Choices {
 		this.mixesAndLR = createMixesAndLR(model)
 		this.groups = createGroups(model)
 		this.dcas = createDCAs(model)
+		this.muteGroups = createMuteGroups(model)
 		this.softKeys = createSoftKeys(model)
 		this.levels = createLevels()
 	}

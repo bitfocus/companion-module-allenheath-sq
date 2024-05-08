@@ -31,11 +31,6 @@ export default {
 			self.CHOICES_PANLEVEL.push({ label: `${pos}`, id: `${pos}` })
 		}
 
-		self.CHOICES_MUTEGRP = []
-		for (let i = 0; i < model.muteGroup; i++) {
-			self.CHOICES_MUTEGRP.push({ label: `MuteGroup ${i + 1}`, id: i })
-		}
-
 		// All fader mix choices
 		self.CHOICES_ALLFADER = []
 		self.CHOICES_ALLFADER.push({ label: `LR`, id: 0 })

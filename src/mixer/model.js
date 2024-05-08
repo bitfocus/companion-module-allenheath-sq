@@ -109,6 +109,26 @@ export class Model {
 		})
 	}
 
+	#muteGroupLabel(muteGroup) {
+		return `MuteGroup ${muteGroup + 1}`
+	}
+
+	#muteGroupLabels = []
+
+	forEachMuteGroup(f) {
+		const muteGroupLabels = this.#muteGroupLabels
+		if (muteGroupLabels.length === 0) {
+			for (let muteGroup = 0; muteGroup < this.muteGroup; muteGroup++) {
+				const label = this.#muteGroupLabel(muteGroup)
+				muteGroupLabels.push(label)
+			}
+		}
+
+		muteGroupLabels.forEach((label, muteGroup) => {
+			f(muteGroup, label, label)
+		})
+	}
+
 	#softKeyLabel(key) {
 		return `SOFTKEY ${key + 1}`
 	}
