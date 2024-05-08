@@ -106,9 +106,9 @@ export default {
 		}
 
 		self.muteOptions = (name, qty, ofs) => {
-			self.CHOICES = []
+			const muteChoices = []
 			for (let i = 1; i <= qty; i++) {
-				self.CHOICES.push({ label: `${name} ${i}`, id: i + ofs })
+				muteChoices.push({ label: `${name} ${i}`, id: i + ofs })
 			}
 
 			return [
@@ -117,7 +117,7 @@ export default {
 					label: name,
 					id: 'strip',
 					default: 1 + ofs,
-					choices: self.CHOICES,
+					choices: muteChoices,
 					minChoicesForSearch: 0,
 				},
 				{
