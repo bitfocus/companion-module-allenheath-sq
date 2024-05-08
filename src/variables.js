@@ -10,17 +10,17 @@ export default {
 			variableId: 'currentScene',
 		})
 
-		for (let i = 0; i < model.chCount; i++) {
+		model.forEachInputChannel((channel, channelLabel) => {
 			let tmp = self.CHOICES_MIX
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
+				const rsp = self.getLevel(channel, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
 
 				variables.push({
-					name: `CH ${i + 1} -> ${tmp[j].label} Level`,
+					name: `${channelLabel} -> ${tmp[j].label} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
-		}
+		})
 
 		for (let i = 0; i < model.grpCount; i++) {
 			let tmp = self.CHOICES_MIX
@@ -58,17 +58,17 @@ export default {
 			}
 		}
 
-		for (let i = 0; i < model.chCount; i++) {
+		model.forEachInputChannel((channel, _channelLabel, channelDesc) => {
 			let tmp = self.CHOICES_FXS
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.fxsCount, [0, 0x4c], [0, 0x14])
+				const rsp = self.getLevel(channel, tmp[j].id, model.fxsCount, [0, 0x4c], [0, 0x14])
 
 				variables.push({
-					name: `CH ${i + 1} -> ${tmp[j].label} Level`,
+					name: `${channelDesc} -> ${tmp[j].label} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
-		}
+		})
 
 		for (let i = 0; i < model.grpCount; i++) {
 			let tmp = self.CHOICES_FXS

@@ -1,16 +1,11 @@
 export default {
-	initActions: function () {
+	initActions: function (choices) {
 		let self = this
 		const model = self.model
 
 		let actions = {}
 
 		var sceneNumber
-
-		self.CHOICES_INPUT_CHANNEL = []
-		for (let i = 0; i < model.chCount; i++) {
-			self.CHOICES_INPUT_CHANNEL.push({ label: `CH ${i + 1}`, id: i })
-		}
 
 		self.CHOICES_MIX = []
 		self.CHOICES_MIX.push({ label: `LR`, id: 99 })
@@ -571,7 +566,7 @@ export default {
 					label: 'Input Channel',
 					id: 'inputChannel',
 					default: 0,
-					choices: self.CHOICES_INPUT_CHANNEL,
+					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -610,7 +605,7 @@ export default {
 					label: 'Input Channel',
 					id: 'inputChannel',
 					default: 0,
-					choices: self.CHOICES_INPUT_CHANNEL,
+					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -727,7 +722,7 @@ export default {
 					label: 'Input Channel',
 					id: 'inputChannel',
 					default: 0,
-					choices: self.CHOICES_INPUT_CHANNEL,
+					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -923,7 +918,7 @@ export default {
 					label: 'Input channel',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_INPUT_CHANNEL,
+					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1077,7 +1072,7 @@ export default {
 					label: 'Input channel',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_INPUT_CHANNEL,
+					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1284,7 +1279,7 @@ export default {
 					label: 'Input channel',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_INPUT_CHANNEL,
+					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
 				},
 				{

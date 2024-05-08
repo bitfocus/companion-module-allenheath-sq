@@ -342,15 +342,16 @@ export default {
 	getRemoteLevel: function () {
 		var self = this
 		const model = self.model
+
 		var buff = []
 
-		for (let i = 0; i < model.chCount; i++) {
+		model.forEachInputChannel((channel) => {
 			let tmp = self.CHOICES_MIX
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
+				const rsp = self.getLevel(channel, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
 				buff.push(rsp['buffer'][0])
 			}
-		}
+		})
 
 		for (let i = 0; i < model.grpCount; i++) {
 			let tmp = self.CHOICES_MIX
@@ -376,13 +377,13 @@ export default {
 			}
 		}
 
-		for (let i = 0; i < model.chCount; i++) {
+		model.forEachInputChannel((channel) => {
 			let tmp = self.CHOICES_FXS
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.fxsCount, [0, 0x4c], [0, 0x14])
+				const rsp = self.getLevel(channel, tmp[j].id, model.fxsCount, [0, 0x4c], [0, 0x14])
 				buff.push(rsp['buffer'][0])
 			}
-		}
+		})
 
 		for (let i = 0; i < model.grpCount; i++) {
 			let tmp = self.CHOICES_FXS

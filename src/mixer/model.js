@@ -33,4 +33,24 @@ export class Model {
 		this.SoftKey = sqModel['SoftKey']
 		this.sceneCount = sqModel['sceneCount']
 	}
+
+	#channelLabel(channel) {
+		return `CH ${channel + 1}`
+	}
+
+	#channelLabels = []
+
+	forEachInputChannel(f) {
+		const channelLabels = this.#channelLabels
+		if (channelLabels.length === 0) {
+			for (let channel = 0; channel < this.chCount; channel++) {
+				const label = this.#channelLabel(channel)
+				channelLabels.push(label)
+			}
+		}
+
+		channelLabels.forEach((label, channel) => {
+			f(channel, label, label)
+		})
+	}
 }

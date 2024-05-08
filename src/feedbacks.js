@@ -4,7 +4,7 @@ const WHITE = combineRgb(255, 255, 255)
 const CARMINE_RED = combineRgb(153, 0, 51)
 
 export default {
-	initFeedbacks: function () {
+	initFeedbacks: function (choices) {
 		let self = this
 
 		var feedbacks = {}
@@ -39,7 +39,7 @@ export default {
 		}
 
 		/* Mute */
-		createtFdb('mute_input', 'Mute', 'Input', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_INPUT_CHANNEL, 0, 0)
+		createtFdb('mute_input', 'Mute', 'Input', { fg: WHITE, bg: CARMINE_RED }, choices.inputChannels, 0, 0)
 		createtFdb('mute_lr', 'Mute', 'LR', { fg: WHITE, bg: CARMINE_RED }, [{ label: `LR`, id: 0 }], 0, 68)
 		createtFdb('mute_aux', 'Mute', 'Aux', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_MIX, 0, 69)
 		createtFdb('mute_group', 'Mute', 'Group', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_GRP, 0, 48)

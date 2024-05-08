@@ -179,18 +179,18 @@ export default {
 		}
 
 		// Input -> Mix
-		for (let i = 0; i < model.chCount; i++) {
+		model.forEachInputChannel((channel, channelLabel) => {
 			let tmp = self.CHOICES_MIX
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
+				const rsp = self.getLevel(channel, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
 				createtMuteLevel(
 					`Mt+dB CH-${tmp[j].label}`,
-					`CH ${i + 1}\\n${tmp[j].label}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
+					`${channelLabel}\\n${tmp[j].label}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
 					'mute_input',
-					i,
+					channel,
 				)
 			}
-		}
+		})
 		/**/
 
 		self.setPresetDefinitions(presets)
