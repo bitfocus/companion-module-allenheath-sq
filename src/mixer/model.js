@@ -8,7 +8,7 @@ export class Model {
 	fxsCount
 	mtxCount
 	dcaCount
-	muteGroup
+	muteGroupCount
 	softKeyCount
 	sceneCount
 
@@ -29,7 +29,7 @@ export class Model {
 		this.fxsCount = sqModel['fxsCount']
 		this.mtxCount = sqModel['mtxCount']
 		this.dcaCount = sqModel['dcaCount']
-		this.muteGroup = sqModel['muteGroup']
+		this.muteGroupCount = sqModel['muteGroupCount']
 		this.softKeyCount = sqModel['SoftKey']
 		this.sceneCount = sqModel['sceneCount']
 	}
@@ -118,7 +118,7 @@ export class Model {
 	forEachMuteGroup(f) {
 		const muteGroupLabels = this.#muteGroupLabels
 		if (muteGroupLabels.length === 0) {
-			for (let muteGroup = 0; muteGroup < this.muteGroup; muteGroup++) {
+			for (let muteGroup = 0; muteGroup < this.muteGroupCount; muteGroup++) {
 				const label = this.#muteGroupLabel(muteGroup)
 				muteGroupLabels.push(label)
 			}

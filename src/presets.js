@@ -57,7 +57,7 @@ export default {
 		createtMute('Mute FX', 'FX Send', 'mute_fx_send', model.fxsCount)
 		createtMute('Mute FX', 'FX Return', 'mute_fx_return', model.fxrCount)
 		createtMute('Mute DCA', 'DCA', 'mute_dca', model.dcaCount)
-		createtMute('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', model.muteGroup)
+		createtMute('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', model.muteGroupCount)
 
 		/* TALKBACK*/
 		model.forEachMix((mix, mixLabel, mixDesc) => {
