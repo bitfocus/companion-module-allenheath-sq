@@ -141,3 +141,9 @@ export function sleep(ml) {
 		cd = Date.now()
 	} while (cd - dt < ml)
 }
+
+export async function asyncSleep(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms)
+	})
+}

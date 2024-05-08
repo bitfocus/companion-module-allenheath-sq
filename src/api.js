@@ -3,7 +3,7 @@ import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import callback from './callback.js'
 
 import { SQModels } from './mixer/models.js'
-import { sleep } from './utils.js'
+import { asyncSleep, sleep } from './utils.js'
 
 const MIDI = 51325
 
@@ -604,16 +604,10 @@ export default {
 	sendBuffers: async function (buffers) {
 		let self = this
 
-		function sleepSend(ms) {
-			return new Promise((resolve) => {
-				setTimeout(resolve, ms)
-			})
-		}
-
 		for (let i = 0; i < buffers.length; i++) {
 			this.log('debug', `Sending : ${Array.from(buffers[i])} from ${this.config.host}`)
 			self.sendSocket(buffers[i])
-			await sleepSend(200)
+			await asyncSleep(200)
 		}
 	},
 }
