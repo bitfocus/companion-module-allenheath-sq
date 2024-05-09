@@ -8,7 +8,7 @@ import { GetConfigFields } from './src/config.js'
 import { getActions } from './src/actions.js'
 import feedbacks from './src/feedbacks.js'
 import { getVariables } from './src/variables.js'
-import presets from './src/presets.js'
+import { getPresets } from './src/presets.js'
 
 import api from './src/api.js'
 
@@ -25,7 +25,6 @@ class sqInstance extends InstanceBase {
 		// Assign the methods from the listed files to this class
 		Object.assign(this, {
 			...feedbacks,
-			...presets,
 			...api,
 		})
 
@@ -76,7 +75,7 @@ class sqInstance extends InstanceBase {
 		this.setActionDefinitions(getActions(this, choices))
 		this.initFeedbacks(choices)
 		this.setVariableDefinitions(getVariables(this, model))
-		this.initPresets()
+		this.setPresetDefinitions(getPresets(this, model))
 
 		//this.checkVariables();
 		this.checkFeedbacks()
