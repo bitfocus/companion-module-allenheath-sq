@@ -144,6 +144,17 @@ function createLevels() {
 	return levels
 }
 
+function createPanLevels() {
+	const panLevels = []
+	panLevels.push({ label: `Step Right`, id: 998 }, { label: `Step Left`, id: 999 })
+	for (let i = -100; i <= 100; i = i + 5) {
+		const pos = i < 0 ? `L${Math.abs(i)}` : i == 0 ? `CTR` : `R${Math.abs(i)}`
+		panLevels.push({ label: `${pos}`, id: `${pos}` })
+	}
+
+	return panLevels
+}
+
 export class Choices {
 	inputChannels
 	mixes
@@ -155,6 +166,7 @@ export class Choices {
 	muteGroups
 	softKeys
 	levels
+	panLevels
 
 	/**
 	 * @param {import('./mixer/model.js').Model} model
@@ -170,5 +182,6 @@ export class Choices {
 		this.muteGroups = createMuteGroups(model)
 		this.softKeys = createSoftKeys(model)
 		this.levels = createLevels()
+		this.panLevels = createPanLevels()
 	}
 }

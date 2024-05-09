@@ -12,15 +12,6 @@ export default {
 			self.CHOICES_MTX.push({ label: `MATRIX ${i + 1}`, id: i })
 		}
 
-		self.CHOICES_PANLEVEL = [
-			{ label: `Step Right`, id: 998 },
-			{ label: `Step Left`, id: 999 },
-		]
-		for (let i = -100; i <= 100; i = i + 5) {
-			let pos = i < 0 ? `L${Math.abs(i)}` : i == 0 ? `CTR` : `R${Math.abs(i)}`
-			self.CHOICES_PANLEVEL.push({ label: `${pos}`, id: `${pos}` })
-		}
-
 		// All fader mix choices
 		self.CHOICES_ALLFADER = []
 		self.CHOICES_ALLFADER.push({ label: `LR`, id: 0 })
@@ -100,7 +91,7 @@ export default {
 			label: 'Level',
 			id: 'leveldb',
 			default: 'CTR',
-			choices: self.CHOICES_PANLEVEL,
+			choices: choices.panLevels,
 			minChoicesForSearch: 0,
 		}
 
