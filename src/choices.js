@@ -168,6 +168,34 @@ function createPanLevels() {
 	return panLevels
 }
 
+/**
+ * @param {import('./mixer/model.js').Model} model
+ * @returns {{ label: string, id: number }[]}
+ */
+function createAllFaders(model) {
+	// All fader mix choices
+	/** @type {{ label: string, id: number }[]} */
+	const allFaders = []
+	allFaders.push({ label: `LR`, id: 0 })
+	model.forEachMix((mix, mixLabel) => {
+		allFaders.push({ label: mixLabel, id: mix + 1 })
+	})
+	model.forEachFxSend((fxs, fxsLabel) => {
+		allFaders.push({ label: fxsLabel, id: fxs + 1 + model.mixCount })
+	})
+	model.forEachMatrix((matrix, matrixLabel) => {
+		allFaders.push({ label: matrixLabel, id: matrix + 1 + model.mixCount + model.fxsCount })
+	})
+	model.forEachDCA((dca, dcaLabel) => {
+		allFaders.push({
+			label: dcaLabel,
+			id: dca + 1 + model.mixCount + model.fxsCount + model.mtxCount + 12,
+		})
+	})
+
+	return allFaders
+}
+
 export class Choices {
 	inputChannels
 	mixes
@@ -181,6 +209,7 @@ export class Choices {
 	softKeys
 	levels
 	panLevels
+	allFaders
 
 	/**
 	 * @param {import('./mixer/model.js').Model} model
@@ -198,5 +227,6 @@ export class Choices {
 		this.softKeys = createSoftKeys(model)
 		this.levels = createLevels()
 		this.panLevels = createPanLevels()
+		this.allFaders = createAllFaders(model)
 	}
 }

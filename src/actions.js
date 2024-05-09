@@ -7,25 +7,6 @@ export default {
 
 		var sceneNumber
 
-		// All fader mix choices
-		self.CHOICES_ALLFADER = []
-		self.CHOICES_ALLFADER.push({ label: `LR`, id: 0 })
-		model.forEachMix((mix, mixLabel) => {
-			self.CHOICES_ALLFADER.push({ label: mixLabel, id: mix + 1 })
-		})
-		model.forEachFxSend((fxs, fxsLabel) => {
-			self.CHOICES_ALLFADER.push({ label: fxsLabel, id: fxs + 1 + model.mixCount })
-		})
-		model.forEachMatrix((matrix, matrixLabel) => {
-			self.CHOICES_ALLFADER.push({ label: matrixLabel, id: matrix + 1 + model.mixCount + model.fxsCount })
-		})
-		model.forEachDCA((dca, dcaLabel) => {
-			self.CHOICES_ALLFADER.push({
-				label: dcaLabel,
-				id: dca + 1 + model.mixCount + model.fxsCount + model.mtxCount + 12,
-			})
-		})
-
 		function muteOptions(name, qty, ofs) {
 			const muteChoices = []
 			for (let i = 1; i <= qty; i++) {
@@ -1183,7 +1164,7 @@ export default {
 					label: 'Fader',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_ALLFADER,
+					choices: choices.allFaders,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -1493,7 +1474,7 @@ export default {
 					label: 'Fader',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_ALLFADER.filter(function (val, idx, arr) {
+					choices: choices.allFaders.filter(function (val, idx, arr) {
 						return idx < 19
 					}),
 					minChoicesForSearch: 0,
