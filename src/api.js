@@ -487,7 +487,7 @@ module.exports = {
 	getRemoteStatus: function (act) {
 		chks = true
 		for (let key in callback[act]) {
-			let mblb = key.toString().split('.')
+			let mblb = key.toString().split(':')
 			this.sendSocket(Buffer.from([this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7f]))
 		}
 	},
@@ -522,7 +522,7 @@ module.exports = {
 						/* Mute */
 						if (MSB == 0 || MSB == 2 || MSB == 4) {
 							this.fdbState['mute_' + MSB + '.' + LSB] = VF == 1 ? true : false
-							self.checkFeedbacks(callback['mute'][MSB + '.' + LSB][0])
+							self.checkFeedbacks(callback['mute'][MSB + ':' + LSB][0])
 							this.log('debug', `Mute Received : ${dt} from ${self.config.host}`)
 						}
 
