@@ -5,7 +5,7 @@ import { UpgradeScripts } from './src/upgrades.js'
 
 import { GetConfigFields } from './src/config.js'
 
-import actions from './src/actions.js'
+import { getActions } from './src/actions.js'
 import feedbacks from './src/feedbacks.js'
 import variables from './src/variables.js'
 import presets from './src/presets.js'
@@ -24,7 +24,6 @@ class sqInstance extends InstanceBase {
 
 		// Assign the methods from the listed files to this class
 		Object.assign(this, {
-			...actions,
 			...feedbacks,
 			...variables,
 			...presets,
@@ -75,7 +74,7 @@ class sqInstance extends InstanceBase {
 
 		const choices = new Choices(model)
 
-		this.initActions(choices)
+		this.setActionDefinitions(getActions(this, choices))
 		this.initFeedbacks(choices)
 		this.initVariables()
 		this.initPresets()
