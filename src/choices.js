@@ -55,6 +55,19 @@ function createGroups(model) {
  * @param {import('./mixer/model.js').Model} model
  * @returns {{ label: string, id: number }[]}
  */
+function createMatrixes(model) {
+	/** @type {{ label: string, id: number }[]} */
+	const matrixes = []
+	model.forEachMatrix((matrix, matrixLabel) => {
+		matrixes.push({ label: matrixLabel, id: matrix })
+	})
+	return matrixes
+}
+
+/**
+ * @param {import('./mixer/model.js').Model} model
+ * @returns {{ label: string, id: number }[]}
+ */
 function createFXReturns(model) {
 	/** @type {{ label: string, id: number }[]} */
 	const fxReturns = []
@@ -160,6 +173,7 @@ export class Choices {
 	mixes
 	mixesAndLR
 	groups
+	matrixes
 	fxReturns
 	fxSends
 	dcas
@@ -176,6 +190,7 @@ export class Choices {
 		this.mixes = createMixes(model)
 		this.mixesAndLR = createMixesAndLR(model)
 		this.groups = createGroups(model)
+		this.matrixes = createMatrixes(model)
 		this.fxReturns = createFXReturns(model)
 		this.fxSends = createFXSends(model)
 		this.dcas = createDCAs(model)

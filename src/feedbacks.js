@@ -43,7 +43,7 @@ export default {
 		createtFdb('mute_lr', 'Mute', 'LR', { fg: WHITE, bg: CARMINE_RED }, [{ label: `LR`, id: 0 }], 0, 68)
 		createtFdb('mute_aux', 'Mute', 'Aux', { fg: WHITE, bg: CARMINE_RED }, choices.mixesAndLR, 0, 69)
 		createtFdb('mute_group', 'Mute', 'Group', { fg: WHITE, bg: CARMINE_RED }, choices.groups, 0, 48)
-		createtFdb('mute_matrix', 'Mute', 'Matrix', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_MTX, 0, 85)
+		createtFdb('mute_matrix', 'Mute', 'Matrix', { fg: WHITE, bg: CARMINE_RED }, choices.matrixes, 0, 85)
 		createtFdb('mute_dca', 'Mute', 'DCA', { fg: WHITE, bg: CARMINE_RED }, choices.dcas, 2, 0)
 		createtFdb('mute_fx_return', 'Mute', 'FX Return', { fg: WHITE, bg: CARMINE_RED }, choices.fxReturns, 0, 60)
 		createtFdb('mute_fx_send', 'Mute', 'FX Send', { fg: WHITE, bg: CARMINE_RED }, choices.fxSends, 0, 81)

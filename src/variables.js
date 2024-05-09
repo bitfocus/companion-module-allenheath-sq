@@ -87,39 +87,34 @@ export default {
 			})
 		})
 
-		{
-			let tmp = self.CHOICES_MTX
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(0, tmp[j].id, model.mtxCount, [0, 0x4e], [0, 0x24])
+		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
+			const rsp = self.getLevel(0, matrix, model.mtxCount, [0, 0x4e], [0, 0x24])
 
-				variables.push({
-					name: `LR -> ${tmp[j].label} Level`,
-					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
-				})
-			}
-		}
+			variables.push({
+				name: `LR -> ${matrixDesc} Level`,
+				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+			})
+		})
 		model.forEachMix((mix, _mixLabel, mixDesc) => {
-			let tmp = self.CHOICES_MTX
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(mix, tmp[j].id, model.mtxCount, [0x4e, 0x4e], [0x24, 0x27])
+			model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
+				const rsp = self.getLevel(mix, matrix, model.mtxCount, [0x4e, 0x4e], [0x24, 0x27])
 
 				variables.push({
-					name: `${mixDesc} -> ${tmp[j].label} Level`,
+					name: `${mixDesc} -> ${matrixDesc} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
-			}
+			})
 		})
 
 		model.forEachGroup((group, _groupLabel, groupDesc) => {
-			let tmp = self.CHOICES_MTX
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(group, tmp[j].id, model.mtxCount, [0, 0x4e], [0, 0x4b])
+			model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
+				const rsp = self.getLevel(group, matrix, model.mtxCount, [0, 0x4e], [0, 0x4b])
 
 				variables.push({
-					name: `${groupDesc} -> ${tmp[j].label} Level`,
+					name: `${groupDesc} -> ${matrixDesc} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
-			}
+			})
 		})
 
 		{
@@ -131,9 +126,9 @@ export default {
 			model.forEachFxSend((fxs, fxsLabel) => {
 				tmp.push({ label: fxsLabel, id: fxs + 1 + model.mixCount })
 			})
-			for (let i = 0; i < model.mtxCount; i++) {
-				tmp.push({ label: `MATRIX ${i + 1}`, id: i + 1 + model.mixCount + model.fxsCount })
-			}
+			model.forEachMatrix((matrix, matrixLabel) => {
+				tmp.push({ label: matrixLabel, id: matrix + 1 + model.mixCount + model.fxsCount })
+			})
 			for (let j = 0; j < tmp.length; j++) {
 				const rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
 

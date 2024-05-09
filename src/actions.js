@@ -7,11 +7,6 @@ export default {
 
 		var sceneNumber
 
-		self.CHOICES_MTX = []
-		for (let i = 0; i < model.mtxCount; i++) {
-			self.CHOICES_MTX.push({ label: `MATRIX ${i + 1}`, id: i })
-		}
-
 		// All fader mix choices
 		self.CHOICES_ALLFADER = []
 		self.CHOICES_ALLFADER.push({ label: `LR`, id: 0 })
@@ -21,9 +16,9 @@ export default {
 		model.forEachFxSend((fxs, fxsLabel) => {
 			self.CHOICES_ALLFADER.push({ label: fxsLabel, id: fxs + 1 + model.mixCount })
 		})
-		for (let i = 0; i < model.mtxCount; i++) {
-			self.CHOICES_ALLFADER.push({ label: `MATRIX ${i + 1}`, id: i + 1 + model.mixCount + model.fxsCount })
-		}
+		model.forEachMatrix((matrix, matrixLabel) => {
+			self.CHOICES_ALLFADER.push({ label: matrixLabel, id: matrix + 1 + model.mixCount + model.fxsCount })
+		})
 		model.forEachDCA((dca, dcaLabel) => {
 			self.CHOICES_ALLFADER.push({
 				label: dcaLabel,
@@ -778,7 +773,7 @@ export default {
 					label: 'Matrix',
 					id: 'mtxAssign',
 					default: [],
-					choices: self.CHOICES_MTX,
+					choices: choices.matrixes,
 				},
 				{
 					type: 'checkbox',
@@ -817,7 +812,7 @@ export default {
 					label: 'Matrix',
 					id: 'mtxAssign',
 					default: [],
-					choices: self.CHOICES_MTX,
+					choices: choices.matrixes,
 				},
 				{
 					type: 'checkbox',
@@ -1122,7 +1117,7 @@ export default {
 					label: 'Matrix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MTX,
+					choices: choices.matrixes,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -1159,7 +1154,7 @@ export default {
 					label: 'Matrix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MTX,
+					choices: choices.matrixes,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -1410,7 +1405,7 @@ export default {
 					label: 'Matrix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MTX,
+					choices: choices.matrixes,
 					minChoicesForSearch: 0,
 				},
 				PanLevelOption,
@@ -1458,7 +1453,7 @@ export default {
 					label: 'Matrix',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_MTX,
+					choices: choices.matrixes,
 					minChoicesForSearch: 0,
 				},
 				PanLevelOption,

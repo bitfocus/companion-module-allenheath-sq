@@ -159,6 +159,31 @@ export class Model {
 		})
 	}
 
+	#matrixLabel(matrix) {
+		return `MATRIX ${matrix + 1}`
+	}
+
+	#matrixDesc(matrix) {
+		return `Matrix ${matrix + 1}`
+	}
+
+	#matrixLabels = []
+
+	forEachMatrix(f) {
+		const matrixLabels = this.#matrixLabels
+		if (matrixLabels.length === 0) {
+			for (let matrix = 0; matrix < this.mtxCount; matrix++) {
+				const label = this.#matrixLabel(matrix)
+				const desc = this.#matrixDesc(matrix)
+				matrixLabels.push([label, desc])
+			}
+		}
+
+		matrixLabels.forEach(([label, desc], matrix) => {
+			f(matrix, label, desc)
+		})
+	}
+
 	#muteGroupLabel(muteGroup) {
 		return `MuteGroup ${muteGroup + 1}`
 	}
