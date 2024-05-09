@@ -46,7 +46,7 @@ export default {
 		createtFdb('mute_matrix', 'Mute', 'Matrix', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_MTX, 0, 85)
 		createtFdb('mute_dca', 'Mute', 'DCA', { fg: WHITE, bg: CARMINE_RED }, choices.dcas, 2, 0)
 		createtFdb('mute_fx_return', 'Mute', 'FX Return', { fg: WHITE, bg: CARMINE_RED }, choices.fxReturns, 0, 60)
-		createtFdb('mute_fx_send', 'Mute', 'FX Send', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_FXS, 0, 81)
+		createtFdb('mute_fx_send', 'Mute', 'FX Send', { fg: WHITE, bg: CARMINE_RED }, choices.fxSends, 0, 81)
 		createtFdb('mute_mutegroup', 'Mute', 'MuteGroup', { fg: WHITE, bg: CARMINE_RED }, choices.muteGroups, 4, 0)
 
 		this.setFeedbackDefinitions(feedbacks)

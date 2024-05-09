@@ -55,39 +55,36 @@ export default {
 		})
 
 		model.forEachInputChannel((channel, _channelLabel, channelDesc) => {
-			let tmp = self.CHOICES_FXS
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(channel, tmp[j].id, model.fxsCount, [0, 0x4c], [0, 0x14])
+			model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
+				const rsp = self.getLevel(channel, fxs, model.fxsCount, [0, 0x4c], [0, 0x14])
 
 				variables.push({
-					name: `${channelDesc} -> ${tmp[j].label} Level`,
+					name: `${channelDesc} -> ${fxsDesc} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
-			}
+			})
 		})
 
 		model.forEachGroup((group, _groupLabel, groupDesc) => {
-			let tmp = self.CHOICES_FXS
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(group, tmp[j].id, model.fxsCount, [0, 0x4d], [0, 0x54])
+			model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
+				const rsp = self.getLevel(group, fxs, model.fxsCount, [0, 0x4d], [0, 0x54])
 
 				variables.push({
-					name: `${groupDesc} -> ${tmp[j].label} Level`,
+					name: `${groupDesc} -> ${fxsDesc} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
-			}
+			})
 		})
 
 		model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
-			let tmp = self.CHOICES_FXS
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(fxr, tmp[j].id, model.fxsCount, [0, 0x4e], [0, 0x04])
+			model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
+				const rsp = self.getLevel(fxr, fxs, model.fxsCount, [0, 0x4e], [0, 0x04])
 
 				variables.push({
-					name: `${fxrDesc} -> ${tmp[j].label} Level`,
+					name: `${fxrDesc} -> ${fxsDesc} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
-			}
+			})
 		})
 
 		{
@@ -131,9 +128,9 @@ export default {
 			model.forEachMix((mix, _mixLabel, mixDesc) => {
 				tmp.push({ label: mixDesc, id: mix + 1 })
 			})
-			for (let i = 0; i < model.fxsCount; i++) {
-				tmp.push({ label: `FX SEND ${i + 1}`, id: i + 1 + model.mixCount })
-			}
+			model.forEachFxSend((fxs, fxsLabel) => {
+				tmp.push({ label: fxsLabel, id: fxs + 1 + model.mixCount })
+			})
 			for (let i = 0; i < model.mtxCount; i++) {
 				tmp.push({ label: `MATRIX ${i + 1}`, id: i + 1 + model.mixCount + model.fxsCount })
 			}

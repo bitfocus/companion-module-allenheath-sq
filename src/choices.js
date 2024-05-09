@@ -68,6 +68,19 @@ function createFXReturns(model) {
  * @param {import('./mixer/model.js').Model} model
  * @returns {{ label: string, id: number }[]}
  */
+function createFXSends(model) {
+	/** @type {{ label: string, id: number }[]} */
+	const fxSends = []
+	model.forEachFxSend((fxs, fxsLabel) => {
+		fxSends.push({ label: fxsLabel, id: fxs })
+	})
+	return fxSends
+}
+
+/**
+ * @param {import('./mixer/model.js').Model} model
+ * @returns {{ label: string, id: number }[]}
+ */
 function createDCAs(model) {
 	/** @type {{ label: string, id: number }[]} */
 	const dcas = []
@@ -137,6 +150,7 @@ export class Choices {
 	mixesAndLR
 	groups
 	fxReturns
+	fxSends
 	dcas
 	muteGroups
 	softKeys
@@ -151,6 +165,7 @@ export class Choices {
 		this.mixesAndLR = createMixesAndLR(model)
 		this.groups = createGroups(model)
 		this.fxReturns = createFXReturns(model)
+		this.fxSends = createFXSends(model)
 		this.dcas = createDCAs(model)
 		this.muteGroups = createMuteGroups(model)
 		this.softKeys = createSoftKeys(model)

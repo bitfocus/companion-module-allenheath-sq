@@ -7,11 +7,6 @@ export default {
 
 		var sceneNumber
 
-		self.CHOICES_FXS = []
-		for (let i = 0; i < model.fxsCount; i++) {
-			self.CHOICES_FXS.push({ label: `FX SEND ${i + 1}`, id: i })
-		}
-
 		self.CHOICES_MTX = []
 		for (let i = 0; i < model.mtxCount; i++) {
 			self.CHOICES_MTX.push({ label: `MATRIX ${i + 1}`, id: i })
@@ -32,9 +27,9 @@ export default {
 		model.forEachMix((mix, mixLabel) => {
 			self.CHOICES_ALLFADER.push({ label: mixLabel, id: mix + 1 })
 		})
-		for (let i = 0; i < model.fxsCount; i++) {
-			self.CHOICES_ALLFADER.push({ label: `FX SEND ${i + 1}`, id: i + 1 + model.mixCount })
-		}
+		model.forEachFxSend((fxs, fxsLabel) => {
+			self.CHOICES_ALLFADER.push({ label: fxsLabel, id: fxs + 1 + model.mixCount })
+		})
 		for (let i = 0; i < model.mtxCount; i++) {
 			self.CHOICES_ALLFADER.push({ label: `MATRIX ${i + 1}`, id: i + 1 + model.mixCount + model.fxsCount })
 		}
@@ -675,7 +670,7 @@ export default {
 					label: 'FX Send',
 					id: 'fxsAssign',
 					default: [],
-					choices: self.CHOICES_FXS,
+					choices: choices.fxSends,
 				},
 				{
 					type: 'checkbox',
@@ -714,7 +709,7 @@ export default {
 					label: 'FX Send',
 					id: 'fxsAssign',
 					default: [],
-					choices: self.CHOICES_FXS,
+					choices: choices.fxSends,
 				},
 				{
 					type: 'checkbox',
@@ -753,7 +748,7 @@ export default {
 					label: 'FX Send',
 					id: 'fxsAssign',
 					default: [],
-					choices: self.CHOICES_FXS,
+					choices: choices.fxSends,
 				},
 				{
 					type: 'checkbox',
@@ -1025,7 +1020,7 @@ export default {
 					label: 'FX Send',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_FXS,
+					choices: choices.fxSends,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -1062,7 +1057,7 @@ export default {
 					label: 'FX Send',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_FXS,
+					choices: choices.fxSends,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,
@@ -1099,7 +1094,7 @@ export default {
 					label: 'FX Send',
 					id: 'assign',
 					default: 0,
-					choices: self.CHOICES_FXS,
+					choices: choices.fxSends,
 					minChoicesForSearch: 0,
 				},
 				LevelOption,

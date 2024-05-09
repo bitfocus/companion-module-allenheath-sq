@@ -134,6 +134,31 @@ export class Model {
 		})
 	}
 
+	#fxSendLabel(fxs) {
+		return `FX SEND ${fxs + 1}`
+	}
+
+	#fxSendDesc(fxs) {
+		return `FX Send ${fxs + 1}`
+	}
+
+	#fxSendLabels = []
+
+	forEachFxSend(f) {
+		const fxSendLabels = this.#fxSendLabels
+		if (fxSendLabels.length === 0) {
+			for (let fxs = 0; fxs < this.fxsCount; fxs++) {
+				const label = this.#fxSendLabel(fxs)
+				const desc = this.#fxSendDesc(fxs)
+				fxSendLabels.push([label, desc])
+			}
+		}
+
+		fxSendLabels.forEach(([label, desc], fxs) => {
+			f(fxs, label, desc)
+		})
+	}
+
 	#muteGroupLabel(muteGroup) {
 		return `MuteGroup ${muteGroup + 1}`
 	}
