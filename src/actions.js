@@ -1,36 +1,30 @@
+function StripOption(label, choices) {
+	return {
+		type: 'dropdown',
+		label,
+		id: 'strip',
+		default: 0,
+		choices,
+		minChoicesForSearch: 0,
+	}
+}
+
+const MuteOption = {
+	type: 'dropdown',
+	label: 'Mute',
+	id: 'mute',
+	default: 0,
+	choices: [
+		{ label: 'Toggle', id: 0 },
+		{ label: 'On', id: 1 },
+		{ label: 'Off', id: 2 },
+	],
+}
+
 export function getActions(self, choices) {
 	const model = self.model
 
 	var sceneNumber
-
-	function muteOptions(name, qty, ofs) {
-		const muteChoices = []
-		for (let i = 1; i <= qty; i++) {
-			muteChoices.push({ label: `${name} ${i}`, id: i + ofs })
-		}
-
-		return [
-			{
-				type: 'dropdown',
-				label: name,
-				id: 'strip',
-				default: 1 + ofs,
-				choices: muteChoices,
-				minChoicesForSearch: 0,
-			},
-			{
-				type: 'dropdown',
-				label: 'Mute',
-				id: 'mute',
-				default: 0,
-				choices: [
-					{ label: 'Toggle', id: 0 },
-					{ label: 'On', id: 1 },
-					{ label: 'Off', id: 2 },
-				],
-			},
-		]
-	}
 
 	const FadingOption = {
 		type: 'dropdown',
@@ -71,7 +65,7 @@ export function getActions(self, choices) {
 
 	actions['mute_input'] = {
 		name: 'Mute Input',
-		options: muteOptions('Input Channel', model.chCount, -1),
+		options: [StripOption('Input Channel', choices.inputChannels), MuteOption],
 		callback: async (action) => {
 			let opt = action.options
 			const MSB = 0
@@ -167,7 +161,7 @@ export function getActions(self, choices) {
 
 	actions['mute_aux'] = {
 		name: 'Mute Aux',
-		options: muteOptions('Aux', 12, -1),
+		options: [StripOption('Aux', choices.mixes), MuteOption],
 		callback: async (action) => {
 			let opt = action.options
 			const MSB = 0
@@ -204,7 +198,7 @@ export function getActions(self, choices) {
 	}
 	actions['mute_group'] = {
 		name: 'Mute Group',
-		options: muteOptions('Aux', 12, -1),
+		options: [StripOption('Group', choices.groups), MuteOption],
 		callback: async (action) => {
 			let opt = action.options
 			const MSB = 0
@@ -241,7 +235,7 @@ export function getActions(self, choices) {
 	}
 	actions['mute_matrix'] = {
 		name: 'Mute Matrix',
-		options: muteOptions('Matrix', 3, -1),
+		options: [StripOption('Matrix', choices.matrixes), MuteOption],
 		callback: async (action) => {
 			let opt = action.options
 			const MSB = 0
@@ -278,7 +272,7 @@ export function getActions(self, choices) {
 	}
 	actions['mute_fx_send'] = {
 		name: 'Mute FX Send',
-		options: muteOptions('FX Send', 4, -1),
+		options: [StripOption('FX Send', choices.fxSends), MuteOption],
 		callback: async (action) => {
 			let opt = action.options
 			const MSB = 0
@@ -315,7 +309,7 @@ export function getActions(self, choices) {
 	}
 	actions['mute_fx_return'] = {
 		name: 'Mute FX Return',
-		options: muteOptions('FX Return', 8, -1),
+		options: [StripOption('FX Return', choices.fxReturns), MuteOption],
 		callback: async (action) => {
 			let opt = action.options
 			const MSB = 0
@@ -352,7 +346,7 @@ export function getActions(self, choices) {
 	}
 	actions['mute_dca'] = {
 		name: 'Mute DCA',
-		options: muteOptions('DCA', 8, -1),
+		options: [StripOption('DCA', choices.dcas), MuteOption],
 		callback: async (action) => {
 			let opt = action.options
 			const MSB = 0x02
@@ -389,7 +383,7 @@ export function getActions(self, choices) {
 	}
 	actions['mute_mutegroup'] = {
 		name: 'Mute MuteGroup',
-		options: muteOptions('Mute MuteGroup', 8, -1),
+		options: [StripOption('MuteGroup', choices.muteGroups), MuteOption],
 		callback: async (action) => {
 			let opt = action.options
 			const MSB = 0x04
