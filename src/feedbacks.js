@@ -4,10 +4,8 @@ const WHITE = combineRgb(255, 255, 255)
 const CARMINE_RED = combineRgb(153, 0, 51)
 
 export function getFeedbacks(self, choices) {
-	const feedbacks = {}
-
-	const createtFdb = (nam, typ, lab, { fg, bg }, chs, msb, ofs) => {
-		feedbacks[nam] = {
+	function createtFdb(typ, lab, { fg, bg }, chs, msb, ofs) {
+		return {
 			type: 'boolean',
 			name: `${typ} ${lab}`,
 			description: 'Change colour',
@@ -32,16 +30,15 @@ export function getFeedbacks(self, choices) {
 		}
 	}
 
-	/* Mute */
-	createtFdb('mute_input', 'Mute', 'Input', { fg: WHITE, bg: CARMINE_RED }, choices.inputChannels, 0, 0)
-	createtFdb('mute_lr', 'Mute', 'LR', { fg: WHITE, bg: CARMINE_RED }, [{ label: `LR`, id: 0 }], 0, 68)
-	createtFdb('mute_aux', 'Mute', 'Aux', { fg: WHITE, bg: CARMINE_RED }, choices.mixesAndLR, 0, 69)
-	createtFdb('mute_group', 'Mute', 'Group', { fg: WHITE, bg: CARMINE_RED }, choices.groups, 0, 48)
-	createtFdb('mute_matrix', 'Mute', 'Matrix', { fg: WHITE, bg: CARMINE_RED }, choices.matrixes, 0, 85)
-	createtFdb('mute_dca', 'Mute', 'DCA', { fg: WHITE, bg: CARMINE_RED }, choices.dcas, 2, 0)
-	createtFdb('mute_fx_return', 'Mute', 'FX Return', { fg: WHITE, bg: CARMINE_RED }, choices.fxReturns, 0, 60)
-	createtFdb('mute_fx_send', 'Mute', 'FX Send', { fg: WHITE, bg: CARMINE_RED }, choices.fxSends, 0, 81)
-	createtFdb('mute_mutegroup', 'Mute', 'MuteGroup', { fg: WHITE, bg: CARMINE_RED }, choices.muteGroups, 4, 0)
-
-	return feedbacks
+	return {
+		mute_input: createtFdb('Mute', 'Input', { fg: WHITE, bg: CARMINE_RED }, choices.inputChannels, 0, 0),
+		mute_lr: createtFdb('Mute', 'LR', { fg: WHITE, bg: CARMINE_RED }, [{ label: `LR`, id: 0 }], 0, 68),
+		mute_aux: createtFdb('Mute', 'Aux', { fg: WHITE, bg: CARMINE_RED }, choices.mixesAndLR, 0, 69),
+		mute_group: createtFdb('Mute', 'Group', { fg: WHITE, bg: CARMINE_RED }, choices.groups, 0, 48),
+		mute_matrix: createtFdb('Mute', 'Matrix', { fg: WHITE, bg: CARMINE_RED }, choices.matrixes, 0, 85),
+		mute_dca: createtFdb('Mute', 'DCA', { fg: WHITE, bg: CARMINE_RED }, choices.dcas, 2, 0),
+		mute_fx_return: createtFdb('Mute', 'FX Return', { fg: WHITE, bg: CARMINE_RED }, choices.fxReturns, 0, 60),
+		mute_fx_send: createtFdb('Mute', 'FX Send', { fg: WHITE, bg: CARMINE_RED }, choices.fxSends, 0, 81),
+		mute_mutegroup: createtFdb('Mute', 'MuteGroup', { fg: WHITE, bg: CARMINE_RED }, choices.muteGroups, 4, 0),
+	}
 }
