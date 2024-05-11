@@ -6,7 +6,7 @@ import { UpgradeScripts } from './src/upgrades.js'
 import { GetConfigFields } from './src/config.js'
 
 import { getActions } from './src/actions.js'
-import feedbacks from './src/feedbacks.js'
+import { getFeedbacks } from './src/feedbacks.js'
 import { getVariables } from './src/variables.js'
 import { getPresets } from './src/presets.js'
 
@@ -19,19 +19,17 @@ import { dBToDec, decTodB } from './src/utils.js'
 class sqInstance extends InstanceBase {
 	model
 
+	fdbState = {}
+	lastValue = {}
+	mch = 0xb0
+
 	constructor(internal) {
 		super(internal)
 
 		// Assign the methods from the listed files to this class
 		Object.assign(this, {
-			...feedbacks,
 			...api,
 		})
-
-		this.fdbState = {}
-		this.lastValue = {}
-
-		this.mch = 0xb0
 	}
 
 	dBToDec(lv, typ = this.config.level) {
@@ -73,7 +71,7 @@ class sqInstance extends InstanceBase {
 		const choices = new Choices(model)
 
 		this.setActionDefinitions(getActions(this, choices))
-		this.initFeedbacks(choices)
+		this.setFeedbackDefinitions(getFeedbacks(this, choices))
 		this.setVariableDefinitions(getVariables(this, model))
 		this.setPresetDefinitions(getPresets(this, model))
 
