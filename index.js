@@ -51,10 +51,6 @@ class sqInstance extends InstanceBase {
 			currentScene: 1,
 		})
 
-		if (this.config.model === undefined) {
-			this.config.model = 'SQ7'
-		}
-
 		this.mch = parseInt('0xB' + (this.config.midich - 1).toString(16))
 
 		this.updateStatus(InstanceStatus.Connecting)

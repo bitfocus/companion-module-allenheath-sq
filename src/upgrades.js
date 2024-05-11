@@ -1,3 +1,5 @@
+import { DefaultModel } from './mixer/models.js'
+
 /**
  * A do-nothing upgrade script.
  *
@@ -42,9 +44,32 @@ function CoalesceSceneRecallActions(_context, props) {
 	return result
 }
 
+/**
+ * Ensure a 'model' property is present in configs that lack it.
+ * @param {import('@companion-module/base').CompanionUpgradeContext} _context
+ * @param {import('@companion-module/base').CompanionStaticUpgradeProps} props
+ * @returns
+ */
+function EnsureModel(_context, props) {
+	const result = {
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
+	}
+
+	const oldConfig = props.config
+	if (oldConfig !== null && !('model' in oldConfig)) {
+		oldConfig.model = DefaultModel
+		result.updatedConfig = oldConfig
+	}
+
+	return result
+}
+
 export const UpgradeScripts = [
 	DummyUpgradeScript,
 	CoalesceSceneRecallActions,
+	EnsureModel,
 	// placeholder comment to force array contents to format one entry per line
 ]
 

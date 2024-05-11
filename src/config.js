@@ -1,4 +1,5 @@
 import { Regex } from '@companion-module/base'
+import { DefaultModel } from './mixer/models.js'
 
 export default {
 	getConfigFields() {
@@ -28,7 +29,7 @@ export default {
 				id: 'model',
 				label: 'Console Type',
 				width: 6,
-				default: 'SQ5',
+				default: DefaultModel,
 				choices: [
 					{ id: 'SQ5', label: 'SQ 5' },
 					{ id: 'SQ6', label: 'SQ 6' },

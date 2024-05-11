@@ -1,3 +1,5 @@
+export const DefaultModel = 'SQ5'
+
 export const SQModels = {
 	SQ5: {
 		chCount: 48,
