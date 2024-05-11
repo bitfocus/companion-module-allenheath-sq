@@ -21,7 +21,7 @@ const MuteOption = {
 	],
 }
 
-export function getActions(self, choices) {
+export function getActions(self, choices, connectionLabel) {
 	const model = self.model
 
 	var sceneNumber
@@ -1133,7 +1133,7 @@ export function getActions(self, choices) {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.mixCount, [0x50, 0x50], [0, 0x44])
 			self.sendSocket(val.buffer[0])
-			opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
 			let opt = action.options
@@ -1181,7 +1181,7 @@ export function getActions(self, choices) {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.mixCount, [0x50, 0x55], [0x30, 0x04])
 			self.sendSocket(val.buffer[0])
-			opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
 			let opt = action.options
@@ -1229,7 +1229,7 @@ export function getActions(self, choices) {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.mixCount, [0x50, 0x56], [0x3c, 0x14])
 			self.sendSocket(val.buffer[0])
-			opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
 			let opt = action.options
@@ -1277,7 +1277,7 @@ export function getActions(self, choices) {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.grpCount, [0, 0x5b], [0, 0x34])
 			self.sendSocket(val.buffer[0])
-			opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
 			let opt = action.options
@@ -1325,7 +1325,7 @@ export function getActions(self, choices) {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.mtxCount, [0x5e, 0x5e], [0x24, 0x27])
 			self.sendSocket(val.buffer[0])
-			opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
 			let opt = action.options
@@ -1373,7 +1373,7 @@ export function getActions(self, choices) {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.mtxCount, [0, 0x5e], [0, 0x4b])
 			self.sendSocket(val.buffer[0])
-			opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
 			let opt = action.options
@@ -1415,7 +1415,7 @@ export function getActions(self, choices) {
 			let opt = action.options
 			let val = self.getLevel(opt.input, 99, 0, [0x5f, 0], [0, 0])
 			self.sendSocket(val.buffer[0])
-			opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
+			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
 			let opt = action.options

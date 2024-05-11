@@ -70,7 +70,7 @@ class sqInstance extends InstanceBase {
 
 		const choices = new Choices(model)
 
-		this.setActionDefinitions(getActions(this, choices))
+		this.setActionDefinitions(getActions(this, choices, config.label))
 		this.setFeedbackDefinitions(getFeedbacks(this, choices))
 		this.setVariableDefinitions(getVariables(this, model))
 		this.setPresetDefinitions(getPresets(this, model, config.talkback))
