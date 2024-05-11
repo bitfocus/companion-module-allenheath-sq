@@ -73,7 +73,7 @@ class sqInstance extends InstanceBase {
 		this.setActionDefinitions(getActions(this, choices))
 		this.setFeedbackDefinitions(getFeedbacks(this, choices))
 		this.setVariableDefinitions(getVariables(this, model))
-		this.setPresetDefinitions(getPresets(this, model))
+		this.setPresetDefinitions(getPresets(this, model, config.talkback))
 
 		//this.checkVariables();
 		this.checkFeedbacks()

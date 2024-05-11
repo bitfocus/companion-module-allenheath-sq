@@ -1,6 +1,6 @@
 import { combineRgb } from '@companion-module/base'
 
-export function getPresets(self, model) {
+export function getPresets(self, model, talkbackChannel) {
 	const presets = []
 
 	/* MUTE */
@@ -74,7 +74,7 @@ export function getPresets(self, model) {
 						{
 							actionId: 'ch_to_mix',
 							options: {
-								inputChannel: `${self.config.talkback}`,
+								inputChannel: `${talkbackChannel}`,
 								mixAssign: [`99`],
 								mixActive: false,
 							},
@@ -82,7 +82,7 @@ export function getPresets(self, model) {
 						{
 							actionId: 'ch_to_mix',
 							options: {
-								inputChannel: `${self.config.talkback}`,
+								inputChannel: `${talkbackChannel}`,
 								mixAssign: [`${mix}`],
 								mixActive: true,
 							},
@@ -90,7 +90,7 @@ export function getPresets(self, model) {
 						{
 							actionId: 'chlev_to_mix',
 							options: {
-								input: `${self.config.talkback}`,
+								input: `${talkbackChannel}`,
 								assign: `${mix}`,
 								level: '49',
 							},
@@ -98,7 +98,7 @@ export function getPresets(self, model) {
 						{
 							actionId: 'mute_input',
 							options: {
-								strip: self.config.talkback,
+								strip: talkbackChannel,
 								mute: 2,
 							},
 						},
@@ -107,7 +107,7 @@ export function getPresets(self, model) {
 						{
 							actionId: 'ch_to_mix',
 							options: {
-								inputChannel: `${self.config.talkback}`,
+								inputChannel: `${talkbackChannel}`,
 								mixAssign: [`${mix}`],
 								mixActive: false,
 							},
@@ -115,7 +115,7 @@ export function getPresets(self, model) {
 						{
 							actionId: 'chlev_to_mix',
 							options: {
-								input: `${self.config.talkback}`,
+								input: `${talkbackChannel}`,
 								assign: `${mix}`,
 								level: '0',
 							},
@@ -123,7 +123,7 @@ export function getPresets(self, model) {
 						{
 							actionId: 'mute_input',
 							options: {
-								strip: self.config.talkback,
+								strip: talkbackChannel,
 								mute: 1,
 							},
 						},
