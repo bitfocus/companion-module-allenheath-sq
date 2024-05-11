@@ -4,18 +4,18 @@ const WHITE = combineRgb(255, 255, 255)
 const CARMINE_RED = combineRgb(153, 0, 51)
 
 export function getFeedbacks(self, choices) {
-	function muteFdb(lab, { fg, bg }, chs, msb, ofs) {
+	function muteFdb(label, { fg, bg }, choices, msb, offset) {
 		return {
 			type: 'boolean',
-			name: `Mute ${lab}`,
+			name: `Mute ${label}`,
 			description: 'Change colour',
 			options: [
 				{
 					type: 'dropdown',
-					label: lab,
+					label,
 					id: 'channel',
 					default: 0,
-					choices: chs,
+					choices,
 					minChoicesForSearch: 0,
 				},
 			],
@@ -24,7 +24,7 @@ export function getFeedbacks(self, choices) {
 				bgcolor: bg,
 			},
 			callback: (feedback, _context) => {
-				const key = `mute_${msb}.${parseInt(feedback.options.channel) + ofs}`
+				const key = `mute_${msb}.${parseInt(feedback.options.channel) + offset}`
 				return Boolean(self.fdbState[key])
 			},
 		}
