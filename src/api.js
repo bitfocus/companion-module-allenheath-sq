@@ -341,12 +341,11 @@ export default {
 	getRemoteLevel: function () {
 		var self = this
 		var buff = []
-		let rsp
 
 		for (let i = 0; i < self.chCount; i++) {
 			let tmp = self.CHOICES_MIX
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x40], [0, 0x44])
+				const rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x40], [0, 0x44])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -354,7 +353,7 @@ export default {
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_MIX
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x45], [0x30, 0x04])
+				const rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x45], [0x30, 0x04])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -362,7 +361,7 @@ export default {
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_MIX
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x46], [0x3c, 0x14])
+				const rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x46], [0x3c, 0x14])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -370,7 +369,7 @@ export default {
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_GRP
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.grpCount, [0, 0x4b], [0, 0x34])
+				const rsp = self.getLevel(i, tmp[j].id, self.grpCount, [0, 0x4b], [0, 0x34])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -378,7 +377,7 @@ export default {
 		for (let i = 0; i < self.chCount; i++) {
 			let tmp = self.CHOICES_FXS
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4c], [0, 0x14])
+				const rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4c], [0, 0x14])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -386,7 +385,7 @@ export default {
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_FXS
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4d], [0, 0x54])
+				const rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4d], [0, 0x54])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -394,7 +393,7 @@ export default {
 		for (let i = 0; i < self.fxrCount; i++) {
 			let tmp = self.CHOICES_FXS
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4e], [0, 0x04])
+				const rsp = self.getLevel(i, tmp[j].id, self.fxsCount, [0, 0x4e], [0, 0x04])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -402,14 +401,14 @@ export default {
 		{
 			let tmp = self.CHOICES_MTX
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x24])
+				const rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x24])
 				buff.push(rsp['buffer'][0])
 			}
 		}
 		for (let i = 0; i < self.mixCount; i++) {
 			let tmp = self.CHOICES_MTX
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x27])
+				const rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x27])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -417,7 +416,7 @@ export default {
 		for (let i = 0; i < self.grpCount; i++) {
 			let tmp = self.CHOICES_MTX
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x4b])
+				const rsp = self.getLevel(i, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x4b])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -435,7 +434,7 @@ export default {
 				tmp.push({ label: `MATRIX ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount })
 			}
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
+				const rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
 				buff.push(rsp['buffer'][0])
 			}
 		}
@@ -443,7 +442,7 @@ export default {
 		{
 			const tmp = this.CHOICES_DCA
 			for (let j = 0; j < tmp.length; j++) {
-				rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0x20, 0])
+				const rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0x20, 0])
 				buff.push(rsp['buffer'][0])
 			}
 		}
