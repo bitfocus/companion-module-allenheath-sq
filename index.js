@@ -18,39 +18,6 @@ import { dBToDec, decTodB } from './src/utils.js'
 class sqInstance extends InstanceBase {
 	model
 
-	// shorthands to be removed later
-
-	get chCount() {
-		return this.model.chCount
-	}
-	get mixCount() {
-		return this.model.mixCount
-	}
-	get grpCount() {
-		return this.model.grpCount
-	}
-	get fxrCount() {
-		return this.model.fxrCount
-	}
-	get fxsCount() {
-		return this.model.fxsCount
-	}
-	get mtxCount() {
-		return this.model.mtxCount
-	}
-	get dcaCount() {
-		return this.model.dcaCount
-	}
-	get muteGroup() {
-		return this.model.muteGroup
-	}
-	get SoftKey() {
-		return this.model.SoftKey
-	}
-	get sceneCount() {
-		return this.model.sceneCount
-	}
-
 	constructor(internal) {
 		super(internal)
 

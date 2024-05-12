@@ -1,44 +1,45 @@
 export default {
 	initActions: function () {
 		let self = this
+		const model = self.model
 
 		let actions = {}
 
 		var sceneNumber
 
 		self.CHOICES_INPUT_CHANNEL = []
-		for (let i = 0; i < self.chCount; i++) {
+		for (let i = 0; i < model.chCount; i++) {
 			self.CHOICES_INPUT_CHANNEL.push({ label: `CH ${i + 1}`, id: i })
 		}
 
 		self.CHOICES_SCENES = []
-		for (let i = 0; i < self.sceneCount; i++) {
+		for (let i = 0; i < model.sceneCount; i++) {
 			self.CHOICES_SCENES.push({ label: `SCENE ${i + 1}`, id: i })
 		}
 
 		self.CHOICES_MIX = []
 		self.CHOICES_MIX.push({ label: `LR`, id: 99 })
-		for (let i = 0; i < self.mixCount; i++) {
+		for (let i = 0; i < model.mixCount; i++) {
 			self.CHOICES_MIX.push({ label: `AUX ${i + 1}`, id: i })
 		}
 
 		self.CHOICES_GRP = []
-		for (let i = 0; i < self.grpCount; i++) {
+		for (let i = 0; i < model.grpCount; i++) {
 			self.CHOICES_GRP.push({ label: `GROUP ${i + 1}`, id: i })
 		}
 
 		self.CHOICES_FXR = []
-		for (let i = 0; i < self.fxrCount; i++) {
+		for (let i = 0; i < model.fxrCount; i++) {
 			self.CHOICES_FXR.push({ label: `FX RETURN ${i + 1}`, id: i })
 		}
 
 		self.CHOICES_FXS = []
-		for (let i = 0; i < self.fxsCount; i++) {
+		for (let i = 0; i < model.fxsCount; i++) {
 			self.CHOICES_FXS.push({ label: `FX SEND ${i + 1}`, id: i })
 		}
 
 		self.CHOICES_MTX = []
-		for (let i = 0; i < self.mtxCount; i++) {
+		for (let i = 0; i < model.mtxCount; i++) {
 			self.CHOICES_MTX.push({ label: `MATRIX ${i + 1}`, id: i })
 		}
 
@@ -76,36 +77,36 @@ export default {
 		}
 
 		self.CHOICES_DCA = []
-		for (let i = 0; i < self.dcaCount; i++) {
+		for (let i = 0; i < model.dcaCount; i++) {
 			self.CHOICES_DCA.push({ label: `DCA ${i + 1}`, id: i })
 		}
 
 		self.CHOICES_MUTEGRP = []
-		for (let i = 0; i < self.muteGroup; i++) {
+		for (let i = 0; i < model.muteGroup; i++) {
 			self.CHOICES_MUTEGRP.push({ label: `MuteGroup ${i + 1}`, id: i })
 		}
 
 		self.CHOICES_SOFT = []
-		for (let i = 0; i < self.SoftKey; i++) {
+		for (let i = 0; i < model.SoftKey; i++) {
 			self.CHOICES_SOFT.push({ label: `SOFTKEY ${i + 1}`, id: i })
 		}
 
 		// All fader mix choices
 		self.CHOICES_ALLFADER = []
 		self.CHOICES_ALLFADER.push({ label: `LR`, id: 0 })
-		for (let i = 0; i < self.mixCount; i++) {
+		for (let i = 0; i < model.mixCount; i++) {
 			self.CHOICES_ALLFADER.push({ label: `AUX ${i + 1}`, id: i + 1 })
 		}
-		for (let i = 0; i < self.fxsCount; i++) {
-			self.CHOICES_ALLFADER.push({ label: `FX SEND ${i + 1}`, id: i + 1 + self.mixCount })
+		for (let i = 0; i < model.fxsCount; i++) {
+			self.CHOICES_ALLFADER.push({ label: `FX SEND ${i + 1}`, id: i + 1 + model.mixCount })
 		}
-		for (let i = 0; i < self.mtxCount; i++) {
-			self.CHOICES_ALLFADER.push({ label: `MATRIX ${i + 1}`, id: i + 1 + self.mixCount + self.fxsCount })
+		for (let i = 0; i < model.mtxCount; i++) {
+			self.CHOICES_ALLFADER.push({ label: `MATRIX ${i + 1}`, id: i + 1 + model.mixCount + model.fxsCount })
 		}
-		for (let i = 0; i < self.dcaCount; i++) {
+		for (let i = 0; i < model.dcaCount; i++) {
 			self.CHOICES_ALLFADER.push({
 				label: `DCA ${i + 1}`,
-				id: i + 1 + self.mixCount + self.fxsCount + self.mtxCount + 12,
+				id: i + 1 + model.mixCount + model.fxsCount + model.mtxCount + 12,
 			})
 		}
 
@@ -175,7 +176,7 @@ export default {
 
 		actions['mute_input'] = {
 			name: 'Mute Input',
-			options: self.muteOptions('Input Channel', self.chCount, -1),
+			options: self.muteOptions('Input Channel', model.chCount, -1),
 			callback: async (action) => {
 				let opt = action.options
 				const MSB = 0
@@ -598,7 +599,7 @@ export default {
 					opt.inputChannel,
 					opt.mixAssign,
 					opt.mixActive,
-					self.mixCount,
+					model.mixCount,
 					[0x60, 0x60],
 					[0, 0x44],
 				)
@@ -637,7 +638,7 @@ export default {
 					opt.inputChannel,
 					opt.grpAssign,
 					opt.grpActive,
-					self.grpCount,
+					model.grpCount,
 					[0, 0x66],
 					[0, 0x74],
 				)
@@ -676,7 +677,7 @@ export default {
 					opt.inputGrp,
 					opt.mixAssign,
 					opt.mixActive,
-					self.mixCount,
+					model.mixCount,
 					[0x60, 0x65],
 					[0x30, 0x04],
 				)
@@ -711,7 +712,14 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				const buffers = self.setRouting(opt.inputFxr, opt.grpAssign, opt.grpActive, self.grpCount, [0, 0x6b], [0, 0x34])
+				const buffers = self.setRouting(
+					opt.inputFxr,
+					opt.grpAssign,
+					opt.grpActive,
+					model.grpCount,
+					[0, 0x6b],
+					[0, 0x34],
+				)
 				self.sendBuffers(buffers)
 			},
 		}
@@ -747,7 +755,7 @@ export default {
 					opt.inputChannel,
 					opt.fxsAssign,
 					opt.fxsActive,
-					self.fxsCount,
+					model.fxsCount,
 					[0, 0x6c],
 					[0, 0x14],
 				)
@@ -782,7 +790,14 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				const buffers = self.setRouting(opt.inputGrp, opt.fxsAssign, opt.fxsActive, self.fxsCount, [0, 0x6d], [0, 0x54])
+				const buffers = self.setRouting(
+					opt.inputGrp,
+					opt.fxsAssign,
+					opt.fxsActive,
+					model.fxsCount,
+					[0, 0x6d],
+					[0, 0x54],
+				)
 				self.sendBuffers(buffers)
 			},
 		}
@@ -814,7 +829,14 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				const buffers = self.setRouting(opt.inputFxr, opt.fxsAssign, opt.fxsActive, self.fxsCount, [0, 0x6e], [0, 0x04])
+				const buffers = self.setRouting(
+					opt.inputFxr,
+					opt.fxsAssign,
+					opt.fxsActive,
+					model.fxsCount,
+					[0, 0x6e],
+					[0, 0x04],
+				)
 				self.sendBuffers(buffers)
 			},
 		}
@@ -850,7 +872,7 @@ export default {
 					opt.inputMix,
 					opt.mtxAssign,
 					opt.mtxActive,
-					self.mtxCount,
+					model.mtxCount,
 					[0x6e, 0x6e],
 					[0x24, 0x27],
 				)
@@ -885,7 +907,14 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				const buffers = self.setRouting(opt.inputGrp, opt.mtxAssign, opt.mtxActive, self.mtxCount, [0, 0x6e], [0, 0x4b])
+				const buffers = self.setRouting(
+					opt.inputGrp,
+					opt.mtxAssign,
+					opt.mtxActive,
+					model.mtxCount,
+					[0, 0x6e],
+					[0, 0x4b],
+				)
 				self.sendBuffers(buffers)
 			},
 		}
@@ -924,7 +953,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.mixCount,
+					model.mixCount,
 					opt.leveldb,
 					[0x40, 0x40],
 					[0, 0x44],
@@ -962,7 +991,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.mixCount,
+					model.mixCount,
 					opt.leveldb,
 					[0x40, 0x45],
 					[0x30, 0x04],
@@ -999,7 +1028,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.mixCount,
+					model.mixCount,
 					opt.leveldb,
 					[0x40, 0x46],
 					[0x3c, 0x14],
@@ -1036,7 +1065,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.grpCount,
+					model.grpCount,
 					opt.leveldb,
 					[0, 0x4b],
 					[0, 0x34],
@@ -1073,7 +1102,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.fxsCount,
+					model.fxsCount,
 					opt.leveldb,
 					[0, 0x4c],
 					[0, 0x14],
@@ -1110,7 +1139,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.fxsCount,
+					model.fxsCount,
 					opt.leveldb,
 					[0, 0x4d],
 					[0, 0x54],
@@ -1147,7 +1176,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.fxsCount,
+					model.fxsCount,
 					opt.leveldb,
 					[0, 0x4e],
 					[0, 0x04],
@@ -1184,7 +1213,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.mtxCount,
+					model.mtxCount,
 					opt.leveldb,
 					[0x4e, 0x4e],
 					[0x24, 0x27],
@@ -1221,7 +1250,7 @@ export default {
 					opt.fade,
 					opt.input,
 					opt.assign,
-					self.mtxCount,
+					model.mtxCount,
 					opt.leveldb,
 					[0, 0x4e],
 					[0, 0x4b],
@@ -1281,7 +1310,7 @@ export default {
 			],
 			subscribe: async (action) => {
 				let opt = action.options
-				let val = self.getLevel(opt.input, opt.assign, self.mixCount, [0x50, 0x50], [0, 0x44])
+				let val = self.getLevel(opt.input, opt.assign, model.mixCount, [0x50, 0x50], [0, 0x44])
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
@@ -1290,7 +1319,7 @@ export default {
 				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
-					self.mixCount,
+					model.mixCount,
 					opt.leveldb,
 					[0x50, 0x50],
 					[0, 0x44],
@@ -1329,7 +1358,7 @@ export default {
 			],
 			subscribe: async (action) => {
 				let opt = action.options
-				let val = self.getLevel(opt.input, opt.assign, self.mixCount, [0x50, 0x55], [0x30, 0x04])
+				let val = self.getLevel(opt.input, opt.assign, model.mixCount, [0x50, 0x55], [0x30, 0x04])
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
@@ -1338,7 +1367,7 @@ export default {
 				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
-					self.mixCount,
+					model.mixCount,
 					opt.leveldb,
 					[0x50, 0x55],
 					[0x30, 0x04],
@@ -1377,7 +1406,7 @@ export default {
 			],
 			subscribe: async (action) => {
 				let opt = action.options
-				let val = self.getLevel(opt.input, opt.assign, self.mixCount, [0x50, 0x56], [0x3c, 0x14])
+				let val = self.getLevel(opt.input, opt.assign, model.mixCount, [0x50, 0x56], [0x3c, 0x14])
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
@@ -1386,7 +1415,7 @@ export default {
 				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
-					self.mixCount,
+					model.mixCount,
 					opt.leveldb,
 					[0x50, 0x56],
 					[0x3c, 0x14],
@@ -1425,7 +1454,7 @@ export default {
 			],
 			subscribe: async (action) => {
 				let opt = action.options
-				let val = self.getLevel(opt.input, opt.assign, self.grpCount, [0, 0x5b], [0, 0x34])
+				let val = self.getLevel(opt.input, opt.assign, model.grpCount, [0, 0x5b], [0, 0x34])
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
@@ -1434,7 +1463,7 @@ export default {
 				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
-					self.grpCount,
+					model.grpCount,
 					opt.leveldb,
 					[0, 0x5b],
 					[0, 0x34],
@@ -1473,7 +1502,7 @@ export default {
 			],
 			subscribe: async (action) => {
 				let opt = action.options
-				let val = self.getLevel(opt.input, opt.assign, self.mtxCount, [0x5e, 0x5e], [0x24, 0x27])
+				let val = self.getLevel(opt.input, opt.assign, model.mtxCount, [0x5e, 0x5e], [0x24, 0x27])
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
@@ -1482,7 +1511,7 @@ export default {
 				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
-					self.mtxCount,
+					model.mtxCount,
 					opt.leveldb,
 					[0x5e, 0x5e],
 					[0x24, 0x27],
@@ -1521,7 +1550,7 @@ export default {
 			],
 			subscribe: async (action) => {
 				let opt = action.options
-				let val = self.getLevel(opt.input, opt.assign, self.mtxCount, [0, 0x5e], [0, 0x4b])
+				let val = self.getLevel(opt.input, opt.assign, model.mtxCount, [0, 0x5e], [0, 0x4b])
 				self.sendSocket(val.buffer[0])
 				opt.showvar = `\$(${self.config.label}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
@@ -1530,7 +1559,7 @@ export default {
 				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
-					self.mtxCount,
+					model.mtxCount,
 					opt.leveldb,
 					[0, 0x5e],
 					[0, 0x4b],
@@ -1584,7 +1613,7 @@ export default {
 					id: 'scene',
 					default: 1,
 					min: 1,
-					max: self.sceneCount,
+					max: model.sceneCount,
 					required: true,
 				},
 			],

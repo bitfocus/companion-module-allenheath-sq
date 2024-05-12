@@ -4,6 +4,7 @@ export default {
 	initPresets: function () {
 		var presets = []
 		var self = this
+		const model = self.model
 
 		/* MUTE */
 		const createtMute = (cat, lab, typ, cnt, nr = true) => {
@@ -48,18 +49,18 @@ export default {
 			}
 		}
 
-		createtMute('Mute Input', 'Input channel', 'mute_input', self.chCount)
+		createtMute('Mute Input', 'Input channel', 'mute_input', model.chCount)
 		createtMute('Mute Mix - Group', 'LR', 'mute_lr', 1, false)
-		createtMute('Mute Mix - Group', 'Aux', 'mute_aux', self.mixCount)
-		createtMute('Mute Mix - Group', 'Group', 'mute_group', self.grpCount)
-		createtMute('Mute Mix - Group', 'Matrix', 'mute_matrix', self.mtxCount)
-		createtMute('Mute FX', 'FX Send', 'mute_fx_send', self.fxsCount)
-		createtMute('Mute FX', 'FX Return', 'mute_fx_return', self.fxrCount)
-		createtMute('Mute DCA', 'DCA', 'mute_dca', self.dcaCount)
-		createtMute('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', self.muteGroup)
+		createtMute('Mute Mix - Group', 'Aux', 'mute_aux', model.mixCount)
+		createtMute('Mute Mix - Group', 'Group', 'mute_group', model.grpCount)
+		createtMute('Mute Mix - Group', 'Matrix', 'mute_matrix', model.mtxCount)
+		createtMute('Mute FX', 'FX Send', 'mute_fx_send', model.fxsCount)
+		createtMute('Mute FX', 'FX Return', 'mute_fx_return', model.fxrCount)
+		createtMute('Mute DCA', 'DCA', 'mute_dca', model.dcaCount)
+		createtMute('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', model.muteGroup)
 
 		/* TALKBACK*/
-		for (var i = 0; i < self.mixCount; i++) {
+		for (var i = 0; i < model.mixCount; i++) {
 			let pst = {
 				type: 'button',
 				category: 'Talkback',
@@ -178,10 +179,10 @@ export default {
 		}
 
 		// Input -> Mix
-		for (let i = 0; i < self.chCount; i++) {
+		for (let i = 0; i < model.chCount; i++) {
 			let tmp = self.CHOICES_MIX
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, self.mixCount, [0x40, 0x40], [0, 0x44])
+				const rsp = self.getLevel(i, tmp[j].id, model.mixCount, [0x40, 0x40], [0, 0x44])
 				createtMuteLevel(
 					`Mt+dB CH-${tmp[j].label}`,
 					`CH ${i + 1}\\n${tmp[j].label}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
