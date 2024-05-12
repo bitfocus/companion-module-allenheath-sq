@@ -399,12 +399,13 @@ export default {
 			}
 		}
 
-		let tmp = self.CHOICES_MTX
-		for (let j = 0; j < tmp.length; j++) {
-			rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x24])
-			buff.push(rsp['buffer'][0])
+		{
+			let tmp = self.CHOICES_MTX
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(0, tmp[j].id, self.mtxCount, [0, 0x4e], [0, 0x24])
+				buff.push(rsp['buffer'][0])
+			}
 		}
-
 		for (let i = 0; i < self.mixCount; i++) {
 			let tmp = self.CHOICES_MTX
 			for (let j = 0; j < tmp.length; j++) {
@@ -421,26 +422,30 @@ export default {
 			}
 		}
 
-		tmp = []
-		tmp.push({ label: `LR`, id: 0 })
-		for (let i = 0; i < this.mixCount; i++) {
-			tmp.push({ label: `AUX ${i + 1}`, id: i + 1 })
-		}
-		for (let i = 0; i < this.fxsCount; i++) {
-			tmp.push({ label: `FX SEND ${i + 1}`, id: i + 1 + this.mixCount })
-		}
-		for (let i = 0; i < this.mtxCount; i++) {
-			tmp.push({ label: `MATRIX ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount })
-		}
-		for (let j = 0; j < tmp.length; j++) {
-			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
-			buff.push(rsp['buffer'][0])
+		{
+			const tmp = []
+			tmp.push({ label: `LR`, id: 0 })
+			for (let i = 0; i < this.mixCount; i++) {
+				tmp.push({ label: `AUX ${i + 1}`, id: i + 1 })
+			}
+			for (let i = 0; i < this.fxsCount; i++) {
+				tmp.push({ label: `FX SEND ${i + 1}`, id: i + 1 + this.mixCount })
+			}
+			for (let i = 0; i < this.mtxCount; i++) {
+				tmp.push({ label: `MATRIX ${i + 1}`, id: i + 1 + this.mixCount + this.fxsCount })
+			}
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
+				buff.push(rsp['buffer'][0])
+			}
 		}
 
-		tmp = this.CHOICES_DCA
-		for (let j = 0; j < tmp.length; j++) {
-			rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0x20, 0])
-			buff.push(rsp['buffer'][0])
+		{
+			const tmp = this.CHOICES_DCA
+			for (let j = 0; j < tmp.length; j++) {
+				rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0x20, 0])
+				buff.push(rsp['buffer'][0])
+			}
 		}
 
 		if (buff.length > 0 && self.midiSocket !== undefined) {
