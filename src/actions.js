@@ -205,8 +205,8 @@ export default {
 			options: self.muteOptions('Input Channel', self.chCount, -1),
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0
-				LSB = 0
+				const MSB = 0
+				const LSB = 0
 
 				let strip = opt.strip
 
@@ -263,8 +263,8 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0
-				LSB = 0x44
+				const MSB = 0
+				const LSB = 0x44
 
 				let strip = parseInt(opt.strip)
 
@@ -301,8 +301,8 @@ export default {
 			options: self.muteOptions('Aux', 12, -1),
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0
-				LSB = 0x45
+				const MSB = 0
+				const LSB = 0x45
 
 				let strip = parseInt(opt.strip)
 
@@ -338,8 +338,8 @@ export default {
 			options: self.muteOptions('Aux', 12, -1),
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0
-				LSB = 0x30
+				const MSB = 0
+				const LSB = 0x30
 
 				let strip = parseInt(opt.strip)
 
@@ -375,8 +375,8 @@ export default {
 			options: self.muteOptions('Matrix', 3, -1),
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0
-				LSB = 0x55
+				const MSB = 0
+				const LSB = 0x55
 
 				let strip = parseInt(opt.strip)
 
@@ -412,8 +412,8 @@ export default {
 			options: self.muteOptions('FX Send', 4, -1),
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0
-				LSB = 0x51
+				const MSB = 0
+				const LSB = 0x51
 
 				let strip = parseInt(opt.strip)
 
@@ -449,8 +449,8 @@ export default {
 			options: self.muteOptions('FX Return', 8, -1),
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0
-				LSB = 0x3c
+				const MSB = 0
+				const LSB = 0x3c
 
 				let strip = parseInt(opt.strip)
 
@@ -486,8 +486,8 @@ export default {
 			options: self.muteOptions('DCA', 8, -1),
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0x02
-				LSB = 0
+				const MSB = 0x02
+				const LSB = 0
 
 				let strip = parseInt(opt.strip)
 
@@ -523,8 +523,8 @@ export default {
 			options: self.muteOptions('Mute MuteGroup', 8, -1),
 			callback: async (action) => {
 				let opt = action.options
-				MSB = 0x04
-				LSB = 0
+				const MSB = 0x04
+				const LSB = 0
 
 				let strip = parseInt(opt.strip)
 
