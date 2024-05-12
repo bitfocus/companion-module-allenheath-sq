@@ -1,15 +1,15 @@
 import { combineRgb } from '@companion-module/base'
 
+const WHITE = combineRgb(255, 255, 255)
+const CARMINE_RED = combineRgb(153, 0, 51)
+
 export default {
 	initFeedbacks: function () {
 		let self = this
 
 		var feedbacks = {}
 
-		const createtFdb = (nam, typ, lab, col, chs, msb, ofs) => {
-			let fg = combineRgb(col['fg'][0], col['fg'][1], col['fg'][2])
-			let bg = combineRgb(col['bg'][0], col['bg'][1], col['bg'][2])
-
+		const createtFdb = (nam, typ, lab, { fg, bg }, chs, msb, ofs) => {
 			feedbacks[nam] = {
 				type: 'boolean',
 				name: `${typ} ${lab}`,
@@ -39,39 +39,15 @@ export default {
 		}
 
 		/* Mute */
-		createtFdb(
-			'mute_input',
-			'Mute',
-			'Input',
-			{ fg: [255, 255, 255], bg: [153, 0, 51] },
-			this.CHOICES_INPUT_CHANNEL,
-			0,
-			0,
-		)
-		createtFdb('mute_lr', 'Mute', 'LR', { fg: [255, 255, 255], bg: [153, 0, 51] }, [{ label: `LR`, id: 0 }], 0, 68)
-		createtFdb('mute_aux', 'Mute', 'Aux', { fg: [255, 255, 255], bg: [153, 0, 51] }, this.CHOICES_MIX, 0, 69)
-		createtFdb('mute_group', 'Mute', 'Group', { fg: [255, 255, 255], bg: [153, 0, 51] }, this.CHOICES_GRP, 0, 48)
-		createtFdb('mute_matrix', 'Mute', 'Matrix', { fg: [255, 255, 255], bg: [153, 0, 51] }, this.CHOICES_MTX, 0, 85)
-		createtFdb('mute_dca', 'Mute', 'DCA', { fg: [255, 255, 255], bg: [153, 0, 51] }, this.CHOICES_DCA, 2, 0)
-		createtFdb(
-			'mute_fx_return',
-			'Mute',
-			'FX Return',
-			{ fg: [255, 255, 255], bg: [153, 0, 51] },
-			this.CHOICES_FXR,
-			0,
-			60,
-		)
-		createtFdb('mute_fx_send', 'Mute', 'FX Send', { fg: [255, 255, 255], bg: [153, 0, 51] }, this.CHOICES_FXS, 0, 81)
-		createtFdb(
-			'mute_mutegroup',
-			'Mute',
-			'MuteGroup',
-			{ fg: [255, 255, 255], bg: [153, 0, 51] },
-			this.CHOICES_MUTEGRP,
-			4,
-			0,
-		)
+		createtFdb('mute_input', 'Mute', 'Input', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_INPUT_CHANNEL, 0, 0)
+		createtFdb('mute_lr', 'Mute', 'LR', { fg: WHITE, bg: CARMINE_RED }, [{ label: `LR`, id: 0 }], 0, 68)
+		createtFdb('mute_aux', 'Mute', 'Aux', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_MIX, 0, 69)
+		createtFdb('mute_group', 'Mute', 'Group', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_GRP, 0, 48)
+		createtFdb('mute_matrix', 'Mute', 'Matrix', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_MTX, 0, 85)
+		createtFdb('mute_dca', 'Mute', 'DCA', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_DCA, 2, 0)
+		createtFdb('mute_fx_return', 'Mute', 'FX Return', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_FXR, 0, 60)
+		createtFdb('mute_fx_send', 'Mute', 'FX Send', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_FXS, 0, 81)
+		createtFdb('mute_mutegroup', 'Mute', 'MuteGroup', { fg: WHITE, bg: CARMINE_RED }, this.CHOICES_MUTEGRP, 4, 0)
 
 		this.setFeedbackDefinitions(feedbacks)
 	},
