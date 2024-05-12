@@ -19,9 +19,6 @@ export default {
 
 		let actions = {}
 
-		var cmd = {}
-		var strip
-
 		var sceneNumber
 
 		self.CHOICES_INPUT_CHANNEL = []
@@ -221,7 +218,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -237,7 +234,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -279,7 +276,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -295,7 +292,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -317,7 +314,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -333,7 +330,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 		actions['mute_group'] = {
@@ -354,7 +351,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -370,7 +367,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 		actions['mute_matrix'] = {
@@ -391,7 +388,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -407,7 +404,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 		actions['mute_fx_send'] = {
@@ -428,7 +425,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -444,7 +441,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 		actions['mute_fx_return'] = {
@@ -465,7 +462,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -481,7 +478,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 		actions['mute_dca'] = {
@@ -502,7 +499,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -518,7 +515,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 		actions['mute_mutegroup'] = {
@@ -539,7 +536,7 @@ export default {
 				}
 
 				self.checkFeedbacks()
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([
 						self.mch,
 						0x63,
@@ -555,7 +552,7 @@ export default {
 						self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
 					]),
 				]
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -592,8 +589,8 @@ export default {
 				let softKey = parseInt(opt.softKey)
 				let keyValu = opt.pressedsk == '0' || opt.pressedsk == '1' ? true : false
 				let tch = parseInt((keyValu ? '0x9' : '0x8') + (self.mch - 176).toString(16))
-				cmd.buffers = [Buffer.from([tch, 0x30 + softKey, keyValu ? 0x7f : 0])]
-				self.sendBuffers(cmd.buffers)
+				const buffers = [Buffer.from([tch, 0x30 + softKey, keyValu ? 0x7f : 0])]
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -625,7 +622,7 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(
+				const buffers = self.setRouting(
 					opt.inputChannel,
 					opt.mixAssign,
 					opt.mixActive,
@@ -633,7 +630,7 @@ export default {
 					[0x60, 0x60],
 					[0, 0x44],
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -665,7 +662,7 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(
+				const buffers = self.setRouting(
 					opt.inputChannel,
 					opt.grpAssign,
 					opt.grpActive,
@@ -673,7 +670,7 @@ export default {
 					[0, 0x66],
 					[0, 0x74],
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -705,7 +702,7 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(
+				const buffers = self.setRouting(
 					opt.inputGrp,
 					opt.mixAssign,
 					opt.mixActive,
@@ -713,7 +710,7 @@ export default {
 					[0x60, 0x65],
 					[0x30, 0x04],
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -745,8 +742,8 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(opt.inputFxr, opt.grpAssign, opt.grpActive, self.grpCount, [0, 0x6b], [0, 0x34])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.setRouting(opt.inputFxr, opt.grpAssign, opt.grpActive, self.grpCount, [0, 0x6b], [0, 0x34])
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -778,7 +775,7 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(
+				const buffers = self.setRouting(
 					opt.inputChannel,
 					opt.fxsAssign,
 					opt.fxsActive,
@@ -786,7 +783,7 @@ export default {
 					[0, 0x6c],
 					[0, 0x14],
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -818,8 +815,8 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(opt.inputGrp, opt.fxsAssign, opt.fxsActive, self.fxsCount, [0, 0x6d], [0, 0x54])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.setRouting(opt.inputGrp, opt.fxsAssign, opt.fxsActive, self.fxsCount, [0, 0x6d], [0, 0x54])
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -851,8 +848,8 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(opt.inputFxr, opt.fxsAssign, opt.fxsActive, self.fxsCount, [0, 0x6e], [0, 0x04])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.setRouting(opt.inputFxr, opt.fxsAssign, opt.fxsActive, self.fxsCount, [0, 0x6e], [0, 0x04])
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -884,7 +881,7 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(
+				const buffers = self.setRouting(
 					opt.inputMix,
 					opt.mtxAssign,
 					opt.mtxActive,
@@ -892,7 +889,7 @@ export default {
 					[0x6e, 0x6e],
 					[0x24, 0x27],
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -924,8 +921,8 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.setRouting(opt.inputGrp, opt.mtxAssign, opt.mtxActive, self.mtxCount, [0, 0x6e], [0, 0x4b])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.setRouting(opt.inputGrp, opt.mtxAssign, opt.mtxActive, self.mtxCount, [0, 0x6e], [0, 0x4b])
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -959,7 +956,7 @@ export default {
 					opt.fade = 0.2
 				}
 
-				cmd.buffers = await self.fadeLevel(
+				const buffers = await self.fadeLevel(
 					opt.fade,
 					opt.input,
 					opt.assign,
@@ -968,8 +965,8 @@ export default {
 					[0x40, 0x40],
 					[0, 0x44],
 				)
-				console.log('cmd.buffers', cmd.buffers)
-				self.sendBuffers(cmd.buffers)
+				console.log('buffers', buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -997,7 +994,7 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(
+				const buffers = self.fadeLevel(
 					opt.fade,
 					opt.input,
 					opt.assign,
@@ -1006,7 +1003,7 @@ export default {
 					[0x40, 0x45],
 					[0x30, 0x04],
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1034,7 +1031,7 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(
+				const buffers = self.fadeLevel(
 					opt.fade,
 					opt.input,
 					opt.assign,
@@ -1043,7 +1040,7 @@ export default {
 					[0x40, 0x46],
 					[0x3c, 0x14],
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1071,8 +1068,16 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(opt.fade, opt.input, opt.assign, self.grpCount, opt.leveldb, [0, 0x4b], [0, 0x34])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.fadeLevel(
+					opt.fade,
+					opt.input,
+					opt.assign,
+					self.grpCount,
+					opt.leveldb,
+					[0, 0x4b],
+					[0, 0x34],
+				)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1100,8 +1105,16 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(opt.fade, opt.input, opt.assign, self.fxsCount, opt.leveldb, [0, 0x4c], [0, 0x14])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.fadeLevel(
+					opt.fade,
+					opt.input,
+					opt.assign,
+					self.fxsCount,
+					opt.leveldb,
+					[0, 0x4c],
+					[0, 0x14],
+				)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1129,8 +1142,16 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(opt.fade, opt.input, opt.assign, self.fxsCount, opt.leveldb, [0, 0x4d], [0, 0x54])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.fadeLevel(
+					opt.fade,
+					opt.input,
+					opt.assign,
+					self.fxsCount,
+					opt.leveldb,
+					[0, 0x4d],
+					[0, 0x54],
+				)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1158,8 +1179,16 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(opt.fade, opt.input, opt.assign, self.fxsCount, opt.leveldb, [0, 0x4e], [0, 0x04])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.fadeLevel(
+					opt.fade,
+					opt.input,
+					opt.assign,
+					self.fxsCount,
+					opt.leveldb,
+					[0, 0x4e],
+					[0, 0x04],
+				)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1187,7 +1216,7 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(
+				const buffers = self.fadeLevel(
 					opt.fade,
 					opt.input,
 					opt.assign,
@@ -1196,7 +1225,7 @@ export default {
 					[0x4e, 0x4e],
 					[0x24, 0x27],
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1224,8 +1253,16 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(opt.fade, opt.input, opt.assign, self.mtxCount, opt.leveldb, [0, 0x4e], [0, 0x4b])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.fadeLevel(
+					opt.fade,
+					opt.input,
+					opt.assign,
+					self.mtxCount,
+					opt.leveldb,
+					[0, 0x4e],
+					[0, 0x4b],
+				)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1245,8 +1282,8 @@ export default {
 			],
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = self.fadeLevel(opt.fade, opt.input, 99, 0, opt.leveldb, [0x4f, 0], [0, 0])
-				self.sendBuffers(cmd.buffers)
+				const buffers = self.fadeLevel(opt.fade, opt.input, 99, 0, opt.leveldb, [0x4f, 0], [0, 0])
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1294,7 +1331,7 @@ export default {
 			},
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = await self.setLevel(
+				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
 					self.mixCount,
@@ -1303,7 +1340,7 @@ export default {
 					[0, 0x44],
 					'PanBalance',
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1350,7 +1387,7 @@ export default {
 			},
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = await self.setLevel(
+				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
 					self.mixCount,
@@ -1359,7 +1396,7 @@ export default {
 					[0x30, 0x04],
 					'PanBalance',
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1406,7 +1443,7 @@ export default {
 			},
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = await self.setLevel(
+				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
 					self.mixCount,
@@ -1415,7 +1452,7 @@ export default {
 					[0x3c, 0x14],
 					'PanBalance',
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1462,7 +1499,7 @@ export default {
 			},
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = await self.setLevel(
+				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
 					self.grpCount,
@@ -1471,7 +1508,7 @@ export default {
 					[0, 0x34],
 					'PanBalance',
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1518,7 +1555,7 @@ export default {
 			},
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = await self.setLevel(
+				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
 					self.mtxCount,
@@ -1527,7 +1564,7 @@ export default {
 					[0x24, 0x27],
 					'PanBalance',
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1574,7 +1611,7 @@ export default {
 			},
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = await self.setLevel(
+				const buffers = await self.setLevel(
 					opt.input,
 					opt.assign,
 					self.mtxCount,
@@ -1583,7 +1620,7 @@ export default {
 					[0, 0x4b],
 					'PanBalance',
 				)
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1624,8 +1661,8 @@ export default {
 			},
 			callback: async (action) => {
 				let opt = action.options
-				cmd.buffers = await self.setLevel(opt.input, 99, 0, opt.leveldb, [0x5f, 0], [0, 0], 'PanBalance')
-				self.sendBuffers(cmd.buffers)
+				const buffers = await self.setLevel(opt.input, 99, 0, opt.leveldb, [0x5f, 0], [0, 0], 'PanBalance')
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1647,11 +1684,11 @@ export default {
 				let opt = action.options
 
 				sceneNumber = opt.scene - 1
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]),
 				]
 
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
@@ -1672,11 +1709,11 @@ export default {
 				let opt = action.options
 
 				sceneNumber = self.setScene(opt.scene)
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]),
 				]
 
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
