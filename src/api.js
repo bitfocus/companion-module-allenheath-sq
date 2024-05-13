@@ -357,19 +357,19 @@ export default {
 			})
 		})
 
-		for (let i = 0; i < model.fxrCount; i++) {
+		model.forEachFxReturn((fxr) => {
 			model.forEachMixAndLR((mix) => {
-				const rsp = self.getLevel(i, mix, model.mixCount, [0x40, 0x46], [0x3c, 0x14])
+				const rsp = self.getLevel(fxr, mix, model.mixCount, [0x40, 0x46], [0x3c, 0x14])
 				buff.push(rsp['buffer'][0])
 			})
-		}
+		})
 
-		for (let i = 0; i < model.fxrCount; i++) {
+		model.forEachFxReturn((fxr) => {
 			model.forEachGroup((group) => {
-				const rsp = self.getLevel(i, group, model.grpCount, [0, 0x4b], [0, 0x34])
+				const rsp = self.getLevel(fxr, group, model.grpCount, [0, 0x4b], [0, 0x34])
 				buff.push(rsp['buffer'][0])
 			})
-		}
+		})
 
 		model.forEachInputChannel((channel) => {
 			let tmp = self.CHOICES_FXS
@@ -387,13 +387,13 @@ export default {
 			}
 		})
 
-		for (let i = 0; i < model.fxrCount; i++) {
+		model.forEachFxReturn((fxr) => {
 			let tmp = self.CHOICES_FXS
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.fxsCount, [0, 0x4e], [0, 0x04])
+				const rsp = self.getLevel(fxr, tmp[j].id, model.fxsCount, [0, 0x4e], [0, 0x04])
 				buff.push(rsp['buffer'][0])
 			}
-		}
+		})
 
 		{
 			let tmp = self.CHOICES_MTX

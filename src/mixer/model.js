@@ -109,6 +109,31 @@ export class Model {
 		})
 	}
 
+	#fxReturnLabel(fxr) {
+		return `FX RETURN ${fxr + 1}`
+	}
+
+	#fxReturnDesc(fxr) {
+		return `FX Return ${fxr + 1}`
+	}
+
+	#fxReturnLabels = []
+
+	forEachFxReturn(f) {
+		const fxReturnLabels = this.#fxReturnLabels
+		if (fxReturnLabels.length === 0) {
+			for (let fxr = 0; fxr < this.fxrCount; fxr++) {
+				const label = this.#fxReturnLabel(fxr)
+				const desc = this.#fxReturnDesc(fxr)
+				fxReturnLabels.push([label, desc])
+			}
+		}
+
+		fxReturnLabels.forEach(([label, desc], fxr) => {
+			f(fxr, label, desc)
+		})
+	}
+
 	#muteGroupLabel(muteGroup) {
 		return `MuteGroup ${muteGroup + 1}`
 	}

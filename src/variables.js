@@ -32,27 +32,27 @@ export default {
 			})
 		})
 
-		for (let i = 0; i < model.fxrCount; i++) {
+		model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 			model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {
-				const rsp = self.getLevel(i, mix, model.mixCount, [0x40, 0x46], [0x3c, 0x14])
+				const rsp = self.getLevel(fxr, mix, model.mixCount, [0x40, 0x46], [0x3c, 0x14])
 
 				variables.push({
-					name: `FX Return ${i + 1} -> ${mixDesc} Level`,
+					name: `${fxrDesc} -> ${mixDesc} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			})
-		}
+		})
 
-		for (let i = 0; i < model.fxrCount; i++) {
+		model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 			model.forEachGroup((group, _groupLabel, groupDesc) => {
-				const rsp = self.getLevel(i, group, model.grpCount, [0, 0x4b], [0, 0x34])
+				const rsp = self.getLevel(fxr, group, model.grpCount, [0, 0x4b], [0, 0x34])
 
 				variables.push({
-					name: `FX Return ${i + 1} -> ${groupDesc} Level`,
+					name: `${fxrDesc} -> ${groupDesc} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			})
-		}
+		})
 
 		model.forEachInputChannel((channel, _channelLabel, channelDesc) => {
 			let tmp = self.CHOICES_FXS
@@ -78,17 +78,17 @@ export default {
 			}
 		})
 
-		for (let i = 0; i < model.fxrCount; i++) {
+		model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 			let tmp = self.CHOICES_FXS
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = self.getLevel(i, tmp[j].id, model.fxsCount, [0, 0x4e], [0, 0x04])
+				const rsp = self.getLevel(fxr, tmp[j].id, model.fxsCount, [0, 0x4e], [0, 0x04])
 
 				variables.push({
-					name: `FX Return ${i + 1} -> ${tmp[j].label} Level`,
+					name: `${fxrDesc} -> ${tmp[j].label} Level`,
 					variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 				})
 			}
-		}
+		})
 
 		{
 			let tmp = self.CHOICES_MTX

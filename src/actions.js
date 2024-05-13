@@ -7,11 +7,6 @@ export default {
 
 		var sceneNumber
 
-		self.CHOICES_FXR = []
-		for (let i = 0; i < model.fxrCount; i++) {
-			self.CHOICES_FXR.push({ label: `FX RETURN ${i + 1}`, id: i })
-		}
-
 		self.CHOICES_FXS = []
 		for (let i = 0; i < model.fxsCount; i++) {
 			self.CHOICES_FXS.push({ label: `FX SEND ${i + 1}`, id: i })
@@ -633,7 +628,7 @@ export default {
 					label: 'FX Return',
 					id: 'inputFxr',
 					default: 0,
-					choices: self.CHOICES_FXR,
+					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -750,7 +745,7 @@ export default {
 					label: 'FX return',
 					id: 'inputFxr',
 					default: 0,
-					choices: self.CHOICES_FXR,
+					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -948,7 +943,7 @@ export default {
 					label: 'FX return',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_FXR,
+					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -985,7 +980,7 @@ export default {
 					label: 'FX return',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_FXR,
+					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1096,7 +1091,7 @@ export default {
 					label: 'FX return',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_FXR,
+					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1325,7 +1320,7 @@ export default {
 					label: 'FX return',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_FXR,
+					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
 				},
 				{
@@ -1373,7 +1368,7 @@ export default {
 					label: 'FX return',
 					id: 'input',
 					default: 0,
-					choices: self.CHOICES_FXR,
+					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
 				},
 				{
