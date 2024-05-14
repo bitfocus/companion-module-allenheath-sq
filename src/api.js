@@ -333,7 +333,7 @@ export default {
 
 	sendSocket: function (buff) {
 		if (this.midiSocket !== undefined && this.midiSocket.isConnected) {
-			this.log('debug', `Sending : ${JSON.parse(JSON.stringify(buff))['data']} from ${this.config.host}`)
+			this.log('debug', `Sending : ${Array.from(buff)} from ${this.config.host}`)
 			this.midiSocket.send(buff)
 		}
 	},
@@ -592,7 +592,7 @@ export default {
 			})
 
 			self.midiSocket.on('data', (data) => {
-				self.getRemoteValue(JSON.parse(JSON.stringify(data))['data'])
+				self.getRemoteValue(Array.from(data))
 			})
 		}
 	},
@@ -608,7 +608,7 @@ export default {
 		}
 
 		for (let i = 0; i < buffers.length; i++) {
-			this.log('debug', `Sending : ${JSON.parse(JSON.stringify(buffers[i]))['data']} from ${this.config.host}`)
+			this.log('debug', `Sending : ${Array.from(buffers[i])} from ${this.config.host}`)
 			self.sendSocket(buffers[i])
 			await sleepSend(200)
 		}
