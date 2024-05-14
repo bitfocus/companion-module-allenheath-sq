@@ -1717,31 +1717,6 @@ export default {
 			},
 		}
 
-		actions['current_scene'] = {
-			name: 'Current scene',
-			options: [
-				{
-					type: 'number',
-					label: 'Scene nr.',
-					id: 'scene',
-					default: 1,
-					min: 1,
-					max: self.sceneCount,
-					required: true,
-				},
-			],
-			callback: async (action) => {
-				let opt = action.options
-
-				sceneNumber = opt.scene - 1
-				const buffers = [
-					Buffer.from([self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]),
-				]
-
-				self.sendBuffers(buffers)
-			},
-		}
-
 		self.setActionDefinitions(actions)
 	},
 }

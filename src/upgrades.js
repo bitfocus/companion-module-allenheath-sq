@@ -16,8 +16,35 @@ function DummyUpgradeScript(_context, _props) {
 	}
 }
 
+/**
+ * This module once supported 'scene_recall' and 'current_scene' actions that
+ * were exactly identical (other than in actionId and the name for each visible
+ * in UI).  Rewrite the latter sort of action to instead encode the former.
+ * @param {import('@companion-module/base').CompanionUpgradeContext} _context
+ * @param {import('@companion-module/base').CompanionStaticUpgradeProps} props
+ * @returns {import('@companion-module/base').CompanionStaticUpgradeResult}
+ */
+function CoalesceSceneRecallActions(_context, props) {
+	const result = {
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
+	}
+
+	for (const action of props.actions) {
+		if (action.actionId === 'current_scene') {
+			action.actionId = 'scene_recall'
+
+			result.updatedActions.push(action)
+		}
+	}
+
+	return result
+}
+
 export const UpgradeScripts = [
 	DummyUpgradeScript,
+	CoalesceSceneRecallActions,
 	// placeholder comment to force array contents to format one entry per line
 ]
 
