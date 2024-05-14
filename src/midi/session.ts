@@ -2,8 +2,11 @@ import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import callback from '../callback.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import type { Mixer } from '../mixer/mixer.js'
-import { prettyBytes } from '../utils/pretty.js'
+import { MidiTokenizer } from './tokenize/tokenize.js'
+import { MixerMessageParser } from './parse/parse.js'
+import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { asyncSleep, sleep } from '../utils/sleep.js'
+import { MixerChannelParser } from './parse/mixer-channel-parse.js'
 
 /**
  * The port number used for MIDI-over-TCP connections to SQ mixers.
@@ -55,6 +58,11 @@ export class MidiSession {
 	#instance: sqInstance
 
 	/**
+	 * The mixer this session connects to.
+	 */
+	#mixer: Mixer
+
+	/**
 	 * The TCP socket used to interact with the mixer.
 	 */
 	socket: TCPHelper | null = null
@@ -93,8 +101,9 @@ export class MidiSession {
 	/**
 	 * Create an SQ mixer abstraction for the given instance.
 	 */
-	constructor(_mixer: Mixer, instance: sqInstance) {
+	constructor(mixer: Mixer, instance: sqInstance) {
 		this.#instance = instance
+		this.#mixer = mixer
 	}
 
 	/**
@@ -129,6 +138,17 @@ export class MidiSession {
 			this.stop(InstanceStatus.ConnectionFailure)
 		})
 
+		this.#processMixerReplies(socket).then(
+			() => {
+				instance.log('info', 'All mixer replies received, disconnecting')
+				this.stop(InstanceStatus.Disconnected)
+			},
+			(reason: any) => {
+				instance.log('error', `Error processing replies: ${reason}`)
+				this.stop(InstanceStatus.ConnectionFailure)
+			},
+		)
+
 		socket.once('connect', () => {
 			instance.log('info', `Connected to ${host}:${SQMidiPort}`)
 			instance.updateStatus(InstanceStatus.Ok)
@@ -147,11 +167,71 @@ export class MidiSession {
 				}, 4000)
 			}
 		})
+	}
 
-		socket.on('data', (data) => {
-			// XXX need to handle thrown errors
-			void instance.getRemoteValue(Array.from(data))
+	/** Read and process mixer reply messages from `socket`. */
+	async #processMixerReplies(socket: TCPHelper) {
+		const mixer = this.#mixer
+		const instance = this.#instance
+
+		const verboseLog = (msg: string) => {
+			if (this.verbose) {
+				instance.log('debug', msg)
+			}
+		}
+
+		const tokenizer = new MidiTokenizer(socket, verboseLog)
+
+		const mixerChannelParser = new MixerChannelParser(verboseLog)
+		mixerChannelParser.on('scene', (newScene: number) => {
+			verboseLog(`Scene changed: ${newScene}`)
+
+			mixer.currentScene = newScene
+			instance.setVariableValues({
+				// The currentScene variable is 1-indexed, consistent with how
+				// the current scene is displayed to users in mixer UI.
+				currentScene: newScene + 1,
+			})
 		})
+		mixerChannelParser.on('mute', (msb: number, lsb: number, vf: number) => {
+			verboseLog(`Mute received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VF=${prettyByte(vf)}`)
+
+			mixer.fdbState[`mute_${msb}.${lsb}`] = vf === 0x01
+			instance.checkFeedbacks((callback.mute as any)[msb + ':' + lsb][0])
+		})
+		mixerChannelParser.on('fader_level', (msb: number, lsb: number, vc: number, vf: number) => {
+			verboseLog(
+				`Fader received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
+			)
+
+			const levelKey = `level_${msb}.${lsb}` as const
+
+			let ost = false
+			const res = instance.getVariableValue(levelKey)
+			if (res !== undefined) {
+				mixer.lastValue[levelKey] = res
+				ost = true
+			}
+
+			const db = instance.decTodB(vc, vf)
+			instance.setVariableValues({
+				[levelKey]: db,
+			})
+
+			if (!ost) {
+				mixer.lastValue[levelKey] = db
+			}
+		})
+		mixerChannelParser.on('pan_level', (msb: number, lsb: number, vc: number, vf: number) => {
+			verboseLog(
+				`Pan received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
+			)
+			instance.setVariableValues({
+				[`pan_${msb}.${lsb}`]: instance.decTodB(vc, vf, 'PanBalance'),
+			})
+		})
+
+		return new MixerMessageParser(this.channel, verboseLog, tokenizer, mixerChannelParser).run()
 	}
 
 	/**

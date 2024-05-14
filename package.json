@@ -49,7 +49,8 @@
 		"node": "^18.12"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.8.0"
+		"@companion-module/base": "~1.8.0",
+		"eventemitter3": "^5.0.1"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^1.5.0",

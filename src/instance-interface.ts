@@ -20,6 +20,9 @@ export interface SQInstanceInterface {
 	configUpdated: InstanceBase<SQInstanceConfig>['configUpdated']
 	log: InstanceBase<SQInstanceConfig>['log']
 	updateStatus: InstanceBase<SQInstanceConfig>['updateStatus']
+	setVariableValues: InstanceBase<SQInstanceConfig>['setVariableValues']
+	checkFeedbacks: InstanceBase<SQInstanceConfig>['checkFeedbacks']
+	getVariableValue: InstanceBase<SQInstanceConfig>['getVariableValue']
 
 	getConfigFields(): SomeCompanionConfigField[]
 
@@ -52,5 +55,4 @@ export interface SQInstanceInterface {
 		cnfg?: string,
 	): Promise<number[][]>
 	getRemoteLevel(): void
-	getRemoteValue(data: number[]): Promise<void>
 }

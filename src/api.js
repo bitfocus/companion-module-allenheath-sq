@@ -1,5 +1,3 @@
-import callback from './callback.js'
-
 import { sleep } from './utils/sleep.js'
 
 export default {
@@ -460,79 +458,5 @@ export default {
 			sleep(300)
 		}
 		self.subscribeActions('pan_to_output')
-	},
-
-	getRemoteValue: async function (data) {
-		var self = this
-
-		/** @type {import('./mixer/mixer.js').Mixer} */
-		const mixer = this.mixer
-		const midi = mixer.midi
-
-		var dt, j
-
-		for (let b = 0; b < data.length; b++) {
-			/* Schene Change */
-			if (data[b] == midi.BN && data[b + 1] == 0) {
-				dt = data.slice(b, b + 5)
-				var csc = dt[4] + dt[2] * 127
-				mixer.currentScene = csc
-				self.setVariableValues({
-					currentScene: csc + 1,
-				})
-				this.log('debug', `Scene Received : ${dt} from ${self.config.host}`)
-			}
-
-			/* Other */
-			if (data[b] == midi.BN && data[b + 1] == 99) {
-				dt = data.slice(b, b + 12)
-
-				if (dt.length == 12) {
-					var MSB = dt[2]
-					var LSB = dt[5]
-					var VC = dt[8]
-					var VF = dt[11]
-
-					/* Mute */
-					if (MSB == 0 || MSB == 2 || MSB == 4) {
-						mixer.fdbState[`mute_${MSB}.${LSB}`] = VF == 1 ? true : false
-						self.checkFeedbacks(callback['mute'][MSB + ':' + LSB][0])
-						this.log('debug', `Mute Received : ${dt} from ${self.config.host}`)
-					}
-
-					/* Fader Level */
-					if (MSB >= 0x40 && MSB <= 0x4f) {
-						const levelKey = `level_${MSB}.${LSB}`
-
-						var ost = false
-						var res = await self.getVariableValue(levelKey)
-						if (res !== undefined) {
-							mixer.lastValue[levelKey] = res
-							ost = true
-						}
-
-						let db = self.decTodB(VC, VF)
-						self.setVariableValues({
-							[levelKey]: db,
-						})
-
-						if (!ost) {
-							mixer.lastValue[levelKey] = db
-						}
-
-						this.log('debug', `Fader Received : ${dt} from ${self.config.host}`)
-					}
-
-					/* Pan Level */
-					if (MSB >= 0x50 && MSB <= 0x5e) {
-						let db = self.decTodB(VC, VF, 'PanBalance')
-						self.setVariableValues({
-							['pan_' + MSB + '.' + LSB]: db,
-						})
-						this.log('debug', `Pan Received : ${dt} from ${self.config.host}`)
-					}
-				}
-			}
-		}
 	},
 }
