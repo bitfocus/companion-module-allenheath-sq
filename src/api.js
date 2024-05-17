@@ -540,7 +540,6 @@ export default {
 		let self = this
 
 		for (let i = 0; i < arrays.length; i++) {
-			this.log('debug', `Sending : ${arrays[i]} from ${this.config.host}`)
 			self.mixer.midi.send(arrays[i])
 			await asyncSleep(200)
 		}
