@@ -1,3 +1,11 @@
+function prettyByte(b) {
+	return ('0' + b.toString(16)).slice(-2)
+}
+
+export function prettyBytes(message) {
+	return message.map(prettyByte).join(' ')
+}
+
 export function dBToDec(lv, typ) {
 	let VC, VF, val, bin
 	if (lv == '-inf') return [0, 0]

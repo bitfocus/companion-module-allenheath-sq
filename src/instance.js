@@ -12,11 +12,14 @@ import { getPresets } from './presets.js'
 import api from './api.js'
 
 import { Choices } from './choices.js'
-import { Model } from './mixer/model.js'
+import { Mixer } from './mixer/mixer.js'
 import { dBToDec, decTodB } from './utils.js'
 
 export class sqInstance extends InstanceBase {
-	model
+	config
+
+	/** @type {?Mixer} */
+	mixer = null
 
 	fdbState = {}
 	lastValue = {}
@@ -40,8 +43,9 @@ export class sqInstance extends InstanceBase {
 	}
 
 	async destroy() {
-		if (this.midiSocket !== undefined) {
-			this.midiSocket.destroy()
+		if (this.mixer !== null) {
+			this.mixer.stop(InstanceStatus.Disconnected)
+			this.mixer = null
 		}
 	}
 
@@ -54,6 +58,13 @@ export class sqInstance extends InstanceBase {
 	}
 
 	async configUpdated(config) {
+		this.mixer?.stop(InstanceStatus.Disconnected)
+
+		const mixer = new Mixer(this, config.model)
+		this.mixer = mixer
+
+		const model = mixer.model
+
 		this.config = config
 
 		this.setVariableValues({
@@ -62,14 +73,9 @@ export class sqInstance extends InstanceBase {
 
 		this.mch = parseInt('0xB' + (this.config.midich - 1).toString(16))
 
-		this.updateStatus(InstanceStatus.Connecting)
-
-		const model = new Model(config.model)
-		this.model = model
-
 		const choices = new Choices(model)
 
-		this.setActionDefinitions(getActions(this, choices, config.label))
+		this.setActionDefinitions(getActions(this, mixer, choices, config.label))
 		this.setFeedbackDefinitions(getFeedbacks(this, choices))
 		this.setVariableDefinitions(getVariables(this, model))
 		this.setPresetDefinitions(getPresets(this, model, config.talkback))
@@ -77,6 +83,10 @@ export class sqInstance extends InstanceBase {
 		//this.checkVariables();
 		this.checkFeedbacks()
 
-		this.initTCP()
+		if (config.host) {
+			mixer.start(config.host, config.status, config.verbose)
+		} else {
+			mixer.stop(InstanceStatus.BadConfig)
+		}
 	}
 }

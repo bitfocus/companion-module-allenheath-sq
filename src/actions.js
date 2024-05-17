@@ -21,8 +21,8 @@ const MuteOption = {
 	],
 }
 
-export function getActions(self, choices, connectionLabel) {
-	const model = self.model
+export function getActions(self, mixer, choices, connectionLabel) {
+	const model = mixer.model
 
 	var sceneNumber
 
@@ -1083,7 +1083,7 @@ export function getActions(self, choices, connectionLabel) {
 		subscribe: async (action) => {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.count.mix, [0x50, 0x50], [0, 0x44])
-			self.sendSocket(val.buffer[0])
+			mixer.midi.send(val.buffer[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
@@ -1131,7 +1131,7 @@ export function getActions(self, choices, connectionLabel) {
 		subscribe: async (action) => {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.count.mix, [0x50, 0x55], [0x30, 0x04])
-			self.sendSocket(val.buffer[0])
+			mixer.midi.send(val.buffer[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
@@ -1179,7 +1179,7 @@ export function getActions(self, choices, connectionLabel) {
 		subscribe: async (action) => {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.count.mix, [0x50, 0x56], [0x3c, 0x14])
-			self.sendSocket(val.buffer[0])
+			mixer.midi.send(val.buffer[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
@@ -1227,7 +1227,7 @@ export function getActions(self, choices, connectionLabel) {
 		subscribe: async (action) => {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.count.group, [0, 0x5b], [0, 0x34])
-			self.sendSocket(val.buffer[0])
+			mixer.midi.send(val.buffer[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
@@ -1275,7 +1275,7 @@ export function getActions(self, choices, connectionLabel) {
 		subscribe: async (action) => {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.count.matrix, [0x5e, 0x5e], [0x24, 0x27])
-			self.sendSocket(val.buffer[0])
+			mixer.midi.send(val.buffer[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
@@ -1323,7 +1323,7 @@ export function getActions(self, choices, connectionLabel) {
 		subscribe: async (action) => {
 			let opt = action.options
 			let val = self.getLevel(opt.input, opt.assign, model.count.matrix, [0, 0x5e], [0, 0x4b])
-			self.sendSocket(val.buffer[0])
+			mixer.midi.send(val.buffer[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {
@@ -1365,7 +1365,7 @@ export function getActions(self, choices, connectionLabel) {
 		subscribe: async (action) => {
 			let opt = action.options
 			let val = self.getLevel(opt.input, 99, 0, [0x5f, 0], [0, 0])
-			self.sendSocket(val.buffer[0])
+			mixer.midi.send(val.buffer[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
 		callback: async (action) => {

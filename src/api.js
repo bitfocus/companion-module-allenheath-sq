@@ -1,10 +1,6 @@
-import { InstanceStatus, TCPHelper } from '@companion-module/base'
-
 import callback from './callback.js'
 
 import { asyncSleep, sleep } from './utils.js'
-
-const MIDI = 51325
 
 export default {
 	setRouting: function (ch, mix, ac, mc, oMB, oLB) {
@@ -139,7 +135,7 @@ export default {
 	},
 
 	setScene: async function (val) {
-		const model = this.model
+		const model = this.mixer.model
 
 		const res = await this.getVariableValue('currentScene')
 		let scn = parseInt(res) - 1 + val
@@ -180,14 +176,13 @@ export default {
 			//if the user did not choose a fade time
 			return await self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 		} else {
-			if (this.midiSocket !== undefined) {
+			const midiSocket = this.mixer.midi.socket
+			if (midiSocket !== null) {
 				let setFade = (MSB, LSB, lv) => {
 					let val = self.dBToDec(lv)
 					let VC = val[0]
 					let VF = val[1]
-					self.midiSocket.send(
-						Buffer.from([self.mch, 0x63, MSB, self.mch, 0x62, LSB, self.mch, 0x06, VC, self.mch, 0x26, VF]),
-					)
+					this.mixer.midi.send([self.mch, 0x63, MSB, self.mch, 0x62, LSB, self.mch, 0x06, VC, self.mch, 0x26, VF])
 
 					lv = parseFloat(lv).toFixed(1)
 					if (lv < -89) {
@@ -328,16 +323,9 @@ export default {
 		}
 	},
 
-	sendSocket: function (data) {
-		if (this.midiSocket !== undefined && this.midiSocket.isConnected) {
-			this.log('debug', `Sending : ${data} from ${this.config.host}`)
-			this.midiSocket.send(Buffer.from(data))
-		}
-	},
-
 	getRemoteLevel: function () {
 		var self = this
-		const model = self.model
+		const model = self.mixer.model
 
 		var buff = []
 
@@ -432,10 +420,10 @@ export default {
 			buff.push(rsp['buffer'][0])
 		})
 
-		if (buff.length > 0 && self.midiSocket !== undefined) {
+		if (buff.length > 0 && self.mixer.midi.socket !== null) {
 			let ctr = 0
 			for (let i = 0; i < buff.length; i++) {
-				self.sendSocket(buff[i])
+				self.mixer.midi.send(buff[i])
 				ctr++
 				if (this.config.status == 'delay') {
 					if (ctr == 20) {
@@ -476,7 +464,7 @@ export default {
 	getRemoteStatus: function (act) {
 		for (let key in callback[act]) {
 			let mblb = key.toString().split(':')
-			this.sendSocket([this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7f])
+			this.mixer.midi.send([this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7f])
 		}
 	},
 
@@ -547,50 +535,13 @@ export default {
 		}
 	},
 
-	initTCP: function () {
-		let self = this
-
-		if (self.midiSocket !== undefined) {
-			self.midiSocket.destroy()
-			delete self.midiSocket
-		}
-
-		if (self.config.host) {
-			self.midiSocket = new TCPHelper(this.config.host, MIDI)
-
-			self.midiSocket.on('error', (err) => {
-				self.log('error', 'Error: ' + err.message)
-			})
-
-			self.midiSocket.on('connect', () => {
-				self.log('debug', `Connected to ${self.config.host}`)
-				self.updateStatus(InstanceStatus.Ok)
-				if (self.config.status != 'nosts') {
-					self.getRemoteStatus('mute')
-					sleep(300)
-					self.getRemoteLevel()
-
-					if (self.config.status == 'full') {
-						var gInt = setTimeout(() => {
-							self.getRemoteLevel()
-						}, 4000)
-					}
-				}
-			})
-
-			self.midiSocket.on('data', (data) => {
-				self.getRemoteValue(Array.from(data))
-			})
-		}
-	},
-
 	//new send command
 	sendBuffers: async function (arrays) {
 		let self = this
 
 		for (let i = 0; i < arrays.length; i++) {
 			this.log('debug', `Sending : ${arrays[i]} from ${this.config.host}`)
-			self.sendSocket(arrays[i])
+			self.mixer.midi.send(arrays[i])
 			await asyncSleep(200)
 		}
 	},

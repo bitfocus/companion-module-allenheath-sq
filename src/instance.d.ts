@@ -1,6 +1,6 @@
-import type { CompanionVariableValue, InstanceBase, SomeCompanionConfigField, TCPHelper } from '@companion-module/base'
+import type { CompanionVariableValue, InstanceBase, SomeCompanionConfigField } from '@companion-module/base'
 import type { SQInstanceConfig } from './config.js'
-import type { Model } from './mixer/model.js'
+import type { Mixer } from './mixer/mixer.js'
 
 export type ParamHalf = readonly [number, number]
 
@@ -10,7 +10,7 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 	// Not declared, simply added in configUpdated
 	config: SQInstanceConfig
 
-	model: Model
+	mixer: Mixer | null
 
 	readonly fdbState: { [key: string]: boolean }
 	readonly lastValue: { [key: string]: CompanionVariableValue }
@@ -27,9 +27,6 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 	getConfigFields(): SomeCompanionConfigField[]
 
 	async configUpdated(config: SQInstanceConfig): Promise<void>
-
-	// Absent after construction, added by initTCP in api.js
-	midiSocket: TCPHelper | undefined
 
 	// Defined in api.js, added via Object.assign.
 	setRouting(ch: number, mix: readonly number[], ac: boolean, mc: number, oMB: ParamHalf, oLB: ParamHalf): number[][]
@@ -60,10 +57,8 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 		oLB: ParamHalf,
 		cnfg?: string,
 	): Promise<number[][]>
-	sendSocket(data: readonly number[]): void
 	getRemoteLevel(): void
 	getRemoteStatus(act: string): void
 	async getRemoteValue(data: number[]): Promise<void>
-	initTCP(): void
 	async sendBuffers(buffers: readonly number[][]): Promise<void>
 }
