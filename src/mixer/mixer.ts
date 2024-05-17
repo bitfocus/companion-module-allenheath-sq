@@ -34,13 +34,16 @@ export class Mixer {
 	 *
 	 * @param host
 	 *   The hostname/IP address of the mixer.
+	 * @param midiChannel
+	 *   The MIDI channel setting used by the mixer.  (This will be 0-15 for
+	 *   channels 1-16 as displayed in mixer UI.)
 	 * @param retrieveStatus
 	 *   When/how to retrieve the current status of mixer levels and routing.
 	 * @param verbose
 	 *   Whether verbose logging of mixer operations should be enabled.
 	 */
-	start(host: string, retrieveStatus: string, verbose: boolean): void {
-		this.midi.start(host, retrieveStatus, verbose)
+	start(host: string, midiChannel: number, retrieveStatus: string, verbose: boolean): void {
+		this.midi.start(host, midiChannel, retrieveStatus, verbose)
 	}
 
 	/** Stop this mixer connection. */

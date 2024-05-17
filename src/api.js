@@ -9,6 +9,8 @@ export default {
 		let LSB
 		let tmp
 
+		const midi = this.mixer.midi
+
 		for (let i = 0; i < mix.length; i++) {
 			if (mix[i] == 99) {
 				MSB = oMB[0]
@@ -19,7 +21,7 @@ export default {
 				LSB = tmp & 0x7f
 			}
 
-			routingCmds.push([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, 0, this.mch, 0x26, ac ? 1 : 0])
+			routingCmds.push([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x06, 0, midi.BN, 0x26, ac ? 1 : 0])
 		}
 
 		return routingCmds
@@ -110,8 +112,10 @@ export default {
 			var VF = tm[1]
 		}
 
+		const midi = this.mixer.midi
+
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
-			levelCmds.push([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF])
+			levelCmds.push([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x06, VC, midi.BN, 0x26, VF])
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
@@ -120,16 +124,16 @@ export default {
 				VF = rtn[1]
 				lv = 997
 
-				levelCmds.push([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF])
+				levelCmds.push([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x06, VC, midi.BN, 0x26, VF])
 			}
 			//else {
 			/* Increment +1 */
-			//	levelCmds.push( ([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, lv == 998 ? 0x60 : 0x61, 0x00 ]) )
+			//	levelCmds.push( [ midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, lv == 998 ? 0x60 : 0x61, 0x00 ] )
 			//	}
 		}
 
 		// Retrive value after set command
-		levelCmds.push([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f])
+		levelCmds.push([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x60, 0x7f])
 
 		return levelCmds
 	},
@@ -163,8 +167,10 @@ export default {
 			LSB = tmp & 0x7f
 		}
 
+		const midi = this.mixer.midi
+
 		return {
-			commands: [[this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f]],
+			commands: [[midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x60, 0x7f]],
 			channel: [MSB, LSB],
 		}
 	},
@@ -176,13 +182,15 @@ export default {
 			//if the user did not choose a fade time
 			return await self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 		} else {
-			const midiSocket = this.mixer.midi.socket
+			const midi = this.mixer.midi
+
+			const midiSocket = midi.socket
 			if (midiSocket !== null) {
 				let setFade = (MSB, LSB, lv) => {
 					let val = self.dBToDec(lv)
 					let VC = val[0]
 					let VF = val[1]
-					this.mixer.midi.send([self.mch, 0x63, MSB, self.mch, 0x62, LSB, self.mch, 0x06, VC, self.mch, 0x26, VF])
+					midi.send([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x06, VC, midi.BN, 0x26, VF])
 
 					lv = parseFloat(lv).toFixed(1)
 					if (lv < -89) {
@@ -462,9 +470,11 @@ export default {
 	},
 
 	getRemoteStatus: function (act) {
+		const midi = this.mixer.midi
+
 		for (let key in callback[act]) {
 			let mblb = key.toString().split(':')
-			this.mixer.midi.send([this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7f])
+			midi.send([midi.BN, 0x63, mblb[0], midi.BN, 0x62, mblb[1], midi.BN, 0x60, 0x7f])
 		}
 	},
 

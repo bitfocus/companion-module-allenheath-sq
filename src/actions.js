@@ -21,8 +21,17 @@ const MuteOption = {
 	],
 }
 
+/**
+ *
+ * @param {import('../index.js').sqInstance} self
+ * @param {import('./mixer/mixer.js').Mixer} mixer
+ * @param {import('./choices.js').Choices} choices
+ * @param {string} connectionLabel
+ * @returns
+ */
 export function getActions(self, mixer, choices, connectionLabel) {
 	const model = mixer.model
+	const midi = mixer.midi
 
 	var sceneNumber
 
@@ -82,7 +91,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -127,7 +136,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -152,7 +161,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -176,7 +185,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -200,7 +209,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -224,7 +233,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -248,7 +257,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -272,7 +281,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -296,7 +305,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const commands = [
-				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
+				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
 			]
 			mixer.midi.sendCommands(commands)
 		},
@@ -334,7 +343,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			let opt = action.options
 			let softKey = parseInt(opt.softKey)
 			let keyValu = opt.pressedsk == '0' || opt.pressedsk == '1' ? true : false
-			let tch = parseInt((keyValu ? '0x9' : '0x8') + (self.mch - 176).toString(16))
+			let tch = (keyValu ? 0x90 : 0x80) | midi.channel
 			const commands = [[tch, 0x30 + softKey, keyValu ? 0x7f : 0]]
 			mixer.midi.sendCommands(commands)
 		},
@@ -1393,7 +1402,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			let opt = action.options
 
 			sceneNumber = opt.scene - 1
-			const commands = [[self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]]
+			const commands = [[midi.BN, 0, (sceneNumber >> 7) & 0x0f, midi.CN, sceneNumber & 0x7f]]
 
 			mixer.midi.sendCommands(commands)
 		},
@@ -1416,7 +1425,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			let opt = action.options
 
 			sceneNumber = self.setScene(opt.scene)
-			const commands = [[self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]]
+			const commands = [[midi.BN, 0, (sceneNumber >> 7) & 0x0f, midi.CN, sceneNumber & 0x7f]]
 
 			mixer.midi.sendCommands(commands)
 		},

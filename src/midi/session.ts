@@ -26,6 +26,12 @@ export class MidiSession {
 	host = ''
 
 	/**
+	 * The MIDI channel setting used by the mixer.  (This will be 0-15 for
+	 * channels 1-16 as displayed in mixer UI.)
+	 */
+	channel = 0
+
+	/**
 	 * When/how to retrieve all levels, routing, etc. from the mixer.
 	 */
 	retrieveStatus = 'nosts'
@@ -34,6 +40,16 @@ export class MidiSession {
 	 * Whether verbose logging is enabled.
 	 */
 	verbose = false
+
+	/** A Control Change byte for this session's MIDI channel. */
+	get BN(): number {
+		return 0xb0 | this.channel
+	}
+
+	/** A Program Change byte for this session's MIDI channel. */
+	get CN(): number {
+		return 0xc0 | this.channel
+	}
 
 	/**
 	 * Create an SQ mixer abstraction for the given instance.
@@ -48,18 +64,22 @@ export class MidiSession {
 	 *
 	 * @param host
 	 *   The hostname/IP address of the mixer.
+	 * @param midiChannel
+	 *   The MIDI channel setting used by the mixer.  (This will be 0-15 for
+	 *   channels 1-16 as displayed in mixer UI.)
 	 * @param retrieveStatus
 	 *   When/how to retrieve the current status of mixer levels and routing.
 	 * @param verbose
 	 *   Whether verbose logging of mixer operations should be enabled.
 	 */
-	start(host: string, retrieveStatus: string, verbose: boolean): void {
+	start(host: string, channel: number, retrieveStatus: string, verbose: boolean): void {
 		this.stop(InstanceStatus.Connecting)
 
 		const socket = new TCPHelper(host, SQMidiPort)
 		this.socket = socket
 
 		this.host = host
+		this.channel = channel
 		this.retrieveStatus = retrieveStatus
 		this.verbose = verbose
 

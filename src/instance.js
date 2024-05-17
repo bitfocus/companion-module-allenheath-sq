@@ -23,7 +23,6 @@ export class sqInstance extends InstanceBase {
 
 	fdbState = {}
 	lastValue = {}
-	mch = 0xb0
 
 	constructor(internal) {
 		super(internal)
@@ -71,8 +70,6 @@ export class sqInstance extends InstanceBase {
 			currentScene: 1,
 		})
 
-		this.mch = parseInt('0xB' + (this.config.midich - 1).toString(16))
-
 		const choices = new Choices(model)
 
 		this.setActionDefinitions(getActions(this, mixer, choices, config.label))
@@ -84,7 +81,7 @@ export class sqInstance extends InstanceBase {
 		this.checkFeedbacks()
 
 		if (config.host) {
-			mixer.start(config.host, config.status, config.verbose)
+			mixer.start(config.host, config.midich - 1, config.status, config.verbose)
 		} else {
 			mixer.stop(InstanceStatus.BadConfig)
 		}

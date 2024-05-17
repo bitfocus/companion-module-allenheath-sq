@@ -14,7 +14,6 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 
 	readonly fdbState: { [key: string]: boolean }
 	readonly lastValue: { [key: string]: CompanionVariableValue }
-	mch: number
 
 	constructor(internal: unknown): InstanceBase<SQInstanceConfig>
 
