@@ -103,6 +103,9 @@ module.exports = {
 
 		console.log('new level: ' + lv)
 
+		//ensure it's a number
+		lv = parseFloat(lv);
+
 		let variableObj = {};
 		variableObj['level_' + MSB +'.'+ LSB] = lv.toFixed(1);
 		self.setVariableValues(variableObj);
