@@ -1336,7 +1336,7 @@ module.exports = {
 				let opt = action.options;
 
 				sceneNumber = opt.scene - 1
-				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0 | (self.mch & 0xF), sceneNumber & 0x7F ]) ]
 
 				self.sendBuffers(cmd.buffers);
 			}
@@ -1359,7 +1359,7 @@ module.exports = {
 				let opt = action.options;
 
 				sceneNumber = self.setScene(opt.scene)
-				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0 | (self.mch & 0xF), sceneNumber & 0x7F ]) ]
 
 				self.sendBuffers(cmd.buffers);
 			}
@@ -1382,7 +1382,7 @@ module.exports = {
 				let opt = action.options;
 
 				sceneNumber = opt.scene - 1
-				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0, sceneNumber & 0x7F ]) ]
+				cmd.buffers = [ Buffer.from([ self.mch, 0, (sceneNumber >> 7) & 0x0F, 0xC0 | (self.mch & 0xF), sceneNumber & 0x7F ]) ]
 
 				self.sendBuffers(cmd.buffers);
 			}
