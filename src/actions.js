@@ -1734,11 +1734,11 @@ export default {
 				let opt = action.options
 
 				sceneNumber = opt.scene - 1
-				cmd.buffers = [
+				const buffers = [
 					Buffer.from([self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]),
 				]
 
-				self.sendBuffers(cmd.buffers)
+				self.sendBuffers(buffers)
 			},
 		}
 
