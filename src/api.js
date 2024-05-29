@@ -498,66 +498,64 @@ export default {
 	getRemoteValue: async function (data) {
 		var self = this
 
-		if (typeof data == 'object') {
-			var dt, j
+		var dt, j
 
-			for (let b = 0; b < data.length; b++) {
-				/* Schene Change */
-				if (data[b] == this.mch && data[b + 1] == 0) {
-					dt = data.slice(b, b + 5)
-					var csc = dt[4] + dt[2] * 127
-					let variableObj = {}
-					variableObj['currentScene'] = csc + 1
-					self.setVariableValues(variableObj)
-					this.log('debug', `Scene Received : ${dt} from ${self.config.host}`)
-				}
+		for (let b = 0; b < data.length; b++) {
+			/* Schene Change */
+			if (data[b] == this.mch && data[b + 1] == 0) {
+				dt = data.slice(b, b + 5)
+				var csc = dt[4] + dt[2] * 127
+				let variableObj = {}
+				variableObj['currentScene'] = csc + 1
+				self.setVariableValues(variableObj)
+				this.log('debug', `Scene Received : ${dt} from ${self.config.host}`)
+			}
 
-				/* Other */
-				if (data[b] == this.mch && data[b + 1] == 99) {
-					dt = data.slice(b, b + 12)
+			/* Other */
+			if (data[b] == this.mch && data[b + 1] == 99) {
+				dt = data.slice(b, b + 12)
 
-					if (dt.length == 12) {
-						var MSB = dt[2]
-						var LSB = dt[5]
-						var VC = dt[8]
-						var VF = dt[11]
+				if (dt.length == 12) {
+					var MSB = dt[2]
+					var LSB = dt[5]
+					var VC = dt[8]
+					var VF = dt[11]
 
-						/* Mute */
-						if (MSB == 0 || MSB == 2 || MSB == 4) {
-							this.fdbState['mute_' + MSB + '.' + LSB] = VF == 1 ? true : false
-							self.checkFeedbacks(callback['mute'][MSB + ':' + LSB][0])
-							this.log('debug', `Mute Received : ${dt} from ${self.config.host}`)
+					/* Mute */
+					if (MSB == 0 || MSB == 2 || MSB == 4) {
+						this.fdbState['mute_' + MSB + '.' + LSB] = VF == 1 ? true : false
+						self.checkFeedbacks(callback['mute'][MSB + ':' + LSB][0])
+						this.log('debug', `Mute Received : ${dt} from ${self.config.host}`)
+					}
+
+					/* Fader Level */
+					if (MSB >= 0x40 && MSB <= 0x4f) {
+						var ost = false
+						var res = await self.getVariableValue('level_' + MSB + '.' + LSB)
+						if (res !== undefined) {
+							self.lastValue['level_' + MSB + '.' + LSB] = res
+							ost = true
 						}
 
-						/* Fader Level */
-						if (MSB >= 0x40 && MSB <= 0x4f) {
-							var ost = false
-							var res = await self.getVariableValue('level_' + MSB + '.' + LSB)
-							if (res !== undefined) {
-								self.lastValue['level_' + MSB + '.' + LSB] = res
-								ost = true
-							}
+						let db = self.decTodB(VC, VF)
+						let variableObj = {}
+						variableObj['level_' + MSB + '.' + LSB] = db
+						self.setVariableValues(variableObj)
 
-							let db = self.decTodB(VC, VF)
-							let variableObj = {}
-							variableObj['level_' + MSB + '.' + LSB] = db
-							self.setVariableValues(variableObj)
-
-							if (!ost) {
-								self.lastValue['level_' + MSB + '.' + LSB] = db
-							}
-
-							this.log('debug', `Fader Received : ${dt} from ${self.config.host}`)
+						if (!ost) {
+							self.lastValue['level_' + MSB + '.' + LSB] = db
 						}
 
-						/* Pan Level */
-						if (MSB >= 0x50 && MSB <= 0x5e) {
-							let db = self.decTodB(VC, VF, 'PanBalance')
-							let variableObj = {}
-							variableObj['pan_' + MSB + '.' + LSB] = db
-							self.setVariableValues(variableObj)
-							this.log('debug', `Pan Received : ${dt} from ${self.config.host}`)
-						}
+						this.log('debug', `Fader Received : ${dt} from ${self.config.host}`)
+					}
+
+					/* Pan Level */
+					if (MSB >= 0x50 && MSB <= 0x5e) {
+						let db = self.decTodB(VC, VF, 'PanBalance')
+						let variableObj = {}
+						variableObj['pan_' + MSB + '.' + LSB] = db
+						self.setVariableValues(variableObj)
+						this.log('debug', `Pan Received : ${dt} from ${self.config.host}`)
 					}
 				}
 			}
