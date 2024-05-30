@@ -175,8 +175,16 @@ export default {
 			label: 'Level',
 			id: 'leveldb',
 			default: 0,
-			multiple: false,
 			choices: self.CHOICES_LEVEL,
+			minChoicesForSearch: 0,
+		}
+
+		const PanLevelOption = {
+			type: 'dropdown',
+			label: 'Level',
+			id: 'leveldb',
+			default: 'CTR',
+			choices: self.CHOICES_PANLEVEL,
 			minChoicesForSearch: 0,
 		}
 
@@ -586,11 +594,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'Mix',
 					id: 'mixAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_MIX,
 				},
 				{
@@ -626,11 +633,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'Group',
 					id: 'grpAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_GRP,
 				},
 				{
@@ -666,11 +672,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'Mix',
 					id: 'mixAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_MIX,
 				},
 				{
@@ -706,11 +711,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'Group',
 					id: 'grpAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_GRP,
 				},
 				{
@@ -739,11 +743,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'FX Send',
 					id: 'fxsAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_FXS,
 				},
 				{
@@ -779,11 +782,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'FX Send',
 					id: 'fxsAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_FXS,
 				},
 				{
@@ -812,11 +814,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'FX Send',
 					id: 'fxsAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_FXS,
 				},
 				{
@@ -845,11 +846,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'Matrix',
 					id: 'mtxAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_MTX,
 				},
 				{
@@ -885,11 +885,10 @@ export default {
 					minChoicesForSearch: 0,
 				},
 				{
-					type: 'dropdown',
+					type: 'multidropdown',
 					label: 'Matrix',
 					id: 'mtxAssign',
 					default: [],
-					multiple: true,
 					choices: self.CHOICES_MTX,
 				},
 				{
@@ -1287,15 +1286,7 @@ export default {
 					choices: self.CHOICES_MIX,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'dropdown',
-					label: 'Level',
-					id: 'leveldb',
-					default: 'CTR',
-					multiple: false,
-					choices: self.CHOICES_PANLEVEL,
-					minChoicesForSearch: 0,
-				},
+				PanLevelOption,
 				{
 					type: 'textinput',
 					label: 'Variable to show level (click config button to refresh)',
@@ -1343,15 +1334,7 @@ export default {
 					choices: self.CHOICES_MIX,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'dropdown',
-					label: 'Level',
-					id: 'leveldb',
-					default: 'CTR',
-					multiple: false,
-					choices: self.CHOICES_PANLEVEL,
-					minChoicesForSearch: 0,
-				},
+				PanLevelOption,
 				{
 					type: 'textinput',
 					label: 'Variable to show level (click config button to refresh)',
@@ -1399,15 +1382,7 @@ export default {
 					choices: self.CHOICES_MIX,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'dropdown',
-					label: 'Level',
-					id: 'leveldb',
-					default: 'CTR',
-					multiple: false,
-					choices: self.CHOICES_PANLEVEL,
-					minChoicesForSearch: 0,
-				},
+				PanLevelOption,
 				{
 					type: 'textinput',
 					label: 'Variable to show level (click config button to refresh)',
@@ -1455,15 +1430,7 @@ export default {
 					choices: self.CHOICES_GRP,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'dropdown',
-					label: 'Level',
-					id: 'leveldb',
-					default: 'CTR',
-					multiple: false,
-					choices: self.CHOICES_PANLEVEL,
-					minChoicesForSearch: 0,
-				},
+				PanLevelOption,
 				{
 					type: 'textinput',
 					label: 'Variable to show level (click config button to refresh)',
@@ -1511,15 +1478,7 @@ export default {
 					choices: self.CHOICES_MTX,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'dropdown',
-					label: 'Level',
-					id: 'leveldb',
-					default: 'CTR',
-					multiple: false,
-					choices: self.CHOICES_PANLEVEL,
-					minChoicesForSearch: 0,
-				},
+				PanLevelOption,
 				{
 					type: 'textinput',
 					label: 'Variable to show level (click config button to refresh)',
@@ -1567,15 +1526,7 @@ export default {
 					choices: self.CHOICES_MTX,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'dropdown',
-					label: 'Level',
-					id: 'leveldb',
-					default: 'CTR',
-					multiple: false,
-					choices: self.CHOICES_PANLEVEL,
-					minChoicesForSearch: 0,
-				},
+				PanLevelOption,
 				{
 					type: 'textinput',
 					label: 'Variable to show level (click config button to refresh)',
@@ -1617,15 +1568,7 @@ export default {
 					}),
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'dropdown',
-					label: 'Level',
-					id: 'leveldb',
-					default: 'CTR',
-					multiple: false,
-					choices: self.CHOICES_PANLEVEL,
-					minChoicesForSearch: 0,
-				},
+				PanLevelOption,
 				{
 					type: 'textinput',
 					label: 'Variable to show level (click config button to refresh)',
