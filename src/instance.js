@@ -21,7 +21,6 @@ export class sqInstance extends InstanceBase {
 	/** @type {?Mixer} */
 	mixer = null
 
-	fdbState = {}
 	lastValue = {}
 
 	constructor(internal) {
@@ -73,7 +72,7 @@ export class sqInstance extends InstanceBase {
 		const choices = new Choices(model)
 
 		this.setActionDefinitions(getActions(this, mixer, choices, config.label))
-		this.setFeedbackDefinitions(getFeedbacks(this, choices))
+		this.setFeedbackDefinitions(getFeedbacks(mixer, choices))
 		this.setVariableDefinitions(getVariables(this, model))
 		this.setPresetDefinitions(getPresets(this, model, config.talkback))
 

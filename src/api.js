@@ -491,7 +491,7 @@ export default {
 
 					/* Mute */
 					if (MSB == 0 || MSB == 2 || MSB == 4) {
-						this.fdbState['mute_' + MSB + '.' + LSB] = VF == 1 ? true : false
+						mixer.fdbState[`mute_${MSB}.${LSB}`] = VF == 1 ? true : false
 						self.checkFeedbacks(callback['mute'][MSB + ':' + LSB][0])
 						this.log('debug', `Mute Received : ${dt} from ${self.config.host}`)
 					}

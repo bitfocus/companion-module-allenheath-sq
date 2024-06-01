@@ -82,13 +82,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1
+				mixer.fdbState[key] = parseInt(opt.mute) == 1
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -125,13 +125,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
+				mixer.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -148,13 +148,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
+				mixer.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -170,13 +170,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
+				mixer.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -192,13 +192,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
+				mixer.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -214,13 +214,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
+				mixer.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -236,13 +236,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
+				mixer.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -258,13 +258,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
+				mixer.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -280,13 +280,13 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
+				mixer.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState[key] = self.fdbState[key] == true ? false : true
+				mixer.fdbState[key] = mixer.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
-			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}

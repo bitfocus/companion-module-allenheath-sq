@@ -19,6 +19,14 @@ export class Mixer {
 	midi: MidiSession
 
 	/**
+	 * A store of current mute status for mixer inputs/outputs.  Keys have the
+	 * form `"mute_${MSB}.${LSB}"`, where `MSB` and `LSB` come from the "Mute
+	 * Parameter Numbers" reference table in the
+	 * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+	 */
+	readonly fdbState: { [key: `mute_${number}.${number}`]: boolean } = {}
+
+	/**
 	 * The scene currently recalled on the mixer minus one -- so this will be in
 	 * the range `[0, 300)` for scenes 1-300 displayed on the mixer.
 	 *

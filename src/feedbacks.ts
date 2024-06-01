@@ -5,12 +5,12 @@ import {
 	type DropdownChoice,
 } from '@companion-module/base'
 import type { Choices } from './choices.js'
-import type { sqInstance } from './instance.js'
+import type { Mixer } from './mixer/mixer.js'
 
 const WHITE = combineRgb(255, 255, 255)
 const CARMINE_RED = combineRgb(153, 0, 51)
 
-export function getFeedbacks(self: sqInstance, choices: Choices): CompanionFeedbackDefinitions {
+export function getFeedbacks(mixer: Mixer, choices: Choices): CompanionFeedbackDefinitions {
 	function muteFeedback(
 		label: string,
 		choices: DropdownChoice[],
@@ -37,8 +37,8 @@ export function getFeedbacks(self: sqInstance, choices: Choices): CompanionFeedb
 			},
 			callback: (feedback, _context) => {
 				const channel = Number(feedback.options.channel)
-				const key = `mute_${msb}.${channel + offset}`
-				return Boolean(self.fdbState[key])
+				const key = `mute_${msb}.${channel + offset}` as const
+				return Boolean(mixer.fdbState[key])
 			},
 		}
 	}

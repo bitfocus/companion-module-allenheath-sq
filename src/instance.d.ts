@@ -12,7 +12,6 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 
 	mixer: Mixer | null
 
-	readonly fdbState: { [key: string]: boolean }
 	readonly lastValue: { [key: string]: CompanionVariableValue }
 
 	constructor(internal: unknown): InstanceBase<SQInstanceConfig>
