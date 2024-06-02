@@ -72,12 +72,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0
 
 			let strip = opt.strip
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -94,7 +94,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
@@ -130,12 +130,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0x44
 
 			let strip = parseInt(opt.strip)
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -152,7 +152,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
@@ -168,12 +168,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0x45
 
 			let strip = parseInt(opt.strip)
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -190,7 +190,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
@@ -205,12 +205,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0x30
 
 			let strip = parseInt(opt.strip)
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -227,7 +227,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
@@ -242,12 +242,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0x55
 
 			let strip = parseInt(opt.strip)
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -264,7 +264,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
@@ -279,12 +279,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0x51
 
 			let strip = parseInt(opt.strip)
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -301,7 +301,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
@@ -316,12 +316,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0x3c
 
 			let strip = parseInt(opt.strip)
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -338,7 +338,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
@@ -353,12 +353,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0
 
 			let strip = parseInt(opt.strip)
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -375,7 +375,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
@@ -390,12 +390,12 @@ export function getActions(self, choices, connectionLabel) {
 			const LSB = 0
 
 			let strip = parseInt(opt.strip)
+			const key = `mute_${MSB}.${LSB + strip}`
 
 			if (parseInt(opt.mute) > 0) {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] = parseInt(opt.mute) == 1 ? true : false
+				self.fdbState[key] = parseInt(opt.mute) == 1 ? true : false
 			} else {
-				self.fdbState['mute_' + MSB + '.' + (LSB + strip)] =
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)] == true ? false : true
+				self.fdbState[key] = self.fdbState[key] == true ? false : true
 			}
 
 			self.checkFeedbacks()
@@ -412,7 +412,7 @@ export function getActions(self, choices, connectionLabel) {
 					0x00,
 					self.mch,
 					0x26,
-					self.fdbState['mute_' + MSB + '.' + (LSB + strip)],
+					self.fdbState[key],
 				]),
 			]
 			self.sendBuffers(buffers)
