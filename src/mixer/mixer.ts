@@ -105,7 +105,7 @@ export class Mixer {
 	 * the next scene and `adjust=-1` is the same as attempting to recall the
 	 * previous scene.
 	 *
-	 * @param {number} adjust
+	 * @param adjust
 	 *    The amount to adjust the current scene by; may be negative.
 	 */
 	stepSceneBy(adjust: number): void {

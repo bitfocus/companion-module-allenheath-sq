@@ -88,16 +88,6 @@ export class MidiSession {
 	 */
 	verbose = false
 
-	/** A Control Change byte for this session's MIDI channel. */
-	get BN(): number {
-		return 0xb0 | this.channel
-	}
-
-	/** A Program Change byte for this session's MIDI channel. */
-	get CN(): number {
-		return 0xc0 | this.channel
-	}
-
 	/**
 	 * Create an SQ mixer abstraction for the given instance.
 	 */
@@ -268,7 +258,7 @@ export class MidiSession {
 	 * where `N` is the session MIDI channel.
 	 */
 	nrpnData(msb: number, lsb: number, vc: number, vf: number): NRPNDataMessage {
-		const BN = this.BN
+		const BN = 0xb0 | this.channel
 		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x06, vc, BN, 0x26, vf]
 	}
 
@@ -282,7 +272,7 @@ export class MidiSession {
 	 * where `N` is the session MIDI channel.
 	 */
 	nrpnIncrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
-		const BN = this.BN
+		const BN = 0xb0 | this.channel
 		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x60, val]
 	}
 
@@ -296,7 +286,7 @@ export class MidiSession {
 	 * where `N` is the session MIDI channel.
 	 */
 	nrpnDecrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
-		const BN = this.BN
+		const BN = 0xb0 | this.channel
 		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x61, val]
 	}
 
@@ -309,8 +299,8 @@ export class MidiSession {
 	 *   scenes 1-300 in its UI.
 	 */
 	sceneChange(scene: number): SceneChangeMessage {
-		const BN = this.BN
-		const CN = this.CN
+		const BN = 0xb0 | this.channel
+		const CN = 0xc0 | this.channel
 		const sceneUpper = (scene >> 7) & 0x0f
 		const sceneLower = scene & 0x7f
 		return [BN, 0, sceneUpper, CN, sceneLower]
