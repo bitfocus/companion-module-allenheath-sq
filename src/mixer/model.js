@@ -30,7 +30,7 @@ export class Model {
 		this.mtxCount = sqModel['mtxCount']
 		this.dcaCount = sqModel['dcaCount']
 		this.muteGroupCount = sqModel['muteGroupCount']
-		this.softKeyCount = sqModel['SoftKey']
+		this.softKeyCount = sqModel['softKeyCount']
 		this.sceneCount = sqModel['sceneCount']
 	}
 
