@@ -21,7 +21,7 @@ export default {
 				LSB = tmp & 0x7f
 			}
 
-			routingCmds.push([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x06, 0, midi.BN, 0x26, ac ? 1 : 0])
+			routingCmds.push([midi.nrpnData(MSB, LSB, 0, ac ? 1 : 0)])
 		}
 
 		return routingCmds
@@ -115,7 +115,7 @@ export default {
 		const midi = this.mixer.midi
 
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
-			levelCmds.push([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x06, VC, midi.BN, 0x26, VF])
+			levelCmds.push(midi.nrpnData(MSB, LSB, VC, FV))
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
@@ -124,7 +124,7 @@ export default {
 				VF = rtn[1]
 				lv = 997
 
-				levelCmds.push([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x06, VC, midi.BN, 0x26, VF])
+				levelCmds.push(midi.nrpnData(MSB, LSB, VC, VF))
 			}
 			//else {
 			/* Increment +1 */
@@ -190,7 +190,7 @@ export default {
 					let val = self.dBToDec(lv)
 					let VC = val[0]
 					let VF = val[1]
-					midi.send([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x06, VC, midi.BN, 0x26, VF])
+					midi.send(midi.nrpnData(MSB, LSB, VC, VF))
 
 					lv = parseFloat(lv).toFixed(1)
 					if (lv < -89) {

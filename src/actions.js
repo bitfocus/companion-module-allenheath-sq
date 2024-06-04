@@ -90,9 +90,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -135,9 +133,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -160,9 +156,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -184,9 +178,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -208,9 +200,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -232,9 +222,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -256,9 +244,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -280,9 +266,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}
@@ -304,9 +288,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const commands = [
-				[midi.BN, 0x63, MSB, midi.BN, 0x62, strip + LSB, midi.BN, 0x06, 0x00, midi.BN, 0x26, self.fdbState[key]],
-			]
+			const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(self.fdbState[key]))]
 			mixer.midi.sendCommands(commands)
 		},
 	}

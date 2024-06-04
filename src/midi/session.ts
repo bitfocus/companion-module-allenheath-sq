@@ -8,6 +8,26 @@ import { asyncSleep, prettyBytes, sleep } from '../utils.js'
  */
 const SQMidiPort = 51325
 
+/**
+ * The type of the array of bytes making up a MIDI NRPN data message, consisting
+ * of two MIDI Control Change messages specifying NRPN MSB/LSB and two MIDI
+ * Control Change messages specifying MSB/LSB of a data value.
+ */
+export type NRPNDataMessage = [
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+]
+
 /** A MIDI connection to an SQ mixer. */
 export class MidiSession {
 	/**
@@ -125,6 +145,21 @@ export class MidiSession {
 			this.socket.destroy()
 			this.socket = null
 		}
+	}
+
+	/**
+	 * Return an NRPN data entry sequence:
+	 *
+	 *     BN 63 msb    // NRPN MSB
+	 *     BN 62 lsb    // NRPN LSB
+	 *     BN 06 vc     // Data entry MSB
+	 *     BN 26 vf     // Data entry LSB
+	 *
+	 * where `N` is the session MIDI channel.
+	 */
+	nrpnData(msb: number, lsb: number, vc: number, vf: number): NRPNDataMessage {
+		const BN = this.BN
+		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x06, vc, BN, 0x26, vf]
 	}
 
 	/**
