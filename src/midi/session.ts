@@ -36,6 +36,15 @@ export type NRPNDataMessage = [
  */
 export type NRPNIncDecMessage = [number, number, number, number, number, number, number, number, number]
 
+/**
+ * The type of the array of bytes making up an SQ scene change message,
+ * consisting of one MIDI Control Change Bank Select message with with a 7-bit
+ * data byte and one MIDI Program Change message with a 7-bit data byte.  The
+ * two 7-bit values, concatenated, specify the scene (with mixer scene 1 encoded
+ * as `0` to mixer scene 300 encoded as `299`).
+ */
+export type SceneChangeMessage = [number, number, number, number, number]
+
 /** A MIDI connection to an SQ mixer. */
 export class MidiSession {
 	/**
@@ -196,6 +205,22 @@ export class MidiSession {
 	nrpnDecrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
 		const BN = this.BN
 		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x61, val]
+	}
+
+	/**
+	 * Return a MIDI message sequence to recall the specified scene.
+	 *
+	 * @param scene
+	 *   The scene to recall.  Note that this is the scene displayed in mixer UI
+	 *   *minus one*, so this will be in range `[0, 300)` if the mixer supports
+	 *   scenes 1-300 in its UI.
+	 */
+	sceneChange(scene: number): SceneChangeMessage {
+		const BN = this.BN
+		const CN = this.CN
+		const sceneUpper = (scene >> 7) & 0x0f
+		const sceneLower = scene & 0x7f
+		return [BN, 0, sceneUpper, CN, sceneLower]
 	}
 
 	/**

@@ -38,7 +38,6 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 		oLB: ParamHalf,
 		cnfg?: string,
 	): Promise<number[][]>
-	async setScene(val: number): Promise<number>
 	getLevel(
 		ch: number,
 		mx: number,

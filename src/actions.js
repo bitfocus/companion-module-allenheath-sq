@@ -33,8 +33,6 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	const model = mixer.model
 	const midi = mixer.midi
 
-	var sceneNumber
-
 	const FadingOption = {
 		type: 'dropdown',
 		label: 'Fading',
@@ -1380,13 +1378,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				required: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-
-			sceneNumber = opt.scene - 1
-			const commands = [[midi.BN, 0, (sceneNumber >> 7) & 0x0f, midi.CN, sceneNumber & 0x7f]]
-
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.setScene(options.scene - 1)
 		},
 	}
 
@@ -1403,13 +1396,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				required: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-
-			sceneNumber = self.setScene(opt.scene)
-			const commands = [[midi.BN, 0, (sceneNumber >> 7) & 0x0f, midi.CN, sceneNumber & 0x7f]]
-
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			const adjust = options.scene
+			mixer.stepSceneBy(adjust)
 		},
 	}
 

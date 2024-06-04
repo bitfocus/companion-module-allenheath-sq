@@ -142,21 +142,6 @@ export default {
 		return levelCmds
 	},
 
-	setScene: async function (val) {
-		const model = this.mixer.model
-
-		const res = await this.getVariableValue('currentScene')
-		let scn = parseInt(res) - 1 + val
-		if (scn < 0) {
-			scn = 0
-		}
-		if (scn > model.count.scene) {
-			scn = model.count.scene
-		}
-
-		return scn
-	},
-
 	getLevel: function (ch, mx, ct, oMB, oLB) {
 		let tmp
 		let MSB
@@ -496,6 +481,7 @@ export default {
 			if (data[b] == midi.BN && data[b + 1] == 0) {
 				dt = data.slice(b, b + 5)
 				var csc = dt[4] + dt[2] * 127
+				mixer.currentScene = csc
 				self.setVariableValues({
 					currentScene: csc + 1,
 				})
