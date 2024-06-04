@@ -128,12 +128,16 @@ export default {
 			}
 			//else {
 			/* Increment +1 */
-			//	levelCmds.push( [ midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, lv == 998 ? 0x60 : 0x61, 0x00 ] )
-			//	}
+			//	levelCmds.push(
+			//		lv == 998
+			//		? midi.nrpnIncrement(MSB, LSB, 0)
+			//		: midi.nrpnDecrement(MSB, LSB, 0)
+			//	)
+			//}
 		}
 
 		// Retrive value after set command
-		levelCmds.push([midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x60, 0x7f])
+		levelCmds.push(midi.nrpnIncrement(MSB, LSB, 0x7f))
 
 		return levelCmds
 	},
@@ -170,7 +174,7 @@ export default {
 		const midi = this.mixer.midi
 
 		return {
-			commands: [[midi.BN, 0x63, MSB, midi.BN, 0x62, LSB, midi.BN, 0x60, 0x7f]],
+			commands: [midi.nrpnIncrement(MSB, LSB, 0x7f)],
 			channel: [MSB, LSB],
 		}
 	},
@@ -474,7 +478,7 @@ export default {
 
 		for (let key in callback[act]) {
 			let mblb = key.toString().split(':')
-			midi.send([midi.BN, 0x63, mblb[0], midi.BN, 0x62, mblb[1], midi.BN, 0x60, 0x7f])
+			midi.send(midi.nrpnIncrement(Number(mblb[0]), Number(mblb[1]), 0x7f))
 		}
 	},
 

@@ -28,6 +28,14 @@ export type NRPNDataMessage = [
 	number,
 ]
 
+/**
+ * The type of the array of bytes making up a MIDI NRPN increment/decrement
+ * message, consisting of two MIDI Control Change messages specifying NRPN
+ * MSB/LSB and one MIDI Control Change message specifying increment or decrement
+ * with one unconstrained 7-bit value.
+ */
+export type NRPNIncDecMessage = [number, number, number, number, number, number, number, number, number]
+
 /** A MIDI connection to an SQ mixer. */
 export class MidiSession {
 	/**
@@ -160,6 +168,34 @@ export class MidiSession {
 	nrpnData(msb: number, lsb: number, vc: number, vf: number): NRPNDataMessage {
 		const BN = this.BN
 		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x06, vc, BN, 0x26, vf]
+	}
+
+	/**
+	 * Return an NRPN increment sequence:
+	 *
+	 *     BN 63 msb    // NRPN MSB
+	 *     BN 62 lsb    // NRPN LSB
+	 *     BN 60 val    // Increment
+	 *
+	 * where `N` is the session MIDI channel.
+	 */
+	nrpnIncrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
+		const BN = this.BN
+		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x60, val]
+	}
+
+	/**
+	 * Return an NRPN decrement sequence:
+	 *
+	 *     BN 63 msb    // NRPN MSB
+	 *     BN 62 lsb    // NRPN LSB
+	 *     BN 61 val    // Increment
+	 *
+	 * where `N` is the session MIDI channel.
+	 */
+	nrpnDecrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
+		const BN = this.BN
+		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x61, val]
 	}
 
 	/**
