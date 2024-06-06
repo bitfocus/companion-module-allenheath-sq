@@ -81,10 +81,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -126,10 +126,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -151,10 +151,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 	actions['mute_group'] = {
@@ -175,10 +175,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 	actions['mute_matrix'] = {
@@ -199,10 +199,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 	actions['mute_fx_send'] = {
@@ -223,10 +223,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 	actions['mute_fx_return'] = {
@@ -247,10 +247,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 	actions['mute_dca'] = {
@@ -271,10 +271,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 	actions['mute_mutegroup'] = {
@@ -295,10 +295,10 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			}
 
 			self.checkFeedbacks()
-			const buffers = [
+			const commands = [
 				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -335,8 +335,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			let softKey = parseInt(opt.softKey)
 			let keyValu = opt.pressedsk == '0' || opt.pressedsk == '1' ? true : false
 			let tch = parseInt((keyValu ? '0x9' : '0x8') + (self.mch - 176).toString(16))
-			const buffers = [[tch, 0x30 + softKey, keyValu ? 0x7f : 0]]
-			self.sendBuffers(buffers)
+			const commands = [[tch, 0x30 + softKey, keyValu ? 0x7f : 0]]
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -367,7 +367,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputChannel,
 				opt.mixAssign,
 				opt.mixActive,
@@ -375,7 +375,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x60, 0x60],
 				[0, 0x44],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -406,7 +406,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputChannel,
 				opt.grpAssign,
 				opt.grpActive,
@@ -414,7 +414,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x66],
 				[0, 0x74],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -445,7 +445,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputGrp,
 				opt.mixAssign,
 				opt.mixActive,
@@ -453,7 +453,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x60, 0x65],
 				[0x30, 0x04],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -484,7 +484,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputFxr,
 				opt.grpAssign,
 				opt.grpActive,
@@ -492,7 +492,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x6b],
 				[0, 0x34],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -523,7 +523,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputChannel,
 				opt.fxsAssign,
 				opt.fxsActive,
@@ -531,7 +531,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x6c],
 				[0, 0x14],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -562,7 +562,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputGrp,
 				opt.fxsAssign,
 				opt.fxsActive,
@@ -570,7 +570,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x6d],
 				[0, 0x54],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -601,7 +601,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputFxr,
 				opt.fxsAssign,
 				opt.fxsActive,
@@ -609,7 +609,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x6e],
 				[0, 0x04],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -640,7 +640,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputMix,
 				opt.mtxAssign,
 				opt.mtxActive,
@@ -648,7 +648,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x6e, 0x6e],
 				[0x24, 0x27],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -679,7 +679,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.setRouting(
+			const commands = self.setRouting(
 				opt.inputGrp,
 				opt.mtxAssign,
 				opt.mtxActive,
@@ -687,7 +687,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x6e],
 				[0, 0x4b],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -721,7 +721,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				opt.fade = 0.2
 			}
 
-			const buffers = await self.fadeLevel(
+			const commands = await self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -730,8 +730,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x40, 0x40],
 				[0, 0x44],
 			)
-			console.log('buffers', buffers)
-			self.sendBuffers(buffers)
+			console.log('commands', commands)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -759,7 +759,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(
+			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -768,7 +768,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x40, 0x45],
 				[0x30, 0x04],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -796,7 +796,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(
+			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -805,7 +805,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x40, 0x46],
 				[0x3c, 0x14],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -833,7 +833,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(
+			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -842,7 +842,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x4b],
 				[0, 0x34],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -870,7 +870,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(
+			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -879,7 +879,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x4c],
 				[0, 0x14],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -907,7 +907,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(
+			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -916,7 +916,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x4d],
 				[0, 0x54],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -944,7 +944,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(
+			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -953,7 +953,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x4e],
 				[0, 0x04],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -981,7 +981,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(
+			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -990,7 +990,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x4e, 0x4e],
 				[0x24, 0x27],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1018,7 +1018,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(
+			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
 				opt.assign,
@@ -1027,7 +1027,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x4e],
 				[0, 0x4b],
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1047,8 +1047,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		],
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = self.fadeLevel(opt.fade, opt.input, 99, 0, opt.leveldb, [0x4f, 0], [0, 0])
-			self.sendBuffers(buffers)
+			const commands = self.fadeLevel(opt.fade, opt.input, 99, 0, opt.leveldb, [0x4f, 0], [0, 0])
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1088,7 +1088,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = await self.setLevel(
+			const commands = await self.setLevel(
 				opt.input,
 				opt.assign,
 				model.count.mix,
@@ -1097,7 +1097,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x44],
 				'PanBalance',
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1136,7 +1136,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = await self.setLevel(
+			const commands = await self.setLevel(
 				opt.input,
 				opt.assign,
 				model.count.mix,
@@ -1145,7 +1145,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x30, 0x04],
 				'PanBalance',
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1184,7 +1184,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = await self.setLevel(
+			const commands = await self.setLevel(
 				opt.input,
 				opt.assign,
 				model.count.mix,
@@ -1193,7 +1193,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x3c, 0x14],
 				'PanBalance',
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1232,7 +1232,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = await self.setLevel(
+			const commands = await self.setLevel(
 				opt.input,
 				opt.assign,
 				model.count.group,
@@ -1241,7 +1241,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x34],
 				'PanBalance',
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1280,7 +1280,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = await self.setLevel(
+			const commands = await self.setLevel(
 				opt.input,
 				opt.assign,
 				model.count.matrix,
@@ -1289,7 +1289,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0x24, 0x27],
 				'PanBalance',
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1328,7 +1328,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = await self.setLevel(
+			const commands = await self.setLevel(
 				opt.input,
 				opt.assign,
 				model.count.matrix,
@@ -1337,7 +1337,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				[0, 0x4b],
 				'PanBalance',
 			)
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1370,8 +1370,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const buffers = await self.setLevel(opt.input, 99, 0, opt.leveldb, [0x5f, 0], [0, 0], 'PanBalance')
-			self.sendBuffers(buffers)
+			const commands = await self.setLevel(opt.input, 99, 0, opt.leveldb, [0x5f, 0], [0, 0], 'PanBalance')
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1393,9 +1393,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			let opt = action.options
 
 			sceneNumber = opt.scene - 1
-			const buffers = [[self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]]
+			const commands = [[self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]]
 
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 
@@ -1416,9 +1416,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			let opt = action.options
 
 			sceneNumber = self.setScene(opt.scene)
-			const buffers = [[self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]]
+			const commands = [[self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]]
 
-			self.sendBuffers(buffers)
+			mixer.midi.sendCommands(commands)
 		},
 	}
 

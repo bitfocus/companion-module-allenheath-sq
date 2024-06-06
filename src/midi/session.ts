@@ -1,7 +1,7 @@
 import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
-import { prettyBytes, sleep } from '../utils.js'
+import { asyncSleep, prettyBytes, sleep } from '../utils.js'
 
 /**
  * The port number used for MIDI-over-TCP connections to SQ mixers.
@@ -119,6 +119,14 @@ export class MidiSession {
 
 			// XXX This needs to be handled better.
 			void socket.send(Buffer.from(data))
+		}
+	}
+
+	// new send command
+	async sendCommands(commands: readonly (readonly number[])[]): Promise<void> {
+		for (let i = 0; i < commands.length; i++) {
+			this.send(commands[i])
+			await asyncSleep(200)
 		}
 	}
 }

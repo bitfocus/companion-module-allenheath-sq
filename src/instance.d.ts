@@ -60,5 +60,4 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 	getRemoteLevel(): void
 	getRemoteStatus(act: string): void
 	async getRemoteValue(data: number[]): Promise<void>
-	async sendBuffers(buffers: readonly number[][]): Promise<void>
 }

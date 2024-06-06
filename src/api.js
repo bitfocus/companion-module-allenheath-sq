@@ -1,6 +1,6 @@
 import callback from './callback.js'
 
-import { asyncSleep, sleep } from './utils.js'
+import { sleep } from './utils.js'
 
 export default {
 	setRouting: function (ch, mix, ac, mc, oMB, oLB) {
@@ -532,16 +532,6 @@ export default {
 					}
 				}
 			}
-		}
-	},
-
-	//new send command
-	sendBuffers: async function (arrays) {
-		let self = this
-
-		for (let i = 0; i < arrays.length; i++) {
-			self.mixer.midi.send(arrays[i])
-			await asyncSleep(200)
 		}
 	},
 }
