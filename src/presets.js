@@ -46,15 +46,15 @@ export function getPresets(self, model, talkbackChannel) {
 		}
 	}
 
-	createtMute('Mute Input', 'Input channel', 'mute_input', model.chCount)
+	createtMute('Mute Input', 'Input channel', 'mute_input', model.count.inputChannel)
 	createtMute('Mute Mix - Group', 'LR', 'mute_lr', 1, false)
-	createtMute('Mute Mix - Group', 'Aux', 'mute_aux', model.mixCount)
-	createtMute('Mute Mix - Group', 'Group', 'mute_group', model.grpCount)
-	createtMute('Mute Mix - Group', 'Matrix', 'mute_matrix', model.mtxCount)
-	createtMute('Mute FX', 'FX Send', 'mute_fx_send', model.fxsCount)
-	createtMute('Mute FX', 'FX Return', 'mute_fx_return', model.fxrCount)
-	createtMute('Mute DCA', 'DCA', 'mute_dca', model.dcaCount)
-	createtMute('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', model.muteGroupCount)
+	createtMute('Mute Mix - Group', 'Aux', 'mute_aux', model.count.mix)
+	createtMute('Mute Mix - Group', 'Group', 'mute_group', model.count.group)
+	createtMute('Mute Mix - Group', 'Matrix', 'mute_matrix', model.count.matrix)
+	createtMute('Mute FX', 'FX Send', 'mute_fx_send', model.count.fxSend)
+	createtMute('Mute FX', 'FX Return', 'mute_fx_return', model.count.fxReturn)
+	createtMute('Mute DCA', 'DCA', 'mute_dca', model.count.dca)
+	createtMute('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', model.count.muteGroup)
 
 	/* TALKBACK*/
 	model.forEachMix((mix, mixLabel, mixDesc) => {
@@ -178,7 +178,7 @@ export function getPresets(self, model, talkbackChannel) {
 	// Input -> Mix
 	model.forEachInputChannel((channel, channelLabel) => {
 		model.forEachMixAndLR((mix, mixLabel) => {
-			const rsp = self.getLevel(channel, mix, model.mixCount, [0x40, 0x40], [0, 0x44])
+			const rsp = self.getLevel(channel, mix, model.count.mix, [0x40, 0x40], [0, 0x44])
 			createtMuteLevel(
 				`Mt+dB CH-${mixLabel}`,
 				`${channelLabel}\\n${mixLabel}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,

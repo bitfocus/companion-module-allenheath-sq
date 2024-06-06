@@ -1,16 +1,7 @@
 import { SQModels } from './models.js'
 
 export class Model {
-	chCount
-	mixCount
-	grpCount
-	fxrCount
-	fxsCount
-	mtxCount
-	dcaCount
-	muteGroupCount
-	softKeyCount
-	sceneCount
+	count
 
 	/**
 	 * Create a representation of a mixer identified by `modelId`.
@@ -22,16 +13,18 @@ export class Model {
 		}
 		const sqModel = SQModels[modelId]
 
-		this.chCount = sqModel['chCount']
-		this.mixCount = sqModel['mixCount']
-		this.grpCount = sqModel['grpCount']
-		this.fxrCount = sqModel['fxrCount']
-		this.fxsCount = sqModel['fxsCount']
-		this.mtxCount = sqModel['mtxCount']
-		this.dcaCount = sqModel['dcaCount']
-		this.muteGroupCount = sqModel['muteGroupCount']
-		this.softKeyCount = sqModel['softKeyCount']
-		this.sceneCount = sqModel['sceneCount']
+		this.count = {
+			inputChannel: sqModel.chCount,
+			mix: sqModel.mixCount,
+			group: sqModel.grpCount,
+			fxReturn: sqModel.fxrCount,
+			fxSend: sqModel.fxsCount,
+			matrix: sqModel.mtxCount,
+			dca: sqModel.dcaCount,
+			muteGroup: sqModel.muteGroupCount,
+			softKey: sqModel.softKeyCount,
+			scene: sqModel.sceneCount,
+		}
 	}
 
 	#channelLabel(channel) {
@@ -43,7 +36,7 @@ export class Model {
 	forEachInputChannel(f) {
 		const channelLabels = this.#channelLabels
 		if (channelLabels.length === 0) {
-			for (let channel = 0; channel < this.chCount; channel++) {
+			for (let channel = 0; channel < this.count.inputChannel; channel++) {
 				const label = this.#channelLabel(channel)
 				channelLabels.push(label)
 			}
@@ -67,7 +60,7 @@ export class Model {
 	forEachMix(f) {
 		const mixLabels = this.#mixLabels
 		if (mixLabels.length === 0) {
-			for (let mix = 0; mix < this.mixCount; mix++) {
+			for (let mix = 0; mix < this.count.mix; mix++) {
 				const label = this.#mixLabel(mix)
 				const desc = this.#mixDesc(mix)
 				mixLabels.push([label, desc])
@@ -97,7 +90,7 @@ export class Model {
 	forEachGroup(f) {
 		const groupLabels = this.#groupLabels
 		if (groupLabels.length === 0) {
-			for (let group = 0; group < this.grpCount; group++) {
+			for (let group = 0; group < this.count.group; group++) {
 				const label = this.#groupLabel(group)
 				const desc = this.#groupDesc(group)
 				groupLabels.push([label, desc])
@@ -122,7 +115,7 @@ export class Model {
 	forEachFxReturn(f) {
 		const fxReturnLabels = this.#fxReturnLabels
 		if (fxReturnLabels.length === 0) {
-			for (let fxr = 0; fxr < this.fxrCount; fxr++) {
+			for (let fxr = 0; fxr < this.count.fxReturn; fxr++) {
 				const label = this.#fxReturnLabel(fxr)
 				const desc = this.#fxReturnDesc(fxr)
 				fxReturnLabels.push([label, desc])
@@ -147,7 +140,7 @@ export class Model {
 	forEachFxSend(f) {
 		const fxSendLabels = this.#fxSendLabels
 		if (fxSendLabels.length === 0) {
-			for (let fxs = 0; fxs < this.fxsCount; fxs++) {
+			for (let fxs = 0; fxs < this.count.fxSend; fxs++) {
 				const label = this.#fxSendLabel(fxs)
 				const desc = this.#fxSendDesc(fxs)
 				fxSendLabels.push([label, desc])
@@ -172,7 +165,7 @@ export class Model {
 	forEachMatrix(f) {
 		const matrixLabels = this.#matrixLabels
 		if (matrixLabels.length === 0) {
-			for (let matrix = 0; matrix < this.mtxCount; matrix++) {
+			for (let matrix = 0; matrix < this.count.matrix; matrix++) {
 				const label = this.#matrixLabel(matrix)
 				const desc = this.#matrixDesc(matrix)
 				matrixLabels.push([label, desc])
@@ -193,7 +186,7 @@ export class Model {
 	forEachMuteGroup(f) {
 		const muteGroupLabels = this.#muteGroupLabels
 		if (muteGroupLabels.length === 0) {
-			for (let muteGroup = 0; muteGroup < this.muteGroupCount; muteGroup++) {
+			for (let muteGroup = 0; muteGroup < this.count.muteGroup; muteGroup++) {
 				const label = this.#muteGroupLabel(muteGroup)
 				muteGroupLabels.push(label)
 			}
@@ -217,7 +210,7 @@ export class Model {
 	forEachSoftKey(f) {
 		const softKeyLabels = this.#softKeyLabels
 		if (softKeyLabels.length === 0) {
-			for (let softKey = 0; softKey < this.softKeyCount; softKey++) {
+			for (let softKey = 0; softKey < this.count.softKey; softKey++) {
 				const label = this.#softKeyLabel(softKey)
 				const desc = this.#softKeyDesc(softKey)
 				softKeyLabels.push([label, desc])
@@ -238,7 +231,7 @@ export class Model {
 	forEachDCA(f) {
 		const dcaLabels = this.#dcaLabels
 		if (dcaLabels.length === 0) {
-			for (let dca = 0; dca < this.dcaCount; dca++) {
+			for (let dca = 0; dca < this.count.dca; dca++) {
 				const label = this.#dcaLabel(dca)
 				dcaLabels.push(label)
 			}
