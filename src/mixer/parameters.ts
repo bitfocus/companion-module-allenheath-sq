@@ -103,6 +103,9 @@ export type AssignToMixOrLRType = keyof typeof AssignToMixOrLRBase
  *
  * These values are the pairs at top left of the relevant tables in the
  * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ * (Or table *section*, in the cases of `'lr-matrix'` and `'mix-matrix'`,
+ * because the former must be treated specially due to LR being encoded with
+ * value `99` .)
  */
 export const AssignToSinkBase = {
 	'inputChannel-group': { MSB: 0x66, LSB: 0x74 },
@@ -110,6 +113,7 @@ export const AssignToSinkBase = {
 	'inputChannel-fxSend': { MSB: 0x6c, LSB: 0x14 },
 	'group-fxSend': { MSB: 0x6d, LSB: 0x54 },
 	'fxReturn-fxSend': { MSB: 0x6e, LSB: 0x04 },
+	'lr-matrix': { MSB: 0x6e, LSB: 0x24 },
 	'mix-matrix': { MSB: 0x6e, LSB: 0x27 },
 	'group-matrix': { MSB: 0x6e, LSB: 0x4b },
 } satisfies SourceToSink

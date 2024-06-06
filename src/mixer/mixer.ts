@@ -371,21 +371,32 @@ export class Mixer {
 	}
 
 	/**
-	 * Assign the given mix (which may be LR) to the supplied matrixes, making
-	 * it active or inactive dependent on `active`.
+	 * Assign the LR mix to the supplied matrixes, making it active or inactive
+	 * dependent on `active`.
+	 *
+	 * @param active
+	 *   Whether to make the LR mix active or inactive in the matrixes.
+	 * @param matrixes
+	 *   The matrixes to activate it in.
+	 */
+	assignLRToMatrixes(active: boolean, matrixes: readonly number[]): void {
+		// Treat LR as if it were the sole source in a one-element source
+		// category.
+		this.#assignSourceToSinks(0, 'lr', active, matrixes, 'matrix', 'lr-matrix')
+	}
+
+	/**
+	 * Assign mix `mix` to the supplied matrixes, making it active or inactive
+	 * dependent on `active`.
 	 *
 	 * @param mix
 	 *   The mix to alter in matrixes.
 	 * @param active
-	 *   Whether to make the mix (which may be LR) active or inactive in the
-	 *   matrixes.
+	 *   Whether to make the mix active or inactive in the matrixes.
 	 * @param matrixes
 	 *   The matrixes to activate it in.
 	 */
 	assignMixToMatrixes(mix: number, active: boolean, matrixes: readonly number[]): void {
-		// XXX This grossly mishandles `mix=99` for LR -- see
-		//     https://github.com/bitfocus/companion-module-allenheath-sq/issues/34#issuecomment-2153490932
-		//     for analysis.
 		this.#assignSourceToSinks(mix, 'mix', active, matrixes, 'matrix', 'mix-matrix')
 	}
 

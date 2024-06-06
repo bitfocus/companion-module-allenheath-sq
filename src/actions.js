@@ -694,13 +694,18 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			const mix = getSource(self, model, options.inputMix, 'mix')
-			if (mix === null) {
-				return
-			}
 			const active = Boolean(options.mtxActive)
 			const matrixes = assignOptionToSinks(options.mtxAssign, mixer.model, 'matrix')
-			mixer.assignMixToMatrixes(mix, active, matrixes)
+			const source = options.inputMix
+			if (Number(source) === 99) {
+				mixer.assignLRToMatrixes(active, matrixes)
+			} else {
+				const mix = getSource(self, model, source, 'mix')
+				if (mix === null) {
+					return
+				}
+				mixer.assignMixToMatrixes(mix, active, matrixes)
+			}
 		},
 	}
 
