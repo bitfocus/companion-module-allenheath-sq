@@ -1,8 +1,17 @@
 import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import { MidiSession } from '../midi/session.js'
-import { Model } from './model.js'
+import { MidiSession, NRPNDataMessage } from '../midi/session.js'
+import { InputOutputType, Model } from './model.js'
 import type { ModelId } from './models.js'
+import {
+	AssignToMixOrLRBase,
+	type AssignToMixOrLRType,
+	AssignToSinkBase,
+	type AssignToSinkType,
+	computeLRParameters,
+	computeParameters,
+	type Param,
+} from './parameters.js'
 
 /**
  * An abstract representation of an SQ mixer.
@@ -120,5 +129,278 @@ export class Mixer {
 		}
 
 		this.setScene(newScene)
+	}
+
+	/**
+	 * Assign a `source` to LR or remove its assignment, depending on `active`.
+	 *
+	 * @param source
+	 *   The number of the source to assign, counting from zero.
+	 * @param active
+	 *   If `true`, the source will be made active in LR.  If `false`, it will
+	 *   be made inactive.
+	 * @param base
+	 *   `MSB`/`LSB` referring to the expected source if `source === 0`.
+	 */
+	#assignToLR(source: number, active: boolean, base: Param): NRPNDataMessage {
+		const { MSB, LSB } = computeLRParameters(source, base)
+
+		return this.midi.nrpnData(MSB, LSB, 0, active ? 1 : 0)
+	}
+
+	/**
+	 * Assign a `source` to `sink` or remove its assignment, depending on
+	 * `active`.
+	 *
+	 * @param source
+	 *   The number of the source to assign, counting from zero.
+	 * @param active
+	 *   If `true`, the source will be made active in the specified sink.  If
+	 *   `false`, it will be made inactive.
+	 * @param sink
+	 *   The number of the sink to assign, relative to all sinks of that type,
+	 *   counting from zero.  (For example, if there are 12 total groups and the
+	 *   sink is a group, this will be in range `[0, 12)`).
+	 * @param sinkType
+	 *   TThe type of sink that `sink` is.
+	 * @param base
+	 *   `MSB`/`LSB` referring to the expected source if `source === 0`.
+	 * @returns {number[]}
+	 */
+	#assignToSink(
+		source: number,
+		active: boolean,
+		sink: number,
+		sinkType: InputOutputType,
+		base: Param,
+	): NRPNDataMessage {
+		const sinkCount = this.model.count[sinkType]
+		if (sinkCount <= sink) {
+			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
+		}
+
+		const { MSB, LSB } = computeParameters(source, sink, sinkCount, base)
+
+		return this.midi.nrpnData(MSB, LSB, 0, active ? 1 : 0)
+	}
+
+	/**
+	 * Assign the numbered `source` of the given type to the supplied mixes
+	 * (which may include LR) and activate or deactivate it in those mixes
+	 * depending on `active`.
+	 *
+	 * @param source
+	 *   A source, e.g. a value in the range `[0, 12)` if `source` is a group
+	 *   being assigned to mixes and the mixer supports 12 groups.
+	 * @param sourceType
+	 *   The type of the source.
+	 * @param active
+	 *   Whether to activate the source in all mixes or deactivate it.
+	 * @param mixes
+	 *   The mixes (potentially including LR) to which `source` should be
+	 *   assigned.
+	 */
+	#assignSourceToMixesAndLR(
+		source: number,
+		sourceType: AssignToMixOrLRType,
+		active: boolean,
+		mixes: readonly number[],
+	): void {
+		const count = this.model.count
+		if (count[sourceType] <= source) {
+			throw new Error(`Attempting to assign out-of-range ${sourceType} ${source}`)
+		}
+
+		const { normal, lr } = AssignToMixOrLRBase[sourceType]
+
+		const commands = mixes.map((sink) => {
+			return sink === 99
+				? this.#assignToLR(source, active, lr)
+				: this.#assignToSink(source, active, sink, 'mix', normal)
+		})
+
+		// XXX
+		void this.midi.sendCommands(commands)
+	}
+
+	/**
+	 * Assign the numbered `source` of the given type to the supplied *non-mix*
+	 * sinks and activate or deactivate it in those sinks depending on `active`.
+	 *
+	 * @param source
+	 *   A source, e.g. a value in the range `[0, 12)` if `source` is a group
+	 *   being assigned to mixes and the mixer supports 12 groups.
+	 * @param sourceType
+	 *   The type of `source`.
+	 * @param active
+	 *   Whether to activate the source in all mixes or deactivate it.
+	 * @param sinks
+	 *   The sinks to which `source` should be assigned.
+	 * @param sinkType
+	 *   The type of the sinks.
+	 * @param paramsType
+	 *   An identifier determining the base MSB/LSB for the desired
+	 *   source-to-sink assignment.
+	 */
+	#assignSourceToSinks(
+		source: number,
+		sourceType: InputOutputType,
+		active: boolean,
+		sinks: readonly number[],
+		sinkType: InputOutputType,
+		paramsType: AssignToSinkType,
+	): void {
+		const count = this.model.count
+		if (count[sourceType] <= source) {
+			throw new Error(`Attempting to assign out-of-range ${sourceType} ${source}`)
+		}
+
+		const params = AssignToSinkBase[paramsType]
+
+		const commands = sinks.map((sink) => {
+			return this.#assignToSink(source, active, sink, sinkType, params)
+		})
+
+		// XXX
+		void this.midi.sendCommands(commands)
+	}
+
+	/**
+	 * Assign the given input channel to the supplied mixes (possibly including
+	 * the LR mix), making it active or inactive dependent on `active`.
+	 *
+	 * @param inputChannel
+	 *   The input channel to alter in mixes.
+	 * @param active
+	 *   Whether to make the input channel active or inactive in the mixes.
+	 * @param mixes
+	 *   The mixes to activate it in, potentially including the LR mix.
+	 */
+	assignInputChannelToMixesAndLR(inputChannel: number, active: boolean, mixes: readonly number[]): void {
+		this.#assignSourceToMixesAndLR(inputChannel, 'inputChannel', active, mixes)
+	}
+
+	/**
+	 * Assign the given input channel to the supplied groups, making it active
+	 * or inactive dependent on `active`.
+	 *
+	 * @param inputChannel
+	 *   The input channel to alter in groups.
+	 * @param active
+	 *   Whether to make the input channel active or inactive in the groups.
+	 * @param groups
+	 *   The groups to activate it in.
+	 */
+	assignInputChannelToGroups(inputChannel: number, active: boolean, groups: readonly number[]): void {
+		this.#assignSourceToSinks(inputChannel, 'inputChannel', active, groups, 'group', 'inputChannel-group')
+	}
+
+	/**
+	 * Assign the given group to the supplied mixes (possibly including the LR
+	 * mix), making it active or inactive dependent on `active`.
+	 *
+	 * @param group
+	 *   The group to alter in mixes.
+	 * @param active
+	 *   Whether to make the group active or inactive in the mixes.
+	 * @param mixes
+	 *   The mixes to activate it in, potentially including the LR mix.
+	 */
+	assignGroupToMixesAndLR(group: number, active: boolean, mixes: readonly number[]): void {
+		this.#assignSourceToMixesAndLR(group, 'group', active, mixes)
+	}
+
+	/**
+	 * Assign the given FX return to the supplied groups, making it active
+	 * or inactive dependent on `active`.
+	 *
+	 * @param fxReturn
+	 *   The FX return to alter in groups.
+	 * @param active
+	 *   Whether to make the FX return active or inactive in the groups.
+	 * @param groups
+	 *   The groups to activate it in.
+	 */
+	assignFXReturnToGroups(fxReturn: number, active: boolean, groups: readonly number[]): void {
+		this.#assignSourceToSinks(fxReturn, 'fxReturn', active, groups, 'group', 'fxReturn-group')
+	}
+
+	/**
+	 * Assign the given input channel to the supplied FX sends, making it active
+	 * or inactive dependent on `active`.
+	 *
+	 * @param inputChannel
+	 *   The input channel to alter in FX sends.
+	 * @param active
+	 *   Whether to make the input channel active or inactive in the FX sends.
+	 * @param fxSends
+	 *   The FX sends to activate it in.
+	 */
+	assignInputChannelToFXSends(inputChannel: number, active: boolean, fxSends: readonly number[]): void {
+		this.#assignSourceToSinks(inputChannel, 'inputChannel', active, fxSends, 'fxSend', 'inputChannel-fxSend')
+	}
+
+	/**
+	 * Assign the given group to the supplied FX sends, making it active or
+	 * inactive dependent on `active`.
+	 *
+	 * @param group
+	 *   The group to alter in FX sends.
+	 * @param active
+	 *   Whether to make the group active or inactive in the FX sends.
+	 * @param fxSends
+	 *   The FX sends to activate it in.
+	 */
+	assignGroupToFXSends(group: number, active: boolean, fxSends: readonly number[]): void {
+		this.#assignSourceToSinks(group, 'group', active, fxSends, 'fxSend', 'group-fxSend')
+	}
+
+	/**
+	 * Assign the given FX return to the supplied FX sends, making it active or
+	 * inactive dependent on `active`.
+	 *
+	 * @param fxReturn
+	 *   The FX return to alter in FX sends.
+	 * @param active
+	 *   Whether to make the group active or inactive in the FX sends.
+	 * @param fxSends
+	 *   The FX sends to activate it in.
+	 */
+	assignFXReturnToFXSends(fxReturn: number, active: boolean, fxSends: readonly number[]): void {
+		this.#assignSourceToSinks(fxReturn, 'fxReturn', active, fxSends, 'fxSend', 'fxReturn-fxSend')
+	}
+
+	/**
+	 * Assign the given mix (which may be LR) to the supplied matrixes, making
+	 * it active or inactive dependent on `active`.
+	 *
+	 * @param mix
+	 *   The mix to alter in matrixes.
+	 * @param active
+	 *   Whether to make the mix (which may be LR) active or inactive in the
+	 *   matrixes.
+	 * @param matrixes
+	 *   The matrixes to activate it in.
+	 */
+	assignMixToMatrixes(mix: number, active: boolean, matrixes: readonly number[]): void {
+		// XXX This grossly mishandles `mix=99` for LR -- see
+		//     https://github.com/bitfocus/companion-module-allenheath-sq/issues/34#issuecomment-2153490932
+		//     for analysis.
+		this.#assignSourceToSinks(mix, 'mix', active, matrixes, 'matrix', 'mix-matrix')
+	}
+
+	/**
+	 * Assign the given group to the supplied matrixes, making it active or
+	 * inactive dependent on `active`.
+	 *
+	 * @param group
+	 *   The group to alter in matrixes.
+	 * @param active
+	 *   Whether to make the group active or inactive in the   matrixes.
+	 * @param matrixes
+	 *   The matrixes to activate it in.
+	 */
+	assignGroupToMatrixes(group: number, active: boolean, matrixes: readonly number[]): void {
+		this.#assignSourceToSinks(group, 'group', active, matrixes, 'matrix', 'group-matrix')
 	}
 }

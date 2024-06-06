@@ -354,17 +354,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputChannel,
-				opt.mixAssign,
-				opt.mixActive,
-				model.count.mix,
-				[0x60, 0x60],
-				[0, 0x44],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignInputChannelToMixesAndLR(options.inputChannel, options.mixActive, options.mixAssign)
 		},
 	}
 
@@ -393,17 +384,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputChannel,
-				opt.grpAssign,
-				opt.grpActive,
-				model.count.group,
-				[0, 0x66],
-				[0, 0x74],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignInputChannelToGroups(options.inputChannel, options.grpActive, options.grpAssign)
 		},
 	}
 
@@ -432,17 +414,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputGrp,
-				opt.mixAssign,
-				opt.mixActive,
-				model.count.mix,
-				[0x60, 0x65],
-				[0x30, 0x04],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignGroupToMixesAndLR(options.inputGrp, options.mixActive, options.mixAssign)
 		},
 	}
 
@@ -471,17 +444,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputFxr,
-				opt.grpAssign,
-				opt.grpActive,
-				model.count.group,
-				[0, 0x6b],
-				[0, 0x34],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignFXReturnToGroups(options.inputFxr, options.grpActive, options.grpAssign)
 		},
 	}
 
@@ -510,17 +474,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputChannel,
-				opt.fxsAssign,
-				opt.fxsActive,
-				model.count.fxSend,
-				[0, 0x6c],
-				[0, 0x14],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignInputChannelToFXSends(options.inputChannel, options.fxsActive, options.fxsAssign)
 		},
 	}
 
@@ -549,17 +504,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputGrp,
-				opt.fxsAssign,
-				opt.fxsActive,
-				model.count.fxSend,
-				[0, 0x6d],
-				[0, 0x54],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignGroupToFXSends(options.inputGrp, options.fxsActive, options.fxsAssign)
 		},
 	}
 
@@ -588,17 +534,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputFxr,
-				opt.fxsAssign,
-				opt.fxsActive,
-				model.count.fxSend,
-				[0, 0x6e],
-				[0, 0x04],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignFXReturnToFXSends(options.inputFxr, options.fxsActive, options.fxsAssign)
 		},
 	}
 
@@ -627,17 +564,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputMix,
-				opt.mtxAssign,
-				opt.mtxActive,
-				model.count.matrix,
-				[0x6e, 0x6e],
-				[0x24, 0x27],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignMixToMatrixes(options.inputMix, options.mtxActive, options.mtxAssign)
 		},
 	}
 
@@ -666,17 +594,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				default: true,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
-			const commands = self.setRouting(
-				opt.inputGrp,
-				opt.mtxAssign,
-				opt.mtxActive,
-				model.count.matrix,
-				[0, 0x6e],
-				[0, 0x4b],
-			)
-			mixer.midi.sendCommands(commands)
+		callback: async ({ options }) => {
+			mixer.assignGroupToMatrixes(options.inputGrp, options.mtxActive, options.mtxAssign)
 		},
 	}
 

@@ -2,8 +2,32 @@ import { type ModelId, SQModels } from './models.js'
 
 export type ForEachFunctor = (n: number, label: string, desc: string) => void
 
+/**
+ * A record of the count of the number of instances of every kind of input,
+ * output, and scene.
+ */
+export type InputOutputCounts = {
+	inputChannel: number
+	mix: number
+	group: number
+	fxReturn: number
+	fxSend: number
+	matrix: number
+	dca: number
+	muteGroup: number
+	softKey: number
+	scene: number
+
+	// Encode LR as its own "category" so we can pretend the LR mix is a
+	// one-element category when computing parameter numbers for
+	// LR-to-matrix assignments.
+	lr: 1
+}
+
+export type InputOutputType = keyof InputOutputCounts
+
 export class Model {
-	count
+	readonly count: InputOutputCounts
 
 	/** Create a representation of a mixer identified by `modelId`. */
 	constructor(modelId: ModelId) {
@@ -20,6 +44,7 @@ export class Model {
 			muteGroup: sqModel.muteGroupCount,
 			softKey: sqModel.softKeyCount,
 			scene: sqModel.sceneCount,
+			lr: 1,
 		}
 	}
 

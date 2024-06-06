@@ -27,7 +27,6 @@ export interface SQInstanceInterface {
 	getConfigFields(): SomeCompanionConfigField[]
 
 	// Defined in api.js, added via Object.assign.
-	setRouting(ch: number, mix: readonly number[], ac: boolean, mc: number, oMB: ParamHalf, oLB: ParamHalf): number[][]
 	setLevel(
 		ch: number,
 		mx: number,

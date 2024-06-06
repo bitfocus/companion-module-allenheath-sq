@@ -1,30 +1,6 @@
 import { sleep } from './utils/sleep.js'
 
 export default {
-	setRouting: function (ch, mix, ac, mc, oMB, oLB) {
-		let routingCmds = []
-		let MSB
-		let LSB
-		let tmp
-
-		const midi = this.mixer.midi
-
-		for (let i = 0; i < mix.length; i++) {
-			if (mix[i] == 99) {
-				MSB = oMB[0]
-				LSB = parseInt(oLB[0]) + parseInt(ch)
-			} else {
-				tmp = parseInt(ch * mc + oLB[1]) + parseInt(mix[i])
-				MSB = oMB[1] + ((tmp >> 7) & 0x0f)
-				LSB = tmp & 0x7f
-			}
-
-			routingCmds.push(midi.nrpnData(MSB, LSB, 0, ac ? 1 : 0))
-		}
-
-		return routingCmds
-	},
-
 	setLevel: async function (ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
 		let levelCmds = []
