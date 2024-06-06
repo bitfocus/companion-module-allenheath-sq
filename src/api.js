@@ -106,9 +106,9 @@ export default {
 		//ensure it's a number
 		lv = parseFloat(lv)
 
-		let variableObj = {}
-		variableObj['level_' + MSB + '.' + LSB] = lv.toFixed(1)
-		self.setVariableValues(variableObj)
+		self.setVariableValues({
+			['level_' + MSB + '.' + LSB]: lv.toFixed(1),
+		})
 
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
 			let tm = self.dBToDec(lv, cnfg)
@@ -195,9 +195,9 @@ export default {
 					if (lv < -89) {
 						lv = '-inf'
 					}
-					let variableObj = {}
-					variableObj['level_' + MSB + '.' + LSB] = lv
-					self.setVariableValues(variableObj)
+					self.setVariableValues({
+						['level_' + MSB + '.' + LSB]: lv,
+					})
 				}
 
 				let fading = async (str, end, step, MSB, LSB) => {
@@ -492,9 +492,9 @@ export default {
 			if (data[b] == this.mch && data[b + 1] == 0) {
 				dt = data.slice(b, b + 5)
 				var csc = dt[4] + dt[2] * 127
-				let variableObj = {}
-				variableObj['currentScene'] = csc + 1
-				self.setVariableValues(variableObj)
+				self.setVariableValues({
+					currentScene: csc + 1,
+				})
 				this.log('debug', `Scene Received : ${dt} from ${self.config.host}`)
 			}
 
@@ -525,9 +525,9 @@ export default {
 						}
 
 						let db = self.decTodB(VC, VF)
-						let variableObj = {}
-						variableObj['level_' + MSB + '.' + LSB] = db
-						self.setVariableValues(variableObj)
+						self.setVariableValues({
+							['level_' + MSB + '.' + LSB]: db,
+						})
 
 						if (!ost) {
 							self.lastValue['level_' + MSB + '.' + LSB] = db
@@ -539,9 +539,9 @@ export default {
 					/* Pan Level */
 					if (MSB >= 0x50 && MSB <= 0x5e) {
 						let db = self.decTodB(VC, VF, 'PanBalance')
-						let variableObj = {}
-						variableObj['pan_' + MSB + '.' + LSB] = db
-						self.setVariableValues(variableObj)
+						self.setVariableValues({
+							['pan_' + MSB + '.' + LSB]: db,
+						})
 						this.log('debug', `Pan Received : ${dt} from ${self.config.host}`)
 					}
 				}
