@@ -1,21 +1,12 @@
+import { computeEitherParameters } from './mixer/parameters.js'
 import { sleep } from './utils/sleep.js'
 
 export default {
 	setLevel: async function (ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
 		var self = this
 		let levelCmds = []
-		let tmp
-		let MSB
-		let LSB
 
-		if (mx == 99) {
-			MSB = oMB[0]
-			LSB = parseInt(oLB[0]) + parseInt(ch)
-		} else {
-			tmp = parseInt(ch * ct + oLB[1]) + parseInt(mx)
-			MSB = oMB[1] + ((tmp >> 7) & 0x0f)
-			LSB = tmp & 0x7f
-		}
+		const { MSB, LSB } = computeEitherParameters(ch, mx, ct, { MSB: oMB[1], LSB: oLB[1] }, { MSB: oMB[0], LSB: oLB[0] })
 
 		console.log('old lv: ' + lv)
 
@@ -119,18 +110,7 @@ export default {
 	},
 
 	getLevel: function (ch, mx, ct, oMB, oLB) {
-		let tmp
-		let MSB
-		let LSB
-
-		if (mx == 99) {
-			MSB = oMB[0]
-			LSB = parseInt(oLB[0]) + parseInt(ch)
-		} else {
-			tmp = parseInt(ch * ct + oLB[1]) + parseInt(mx)
-			MSB = oMB[1] + ((tmp >> 7) & 0x0f)
-			LSB = tmp & 0x7f
-		}
+		const { MSB, LSB } = computeEitherParameters(ch, mx, ct, { MSB: oMB[1], LSB: oLB[1] }, { MSB: oMB[0], LSB: oLB[0] })
 
 		const midi = this.mixer.midi
 
@@ -196,11 +176,13 @@ export default {
 					}, 50)
 				}
 
-				let rm = self.getLevel(ch, mx, ct, oMB, oLB)
-				const MSB = rm.channel[0]
-				const LSB = rm.channel[1]
-				let VC
-				let VF
+				const { MSB, LSB } = computeEitherParameters(
+					ch,
+					mx,
+					ct,
+					{ MSB: oMB[1], LSB: oLB[1] },
+					{ MSB: oMB[0], LSB: oLB[0] },
+				)
 				var end
 
 				if (lv == '-inf') {

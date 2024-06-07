@@ -65,6 +65,16 @@ export function computeParameters(source: number, sink: number, sinkCount: numbe
 	return { MSB: base.MSB + ((val >> 7) & 0xf), LSB: val & 0x7f }
 }
 
+export function computeEitherParameters(
+	source: number,
+	sink: number,
+	sinkCount: number,
+	base: Param,
+	lrBase: Param,
+): Param {
+	return sink === 99 ? computeLRParameters(source, lrBase) : computeParameters(source, sink, sinkCount, base)
+}
+
 type SourceToMixOrLR = {
 	[key: string]: {
 		normal: Param
