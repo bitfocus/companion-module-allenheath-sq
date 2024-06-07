@@ -1,4 +1,5 @@
 import { InstanceStatus, TCPHelper } from '@companion-module/base'
+import callback from '../callback.js'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import { asyncSleep, prettyBytes, sleep } from '../utils.js'
@@ -135,7 +136,7 @@ export class MidiSession {
 				return
 			}
 
-			instance.getRemoteStatus('mute')
+			this.#retrieveMuteStatuses()
 			sleep(300)
 			instance.getRemoteLevel()
 
@@ -161,6 +162,17 @@ export class MidiSession {
 		if (this.socket !== null) {
 			this.socket.destroy()
 			this.socket = null
+		}
+	}
+
+	/**
+	 * Issue MIDI commands to the mixer to retrieve the current mute states of
+	 * all inputs and outputs.
+	 */
+	#retrieveMuteStatuses(): void {
+		for (const key in callback.mute) {
+			const mblb = key.toString().split(':')
+			this.send(this.nrpnIncrement(Number(mblb[0]), Number(mblb[1]), 0x7f))
 		}
 	}
 

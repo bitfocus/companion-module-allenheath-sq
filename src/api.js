@@ -458,15 +458,6 @@ export default {
 		self.subscribeActions('pan_to_output')
 	},
 
-	getRemoteStatus: function (act) {
-		const midi = this.mixer.midi
-
-		for (let key in callback[act]) {
-			let mblb = key.toString().split(':')
-			midi.send(midi.nrpnIncrement(Number(mblb[0]), Number(mblb[1]), 0x7f))
-		}
-	},
-
 	getRemoteValue: async function (data) {
 		var self = this
 
