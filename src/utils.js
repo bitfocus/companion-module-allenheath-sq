@@ -81,7 +81,7 @@ export function dBToDec(lv, typ) {
  *
  * @param {number} VC
  * @param {number} VF
- * @param {import('./mixer/mixer.js').FaderLaw | 'PanBalance'} typ
+ * @param {import('./mixer/mixer.js').FaderLaw} typ
  * @returns {string}
  */
 export function decTodB(VC, VF, typ) {

@@ -115,7 +115,7 @@ export class Mixer {
 		return dBToDec(lv, typ) as any
 	}
 
-	decTodB(VC: number, VF: number, typ: FaderLaw | 'PanBalance' = this.faderLaw): string | number {
+	decTodB(VC: number, VF: number, typ = this.faderLaw): string | number {
 		return decTodB(VC, VF, typ) as any
 	}
 

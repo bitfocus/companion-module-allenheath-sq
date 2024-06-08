@@ -1,5 +1,8 @@
 export type LevelChoice = 'CTR' | `L${number}` | `R${number}`
 
+const CENTER = (0x3f << 7) | 0x7f
+const MAX = (0x7f << 7) + 0x7f
+
 /**
  * Convert a pan/balance level choice value to the MIDI NRPN encoding of that
  * choice.
@@ -23,7 +26,34 @@ export function panBalanceLevelToVCVF(level: LevelChoice): [number, number] {
 
 	// The combined VC/VF for a pan/balance level is just a linear interpolation
 	// over L100%=[0x00, 0x00] to CTR=[0x3F, 0x7F] to R100%=[0x7F, 0x7F].
-	const MAX = (0x7f << 7) + 0x7f
 	const interpolated = Math.floor((lv / 200) * MAX)
 	return [interpolated >> 7, interpolated & 0x7f]
+}
+
+/**
+ * Convert a `VC`/`VF` pair to a human-readable pan/balance level.
+ *
+ * This function returns a human-readable version of what `vc`/`vf` encode.  It
+ * is _not_ guaranteed to be a valid pan/balance-level option value, as those
+ * options are restricted to 5% increments.
+ */
+export function vcvfToReadablePanBalance(vc: number, vf: number): LevelChoice {
+	const data = (vc << 7) | vf
+	let val = parseFloat(((data - CENTER) / 81.9).toFixed(0))
+	if (val > 100) {
+		val = 100
+	}
+	if (val < -100) {
+		val = -100
+	}
+
+	if (val == 0) {
+		return 'CTR'
+	}
+
+	const amount = Math.abs(val)
+	if (val < 0) {
+		return `L${amount}`
+	}
+	return `R${amount}`
 }

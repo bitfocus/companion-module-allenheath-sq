@@ -2,6 +2,7 @@ import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import callback from '../callback.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import type { Mixer } from '../mixer/mixer.js'
+import { vcvfToReadablePanBalance } from '../mixer/pan-balance.js'
 import { MidiTokenizer } from './tokenize/tokenize.js'
 import { MixerMessageParser } from './parse/parse.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
@@ -217,7 +218,7 @@ export class MidiSession {
 				`Pan received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
 			)
 			instance.setVariableValues({
-				[`pan_${msb}.${lsb}`]: mixer.decTodB(vc, vf, 'PanBalance'),
+				[`pan_${msb}.${lsb}`]: vcvfToReadablePanBalance(vc, vf),
 			})
 		})
 
