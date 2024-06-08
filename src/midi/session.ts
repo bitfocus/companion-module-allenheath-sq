@@ -203,7 +203,7 @@ export class MidiSession {
 				ost = true
 			}
 
-			const db = instance.decTodB(vc, vf)
+			const db = mixer.decTodB(vc, vf)
 			instance.setVariableValues({
 				[levelKey]: db,
 			})
@@ -217,7 +217,7 @@ export class MidiSession {
 				`Pan received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
 			)
 			instance.setVariableValues({
-				[`pan_${msb}.${lsb}`]: instance.decTodB(vc, vf, 'PanBalance'),
+				[`pan_${msb}.${lsb}`]: mixer.decTodB(vc, vf, 'PanBalance'),
 			})
 		})
 

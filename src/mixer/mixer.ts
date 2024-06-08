@@ -1,5 +1,5 @@
 import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
-import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { Level, SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { MidiSession, NRPNDataMessage } from '../midi/session.js'
 import { InputOutputType, Model } from './model.js'
 import type { ModelId } from './models.js'
@@ -12,6 +12,23 @@ import {
 	computeParameters,
 	type Param,
 } from './parameters.js'
+import { dBToDec, decTodB } from '../utils.js'
+
+/**
+ * The two values of the NRPN fader law setting in the mixer.  The two values
+ * determine how signal levels are encoded in MIDI level messages sent to and
+ * received from the mixer:
+ *
+ * * `"LinearTaper"` uses a high-resolution encoding that supports 16384
+ *   different level values.
+ * * `"AudioTaper"` uses a much lower-resolution encoding that's easier to map
+ *   onto a physical fader position.
+ *
+ * For more details, see the "3.4 Levels: NRPN Fader Law" section and the
+ * Taper Level Values tables in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ */
+export type FaderLaw = 'LinearTaper' | 'AudioTaper'
 
 /**
  * An abstract representation of an SQ mixer.
@@ -21,6 +38,9 @@ export class Mixer {
 	 * The model of this mixer.
 	 */
 	model: Model
+
+	/** The NRPN fader law setting in the mixer. */
+	faderLaw: FaderLaw = 'LinearTaper'
 
 	/**
 	 * The MIDI transport used to interact with the mixer.
@@ -74,18 +94,29 @@ export class Mixer {
 	 * @param midiChannel
 	 *   The MIDI channel setting used by the mixer.  (This will be 0-15 for
 	 *   channels 1-16 as displayed in mixer UI.)
+	 * @param faderLaw
+	 *    The NRPN fader law set in the mixer.
 	 * @param retrieveStatus
 	 *   When/how to retrieve the current status of mixer levels and routing.
 	 * @param verbose
 	 *   Whether verbose logging of mixer operations should be enabled.
 	 */
-	start(host: string, midiChannel: number, retrieveStatus: string, verbose: boolean): void {
+	start(host: string, midiChannel: number, faderLaw: FaderLaw, retrieveStatus: string, verbose: boolean): void {
+		this.faderLaw = faderLaw
 		this.midi.start(host, midiChannel, retrieveStatus, verbose)
 	}
 
 	/** Stop this mixer connection. */
 	stop(status = InstanceStatus.Disconnected): void {
 		this.midi.stop(status)
+	}
+
+	dBToDec(lv: Level, typ: FaderLaw | 'PanBalance' = this.faderLaw): [number, number] {
+		return dBToDec(lv, typ) as any
+	}
+
+	decTodB(VC: number, VF: number, typ: FaderLaw | 'PanBalance' = this.faderLaw): string | number {
+		return decTodB(VC, VF, typ) as any
 	}
 
 	/**

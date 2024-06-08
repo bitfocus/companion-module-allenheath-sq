@@ -1,19 +1,16 @@
 import type { InstanceBase, SomeCompanionConfigField } from '@companion-module/base'
 import type { SQInstanceConfig } from './config.js'
-import type { Mixer } from './mixer/mixer.js'
+import type { FaderLaw, Mixer } from './mixer/mixer.js'
 
 export type ParamHalf = readonly [number, number]
 
-type Level = number | string
+export type Level = number | string
 
 export interface SQInstanceInterface {
 	// Not declared, simply added in configUpdated
 	config: SQInstanceConfig
 
 	mixer: Mixer | null
-
-	dBToDec(lv: string | number, typ?: string): any
-	decTodB(vc: number, vf: number, typ?: string): any
 
 	init: InstanceBase<SQInstanceConfig>['init']
 	destroy: InstanceBase<SQInstanceConfig>['destroy']
@@ -34,7 +31,7 @@ export interface SQInstanceInterface {
 		lv: Level,
 		oMB: ParamHalf,
 		oLB: ParamHalf,
-		cnfg?: string,
+		cnfg?: FaderLaw | 'PanBalance',
 	): Promise<number[][]>
 	getLevel(
 		ch: number,
@@ -51,7 +48,7 @@ export interface SQInstanceInterface {
 		lv: Level,
 		oMB: ParamHalf,
 		oLB: ParamHalf,
-		cnfg?: string,
+		cnfg?: FaderLaw | 'PanBalance',
 	): Promise<number[][]>
 	getRemoteLevel(): void
 }

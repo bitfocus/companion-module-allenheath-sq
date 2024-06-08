@@ -2,8 +2,11 @@ import { computeEitherParameters } from './mixer/parameters.js'
 import { sleep } from './utils/sleep.js'
 
 export default {
-	setLevel: async function (ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
+	setLevel: async function (ch, mx, ct, lv, oMB, oLB, cnfg = this.mixer.faderLaw) {
 		var self = this
+
+		const mixer = this.mixer
+
 		let levelCmds = []
 
 		const { MSB, LSB } = computeEitherParameters(ch, mx, ct, { MSB: oMB[1], LSB: oLB[1] }, { MSB: oMB[0], LSB: oLB[0] })
@@ -74,19 +77,19 @@ export default {
 		})
 
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
-			let tm = self.dBToDec(lv, cnfg)
+			let tm = mixer.dBToDec(lv, cnfg)
 			var VC = tm[0]
 			var VF = tm[1]
 		}
 
-		const midi = this.mixer.midi
+		const midi = mixer.midi
 
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
 			levelCmds.push(midi.nrpnData(MSB, LSB, VC, FV))
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
-				let rtn = self.dBToDec(self.mixer.lastValue[levelKey], cnfg)
+				let rtn = mixer.dBToDec(mixer.lastValue[levelKey], cnfg)
 				VC = rtn[0]
 				VF = rtn[1]
 				lv = 997
@@ -120,19 +123,20 @@ export default {
 		}
 	},
 
-	fadeLevel: async function (fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.config.level) {
+	fadeLevel: async function (fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.mixer.faderLaw) {
 		var self = this
 
 		if (fd == 0) {
 			//if the user did not choose a fade time
 			return await self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
 		} else {
-			const midi = this.mixer.midi
+			const mixer = this.mixer
+			const midi = mixer.midi
 
 			const midiSocket = midi.socket
 			if (midiSocket !== null) {
 				let setFade = (MSB, LSB, lv) => {
-					let val = self.dBToDec(lv)
+					let val = mixer.dBToDec(lv)
 					let VC = val[0]
 					let VF = val[1]
 					midi.send(midi.nrpnData(MSB, LSB, VC, VF))
@@ -196,7 +200,7 @@ export default {
 				} else {
 					if (lv == 1000) {
 						/* Last dB value */
-						end = this.mixer.lastValue[levelKey]
+						end = mixer.lastValue[levelKey]
 					} else {
 						end = await self.getVariableValue(levelKey)
 

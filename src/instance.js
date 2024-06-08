@@ -13,7 +13,23 @@ import api from './api.js'
 
 import { Choices } from './choices.js'
 import { Mixer } from './mixer/mixer.js'
-import { dBToDec, decTodB } from './utils.js'
+
+/**
+ * Convert the fader law option value to a properly-typed value.
+ *
+ * @param {import('@companion-module/base').InputValue | undefined} faderLawOpt
+ * @returns {import('./mixer/mixer.js').FaderLaw}
+ */
+function toFaderLaw(faderLawOpt) {
+	const law = String(faderLawOpt)
+	switch (law) {
+		case 'LinearTaper':
+		case 'AudioTaper':
+			return law
+		default:
+			return 'LinearTaper'
+	}
+}
 
 export class sqInstance extends InstanceBase {
 	config
@@ -28,14 +44,6 @@ export class sqInstance extends InstanceBase {
 		Object.assign(this, {
 			...api,
 		})
-	}
-
-	dBToDec(lv, typ = this.config.level) {
-		return dBToDec(lv, typ)
-	}
-
-	decTodB(VC, VF, typ = this.config.level) {
-		return decTodB(VC, VF, typ)
 	}
 
 	async destroy() {
@@ -78,7 +86,7 @@ export class sqInstance extends InstanceBase {
 		this.checkFeedbacks()
 
 		if (config.host) {
-			mixer.start(config.host, config.midich - 1, config.status, config.verbose)
+			mixer.start(config.host, config.midich - 1, toFaderLaw(config.level), config.status, config.verbose)
 		} else {
 			mixer.stop(InstanceStatus.BadConfig)
 		}

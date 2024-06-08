@@ -1,3 +1,8 @@
+/**
+ * @param {import('./instance-interface.js').Level} lv
+ * @param {import('./mixer/mixer.js').FaderLaw | 'PanBalance'} typ
+ * @returns
+ */
 export function dBToDec(lv, typ) {
 	let VC, VF, val, bin
 	if (lv == '-inf') return [0, 0]
@@ -72,6 +77,13 @@ export function dBToDec(lv, typ) {
 	return [VC, VF]
 }
 
+/**
+ *
+ * @param {number} VC
+ * @param {number} VF
+ * @param {import('./mixer/mixer.js').FaderLaw | 'PanBalance'} typ
+ * @returns {string}
+ */
 export function decTodB(VC, VF, typ) {
 	let dec, val
 
