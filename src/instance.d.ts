@@ -46,7 +46,7 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 		ct: number,
 		oMB: ParamHalf,
 		oLB: ParamHalf,
-	): { buffer: [number[]]; channel: [number, number] }
+	): { commands: [number[]]; channel: [number, number] }
 	async fadeLevel(
 		fd: number,
 		ch: number,

@@ -164,7 +164,7 @@ export default {
 		}
 
 		return {
-			buffer: [[this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f]],
+			commands: [[this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f]],
 			channel: [MSB, LSB],
 		}
 	},
@@ -332,68 +332,68 @@ export default {
 		model.forEachInputChannel((channel) => {
 			model.forEachMixAndLR((mix) => {
 				const rsp = self.getLevel(channel, mix, model.count.mix, [0x40, 0x40], [0, 0x44])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEachGroup((group) => {
 			model.forEachMixAndLR((mix) => {
 				const rsp = self.getLevel(group, mix, model.count.mix, [0x40, 0x45], [0x30, 0x04])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEachFxReturn((fxr) => {
 			model.forEachMixAndLR((mix) => {
 				const rsp = self.getLevel(fxr, mix, model.count.mix, [0x40, 0x46], [0x3c, 0x14])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEachFxReturn((fxr) => {
 			model.forEachGroup((group) => {
 				const rsp = self.getLevel(fxr, group, model.count.group, [0, 0x4b], [0, 0x34])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEachInputChannel((channel) => {
 			model.forEachFxSend((fxs) => {
 				const rsp = self.getLevel(channel, fxs, model.count.fxSend, [0, 0x4c], [0, 0x14])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEachGroup((group) => {
 			model.forEachFxSend((fxs) => {
 				const rsp = self.getLevel(group, fxs, model.count.fxSend, [0, 0x4d], [0, 0x54])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEachFxReturn((fxr) => {
 			model.forEachFxSend((fxs) => {
 				const rsp = self.getLevel(fxr, fxs, model.count.fxSend, [0, 0x4e], [0, 0x04])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEachMatrix((matrix) => {
 			const rsp = self.getLevel(0, matrix, model.count.matrix, [0, 0x4e], [0, 0x24])
-			buff.push(rsp['buffer'][0])
+			buff.push(rsp.commands[0])
 		})
 
 		model.forEachMix((mix) => {
 			model.forEachMatrix((matrix) => {
 				const rsp = self.getLevel(mix, matrix, model.count.matrix, [0, 0x4e], [0, 0x27])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEachGroup((group) => {
 			model.forEachMatrix((matrix) => {
 				const rsp = self.getLevel(group, matrix, model.count.matrix, [0, 0x4e], [0, 0x4b])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			})
 		})
 
@@ -411,13 +411,13 @@ export default {
 			})
 			for (let j = 0; j < tmp.length; j++) {
 				const rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
-				buff.push(rsp['buffer'][0])
+				buff.push(rsp.commands[0])
 			}
 		}
 
 		model.forEachDCA((dca) => {
 			const rsp = self.getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
-			buff.push(rsp['buffer'][0])
+			buff.push(rsp.commands[0])
 		})
 
 		if (buff.length > 0 && self.mixer.midi.socket !== null) {
