@@ -21,8 +21,6 @@ export class sqInstance extends InstanceBase {
 	/** @type {?Mixer} */
 	mixer = null
 
-	lastValue = {}
-
 	constructor(internal) {
 		super(internal)
 

@@ -45,8 +45,10 @@ export default {
 
 		console.log('old lv: ' + lv)
 
+		const levelKey = `level_${MSB}.${LSB}`
+
 		if (lv.toString().indexOf('step') > -1) {
-			let currentLevel = await self.getVariableValue('level_' + MSB + '.' + LSB)
+			let currentLevel = await self.getVariableValue(levelKey)
 			if (currentLevel == '-inf') {
 				currentLevel = -90
 			} else {
@@ -103,7 +105,7 @@ export default {
 		lv = parseFloat(lv)
 
 		self.setVariableValues({
-			['level_' + MSB + '.' + LSB]: lv.toFixed(1),
+			[levelKey]: lv.toFixed(1),
 		})
 
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
@@ -119,7 +121,7 @@ export default {
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
-				let rtn = self.dBToDec(self.lastValue['level_' + MSB + '.' + LSB], cnfg)
+				let rtn = self.dBToDec(self.mixer.lastValue[levelKey], cnfg)
 				VC = rtn[0]
 				VF = rtn[1]
 				lv = 997
@@ -221,8 +223,8 @@ export default {
 				}
 
 				let rm = self.getLevel(ch, mx, ct, oMB, oLB)
-				var MSB = rm.channel[0]
-				var LSB = rm.channel[1]
+				const MSB = rm.channel[0]
+				const LSB = rm.channel[1]
 				let VC
 				let VF
 				var end
@@ -231,14 +233,16 @@ export default {
 					lv = -90
 				}
 
+				const levelKey = `level_${MSB}.${LSB}`
+
 				if (lv < 998) {
 					end = lv
 				} else {
 					if (lv == 1000) {
 						/* Last dB value */
-						end = self.lastValue['level_' + MSB + '.' + LSB]
+						end = this.mixer.lastValue[levelKey]
 					} else {
-						end = await self.getVariableValue('level_' + MSB + '.' + LSB)
+						end = await self.getVariableValue(levelKey)
 
 						if (end == '-inf') {
 							end = -90
@@ -273,7 +277,7 @@ export default {
 				}
 
 				let str //start value
-				let res = await self.getVariableValue('level_' + MSB + '.' + LSB)
+				let res = await self.getVariableValue(levelKey)
 				str = res
 
 				if (str == '-inf') {
@@ -498,20 +502,22 @@ export default {
 
 					/* Fader Level */
 					if (MSB >= 0x40 && MSB <= 0x4f) {
+						const levelKey = `level_${MSB}.${LSB}`
+
 						var ost = false
-						var res = await self.getVariableValue('level_' + MSB + '.' + LSB)
+						var res = await self.getVariableValue(levelKey)
 						if (res !== undefined) {
-							self.lastValue['level_' + MSB + '.' + LSB] = res
+							mixer.lastValue[levelKey] = res
 							ost = true
 						}
 
 						let db = self.decTodB(VC, VF)
 						self.setVariableValues({
-							['level_' + MSB + '.' + LSB]: db,
+							[levelKey]: db,
 						})
 
 						if (!ost) {
-							self.lastValue['level_' + MSB + '.' + LSB] = db
+							mixer.lastValue[levelKey] = db
 						}
 
 						this.log('debug', `Fader Received : ${dt} from ${self.config.host}`)

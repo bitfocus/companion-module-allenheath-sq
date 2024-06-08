@@ -1,4 +1,4 @@
-import { InstanceStatus } from '@companion-module/base'
+import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import { MidiSession } from '../midi/session.js'
 import { Model } from './model.js'
@@ -25,6 +25,14 @@ export class Mixer {
 	 * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
 	 */
 	readonly fdbState: { [key: `mute_${number}.${number}`]: boolean } = {}
+
+	/**
+	 * A store of the last level of each source in its sinks as reported by the
+	 * mixer.  Keys have the form `"level_${MSB}.${LSB}"`, where `MSB` and `LSB`
+	 * come from the "Level Parameter Numbers" reference tables in the
+	 * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+	 */
+	lastValue: { [key: `level_${number}.${number}`]: CompanionVariableValue } = {}
 
 	/**
 	 * The scene currently recalled on the mixer minus one -- so this will be in

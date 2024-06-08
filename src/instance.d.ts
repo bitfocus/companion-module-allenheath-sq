@@ -1,4 +1,4 @@
-import type { CompanionVariableValue, InstanceBase, SomeCompanionConfigField } from '@companion-module/base'
+import type { InstanceBase, SomeCompanionConfigField } from '@companion-module/base'
 import type { SQInstanceConfig } from './config.js'
 import type { Mixer } from './mixer/mixer.js'
 
@@ -11,8 +11,6 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 	config: SQInstanceConfig
 
 	mixer: Mixer | null
-
-	readonly lastValue: { [key: string]: CompanionVariableValue }
 
 	constructor(internal: unknown): InstanceBase<SQInstanceConfig>
 
