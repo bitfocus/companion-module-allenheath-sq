@@ -32,7 +32,7 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 	midiSocket: TCPHelper | undefined
 
 	// Defined in api.js, added via Object.assign.
-	setRouting(ch: number, mix: readonly number[], ac: boolean, mc: number, oMB: ParamHalf, oLB: ParamHalf): Buffer[]
+	setRouting(ch: number, mix: readonly number[], ac: boolean, mc: number, oMB: ParamHalf, oLB: ParamHalf): number[][]
 	async setLevel(
 		ch: number,
 		mx: number,
@@ -41,7 +41,7 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 		oMB: ParamHalf,
 		oLB: ParamHalf,
 		cnfg?: string,
-	): Promise<Buffer[]>
+	): Promise<number[][]>
 	async setScene(val: number): Promise<number>
 	getLevel(
 		ch: number,
@@ -49,7 +49,7 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 		ct: number,
 		oMB: ParamHalf,
 		oLB: ParamHalf,
-	): { buffer: [Buffer]; channel: [number, number] }
+	): { buffer: [number[]]; channel: [number, number] }
 	async fadeLevel(
 		fd: number,
 		ch: number,
@@ -59,11 +59,11 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 		oMB: ParamHalf,
 		oLB: ParamHalf,
 		cnfg?: string,
-	): Promise<Buffer[]>
-	sendSocket(buff: Buffer): void
+	): Promise<number[][]>
+	sendSocket(data: readonly number[]): void
 	getRemoteLevel(): void
 	getRemoteStatus(act: string): void
 	async getRemoteValue(data: number[]): Promise<void>
 	initTCP(): void
-	async sendBuffers(buffers: Buffer[]): Promise<void>
+	async sendBuffers(buffers: readonly number[][]): Promise<void>
 }

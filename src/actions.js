@@ -82,20 +82,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -140,20 +127,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -178,20 +152,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -215,20 +176,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -252,20 +200,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -289,20 +224,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -326,20 +248,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -363,20 +272,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -400,20 +296,7 @@ export function getActions(self, choices, connectionLabel) {
 
 			self.checkFeedbacks()
 			const buffers = [
-				Buffer.from([
-					self.mch,
-					0x63,
-					MSB,
-					self.mch,
-					0x62,
-					strip + LSB,
-					self.mch,
-					0x06,
-					0x00,
-					self.mch,
-					0x26,
-					self.fdbState[key],
-				]),
+				[self.mch, 0x63, MSB, self.mch, 0x62, strip + LSB, self.mch, 0x06, 0x00, self.mch, 0x26, self.fdbState[key]],
 			]
 			self.sendBuffers(buffers)
 		},
@@ -452,7 +335,7 @@ export function getActions(self, choices, connectionLabel) {
 			let softKey = parseInt(opt.softKey)
 			let keyValu = opt.pressedsk == '0' || opt.pressedsk == '1' ? true : false
 			let tch = parseInt((keyValu ? '0x9' : '0x8') + (self.mch - 176).toString(16))
-			const buffers = [Buffer.from([tch, 0x30 + softKey, keyValu ? 0x7f : 0])]
+			const buffers = [[tch, 0x30 + softKey, keyValu ? 0x7f : 0]]
 			self.sendBuffers(buffers)
 		},
 	}
@@ -1510,9 +1393,7 @@ export function getActions(self, choices, connectionLabel) {
 			let opt = action.options
 
 			sceneNumber = opt.scene - 1
-			const buffers = [
-				Buffer.from([self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]),
-			]
+			const buffers = [[self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]]
 
 			self.sendBuffers(buffers)
 		},
@@ -1535,9 +1416,7 @@ export function getActions(self, choices, connectionLabel) {
 			let opt = action.options
 
 			sceneNumber = self.setScene(opt.scene)
-			const buffers = [
-				Buffer.from([self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]),
-			]
+			const buffers = [[self.mch, 0, (sceneNumber >> 7) & 0x0f, 0xc0 | (self.mch & 0xf), sceneNumber & 0x7f]]
 
 			self.sendBuffers(buffers)
 		},

@@ -23,9 +23,7 @@ export default {
 				LSB = tmp & 0x7f
 			}
 
-			routingCmds.push(
-				Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, 0, this.mch, 0x26, ac ? 1 : 0]),
-			)
+			routingCmds.push([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, 0, this.mch, 0x26, ac ? 1 : 0])
 		}
 
 		return routingCmds
@@ -117,7 +115,7 @@ export default {
 		}
 
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
-			levelCmds.push(Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF]))
+			levelCmds.push([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF])
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
@@ -126,16 +124,16 @@ export default {
 				VF = rtn[1]
 				lv = 997
 
-				levelCmds.push(Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF]))
+				levelCmds.push([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x06, VC, this.mch, 0x26, VF])
 			}
 			//else {
 			/* Increment +1 */
-			//	levelCmds.push( Buffer.from([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, lv == 998 ? 0x60 : 0x61, 0x00 ]) )
+			//	levelCmds.push( ([ this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, lv == 998 ? 0x60 : 0x61, 0x00 ]) )
 			//	}
 		}
 
 		// Retrive value after set command
-		levelCmds.push(Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f]))
+		levelCmds.push([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f])
 
 		return levelCmds
 	},
@@ -170,7 +168,7 @@ export default {
 		}
 
 		return {
-			buffer: [Buffer.from([this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f])],
+			buffer: [[this.mch, 0x63, MSB, this.mch, 0x62, LSB, this.mch, 0x60, 0x7f]],
 			channel: [MSB, LSB],
 		}
 	},
@@ -330,10 +328,10 @@ export default {
 		}
 	},
 
-	sendSocket: function (buff) {
+	sendSocket: function (data) {
 		if (this.midiSocket !== undefined && this.midiSocket.isConnected) {
-			this.log('debug', `Sending : ${Array.from(buff)} from ${this.config.host}`)
-			this.midiSocket.send(buff)
+			this.log('debug', `Sending : ${data} from ${this.config.host}`)
+			this.midiSocket.send(Buffer.from(data))
 		}
 	},
 
@@ -478,7 +476,7 @@ export default {
 	getRemoteStatus: function (act) {
 		for (let key in callback[act]) {
 			let mblb = key.toString().split(':')
-			this.sendSocket(Buffer.from([this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7f]))
+			this.sendSocket([this.mch, 0x63, mblb[0], this.mch, 0x62, mblb[1], this.mch, 0x60, 0x7f])
 		}
 	},
 
@@ -587,12 +585,12 @@ export default {
 	},
 
 	//new send command
-	sendBuffers: async function (buffers) {
+	sendBuffers: async function (arrays) {
 		let self = this
 
-		for (let i = 0; i < buffers.length; i++) {
-			this.log('debug', `Sending : ${Array.from(buffers[i])} from ${this.config.host}`)
-			self.sendSocket(buffers[i])
+		for (let i = 0; i < arrays.length; i++) {
+			this.log('debug', `Sending : ${arrays[i]} from ${this.config.host}`)
+			self.sendSocket(arrays[i])
 			await asyncSleep(200)
 		}
 	},
