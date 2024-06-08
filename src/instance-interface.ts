@@ -24,6 +24,7 @@ export interface SQInstanceInterface {
 	getConfigFields(): SomeCompanionConfigField[]
 
 	// Defined in api.js, added via Object.assign.
+	setPanBalance(ch: number, mx: number, ct: number, lv: Level, oMB: ParamHalf, oLB: ParamHalf): number[][]
 	setLevel(
 		ch: number,
 		mx: number,
@@ -31,7 +32,7 @@ export interface SQInstanceInterface {
 		lv: Level,
 		oMB: ParamHalf,
 		oLB: ParamHalf,
-		cnfg?: FaderLaw | 'PanBalance',
+		cnfg?: FaderLaw,
 	): Promise<number[][]>
 	getLevel(
 		ch: number,
@@ -48,7 +49,7 @@ export interface SQInstanceInterface {
 		lv: Level,
 		oMB: ParamHalf,
 		oLB: ParamHalf,
-		cnfg?: FaderLaw | 'PanBalance',
+		cnfg?: FaderLaw,
 	): Promise<number[][]>
 	getRemoteLevel(): void
 }
