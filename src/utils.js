@@ -1,6 +1,6 @@
 /**
  * @param {import('./instance-interface.js').Level} lv
- * @param {import('./mixer/mixer.js').FaderLaw | 'PanBalance'} typ
+ * @param {import('./mixer/mixer.js').FaderLaw} typ
  * @returns
  */
 export function dBToDec(lv, typ) {

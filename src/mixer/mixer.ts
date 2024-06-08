@@ -111,7 +111,7 @@ export class Mixer {
 		this.midi.stop(status)
 	}
 
-	dBToDec(lv: Level, typ: FaderLaw | 'PanBalance' = this.faderLaw): [number, number] {
+	dBToDec(lv: Level, typ = this.faderLaw): [number, number] {
 		return dBToDec(lv, typ) as any
 	}
 

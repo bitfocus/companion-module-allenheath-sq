@@ -1,3 +1,4 @@
+import { panBalanceLevelToVCVF } from './mixer/pan-balance.js'
 import { computeEitherParameters } from './mixer/parameters.js'
 import { sleep } from './utils/sleep.js'
 
@@ -21,8 +22,7 @@ export default {
 				break
 			// 'L100', 'L95', ..., 'L5', CTR', 'R5', ..., 'R95', 'R100'
 			default: {
-				let tm = mixer.dBToDec(lv, 'PanBalance')
-				const [VC, VF] = tm
+				const [VC, VF] = panBalanceLevelToVCVF(lv)
 
 				modifyPanBalanceCommand = midi.nrpnData(MSB, LSB, VC, VF)
 			}
