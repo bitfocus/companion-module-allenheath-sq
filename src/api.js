@@ -28,11 +28,11 @@ export default {
 			}
 		}
 
-		return [
+		midi.sendCommands([
 			modifyPanBalanceCommand,
 			// Query the new pan/balance value to update its variable.
 			midi.nrpnIncrement(MSB, LSB, 0x7f),
-		]
+		])
 	},
 
 	setLevel: async function (ch, mx, ct, lv, oMB, oLB, cnfg = this.mixer.faderLaw) {

@@ -1142,8 +1142,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const commands = self.setPanBalance(opt.input, opt.assign, model.count.mix, opt.leveldb, [0x50, 0x50], [0, 0x44])
-			mixer.midi.sendCommands(commands)
+			self.setPanBalance(opt.input, opt.assign, model.count.mix, opt.leveldb, [0x50, 0x50], [0, 0x44])
 		},
 	}
 
@@ -1182,15 +1181,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const commands = self.setPanBalance(
-				opt.input,
-				opt.assign,
-				model.count.mix,
-				opt.leveldb,
-				[0x50, 0x55],
-				[0x30, 0x04],
-			)
-			mixer.midi.sendCommands(commands)
+			self.setPanBalance(opt.input, opt.assign, model.count.mix, opt.leveldb, [0x50, 0x55], [0x30, 0x04])
 		},
 	}
 
@@ -1229,15 +1220,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const commands = self.setPanBalance(
-				opt.input,
-				opt.assign,
-				model.count.mix,
-				opt.leveldb,
-				[0x50, 0x56],
-				[0x3c, 0x14],
-			)
-			mixer.midi.sendCommands(commands)
+			self.setPanBalance(opt.input, opt.assign, model.count.mix, opt.leveldb, [0x50, 0x56], [0x3c, 0x14])
 		},
 	}
 
@@ -1276,8 +1259,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const commands = self.setPanBalance(opt.input, opt.assign, model.count.group, opt.leveldb, [0, 0x5b], [0, 0x34])
-			mixer.midi.sendCommands(commands)
+			self.setPanBalance(opt.input, opt.assign, model.count.group, opt.leveldb, [0, 0x5b], [0, 0x34])
 		},
 	}
 
@@ -1316,15 +1298,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const commands = self.setPanBalance(
-				opt.input,
-				opt.assign,
-				model.count.matrix,
-				opt.leveldb,
-				[0x5e, 0x5e],
-				[0x24, 0x27],
-			)
-			mixer.midi.sendCommands(commands)
+			self.setPanBalance(opt.input, opt.assign, model.count.matrix, opt.leveldb, [0x5e, 0x5e], [0x24, 0x27])
 		},
 	}
 
@@ -1363,8 +1337,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const commands = self.setPanBalance(opt.input, opt.assign, model.count.matrix, opt.leveldb, [0, 0x5e], [0, 0x4b])
-			mixer.midi.sendCommands(commands)
+			self.setPanBalance(opt.input, opt.assign, model.count.matrix, opt.leveldb, [0, 0x5e], [0, 0x4b])
 		},
 	}
 
@@ -1397,8 +1370,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 		callback: async (action) => {
 			let opt = action.options
-			const commands = self.setPanBalance(opt.input, 99, 0, opt.leveldb, [0x5f, 0], [0, 0])
-			mixer.midi.sendCommands(commands)
+			self.setPanBalance(opt.input, 99, 0, opt.leveldb, [0x5f, 0], [0, 0])
 		},
 	}
 
