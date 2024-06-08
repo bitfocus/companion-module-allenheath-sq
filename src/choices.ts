@@ -1,5 +1,6 @@
 import type { DropdownChoice } from '@companion-module/base'
 import type { Model } from './mixer/model.js'
+import { createPanLevels } from './mixer/pan-balance.js'
 
 function createInputChannels(model: Model): DropdownChoice[] {
 	const inputChannels: DropdownChoice[] = []
@@ -105,17 +106,6 @@ function createLevels() {
 		levels.push({ label: `${i} dB`, id: i })
 	}
 	return levels
-}
-
-function createPanLevels() {
-	const panLevels: DropdownChoice[] = []
-	panLevels.push({ label: `Step Right`, id: 998 }, { label: `Step Left`, id: 999 })
-	for (let i = -100; i <= 100; i = i + 5) {
-		const pos = i < 0 ? `L${Math.abs(i)}` : i == 0 ? `CTR` : `R${Math.abs(i)}`
-		panLevels.push({ label: `${pos}`, id: `${pos}` })
-	}
-
-	return panLevels
 }
 
 function createAllFaders(model: Model): DropdownChoice[] {

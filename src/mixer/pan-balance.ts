@@ -1,3 +1,5 @@
+import { DropdownChoice } from '@companion-module/base'
+
 export type LevelChoice = 'CTR' | `L${number}` | `R${number}`
 
 const CENTER = (0x3f << 7) | 0x7f
@@ -56,4 +58,15 @@ export function vcvfToReadablePanBalance(vc: number, vf: number): LevelChoice {
 		return `L${amount}`
 	}
 	return `R${amount}`
+}
+
+export function createPanLevels(): DropdownChoice[] {
+	const panLevels = []
+	panLevels.push({ label: `Step Right`, id: 998 }, { label: `Step Left`, id: 999 })
+	for (let i = -100; i <= 100; i = i + 5) {
+		const pos = i < 0 ? `L${Math.abs(i)}` : i == 0 ? `CTR` : `R${Math.abs(i)}`
+		panLevels.push({ label: `${pos}`, id: `${pos}` })
+	}
+
+	return panLevels
 }
