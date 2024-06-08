@@ -51,27 +51,6 @@ export function dBToDec(lv, typ) {
 				VF = 0
 			}
 			break
-
-		case 'PanBalance':
-			if (lv != 'CTR') {
-				let sg = lv.substr(0, 1)
-				lv = parseInt(lv.slice(1)) * (sg == 'L' ? -1 : 1)
-			} else {
-				lv = 0
-			}
-			val = Math.round(8191 + lv * 81.9)
-			val = val > 8191 ? val + 221 : val + 100
-			if (val < 5) {
-				val = 0
-			}
-			if (val > 16380) {
-				val = 16383
-			}
-			bin = ('00000000000000' + val.toString(2)).slice(-14)
-
-			VC = parseInt(bin.slice(0, -7), 2)
-			VF = parseInt(bin.slice(-7), 2)
-			break
 	}
 
 	return [VC, VF]
@@ -125,21 +104,6 @@ export function decTodB(VC, VF, typ) {
 					val = parseFloat(-40 - (15 - VC) / 0.2).toFixed(0)
 					break
 			}
-			break
-
-		case 'PanBalance':
-			dec = parseInt(VC.toString(2) + ('0000000' + VF.toString(2)).slice(-7), 2)
-			val = parseFloat((dec - 8191) / 81.9).toFixed(0)
-			if (val > 100) {
-				val = 100
-			}
-			if (val < -100) {
-				val = -100
-			}
-			if (val == 0) {
-				return 'CTR'
-			}
-			val = (val < 0 ? 'L' : 'R') + Math.abs(val).toString()
 			break
 	}
 
