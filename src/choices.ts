@@ -131,6 +131,19 @@ function createAllFaders(model: Model): DropdownChoice[] {
 	return allFaders
 }
 
+function createPanBalanceOutputFaders(model: Model): DropdownChoice[] {
+	const allFaders: DropdownChoice[] = []
+	allFaders.push({ label: `LR`, id: 0 })
+	model.forEachMix((mix, mixLabel) => {
+		allFaders.push({ label: mixLabel, id: 1 + mix })
+	})
+	model.forEachMatrix((matrix, matrixLabel) => {
+		allFaders.push({ label: matrixLabel, id: 0x11 + matrix })
+	})
+
+	return allFaders
+}
+
 export class Choices {
 	readonly inputChannels
 	readonly mixes
@@ -145,6 +158,7 @@ export class Choices {
 	readonly levels
 	readonly panLevels
 	readonly allFaders
+	readonly panBalanceFaders
 
 	constructor(model: Model) {
 		this.inputChannels = createInputChannels(model)
@@ -160,5 +174,6 @@ export class Choices {
 		this.levels = createLevels()
 		this.panLevels = createPanLevels()
 		this.allFaders = createAllFaders(model)
+		this.panBalanceFaders = createPanBalanceOutputFaders(model)
 	}
 }

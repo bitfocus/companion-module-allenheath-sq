@@ -1357,9 +1357,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				label: 'Fader',
 				id: 'input',
 				default: 0,
-				choices: choices.allFaders.filter(function (val, idx, arr) {
-					return idx < 19
-				}),
+				choices: choices.panBalanceFaders,
 				minChoicesForSearch: 0,
 			},
 			PanLevelOption,
