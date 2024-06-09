@@ -24,7 +24,6 @@ export interface SQInstanceInterface {
 	getConfigFields(): SomeCompanionConfigField[]
 
 	// Defined in api.js, added via Object.assign.
-	setPanBalance(ch: number, mx: number, ct: number, lv: Level, oMB: ParamHalf, oLB: ParamHalf): number[][]
 	setLevel(
 		ch: number,
 		mx: number,

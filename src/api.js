@@ -1,40 +1,7 @@
-import { panBalanceLevelToVCVF } from './mixer/pan-balance.js'
 import { computeEitherParameters } from './mixer/parameters.js'
 import { sleep } from './utils/sleep.js'
 
 export default {
-	setPanBalance: function (ch, mx, ct, lv, oMB, oLB) {
-		const { MSB, LSB } = computeEitherParameters(ch, mx, ct, { MSB: oMB[1], LSB: oLB[1] }, { MSB: oMB[0], LSB: oLB[0] })
-
-		/** @type {import('./mixer/mixer.js').Mixer} */
-		const mixer = this.mixer
-		const midi = mixer.midi
-
-		let modifyPanBalanceCommand
-		switch (lv) {
-			// Step Right
-			case 998:
-				modifyPanBalanceCommand = midi.nrpnIncrement(MSB, LSB, 0)
-				break
-			// Step Left
-			case 999:
-				modifyPanBalanceCommand = midi.nrpnDecrement(MSB, LSB, 0)
-				break
-			// 'L100', 'L95', ..., 'L5', CTR', 'R5', ..., 'R95', 'R100'
-			default: {
-				const [VC, VF] = panBalanceLevelToVCVF(lv)
-
-				modifyPanBalanceCommand = midi.nrpnData(MSB, LSB, VC, VF)
-			}
-		}
-
-		midi.sendCommands([
-			modifyPanBalanceCommand,
-			// Query the new pan/balance value to update its variable.
-			midi.nrpnIncrement(MSB, LSB, 0x7f),
-		])
-	},
-
 	setLevel: async function (ch, mx, ct, lv, oMB, oLB, cnfg = this.mixer.faderLaw) {
 		var self = this
 

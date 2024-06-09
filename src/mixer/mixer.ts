@@ -3,6 +3,7 @@ import type { Level, SQInstanceInterface as sqInstance } from '../instance-inter
 import { MidiSession, NRPNDataMessage } from '../midi/session.js'
 import { InputOutputType, Model } from './model.js'
 import type { ModelId } from './models.js'
+import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
 	AssignToMixOrLRBase,
 	type AssignToMixOrLRType,
@@ -10,9 +11,16 @@ import {
 	type AssignToSinkType,
 	computeLRParameters,
 	computeParameters,
+	PanBalanceInMixOrLRBase,
+	type PanBalanceInMixOrLRType,
+	PanBalanceInSinkBase,
+	type PanBalanceInSinkType,
+	PanBalanceOutput,
 	type Param,
 } from './parameters.js'
 import { dBToDec, decTodB } from '../utils.js'
+
+type PanBalance = any
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -444,5 +452,243 @@ export class Mixer {
 	 */
 	assignGroupToMatrixes(group: number, active: boolean, matrixes: readonly number[]): void {
 		this.#assignSourceToSinks(group, 'group', active, matrixes, 'matrix', 'group-matrix')
+	}
+
+	/**
+	 * Set the pan/balance of `source` in the sink `sink` of type `sinkType`.
+	 *
+	 * @param source
+	 *   A source, e.g. a value in the range `[0, 12)` if `source` is a group
+	 *   and the mixer supports 12 groups.  It must be in the valid range for
+	 *   the type its caller intends: this function won't (and can't) do any
+	 *   range-checking.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param sink
+	 *   The numbered sink in which `source`'s pan/balance level will be
+	 *   adjusted, e.g. `2` for Aux 3.
+	 * @param sinkType
+	 *   The type of `sink`.
+	 * @param base
+	 *   The base MSB/LSB for the desired source-to-sink pan/balance settings.
+	 */
+	#setPanBalance(source: number, panBalance: PanBalance, sink: number, sinkType: InputOutputType, base: Param): void {
+		const sinkCount = this.model.count[sinkType]
+		if (sinkCount <= sink) {
+			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
+		}
+
+		const { MSB, LSB } = computeParameters(source, sink, sinkCount, base)
+
+		const midi = this.midi
+
+		let modifyPanBalanceCommand
+		switch (panBalance) {
+			// Step Right
+			case 998:
+				modifyPanBalanceCommand = midi.nrpnIncrement(MSB, LSB, 0)
+				break
+			// Step Left
+			case 999:
+				modifyPanBalanceCommand = midi.nrpnDecrement(MSB, LSB, 0)
+				break
+			// 'L100', 'L95', ..., 'L5', CTR', 'R5', ..., 'R95', 'R100'
+			default: {
+				const [VC, VF] = panBalanceLevelToVCVF(panBalance)
+
+				modifyPanBalanceCommand = midi.nrpnData(MSB, LSB, VC, VF)
+			}
+		}
+
+		// XXX
+		void midi.sendCommands([
+			modifyPanBalanceCommand,
+			// Query the new pan/balance value to update its variable.
+			// XXX check later -- possibly only stepping left/right need this
+			midi.nrpnIncrement(MSB, LSB, 0x7f),
+		])
+	}
+
+	/**
+	 * Set the pan/balance of `source` within `mix` (which may be LR).
+	 *
+	 * @param source
+	 *   A source, e.g. a value in the range `[0, 12)` if `source` is a group
+	 *   and the mixer supports 12 groups.
+	 * @param sourceType
+	 *   The type of `source`.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param mixOrLR
+	 *   The mix (or LR) in which `source`'s pan/balance level will be adjusted,
+	 *   e.g. `2` for Aux 3.
+	 */
+	#setPanBalanceInMixOrLR(
+		source: number,
+		sourceType: PanBalanceInMixOrLRType,
+		panBalance: PanBalance,
+		mixOrLR: number,
+	): void {
+		const count = this.model.count
+		if (count[sourceType] <= source) {
+			throw new Error(`Attempting to set pan/balance for out-of-range ${sourceType} ${source}`)
+		}
+
+		const { normal, lr } = PanBalanceInMixOrLRBase[sourceType]
+
+		if (mixOrLR === 99) {
+			this.#setPanBalance(source, panBalance, 0, 'lr', lr)
+		} else {
+			this.#setPanBalance(source, panBalance, mixOrLR, 'mix', normal)
+		}
+	}
+
+	/**
+	 * Set the pan/balance of `source` within `sink`.
+	 *
+	 * @param source
+	 *   A source, e.g. a value in the range `[0, 12)` if `source` is a group
+	 *   being assigned to mixes and the mixer supports 12 groups.
+	 * @param sourceType
+	 *   The type of `source`.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param sink
+	 *   The numbered sink in which `source`'s pan/balance level will be
+	 *   adjusted, e.g. `2` for Aux 3.
+	 * @param sinkType
+	 *   The type of `sink`.
+	 * @param paramsType
+	 *   An identifier determining the base MSB/LSB for the desired
+	 *   pan/balance level of `source` in `sink`.
+	 */
+	#setPanBalanceInSink(
+		source: number,
+		sourceType: InputOutputType,
+		panBalance: PanBalance,
+		sink: number,
+		sinkType: InputOutputType,
+		paramsType: PanBalanceInSinkType,
+	) {
+		const count = this.model.count
+		if (count[sourceType] <= source) {
+			throw new Error(`Attempting to set pan/balance for out-of-range ${sourceType} ${source}`)
+		}
+
+		const params = PanBalanceInSinkBase[paramsType]
+
+		this.#setPanBalance(source, panBalance, sink, sinkType, params)
+	}
+
+	/**
+	 * Set the pan/balance of an input channel within a mix (which may be LR).
+	 *
+	 * @param channel
+	 *   An input channel, e.g. `3` for input channel 4.
+	 * @param pan
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param mixOrLR
+	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
+	 */
+	setInputChannelPanBalanceInMixOrLR(channel: number, pan: PanBalance, mixOrLR: number): void {
+		this.#setPanBalanceInMixOrLR(channel, 'inputChannel', pan, mixOrLR)
+	}
+
+	/**
+	 * Set the pan/balance of a group within a mix (which may be LR).
+	 *
+	 * @param group
+	 *   A group, e.g. `1` for group 2.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param mixOrLR
+	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
+	 */
+	setGroupPanBalanceInMixOrLR(group: number, panBalance: PanBalance, mixOrLR: number): void {
+		this.#setPanBalanceInMixOrLR(group, 'group', panBalance, mixOrLR)
+	}
+
+	/**
+	 * Set the pan/balance of an FX return within a mix (which may be LR).
+	 *
+	 * @param fxReturn
+	 *   An FX return, e.g. `1` for FX return 2.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param mixOrLR
+	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
+	 */
+	setFXReturnPanBalanceInMixOrLR(fxReturn: number, panBalance: PanBalance, mixOrLR: number): void {
+		this.#setPanBalanceInMixOrLR(fxReturn, 'fxReturn', panBalance, mixOrLR)
+	}
+
+	/**
+	 * Set the pan/balance of an FX return within a group.
+	 *
+	 * @param fxReturn
+	 *   An FX return, e.g. `1` for FX return 2.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param group
+	 *   A group, e.g. `2` for group 3.
+	 */
+	setFXReturnPanBalanceInGroup(fxReturn: number, panBalance: PanBalance, group: number): void {
+		this.#setPanBalanceInSink(fxReturn, 'fxReturn', panBalance, group, 'group', 'fxReturn-group')
+	}
+
+	/**
+	 * Set the pan/balance of LR within a matrix.
+	 *
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param matrix
+	 *   A matrix, e.g. `2` for matrix 3.
+	 */
+	setLRPanBalanceInMatrix(panBalance: PanBalance, matrix: number): void {
+		this.#setPanBalanceInSink(0, 'lr', panBalance, matrix, 'matrix', 'lr-matrix')
+	}
+
+	/**
+	 * Set the pan/balance of a mix within a matrix.
+	 *
+	 * @param mix
+	 *   A mix, e.g. `2` for Aux 3.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param matrix
+	 *   A matrix, e.g. `2` for matrix 3.
+	 */
+	setMixPanBalanceInMatrix(mix: number, panBalance: PanBalance, matrix: number): void {
+		this.#setPanBalanceInSink(mix, 'mix', panBalance, matrix, 'matrix', 'mix-matrix')
+	}
+
+	/**
+	 * Set the pan/balance of a mix within a matrix.
+	 *
+	 * @param group
+	 *   A group, e.g. `2` for Group 3.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 * @param matrix
+	 *   A matrix, e.g. `2` for matrix 3.
+	 */
+	setGroupPanBalanceInMatrix(group: number, panBalance: PanBalance, matrix: number): void {
+		this.#setPanBalanceInSink(group, 'group', panBalance, matrix, 'matrix', 'group-matrix')
+	}
+
+	/**
+	 * Set the pan/balance of any of various outputs in their own right, not fed
+	 * into anything.  (For example, this can be used to pan LR all the way left
+	 * or right.)
+	 *
+	 * @param fader
+	 *   A fader value from the list of valid choices.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 */
+	setOutputPanBalance(fader: number, panBalance: PanBalance): void {
+		// Abuse LR as a "sink" whose category contains exactly one element to
+		// make the MSB/LSB parameter math do the desired thing.
+		this.#setPanBalance(fader, panBalance, 0, 'lr', PanBalanceOutput)
 	}
 }

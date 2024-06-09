@@ -1140,9 +1140,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			mixer.midi.send(val.commands[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
-		callback: async (action) => {
-			let opt = action.options
-			self.setPanBalance(opt.input, opt.assign, model.count.mix, opt.leveldb, [0x50, 0x50], [0, 0x44])
+		callback: async ({ options }) => {
+			const { input: inputChannel, leveldb: panBalance, assign: mixOrLR } = options
+			mixer.setInputChannelPanBalanceInMixOrLR(inputChannel, panBalance, mixOrLR)
 		},
 	}
 
@@ -1179,9 +1179,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			mixer.midi.send(val.commands[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
-		callback: async (action) => {
-			let opt = action.options
-			self.setPanBalance(opt.input, opt.assign, model.count.mix, opt.leveldb, [0x50, 0x55], [0x30, 0x04])
+		callback: async ({ options }) => {
+			const { input: group, leveldb: panBalance, assign: mixOrLR } = options
+			mixer.setGroupPanBalanceInMixOrLR(group, panBalance, mixOrLR)
 		},
 	}
 
@@ -1218,9 +1218,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			mixer.midi.send(val.commands[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
-		callback: async (action) => {
-			let opt = action.options
-			self.setPanBalance(opt.input, opt.assign, model.count.mix, opt.leveldb, [0x50, 0x56], [0x3c, 0x14])
+		callback: async ({ options }) => {
+			const { input: fxReturn, leveldb: panBalance, assign: mixOrLR } = options
+			mixer.setFXReturnPanBalanceInMixOrLR(fxReturn, panBalance, mixOrLR)
 		},
 	}
 
@@ -1257,9 +1257,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			mixer.midi.send(val.commands[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
-		callback: async (action) => {
-			let opt = action.options
-			self.setPanBalance(opt.input, opt.assign, model.count.group, opt.leveldb, [0, 0x5b], [0, 0x34])
+		callback: async ({ options }) => {
+			// XXX The SQ MIDI Protocol document (Issue 3) includes a table for
+			//     this (page 26).  Issue 5 of the same document does not.  Is
+			//     this operation even a thing?
+			const { input: fxReturn, leveldb: panBalance, assign: group } = options
+			mixer.setFXReturnPanBalanceInGroup(fxReturn, panBalance, group)
 		},
 	}
 
@@ -1296,9 +1299,14 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			mixer.midi.send(val.commands[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
-		callback: async (action) => {
-			let opt = action.options
-			self.setPanBalance(opt.input, opt.assign, model.count.matrix, opt.leveldb, [0x5e, 0x5e], [0x24, 0x27])
+		callback: async ({ options }) => {
+			const { input: mixOrLR, leveldb: panBalance, assign: matrix } = options
+			if (mixOrLR === 99) {
+				mixer.setLRPanBalanceInMatrix(panBalance, matrix)
+			} else {
+				const mix = mixOrLR
+				mixer.setMixPanBalanceInMatrix(mix, panBalance, matrix)
+			}
 		},
 	}
 
@@ -1335,9 +1343,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			mixer.midi.send(val.commands[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
-		callback: async (action) => {
-			let opt = action.options
-			self.setPanBalance(opt.input, opt.assign, model.count.matrix, opt.leveldb, [0, 0x5e], [0, 0x4b])
+		callback: async ({ options }) => {
+			const { input: group, leveldb: panBalance, assign: matrix } = options
+			mixer.setGroupPanBalanceInMatrix(group, panBalance, matrix)
 		},
 	}
 
@@ -1368,9 +1376,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			mixer.midi.send(val.commands[0])
 			opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 		},
-		callback: async (action) => {
-			let opt = action.options
-			self.setPanBalance(opt.input, 99, 0, opt.leveldb, [0x5f, 0], [0, 0])
+		callback: async ({ options }) => {
+			const { input: fader, leveldb: panBalance } = options
+			mixer.setOutputPanBalance(fader, panBalance)
 		},
 	}
 

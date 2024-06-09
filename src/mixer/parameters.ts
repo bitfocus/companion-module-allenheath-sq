@@ -129,3 +129,58 @@ export const AssignToSinkBase = {
 } satisfies SourceToSink
 
 export type AssignToSinkType = keyof typeof AssignToSinkBase
+
+/**
+ * Base parameter MSB/LSB values corresponding to setting the mixer pan/balance
+ * level of the given source category in mixes or LR.
+ *
+ * These values are the pairs at top left of the relevant tables in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ */
+export const PanBalanceInMixOrLRBase = {
+	inputChannel: {
+		normal: { MSB: 0x50, LSB: 0x44 },
+		lr: { MSB: 0x50, LSB: 0x00 },
+	},
+	group: {
+		normal: { MSB: 0x55, LSB: 0x04 },
+		lr: { MSB: 0x50, LSB: 0x30 },
+	},
+	fxReturn: {
+		normal: { MSB: 0x56, LSB: 0x14 },
+		lr: { MSB: 0x50, LSB: 0x3c },
+	},
+} satisfies SourceToMixOrLR
+
+export type PanBalanceInMixOrLRType = keyof typeof PanBalanceInMixOrLRBase
+
+/**
+ * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
+ * pan/balance levels of the given source category in the given sink category.
+ * (Note that when the source category is `'mix'`, this *doesn't* include the LR
+ * mix.)
+ *
+ * These values are the pairs at top left of the relevant tables in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ * (Or table *section*, in the cases of `'lr-matrix'` and `'mix-matrix'`,
+ * because the former must be treated specially due to LR being encoded with
+ * value `99` .)
+ */
+export const PanBalanceInSinkBase = {
+	'fxReturn-group': { MSB: 0x5b, LSB: 0x34 },
+	'lr-matrix': { MSB: 0x5e, LSB: 0x24 },
+	'mix-matrix': { MSB: 0x5e, LSB: 0x27 },
+	'group-matrix': { MSB: 0x5e, LSB: 0x4b },
+} satisfies SourceToSink
+
+export type PanBalanceInSinkType = keyof typeof PanBalanceInSinkBase
+
+/**
+ * Base parameter MSB/LSB corresponding to setting balance of sources used
+ * directly as outputs.
+ *
+ * This value comes from the top of the LR/mixes/matrixes to "Output" table
+ * under "Balance Parameter Number - Master Sends" in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ */
+export const PanBalanceOutput = { MSB: 0x5f, LSB: 0x00 } satisfies Param
