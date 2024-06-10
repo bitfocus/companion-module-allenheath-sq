@@ -26,7 +26,7 @@
 		"type": "node18",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
-		"entrypoint": "../index.js"
+		"entrypoint": "../src/main.js"
 	},
 	"manufacturer": "Allen & Heath",
 	"products": ["SQ5", "SQ6", "SQ7"],

@@ -1,22 +1,21 @@
 // Allen & Heath SQ Series
 
-import { InstanceBase, InstanceStatus, runEntrypoint } from '@companion-module/base'
-import { UpgradeScripts } from './src/upgrades.js'
+import { InstanceBase, InstanceStatus } from '@companion-module/base'
 
-import { GetConfigFields } from './src/config.js'
+import { GetConfigFields } from './config.js'
 
-import { getActions } from './src/actions.js'
-import { getFeedbacks } from './src/feedbacks.js'
-import { getVariables } from './src/variables.js'
-import { getPresets } from './src/presets.js'
+import { getActions } from './actions.js'
+import { getFeedbacks } from './feedbacks.js'
+import { getVariables } from './variables.js'
+import { getPresets } from './presets.js'
 
-import api from './src/api.js'
+import api from './api.js'
 
-import { Choices } from './src/choices.js'
-import { Model } from './src/mixer/model.js'
-import { dBToDec, decTodB } from './src/utils.js'
+import { Choices } from './choices.js'
+import { Model } from './mixer/model.js'
+import { dBToDec, decTodB } from './utils.js'
 
-class sqInstance extends InstanceBase {
+export class sqInstance extends InstanceBase {
 	model
 
 	fdbState = {}
@@ -81,5 +80,3 @@ class sqInstance extends InstanceBase {
 		this.initTCP()
 	}
 }
-
-runEntrypoint(sqInstance, UpgradeScripts)
