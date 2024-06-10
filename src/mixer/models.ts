@@ -1,6 +1,22 @@
 export const DefaultModel = 'SQ5'
 
-export const SQModels = {
+export type ModelId = 'SQ5' | 'SQ6' | 'SQ7'
+
+type ModelType = {
+	chCount: number
+	mixCount: number
+	grpCount: number
+	fxrCount: number
+	fxsCount: number
+	mtxCount: number
+	dcaCount: number
+	muteGroupCount: number
+	softKeyCount: number
+	RotaryKey: number
+	sceneCount: number
+}
+
+export const SQModels: { [K in ModelId]: ModelType } = {
 	SQ5: {
 		chCount: 48,
 		mixCount: 12,
