@@ -5,8 +5,6 @@ export function getPresets(self, model, talkbackChannel) {
 
 	/* MUTE */
 	const createtMute = (cat, lab, typ, cnt, nr = true) => {
-		var tmp = []
-
 		for (var i = 0; i < cnt; i++) {
 			let pst = {
 				type: 'button',
