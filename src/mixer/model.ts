@@ -1,16 +1,12 @@
-import { SQModels } from './models.js'
+import { type ModelId, SQModels } from './models.js'
+
+export type ForEachFunctor = (n: number, label: string, desc: string) => void
 
 export class Model {
 	count
 
-	/**
-	 * Create a representation of a mixer identified by `modelId`.
-	 * @param {string} modelId
-	 */
-	constructor(modelId) {
-		if (!(modelId in SQModels)) {
-			throw new RangeError(`Unknown SQ model: ${modelId}`)
-		}
+	/** Create a representation of a mixer identified by `modelId`. */
+	constructor(modelId: ModelId) {
 		const sqModel = SQModels[modelId]
 
 		this.count = {
@@ -27,13 +23,13 @@ export class Model {
 		}
 	}
 
-	#channelLabel(channel) {
+	#channelLabel(channel: number): string {
 		return `CH ${channel + 1}`
 	}
 
-	#channelLabels = []
+	readonly #channelLabels: string[] = []
 
-	forEachInputChannel(f) {
+	forEachInputChannel(f: ForEachFunctor): void {
 		const channelLabels = this.#channelLabels
 		if (channelLabels.length === 0) {
 			for (let channel = 0; channel < this.count.inputChannel; channel++) {
@@ -47,17 +43,17 @@ export class Model {
 		})
 	}
 
-	#mixLabel(mix) {
+	#mixLabel(mix: number): string {
 		return `AUX ${mix + 1}`
 	}
 
-	#mixDesc(mix) {
+	#mixDesc(mix: number): string {
 		return `Aux ${mix + 1}`
 	}
 
-	#mixLabels = []
+	readonly #mixLabels: [string, string][] = []
 
-	forEachMix(f) {
+	forEachMix(f: ForEachFunctor): void {
 		const mixLabels = this.#mixLabels
 		if (mixLabels.length === 0) {
 			for (let mix = 0; mix < this.count.mix; mix++) {
@@ -72,22 +68,22 @@ export class Model {
 		})
 	}
 
-	forEachMixAndLR(f) {
+	forEachMixAndLR(f: ForEachFunctor): void {
 		f(99, 'LR', 'LR')
 		this.forEachMix(f)
 	}
 
-	#groupLabel(group) {
+	#groupLabel(group: number): string {
 		return `GROUP ${group + 1}`
 	}
 
-	#groupDesc(group) {
+	#groupDesc(group: number): string {
 		return `Group ${group + 1}`
 	}
 
-	#groupLabels = []
+	readonly #groupLabels: [string, string][] = []
 
-	forEachGroup(f) {
+	forEachGroup(f: ForEachFunctor): void {
 		const groupLabels = this.#groupLabels
 		if (groupLabels.length === 0) {
 			for (let group = 0; group < this.count.group; group++) {
@@ -102,17 +98,17 @@ export class Model {
 		})
 	}
 
-	#fxReturnLabel(fxr) {
+	#fxReturnLabel(fxr: number): string {
 		return `FX RETURN ${fxr + 1}`
 	}
 
-	#fxReturnDesc(fxr) {
+	#fxReturnDesc(fxr: number): string {
 		return `FX Return ${fxr + 1}`
 	}
 
-	#fxReturnLabels = []
+	readonly #fxReturnLabels: [string, string][] = []
 
-	forEachFxReturn(f) {
+	forEachFxReturn(f: ForEachFunctor): void {
 		const fxReturnLabels = this.#fxReturnLabels
 		if (fxReturnLabels.length === 0) {
 			for (let fxr = 0; fxr < this.count.fxReturn; fxr++) {
@@ -127,17 +123,17 @@ export class Model {
 		})
 	}
 
-	#fxSendLabel(fxs) {
+	#fxSendLabel(fxs: number): string {
 		return `FX SEND ${fxs + 1}`
 	}
 
-	#fxSendDesc(fxs) {
+	#fxSendDesc(fxs: number): string {
 		return `FX Send ${fxs + 1}`
 	}
 
-	#fxSendLabels = []
+	readonly #fxSendLabels: [string, string][] = []
 
-	forEachFxSend(f) {
+	forEachFxSend(f: ForEachFunctor): void {
 		const fxSendLabels = this.#fxSendLabels
 		if (fxSendLabels.length === 0) {
 			for (let fxs = 0; fxs < this.count.fxSend; fxs++) {
@@ -152,17 +148,17 @@ export class Model {
 		})
 	}
 
-	#matrixLabel(matrix) {
+	#matrixLabel(matrix: number): string {
 		return `MATRIX ${matrix + 1}`
 	}
 
-	#matrixDesc(matrix) {
+	#matrixDesc(matrix: number): string {
 		return `Matrix ${matrix + 1}`
 	}
 
-	#matrixLabels = []
+	readonly #matrixLabels: [string, string][] = []
 
-	forEachMatrix(f) {
+	forEachMatrix(f: ForEachFunctor): void {
 		const matrixLabels = this.#matrixLabels
 		if (matrixLabels.length === 0) {
 			for (let matrix = 0; matrix < this.count.matrix; matrix++) {
@@ -177,13 +173,13 @@ export class Model {
 		})
 	}
 
-	#muteGroupLabel(muteGroup) {
+	#muteGroupLabel(muteGroup: number): string {
 		return `MuteGroup ${muteGroup + 1}`
 	}
 
-	#muteGroupLabels = []
+	readonly #muteGroupLabels: string[] = []
 
-	forEachMuteGroup(f) {
+	forEachMuteGroup(f: ForEachFunctor): void {
 		const muteGroupLabels = this.#muteGroupLabels
 		if (muteGroupLabels.length === 0) {
 			for (let muteGroup = 0; muteGroup < this.count.muteGroup; muteGroup++) {
@@ -197,17 +193,17 @@ export class Model {
 		})
 	}
 
-	#softKeyLabel(key) {
+	#softKeyLabel(key: number): string {
 		return `SOFTKEY ${key + 1}`
 	}
 
-	#softKeyDesc(key) {
+	#softKeyDesc(key: number): string {
 		return `SoftKey ${key + 1}`
 	}
 
-	#softKeyLabels = []
+	readonly #softKeyLabels: [string, string][] = []
 
-	forEachSoftKey(f) {
+	forEachSoftKey(f: ForEachFunctor): void {
 		const softKeyLabels = this.#softKeyLabels
 		if (softKeyLabels.length === 0) {
 			for (let softKey = 0; softKey < this.count.softKey; softKey++) {
@@ -222,13 +218,13 @@ export class Model {
 		})
 	}
 
-	#dcaLabel(dca) {
+	#dcaLabel(dca: number): string {
 		return `DCA ${dca + 1}`
 	}
 
-	#dcaLabels = []
+	readonly #dcaLabels: string[] = []
 
-	forEachDCA(f) {
+	forEachDCA(f: ForEachFunctor): void {
 		const dcaLabels = this.#dcaLabels
 		if (dcaLabels.length === 0) {
 			for (let dca = 0; dca < this.count.dca; dca++) {
