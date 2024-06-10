@@ -143,10 +143,8 @@ function createLevels() {
 		{ label: `Step -6 dB`, id: 'step-6' }, //added
 	)
 	for (let i = -90; i <= -40; i = i + 5) {
-		if (i == -90) {
-			i = '-inf'
-		}
-		levels.push({ label: `${i} dB`, id: i })
+		let id = i == -90 ? '-inf' : i
+		levels.push({ label: `${i} dB`, id })
 	}
 	for (let i = -39; i <= -10; i = i + 1) {
 		levels.push({ label: `${i} dB`, id: i })
