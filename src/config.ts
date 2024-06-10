@@ -1,7 +1,7 @@
-import { Regex } from '@companion-module/base'
+import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
 import { DefaultModel, SQModels } from './mixer/models.js'
 
-function createDefaultTalkbackChannelOption() {
+function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
 	// The number of input channels depends on how many input channels the
 	// user's chosen SQ model has.  Currently all SQs have the same number of
 	// input channels, so use that count.
@@ -35,9 +35,8 @@ function createDefaultTalkbackChannelOption() {
 
 /**
  * Get SQ module configuration fields.
- * @returns {import('@companion-module/base').SomeCompanionConfigField[]}
  */
-export function GetConfigFields() {
+export function GetConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
 			type: 'static-text',
@@ -79,7 +78,7 @@ export function GetConfigFields() {
 		},
 		createDefaultTalkbackChannelOption(),
 		{
-			type: 'textinput',
+			type: 'number',
 			id: 'midich',
 			label: 'MIDI channel',
 			width: 6,
@@ -104,6 +103,7 @@ export function GetConfigFields() {
 			id: 'verbose',
 			label: 'Enable Verbose Logging',
 			width: 12,
+			default: false,
 		},
 	]
 }
