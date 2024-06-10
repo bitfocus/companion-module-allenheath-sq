@@ -28,7 +28,6 @@
 	"eslintIgnore": [
 		"src/actions.js",
 		"src/api.js",
-		"src/choices.js",
 		"src/instance.js",
 		"dist/**/*.js",
 		"pkg/**/*.js"

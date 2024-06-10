@@ -1,128 +1,80 @@
-/**
- *
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createInputChannels(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const inputChannels = []
+import type { DropdownChoice } from '@companion-module/base'
+import type { Model } from './mixer/model.js'
+
+function createInputChannels(model: Model): DropdownChoice[] {
+	const inputChannels: DropdownChoice[] = []
 	model.forEachInputChannel((channel, channelLabel) => {
 		inputChannels.push({ label: channelLabel, id: channel })
 	})
 	return inputChannels
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createMixes(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const mixes = []
+function createMixes(model: Model): DropdownChoice[] {
+	const mixes: DropdownChoice[] = []
 	model.forEachMix((id, label) => {
 		mixes.push({ label, id })
 	})
 	return mixes
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createMixesAndLR(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const mixesAndLR = []
+function createMixesAndLR(model: Model): DropdownChoice[] {
+	const mixesAndLR: DropdownChoice[] = []
 	model.forEachMixAndLR((id, label) => {
 		mixesAndLR.push({ label, id })
 	})
 	return mixesAndLR
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createGroups(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const groups = []
+function createGroups(model: Model): DropdownChoice[] {
+	const groups: DropdownChoice[] = []
 	model.forEachGroup((group, groupLabel) => {
 		groups.push({ label: groupLabel, id: group })
 	})
 	return groups
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createMatrixes(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const matrixes = []
+function createMatrixes(model: Model): DropdownChoice[] {
+	const matrixes: DropdownChoice[] = []
 	model.forEachMatrix((matrix, matrixLabel) => {
 		matrixes.push({ label: matrixLabel, id: matrix })
 	})
 	return matrixes
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createFXReturns(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const fxReturns = []
+function createFXReturns(model: Model): DropdownChoice[] {
+	const fxReturns: DropdownChoice[] = []
 	model.forEachFxReturn((fxr, fxrLabel) => {
 		fxReturns.push({ label: fxrLabel, id: fxr })
 	})
 	return fxReturns
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createFXSends(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const fxSends = []
+function createFXSends(model: Model): DropdownChoice[] {
+	const fxSends: DropdownChoice[] = []
 	model.forEachFxSend((fxs, fxsLabel) => {
 		fxSends.push({ label: fxsLabel, id: fxs })
 	})
 	return fxSends
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createDCAs(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const dcas = []
+function createDCAs(model: Model): DropdownChoice[] {
+	const dcas: DropdownChoice[] = []
 	model.forEachDCA((dca, dcaLabel) => {
 		dcas.push({ label: dcaLabel, id: dca })
 	})
 	return dcas
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createMuteGroups(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const muteGroups = []
+function createMuteGroups(model: Model): DropdownChoice[] {
+	const muteGroups: DropdownChoice[] = []
 	model.forEachMuteGroup((muteGroup, muteGroupLabel) => {
 		muteGroups.push({ label: muteGroupLabel, id: muteGroup })
 	})
 	return muteGroups
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createSoftKeys(model) {
-	/** @type {{ label: string, id: number }[]} */
-	const softKeys = []
+function createSoftKeys(model: Model): DropdownChoice[] {
+	const softKeys: DropdownChoice[] = []
 	model.forEachSoftKey((softKey, softKeyLabel) => {
 		softKeys.push({ label: softKeyLabel, id: softKey })
 	})
@@ -130,7 +82,7 @@ function createSoftKeys(model) {
 }
 
 function createLevels() {
-	const levels = []
+	const levels: DropdownChoice[] = []
 	levels.push(
 		{ label: `Last dB value`, id: 1000 },
 		{ label: `Step +0.1 dB`, id: 'step+0.1' }, //added
@@ -143,7 +95,7 @@ function createLevels() {
 		{ label: `Step -6 dB`, id: 'step-6' }, //added
 	)
 	for (let i = -90; i <= -40; i = i + 5) {
-		let id = i == -90 ? '-inf' : i
+		const id = i == -90 ? '-inf' : i
 		levels.push({ label: `${i} dB`, id })
 	}
 	for (let i = -39; i <= -10; i = i + 1) {
@@ -156,7 +108,7 @@ function createLevels() {
 }
 
 function createPanLevels() {
-	const panLevels = []
+	const panLevels: DropdownChoice[] = []
 	panLevels.push({ label: `Step Right`, id: 998 }, { label: `Step Left`, id: 999 })
 	for (let i = -100; i <= 100; i = i + 5) {
 		const pos = i < 0 ? `L${Math.abs(i)}` : i == 0 ? `CTR` : `R${Math.abs(i)}`
@@ -166,14 +118,9 @@ function createPanLevels() {
 	return panLevels
 }
 
-/**
- * @param {import('./mixer/model.js').Model} model
- * @returns {{ label: string, id: number }[]}
- */
-function createAllFaders(model) {
+function createAllFaders(model: Model): DropdownChoice[] {
 	// All fader mix choices
-	/** @type {{ label: string, id: number }[]} */
-	const allFaders = []
+	const allFaders: DropdownChoice[] = []
 	allFaders.push({ label: `LR`, id: 0 })
 	model.forEachMix((mix, mixLabel) => {
 		allFaders.push({ label: mixLabel, id: mix + 1 })
@@ -195,24 +142,21 @@ function createAllFaders(model) {
 }
 
 export class Choices {
-	inputChannels
-	mixes
-	mixesAndLR
-	groups
-	matrixes
-	fxReturns
-	fxSends
-	dcas
-	muteGroups
-	softKeys
-	levels
-	panLevels
-	allFaders
+	readonly inputChannels
+	readonly mixes
+	readonly mixesAndLR
+	readonly groups
+	readonly matrixes
+	readonly fxReturns
+	readonly fxSends
+	readonly dcas
+	readonly muteGroups
+	readonly softKeys
+	readonly levels
+	readonly panLevels
+	readonly allFaders
 
-	/**
-	 * @param {import('./mixer/model.js').Model} model
-	 */
-	constructor(model) {
+	constructor(model: Model) {
 		this.inputChannels = createInputChannels(model)
 		this.mixes = createMixes(model)
 		this.mixesAndLR = createMixesAndLR(model)
