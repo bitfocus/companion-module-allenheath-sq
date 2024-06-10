@@ -2,21 +2,47 @@
 	"name": "allenheath-sq",
 	"version": "2.0.2",
 	"type": "module",
-	"main": "index.js",
+	"main": "dist/main.js",
 	"scripts": {
+		"postinstall": "husky",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"format": "prettier -w .",
-		"prepare": "husky install"
+		"package": "yarn build && companion-module-build",
+		"build": "rimraf dist && yarn build:main",
+		"build:main": "tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.build.json --watch",
+		"lint:raw": "eslint --ext .ts --ext .js --ignore-pattern dist --ignore-pattern pkg",
+		"lint": "yarn lint:raw .",
+		"eslint": "./node_modules/.bin/eslint",
+		"prettier": "./node_modules/.bin/prettier"
 	},
 	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-allenheath-sq.git"
 	},
+	"eslintConfig": {
+		"env": {
+			"node": true
+		}
+	},
+	"eslintIgnore": [
+		"src/actions.js",
+		"src/api.js",
+		"src/choices.js",
+		"src/instance.js",
+		"dist/**/*.js",
+		"pkg/**/*.js"
+	],
 	"prettier": "@companion-module/tools/.prettierrc.json",
 	"lint-staged": {
-		"*.{js,json}": [
-			"yarn format"
+		"*.{css,json,md,scss}": [
+			"prettier --write"
+		],
+		"*.{ts,tsx,js,jsx}": [
+			"yarn lint:raw --fix"
+		],
+		"*.yaml": [
+			"prettier --write"
 		]
 	},
 	"engines": {
@@ -27,8 +53,11 @@
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^1.5.0",
+		"@types/node": "^18.19.10",
+		"eslint-plugin-prettier": "^5.1.3",
 		"husky": "^9.0.11",
 		"lint-staged": "^15.2.2",
-		"prettier": "^3.2.5"
+		"prettier": "^3.2.5",
+		"typescript": "~5.2.2"
 	}
 }

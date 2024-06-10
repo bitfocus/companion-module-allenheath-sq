@@ -1,0 +1,14 @@
+{
+	"extends": "@companion-module/tools/tsconfig/node18/recommended",
+	"include": ["src/**/*.js", "src/**/*.ts"],
+	"exclude": ["node_modules/**", "src/**/*spec.ts", "src/**/*test.ts", "src/**/__tests__/*", "src/**/__mocks__/*"],
+	"compilerOptions": {
+		"allowJs": true,
+		"outDir": "./dist",
+		"baseUrl": "./",
+		"paths": {
+			"*": ["./node_modules/*"]
+		},
+		"module": "es2022"
+	}
+}

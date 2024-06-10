@@ -178,7 +178,7 @@ export function getPresets(self, model, talkbackChannel) {
 			const rsp = self.getLevel(channel, mix, model.count.mix, [0x40, 0x40], [0, 0x44])
 			createtMuteLevel(
 				`Mt+dB CH-${mixLabel}`,
-				`${channelLabel}\\n${mixLabel}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
+				`${channelLabel}\\n${mixLabel}\\n$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
 				'mute_input',
 				channel,
 				mix,
