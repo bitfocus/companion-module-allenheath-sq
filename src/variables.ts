@@ -1,5 +1,9 @@
-export function getVariables(self, model) {
-	const variables = []
+import type { CompanionVariableDefinition } from '@companion-module/base'
+import type { sqInstance } from './instance.js'
+import type { Model } from './mixer/model.js'
+
+export function getVariables(self: sqInstance, model: Model): CompanionVariableDefinition[] {
+	const variables: CompanionVariableDefinition[] = []
 
 	variables.push({
 		name: 'Scene - Current',
