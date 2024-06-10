@@ -1,3 +1,9 @@
+import type {
+	CompanionStaticUpgradeProps,
+	CompanionStaticUpgradeResult,
+	CompanionUpgradeContext,
+} from '@companion-module/base'
+import { configIsMissingModel, type SQInstanceConfig } from './config.js'
 import { DefaultModel } from './mixer/models.js'
 
 /**
@@ -6,11 +12,11 @@ import { DefaultModel } from './mixer/models.js'
  * Because Companion records last-upgrade-performed status by index into the
  * `UpgradeScripts` array, this function can't be deleted even though it does
  * nothing.
- * @param {import('@companion-module/base').CompanionUpgradeContext} _context
- * @param {import('@companion-module/base').CompanionStaticUpgradeProps} _props
- * @returns {import('@companion-module/base').CompanionStaticUpgradeResult}
  */
-function DummyUpgradeScript(_context, _props) {
+function DummyUpgradeScript(
+	_context: CompanionUpgradeContext<SQInstanceConfig>,
+	_props: CompanionStaticUpgradeProps<SQInstanceConfig>,
+): CompanionStaticUpgradeResult<SQInstanceConfig> {
 	return {
 		updatedConfig: null,
 		updatedActions: [],
@@ -22,12 +28,12 @@ function DummyUpgradeScript(_context, _props) {
  * This module once supported 'scene_recall' and 'current_scene' actions that
  * were exactly identical (other than in actionId and the name for each visible
  * in UI).  Rewrite the latter sort of action to instead encode the former.
- * @param {import('@companion-module/base').CompanionUpgradeContext} _context
- * @param {import('@companion-module/base').CompanionStaticUpgradeProps} props
- * @returns {import('@companion-module/base').CompanionStaticUpgradeResult}
  */
-function CoalesceSceneRecallActions(_context, props) {
-	const result = {
+function CoalesceSceneRecallActions(
+	_context: CompanionUpgradeContext<SQInstanceConfig>,
+	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
+): CompanionStaticUpgradeResult<SQInstanceConfig> {
+	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
 		updatedConfig: null,
 		updatedActions: [],
 		updatedFeedbacks: [],
@@ -46,19 +52,19 @@ function CoalesceSceneRecallActions(_context, props) {
 
 /**
  * Ensure a 'model' property is present in configs that lack it.
- * @param {import('@companion-module/base').CompanionUpgradeContext} _context
- * @param {import('@companion-module/base').CompanionStaticUpgradeProps} props
- * @returns
  */
-function EnsureModel(_context, props) {
-	const result = {
+function EnsureModel(
+	_context: CompanionUpgradeContext<SQInstanceConfig>,
+	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
+): CompanionStaticUpgradeResult<SQInstanceConfig> {
+	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
 		updatedConfig: null,
 		updatedActions: [],
 		updatedFeedbacks: [],
 	}
 
 	const oldConfig = props.config
-	if (oldConfig !== null && !('model' in oldConfig)) {
+	if (configIsMissingModel(oldConfig)) {
 		oldConfig.model = DefaultModel
 		result.updatedConfig = oldConfig
 	}

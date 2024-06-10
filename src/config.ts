@@ -1,6 +1,23 @@
 import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
 import { DefaultModel, SQModels } from './mixer/models.js'
 
+export interface SQInstanceConfig {
+	host: string
+	model: string
+	level: string
+	talkback: number
+	midich: number
+	status: string
+	verbose: boolean
+}
+
+/**
+ * Determine whether the given instance config is missing a `'model'` property.
+ */
+export function configIsMissingModel(config: SQInstanceConfig | null): config is SQInstanceConfig {
+	return config !== null && !('model' in config)
+}
+
 function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
 	// The number of input channels depends on how many input channels the
 	// user's chosen SQ model has.  Currently all SQs have the same number of
