@@ -1,20 +1,24 @@
 import { combineRgb } from '@companion-module/base'
 
+const White = combineRgb(255, 255, 255)
+const Black = combineRgb(0, 0, 0)
+
 export function getPresets(self, model, talkbackChannel) {
-	const presets = []
+	const presets = {}
 
 	/* MUTE */
 	const createtMute = (cat, lab, typ, cnt, nr = true) => {
 		for (var i = 0; i < cnt; i++) {
-			let pst = {
+			const suffix = cnt > 1 ? `_${i}` : ''
+			presets[`preset_${typ}${suffix}`] = {
 				type: 'button',
 				category: cat,
 				name: lab + (nr ? ' ' + (i + 1) : ''),
 				style: {
 					text: lab + (nr ? ' ' + (i + 1) : ''),
 					size: 'auto',
-					color: combineRgb(255, 255, 255),
-					bgcolor: combineRgb(0, 0, 0),
+					color: White,
+					bgcolor: Black,
 				},
 				steps: [
 					{
@@ -39,8 +43,6 @@ export function getPresets(self, model, talkbackChannel) {
 					},
 				],
 			}
-
-			presets.push(pst)
 		}
 	}
 
@@ -56,15 +58,15 @@ export function getPresets(self, model, talkbackChannel) {
 
 	/* TALKBACK*/
 	model.forEachMix((mix, mixLabel, mixDesc) => {
-		let pst = {
+		presets[`preset_talkback_mix${mix}`] = {
 			type: 'button',
 			category: 'Talkback',
 			name: `Talk to ${mixDesc}`,
 			style: {
 				text: `Talk to ${mixLabel}`,
 				size: 'auto',
-				color: combineRgb(255, 255, 255),
-				bgcolor: combineRgb(0, 0, 0),
+				color: White,
+				bgcolor: Black,
 			},
 			steps: [
 				{
@@ -130,21 +132,20 @@ export function getPresets(self, model, talkbackChannel) {
 			],
 			feedbacks: [],
 		}
-
-		presets.push(pst)
 	})
 
 	/* MUTE + FADER LEVEL */
-	const createtMuteLevel = (cat, lab, typ, ch) => {
-		let pst = {
+	const createtMuteLevel = (cat, lab, typ, ch, mix) => {
+		const mixId = mix === 99 ? 'lr' : `mix${mix}`
+		presets[`preset_mute_input${ch}_${mixId}`] = {
 			type: 'button',
 			category: cat,
 			name: lab,
 			style: {
 				text: lab,
 				size: 'auto',
-				color: combineRgb(255, 255, 255),
-				bgcolor: combineRgb(0, 0, 0),
+				color: White,
+				bgcolor: Black,
 			},
 			steps: [
 				{
@@ -169,8 +170,6 @@ export function getPresets(self, model, talkbackChannel) {
 				},
 			],
 		}
-
-		presets.push(pst)
 	}
 
 	// Input -> Mix
@@ -182,6 +181,7 @@ export function getPresets(self, model, talkbackChannel) {
 				`${channelLabel}\\n${mixLabel}\\n\$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
 				'mute_input',
 				channel,
+				mix,
 			)
 		})
 	})
