@@ -1,14 +1,16 @@
-import { combineRgb } from '@companion-module/base'
+import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
+import type { sqInstance } from './instance.js'
+import type { Model } from './mixer/model.js'
 
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
 
-export function getPresets(self, model, talkbackChannel) {
-	const presets = {}
+export function getPresets(self: sqInstance, model: Model, talkbackChannel: number): CompanionPresetDefinitions {
+	const presets: CompanionPresetDefinitions = {}
 
 	/* MUTE */
-	const createtMute = (cat, lab, typ, cnt, nr = true) => {
-		for (var i = 0; i < cnt; i++) {
+	const createtMute = (cat: string, lab: string, typ: string, cnt: number, nr = true): void => {
+		for (let i = 0; i < cnt; i++) {
 			const suffix = cnt > 1 ? `_${i}` : ''
 			presets[`preset_${typ}${suffix}`] = {
 				type: 'button',
@@ -135,7 +137,7 @@ export function getPresets(self, model, talkbackChannel) {
 	})
 
 	/* MUTE + FADER LEVEL */
-	const createtMuteLevel = (cat, lab, typ, ch, mix) => {
+	const createtMuteLevel = (cat: string, lab: string, typ: string, ch: number, mix: number): void => {
 		const mixId = mix === 99 ? 'lr' : `mix${mix}`
 		presets[`preset_mute_input${ch}_${mixId}`] = {
 			type: 'button',
