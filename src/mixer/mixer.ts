@@ -32,7 +32,7 @@ export class Mixer {
 	 * come from the "Level Parameter Numbers" reference tables in the
 	 * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
 	 */
-	lastValue: { [key: `level_${number}.${number}`]: CompanionVariableValue } = {}
+	readonly lastValue: { [key: `level_${number}.${number}`]: CompanionVariableValue } = {}
 
 	/**
 	 * The scene currently recalled on the mixer minus one -- so this will be in
