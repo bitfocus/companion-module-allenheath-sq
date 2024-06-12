@@ -481,11 +481,15 @@ export default {
 	getRemoteValue: async function (data) {
 		var self = this
 
+		/** @type {import('./mixer/mixer.js').Mixer} */
+		const mixer = this.mixer
+		const midi = mixer.midi
+
 		var dt, j
 
 		for (let b = 0; b < data.length; b++) {
 			/* Schene Change */
-			if (data[b] == this.mch && data[b + 1] == 0) {
+			if (data[b] == midi.BN && data[b + 1] == 0) {
 				dt = data.slice(b, b + 5)
 				var csc = dt[4] + dt[2] * 127
 				self.setVariableValues({
@@ -495,7 +499,7 @@ export default {
 			}
 
 			/* Other */
-			if (data[b] == this.mch && data[b + 1] == 99) {
+			if (data[b] == midi.BN && data[b + 1] == 99) {
 				dt = data.slice(b, b + 12)
 
 				if (dt.length == 12) {
