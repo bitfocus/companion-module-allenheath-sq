@@ -1,3 +1,4 @@
+/// <reference path="./sqinstance.d.ts" />
 // Allen & Heath SQ Series
 
 import { InstanceBase, InstanceStatus } from '@companion-module/base'
