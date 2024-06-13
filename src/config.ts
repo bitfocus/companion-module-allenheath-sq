@@ -18,6 +18,13 @@ export function configIsMissingModel(config: SQInstanceConfig | null): config is
 	return config !== null && !('model' in config)
 }
 
+/**
+ * Add the 'model' option (defaulting to SQ5) to a config that's missing one.
+ */
+export function addModelOptionToConfig(config: SQInstanceConfig): void {
+	config.model = DefaultModel
+}
+
 function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
 	// The number of input channels depends on how many input channels the
 	// user's chosen SQ model has.  Currently all SQs have the same number of
