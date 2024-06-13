@@ -1,0 +1,49 @@
+name: Build and Test CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Stay consistent with package.json.
+        node-version: [~18.12]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Prepare Environment
+        run: |
+          yarn install
+        env:
+          CI: true
+      - name: Lint module code
+        run: |
+          yarn lint
+        env:
+          CI: true
+      - name: Compile module code
+        run: |
+          yarn build
+        env:
+          CI: true
+      - name: Run module tests
+        run: |
+          yarn test
+        env:
+          CI: true
+      - name: Build Companion package
+        run: |
+          yarn companion-module-build
+        env:
+          CI: true
