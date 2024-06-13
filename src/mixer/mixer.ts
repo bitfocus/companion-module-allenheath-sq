@@ -1,5 +1,5 @@
 import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
-import type { sqInstance } from '../instance.js'
+import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { MidiSession } from '../midi/session.js'
 import { Model } from './model.js'
 import type { ModelId } from './models.js'

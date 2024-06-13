@@ -1,6 +1,6 @@
 import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import callback from '../callback.js'
-import type { sqInstance } from '../instance.js'
+import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import type { Mixer } from '../mixer/mixer.js'
 import { asyncSleep, prettyBytes, sleep } from '../utils.js'
 

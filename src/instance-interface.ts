@@ -6,27 +6,26 @@ export type ParamHalf = readonly [number, number]
 
 type Level = number | string
 
-declare class sqInstance extends InstanceBase<SQInstanceConfig> {
+export interface SQInstanceInterface {
 	// Not declared, simply added in configUpdated
 	config: SQInstanceConfig
 
 	mixer: Mixer | null
 
-	constructor(internal: unknown): InstanceBase<SQInstanceConfig>
+	dBToDec(lv: string | number, typ?: string): any
+	decTodB(vc: number, vf: number, typ?: string): any
 
-	dBToDec(lv: string | number, typ?: string)
-	decTodB(vc: number, vf: number, typ?: string)
-
-	async destroy(): Promise<void>
-	async init(config: SQInstanceConfig): Promise<void>
+	init: InstanceBase<SQInstanceConfig>['init']
+	destroy: InstanceBase<SQInstanceConfig>['destroy']
+	configUpdated: InstanceBase<SQInstanceConfig>['configUpdated']
+	log: InstanceBase<SQInstanceConfig>['log']
+	updateStatus: InstanceBase<SQInstanceConfig>['updateStatus']
 
 	getConfigFields(): SomeCompanionConfigField[]
 
-	async configUpdated(config: SQInstanceConfig): Promise<void>
-
 	// Defined in api.js, added via Object.assign.
 	setRouting(ch: number, mix: readonly number[], ac: boolean, mc: number, oMB: ParamHalf, oLB: ParamHalf): number[][]
-	async setLevel(
+	setLevel(
 		ch: number,
 		mx: number,
 		ct: number,
@@ -42,7 +41,7 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 		oMB: ParamHalf,
 		oLB: ParamHalf,
 	): { commands: [number[]]; channel: [number, number] }
-	async fadeLevel(
+	fadeLevel(
 		fd: number,
 		ch: number,
 		mx: number,
@@ -53,5 +52,5 @@ declare class sqInstance extends InstanceBase<SQInstanceConfig> {
 		cnfg?: string,
 	): Promise<number[][]>
 	getRemoteLevel(): void
-	async getRemoteValue(data: number[]): Promise<void>
+	getRemoteValue(data: number[]): Promise<void>
 }

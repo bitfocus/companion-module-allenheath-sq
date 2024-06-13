@@ -1,5 +1,5 @@
 import type { CompanionVariableDefinition } from '@companion-module/base'
-import type { sqInstance } from './instance.js'
+import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 import type { Model } from './mixer/model.js'
 
 export function getVariables(self: sqInstance, model: Model): CompanionVariableDefinition[] {
