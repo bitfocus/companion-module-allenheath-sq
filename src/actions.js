@@ -413,8 +413,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.mixActive)
 			const mixes = mixesAndLRAssignOptionToSinks(options.mixAssign, mixer.model)
-			mixer.assignInputChannelToMixesAndLR(options.inputChannel, options.mixActive, mixes)
+			mixer.assignInputChannelToMixesAndLR(options.inputChannel, active, mixes)
 		},
 	}
 
@@ -444,8 +445,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.grpActive)
 			const groups = assignOptionToSinks(options.grpAssign, mixer.model, 'group')
-			mixer.assignInputChannelToGroups(options.inputChannel, options.grpActive, groups)
+			mixer.assignInputChannelToGroups(options.inputChannel, active, groups)
 		},
 	}
 
@@ -475,8 +477,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.mixActive)
 			const mixes = mixesAndLRAssignOptionToSinks(options.mixAssign, mixer.model)
-			mixer.assignGroupToMixesAndLR(options.inputGrp, options.mixActive, mixes)
+			mixer.assignGroupToMixesAndLR(options.inputGrp, active, mixes)
 		},
 	}
 
@@ -506,8 +509,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.grpActive)
 			const groups = assignOptionToSinks(options.grpAssign, mixer.model, 'group')
-			mixer.assignFXReturnToGroups(options.inputFxr, options.grpActive, groups)
+			mixer.assignFXReturnToGroups(options.inputFxr, active, groups)
 		},
 	}
 
@@ -537,8 +541,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.fxsActive)
 			const fxSends = assignOptionToSinks(options.fxsAssign, mixer.model, 'fxSend')
-			mixer.assignInputChannelToFXSends(options.inputChannel, options.fxsActive, fxSends)
+			mixer.assignInputChannelToFXSends(options.inputChannel, active, fxSends)
 		},
 	}
 
@@ -568,8 +573,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.fxsActive)
 			const fxSends = assignOptionToSinks(options.fxsAssign, mixer.model, 'fxSend')
-			mixer.assignGroupToFXSends(options.inputGrp, options.fxsActive, fxSends)
+			mixer.assignGroupToFXSends(options.inputGrp, active, fxSends)
 		},
 	}
 
@@ -599,8 +605,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.fxsActive)
 			const fxSends = assignOptionToSinks(options.fxsAssign, mixer.model, 'fxSend')
-			mixer.assignFXReturnToFXSends(options.inputFxr, options.fxsActive, fxSends)
+			mixer.assignFXReturnToFXSends(options.inputFxr, active, fxSends)
 		},
 	}
 
@@ -630,8 +637,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.mtxActive)
 			const matrixes = assignOptionToSinks(options.mtxAssign, mixer.model, 'matrix')
-			mixer.assignMixToMatrixes(options.inputMix, options.mtxActive, matrixes)
+			mixer.assignMixToMatrixes(options.inputMix, active, matrixes)
 		},
 	}
 
@@ -661,8 +669,9 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
+			const active = Boolean(options.mtxActive)
 			const matrixes = assignOptionToSinks(options.mtxAssign, mixer.model, 'matrix')
-			mixer.assignGroupToMatrixes(options.inputGrp, options.mtxActive, matrixes)
+			mixer.assignGroupToMatrixes(options.inputGrp, active, matrixes)
 		},
 	}
 
