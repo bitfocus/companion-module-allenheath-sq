@@ -1,11 +1,3 @@
-function prettyByte(b) {
-	return b.toString(16).toUpperCase().padStart(2, '0')
-}
-
-export function prettyBytes(message) {
-	return message.map(prettyByte).join(' ')
-}
-
 export function dBToDec(lv, typ) {
 	let VC, VF, val, bin
 	if (lv == '-inf') return [0, 0]
