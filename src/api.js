@@ -1,6 +1,6 @@
 import callback from './callback.js'
 
-import { sleep } from './utils.js'
+import { sleep } from './utils/sleep.js'
 
 export default {
 	setRouting: function (ch, mix, ac, mc, oMB, oLB) {

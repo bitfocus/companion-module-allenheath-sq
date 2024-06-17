@@ -141,17 +141,3 @@ export function decTodB(VC, VF, typ) {
 
 	return val
 }
-
-export function sleep(ml) {
-	const dt = Date.now()
-	let cd = null
-	do {
-		cd = Date.now()
-	} while (cd - dt < ml)
-}
-
-export async function asyncSleep(ms) {
-	return new Promise((resolve) => {
-		setTimeout(resolve, ms)
-	})
-}

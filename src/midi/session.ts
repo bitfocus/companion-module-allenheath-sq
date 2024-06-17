@@ -2,7 +2,8 @@ import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import callback from '../callback.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import type { Mixer } from '../mixer/mixer.js'
-import { asyncSleep, prettyBytes, sleep } from '../utils.js'
+import { prettyBytes } from '../utils.js'
+import { asyncSleep, sleep } from '../utils/sleep.js'
 
 /**
  * The port number used for MIDI-over-TCP connections to SQ mixers.
