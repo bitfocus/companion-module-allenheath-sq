@@ -1,3 +1,61 @@
+/**
+ * Convert the options value for a multidropdown field of numbered sinks into a
+ * well-typed list of sink numbers.
+ *
+ * @param {import('@companion-module/base').InputValue | undefined} assign
+ *   An `options.<sink type>Assign` value.
+ * @param {import('./mixer/model.js').Model} model
+ *   The model of the mixer.
+ * @param {Exclude<InputOutputType, 'mix'>} sinkType
+ *   The type of the sinks.
+ * @returns {number[]}
+ *   An array of sinks.
+ */
+function assignOptionToSinks(assign, model, sinkType) {
+	if (!Array.isArray(assign)) {
+		return []
+	}
+
+	const sinkCount = model.count[sinkType]
+	/** @type {number[]} */
+	const sinks = []
+	for (const item of assign) {
+		const sink = Number(item)
+		if (sink < sinkCount) {
+			sinks.push(sink)
+		}
+	}
+	return sinks
+}
+
+/**
+ * Convert the options value for a multidropdown field of numbered mixes-or-LR
+ * into a well-typed list of numbers.
+ *
+ * @param {import('@companion-module/base').InputValue | undefined} mixAssign
+ *   An `options.mixAssign` value consisting of zero or more mixes and LR.
+ * @param {import('./mixer/model.js').Model} model
+ *   The model of the mixer.
+ * @returns {number[]}
+ *   An array of sinks.
+ */
+function mixesAndLRAssignOptionToSinks(mixAssign, model) {
+	if (!Array.isArray(mixAssign)) {
+		return []
+	}
+
+	const sinkCount = model.count.mix
+	/** @type {number[]} */
+	const sinks = []
+	for (const item of mixAssign) {
+		const sink = Number(item)
+		if (sink < sinkCount || sink === 99) {
+			sinks.push(sink)
+		}
+	}
+	return sinks
+}
+
 function StripOption(label, choices) {
 	return {
 		type: 'dropdown',
@@ -355,7 +413,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignInputChannelToMixesAndLR(options.inputChannel, options.mixActive, options.mixAssign)
+			const mixes = mixesAndLRAssignOptionToSinks(options.mixAssign, mixer.model)
+			mixer.assignInputChannelToMixesAndLR(options.inputChannel, options.mixActive, mixes)
 		},
 	}
 
@@ -385,7 +444,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignInputChannelToGroups(options.inputChannel, options.grpActive, options.grpAssign)
+			const groups = assignOptionToSinks(options.grpAssign, mixer.model, 'group')
+			mixer.assignInputChannelToGroups(options.inputChannel, options.grpActive, groups)
 		},
 	}
 
@@ -415,7 +475,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignGroupToMixesAndLR(options.inputGrp, options.mixActive, options.mixAssign)
+			const mixes = mixesAndLRAssignOptionToSinks(options.mixAssign, mixer.model)
+			mixer.assignGroupToMixesAndLR(options.inputGrp, options.mixActive, mixes)
 		},
 	}
 
@@ -445,7 +506,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignFXReturnToGroups(options.inputFxr, options.grpActive, options.grpAssign)
+			const groups = assignOptionToSinks(options.grpAssign, mixer.model, 'group')
+			mixer.assignFXReturnToGroups(options.inputFxr, options.grpActive, groups)
 		},
 	}
 
@@ -475,7 +537,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignInputChannelToFXSends(options.inputChannel, options.fxsActive, options.fxsAssign)
+			const fxSends = assignOptionToSinks(options.fxsAssign, mixer.model, 'fxSend')
+			mixer.assignInputChannelToFXSends(options.inputChannel, options.fxsActive, fxSends)
 		},
 	}
 
@@ -505,7 +568,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignGroupToFXSends(options.inputGrp, options.fxsActive, options.fxsAssign)
+			const fxSends = assignOptionToSinks(options.fxsAssign, mixer.model, 'fxSend')
+			mixer.assignGroupToFXSends(options.inputGrp, options.fxsActive, fxSends)
 		},
 	}
 
@@ -535,7 +599,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignFXReturnToFXSends(options.inputFxr, options.fxsActive, options.fxsAssign)
+			const fxSends = assignOptionToSinks(options.fxsAssign, mixer.model, 'fxSend')
+			mixer.assignFXReturnToFXSends(options.inputFxr, options.fxsActive, fxSends)
 		},
 	}
 
@@ -565,7 +630,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignMixToMatrixes(options.inputMix, options.mtxActive, options.mtxAssign)
+			const matrixes = assignOptionToSinks(options.mtxAssign, mixer.model, 'matrix')
+			mixer.assignMixToMatrixes(options.inputMix, options.mtxActive, matrixes)
 		},
 	}
 
@@ -595,7 +661,8 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			},
 		],
 		callback: async ({ options }) => {
-			mixer.assignGroupToMatrixes(options.inputGrp, options.mtxActive, options.mtxAssign)
+			const matrixes = assignOptionToSinks(options.mtxAssign, mixer.model, 'matrix')
+			mixer.assignGroupToMatrixes(options.inputGrp, options.mtxActive, matrixes)
 		},
 	}
 
