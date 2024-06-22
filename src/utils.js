@@ -1,5 +1,5 @@
 function prettyByte(b) {
-	return ('0' + b.toString(16)).slice(-2)
+	return b.toString(16).toUpperCase().padStart(2, '0')
 }
 
 export function prettyBytes(message) {

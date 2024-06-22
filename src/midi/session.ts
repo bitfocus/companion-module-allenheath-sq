@@ -242,7 +242,7 @@ export class MidiSession {
 		const socket = this.socket
 		if (socket !== null && socket.isConnected) {
 			if (this.verbose) {
-				this.#instance.log('debug', `SEND: ${prettyBytes(data)} from ${this.host}`)
+				this.#instance.log('debug', `SEND: ${prettyBytes(data)} to ${this.host}`)
 			}
 
 			// XXX This needs to be handled better.
