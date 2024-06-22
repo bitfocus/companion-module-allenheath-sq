@@ -21,7 +21,7 @@ export default {
 				LSB = tmp & 0x7f
 			}
 
-			routingCmds.push([midi.nrpnData(MSB, LSB, 0, ac ? 1 : 0)])
+			routingCmds.push(midi.nrpnData(MSB, LSB, 0, ac ? 1 : 0))
 		}
 
 		return routingCmds
