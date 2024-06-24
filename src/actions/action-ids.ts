@@ -9,6 +9,22 @@ export type ActionDefinitions<ActionSet extends string> = {
 }
 
 /**
+ * Action IDs for all actions that mute, unmute, or toggle muting of a mixer
+ * input/output.
+ */
+export enum MuteActionId {
+	MuteInputChannel = 'mute_input',
+	MuteLR = 'mute_lr',
+	MuteMix = 'mute_aux',
+	MuteGroup = 'mute_group',
+	MuteMatrix = 'mute_matrix',
+	MuteFXSend = 'mute_fx_send',
+	MuteFXReturn = 'mute_fx_return',
+	MuteDCA = 'mute_dca',
+	MuteMuteGroup = 'mute_mutegroup',
+}
+
+/**
  * Action IDs for all actions that activate/deactivate a mixer source within a
  * sink.
  */
