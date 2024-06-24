@@ -110,7 +110,7 @@ const MuteOption = {
 
 /**
  *
- * @param {import('../index.js').sqInstance} self
+ * @param {import('./instance-interface.js').SQInstanceInterface} self
  * @param {import('./mixer/mixer.js').Mixer} mixer
  * @param {import('./choices.js').Choices} choices
  * @param {string} connectionLabel
@@ -160,8 +160,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	actions['mute_input'] = {
 		name: 'Mute Input',
 		options: [StripOption('Input Channel', choices.inputChannels), MuteOption],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0
 			const LSB = 0
 
@@ -203,8 +202,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				],
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0
 			const LSB = 0x44
 
@@ -226,8 +224,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	actions['mute_aux'] = {
 		name: 'Mute Aux',
 		options: [StripOption('Aux', choices.mixes), MuteOption],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0
 			const LSB = 0x45
 
@@ -248,8 +245,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	actions['mute_group'] = {
 		name: 'Mute Group',
 		options: [StripOption('Group', choices.groups), MuteOption],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0
 			const LSB = 0x30
 
@@ -270,8 +266,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	actions['mute_matrix'] = {
 		name: 'Mute Matrix',
 		options: [StripOption('Matrix', choices.matrixes), MuteOption],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0
 			const LSB = 0x55
 
@@ -292,8 +287,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	actions['mute_fx_send'] = {
 		name: 'Mute FX Send',
 		options: [StripOption('FX Send', choices.fxSends), MuteOption],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0
 			const LSB = 0x51
 
@@ -314,8 +308,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	actions['mute_fx_return'] = {
 		name: 'Mute FX Return',
 		options: [StripOption('FX Return', choices.fxReturns), MuteOption],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0
 			const LSB = 0x3c
 
@@ -336,8 +329,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	actions['mute_dca'] = {
 		name: 'Mute DCA',
 		options: [StripOption('DCA', choices.dcas), MuteOption],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0x02
 			const LSB = 0
 
@@ -358,8 +350,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	actions['mute_mutegroup'] = {
 		name: 'Mute MuteGroup',
 		options: [StripOption('MuteGroup', choices.muteGroups), MuteOption],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const MSB = 0x04
 			const LSB = 0
 
@@ -406,8 +397,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				minChoicesForSearch: 5,
 			},
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			let softKey = parseInt(opt.softKey)
 			let keyValu = opt.pressedsk == '0' || opt.pressedsk == '1' ? true : false
 			let tch = (keyValu ? 0x90 : 0x80) | midi.channel
@@ -768,8 +758,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			if (opt.fade == 0) {
 				//make it super short like 0.2
 				opt.fade = 0.2
@@ -811,8 +800,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
@@ -848,8 +836,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
@@ -885,8 +872,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
@@ -922,8 +908,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
@@ -959,8 +944,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
@@ -996,8 +980,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
@@ -1033,8 +1016,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
@@ -1070,8 +1052,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(
 				opt.fade,
 				opt.input,
@@ -1099,8 +1080,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 			LevelOption,
 			FadingOption,
 		],
-		callback: async (action) => {
-			let opt = action.options
+		callback: async ({ options: opt }) => {
 			const commands = self.fadeLevel(opt.fade, opt.input, 99, 0, opt.leveldb, [0x4f, 0], [0, 0])
 			mixer.midi.sendCommands(commands)
 		},
