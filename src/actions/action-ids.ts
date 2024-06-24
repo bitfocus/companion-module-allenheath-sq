@@ -39,3 +39,9 @@ export enum AssignActionId {
 	MixToMatrix = 'mix_to_mtx',
 	GroupToMatrix = 'grp_to_mtx',
 }
+
+/** Action IDs for all actions that change the mixer's current scene. */
+export enum SceneActionId {
+	SceneRecall = 'scene_recall',
+	SceneStep = 'scene_step',
+}

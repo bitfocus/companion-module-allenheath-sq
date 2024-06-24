@@ -1,5 +1,6 @@
 import { assignActions } from './actions/assign.js'
 import { muteActions } from './actions/mute.js'
+import { sceneActions } from './actions/scene.js'
 
 /**
  *
@@ -716,43 +717,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	// Scene
-	actions['scene_recall'] = {
-		name: 'Scene recall',
-		options: [
-			{
-				type: 'number',
-				label: 'Scene nr.',
-				id: 'scene',
-				default: 1,
-				min: 1,
-				max: model.count.scene,
-				required: true,
-			},
-		],
-		callback: async ({ options }) => {
-			mixer.setScene(options.scene - 1)
-		},
-	}
-
-	actions['scene_step'] = {
-		name: 'Scene step',
-		options: [
-			{
-				type: 'number',
-				label: 'Scene +/-',
-				id: 'scene',
-				default: 1,
-				min: -50,
-				max: 50,
-				required: true,
-			},
-		],
-		callback: async ({ options }) => {
-			const adjust = options.scene
-			mixer.stepSceneBy(adjust)
-		},
-	}
+	Object.assign(actions, sceneActions(self, mixer))
 
 	return actions
 }
