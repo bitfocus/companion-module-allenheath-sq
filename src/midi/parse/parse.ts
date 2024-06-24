@@ -1,6 +1,6 @@
-import { MixerChannelParser } from './mixer-channel-parse.js'
+import { type MixerChannelParser } from './mixer-channel-parse.js'
 import { prettyByte, prettyBytes } from '../../utils/pretty.js'
-import { Tokenizer } from '../tokenize/tokenize.js'
+import { type Tokenizer } from '../tokenize/tokenize.js'
 
 /**
  * An SQ mixer message parser of all MIDI messages (of all types and in all

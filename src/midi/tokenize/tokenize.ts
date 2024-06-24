@@ -1,6 +1,6 @@
 import type { InstanceBase, TCPHelper } from '@companion-module/base'
 import { EventEmitter } from 'eventemitter3'
-import { SQInstanceConfig } from '../../config.js'
+import { type SQInstanceConfig } from '../../config.js'
 import { prettyBytes } from '../../utils/pretty.js'
 import { SocketReader } from '../../utils/socket-reader.js'
 

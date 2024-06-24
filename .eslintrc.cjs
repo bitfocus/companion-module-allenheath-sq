@@ -7,6 +7,12 @@ module.exports = {
 				allowModules: ['@jest/globals'],
 			},
 		],
+		'@typescript-eslint/consistent-type-imports': [
+			'error',
+			{
+				fixStyle: 'inline-type-imports',
+			},
+		],
 	},
 	overrides: [],
 }

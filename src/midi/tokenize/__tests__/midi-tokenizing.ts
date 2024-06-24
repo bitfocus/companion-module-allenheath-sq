@@ -1,7 +1,7 @@
 import { TCPHelper } from '@companion-module/base'
 import net from 'net'
-import { Interaction } from './interactions.js'
-import { MidiMessage, MidiMessageEvents, MidiTokenizer } from '../tokenize.js'
+import { type Interaction } from './interactions.js'
+import { type MidiMessage, type MidiMessageEvents, MidiTokenizer } from '../tokenize.js'
 import { prettyByte, prettyBytes } from '../../../utils/pretty.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
 

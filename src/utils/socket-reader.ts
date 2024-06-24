@@ -1,4 +1,4 @@
-import { TCPHelper } from '@companion-module/base'
+import { type TCPHelper } from '@companion-module/base'
 
 /** A class to read bytes from a socket and append them to a provided array. */
 export class SocketReader {

@@ -1,8 +1,8 @@
 import EventEmitter from 'eventemitter3'
-import { MixerChannelParser, MixerMessageEvents } from '../mixer-channel-parse.js'
+import { MixerChannelParser, type MixerMessageEvents } from '../mixer-channel-parse.js'
 import { MixerMessageParser } from '../parse.js'
-import { ExpectInteraction, Interaction, ReceiveInteraction } from './interactions.js'
-import { MidiMessage, MidiMessageEvents, Tokenizer } from '../../tokenize/tokenize.js'
+import { type ExpectInteraction, type Interaction, type ReceiveInteraction } from './interactions.js'
+import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenize.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
 import { prettyBytes } from '../../../utils/pretty.js'
 

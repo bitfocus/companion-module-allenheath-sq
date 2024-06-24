@@ -1,7 +1,7 @@
 import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
 import type { Level, SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import { MidiSession, NRPNDataMessage } from '../midi/session.js'
-import { InputOutputType, Model } from './model.js'
+import { MidiSession, type NRPNDataMessage } from '../midi/session.js'
+import { type InputOutputType, Model } from './model.js'
 import type { ModelId } from './models.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
