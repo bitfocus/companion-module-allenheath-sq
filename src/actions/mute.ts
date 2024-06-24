@@ -8,6 +8,7 @@ import { type SQInstanceInterface as sqInstance } from '../instance-interface.js
 import { type Choices } from '../choices.js'
 import { type ActionDefinitions, MuteActionId } from './action-ids.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
+import { MuteOperation } from '../mixer/mixer.js'
 
 function StripOption(label: string, choices: DropdownChoice[]): CompanionInputFieldDropdown {
 	return {
@@ -31,12 +32,6 @@ const MuteOption = {
 		{ label: 'Off', id: 2 },
 	],
 } satisfies CompanionInputFieldDropdown
-
-enum MuteOperation {
-	Toggle = 0,
-	On = 1,
-	Off = 2,
-}
 
 type MuteOptions = {
 	strip: number
@@ -97,34 +92,19 @@ function getMuteOptions(
  */
 export function muteActions(instance: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<MuteActionId> {
 	const model = mixer.model
-	const midi = mixer.midi
 
 	return {
 		[MuteActionId.MuteInputChannel]: {
 			name: 'Mute Input',
 			options: [StripOption('Input Channel', choices.inputChannels), MuteOption],
 			callback: async ({ options: opt }) => {
-				const MSB = 0
-				const LSB = 0
-
 				const options = getMuteOptions(instance, model, opt, 'inputChannel')
 				if (options === null) {
 					return
 				}
 
 				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				mixer.muteInputChannel(strip, op)
 			},
 		},
 
@@ -152,27 +132,13 @@ export function muteActions(instance: sqInstance, mixer: Mixer, choices: Choices
 				},
 			],
 			callback: async ({ options: opt }) => {
-				const MSB = 0
-				const LSB = 0x44
-
 				const options = getMuteOptions(instance, model, opt, 'lr')
 				if (options === null) {
 					return
 				}
 
-				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				const { op } = options
+				mixer.muteLR(op)
 			},
 		},
 
@@ -180,189 +146,91 @@ export function muteActions(instance: sqInstance, mixer: Mixer, choices: Choices
 			name: 'Mute Aux',
 			options: [StripOption('Aux', choices.mixes), MuteOption],
 			callback: async ({ options: opt }) => {
-				const MSB = 0
-				const LSB = 0x45
-
 				const options = getMuteOptions(instance, model, opt, 'mix')
 				if (options === null) {
 					return
 				}
 
 				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				mixer.muteMix(strip, op)
 			},
 		},
 		[MuteActionId.MuteGroup]: {
 			name: 'Mute Group',
 			options: [StripOption('Group', choices.groups), MuteOption],
 			callback: async ({ options: opt }) => {
-				const MSB = 0
-				const LSB = 0x30
-
 				const options = getMuteOptions(instance, model, opt, 'group')
 				if (options === null) {
 					return
 				}
 
 				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				mixer.muteGroup(strip, op)
 			},
 		},
 		[MuteActionId.MuteMatrix]: {
 			name: 'Mute Matrix',
 			options: [StripOption('Matrix', choices.matrixes), MuteOption],
 			callback: async ({ options: opt }) => {
-				const MSB = 0
-				const LSB = 0x55
-
 				const options = getMuteOptions(instance, model, opt, 'matrix')
 				if (options === null) {
 					return
 				}
 
 				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				mixer.muteMatrix(strip, op)
 			},
 		},
 		[MuteActionId.MuteFXSend]: {
 			name: 'Mute FX Send',
 			options: [StripOption('FX Send', choices.fxSends), MuteOption],
 			callback: async ({ options: opt }) => {
-				const MSB = 0
-				const LSB = 0x51
-
 				const options = getMuteOptions(instance, model, opt, 'fxSend')
 				if (options === null) {
 					return
 				}
 
 				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				mixer.muteFXSend(strip, op)
 			},
 		},
 		[MuteActionId.MuteFXReturn]: {
 			name: 'Mute FX Return',
 			options: [StripOption('FX Return', choices.fxReturns), MuteOption],
 			callback: async ({ options: opt }) => {
-				const MSB = 0
-				const LSB = 0x3c
-
 				const options = getMuteOptions(instance, model, opt, 'fxReturn')
 				if (options === null) {
 					return
 				}
 
 				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				mixer.muteFXReturn(strip, op)
 			},
 		},
 		[MuteActionId.MuteDCA]: {
 			name: 'Mute DCA',
 			options: [StripOption('DCA', choices.dcas), MuteOption],
 			callback: async ({ options: opt }) => {
-				const MSB = 0x02
-				const LSB = 0
-
 				const options = getMuteOptions(instance, model, opt, 'dca')
 				if (options === null) {
 					return
 				}
 
 				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				mixer.muteDCA(strip, op)
 			},
 		},
 		[MuteActionId.MuteMuteGroup]: {
 			name: 'Mute MuteGroup',
 			options: [StripOption('MuteGroup', choices.muteGroups), MuteOption],
 			callback: async ({ options: opt }) => {
-				const MSB = 0x04
-				const LSB = 0
-
 				const options = getMuteOptions(instance, model, opt, 'muteGroup')
 				if (options === null) {
 					return
 				}
 
 				const { strip, op } = options
-				const key = `mute_${MSB}.${LSB + strip}` as const
-
-				if (op !== MuteOperation.Toggle) {
-					mixer.fdbState[key] = op == MuteOperation.On
-				} else {
-					mixer.fdbState[key] = !mixer.fdbState[key]
-				}
-
-				instance.checkFeedbacks()
-				const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(mixer.fdbState[key]))]
-				// XXX
-				void mixer.midi.sendCommands(commands)
+				mixer.muteMuteGroup(strip, op)
 			},
 		},
 	}

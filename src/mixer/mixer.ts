@@ -11,6 +11,8 @@ import {
 	type AssignToSinkType,
 	computeLRParameters,
 	computeParameters,
+	MuteBases,
+	type MuteType,
 	PanBalanceInMixOrLRBase,
 	type PanBalanceInMixOrLRType,
 	PanBalanceInSinkBase,
@@ -38,10 +40,19 @@ type PanBalance = any
  */
 export type FaderLaw = 'LinearTaper' | 'AudioTaper'
 
+export enum MuteOperation {
+	Toggle = 0,
+	On = 1,
+	Off = 2,
+}
+
 /**
  * An abstract representation of an SQ mixer.
  */
 export class Mixer {
+	/** The instance controlling this mixer. */
+	#instance
+
 	/**
 	 * The model of this mixer.
 	 */
@@ -88,6 +99,7 @@ export class Mixer {
 	 *   The instance controlling this mixer.
 	 */
 	constructor(instance: sqInstance, model: ModelId) {
+		this.#instance = instance
 		this.model = new Model(model)
 		this.midi = new MidiSession(this, instance)
 	}
@@ -168,6 +180,75 @@ export class Mixer {
 		}
 
 		this.setScene(newScene)
+	}
+
+	/** Perform the supplied mute operation upon the strip of the given type. */
+	#mute(strip: number, type: MuteType, op: MuteOperation): void {
+		if (this.model.count[type] <= strip) {
+			throw new Error(`Attempting to mute invalid ${type} ${strip}`)
+		}
+
+		const { MSB, LSB } = MuteBases[type]
+		const key = `mute_${MSB}.${LSB + strip}` as const
+
+		const fdbState = this.fdbState
+		if (op !== MuteOperation.Toggle) {
+			fdbState[key] = op === MuteOperation.On
+		} else {
+			fdbState[key] = !fdbState[key]
+		}
+
+		const midi = this.midi
+
+		this.#instance.checkFeedbacks()
+		const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(fdbState[key]))]
+		// XXX
+		void midi.sendCommands(commands)
+	}
+
+	/** Act upon the mute status of the given input channel. */
+	muteInputChannel(inputChannel: number, op: MuteOperation): void {
+		this.#mute(inputChannel, 'inputChannel', op)
+	}
+
+	/** Act upon the mute status of LR. */
+	muteLR(op: MuteOperation): void {
+		this.#mute(0, 'lr', op)
+	}
+
+	/** Act upon the mute status of the given mix. */
+	muteMix(mix: number, op: MuteOperation): void {
+		this.#mute(mix, 'mix', op)
+	}
+
+	/** Act upon the mute status of the given mute group. */
+	muteGroup(group: number, op: MuteOperation): void {
+		this.#mute(group, 'group', op)
+	}
+
+	/** Act upon the mute status of the given matrix. */
+	muteMatrix(matrix: number, op: MuteOperation): void {
+		this.#mute(matrix, 'matrix', op)
+	}
+
+	/** Act upon the mute status of the given FX send. */
+	muteFXSend(fxSend: number, op: MuteOperation): void {
+		this.#mute(fxSend, 'fxSend', op)
+	}
+
+	/** Act upon the mute status of the given FX return. */
+	muteFXReturn(fxReturn: number, op: MuteOperation): void {
+		this.#mute(fxReturn, 'fxReturn', op)
+	}
+
+	/** Act upon the mute status of the given DCA. */
+	muteDCA(dca: number, op: MuteOperation): void {
+		this.#mute(dca, 'dca', op)
+	}
+
+	/** Act upon the mute status of the given mute group. */
+	muteMuteGroup(strip: number, op: MuteOperation): void {
+		this.#mute(strip, 'muteGroup', op)
 	}
 
 	/**
