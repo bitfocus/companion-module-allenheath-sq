@@ -87,3 +87,16 @@ export enum OutputActionId {
 	OutputLevel = 'level_to_output',
 	OutputPanBalance = 'pan_to_output',
 }
+
+const ActionId = {
+	...MuteActionId,
+	...AssignActionId,
+	...SceneActionId,
+	...SoftKeyId,
+	...LevelActionId,
+	...PanBalanceActionId,
+	...OutputActionId,
+} as const
+
+/** All action IDs. */
+export type ActionId = keyof typeof ActionId
