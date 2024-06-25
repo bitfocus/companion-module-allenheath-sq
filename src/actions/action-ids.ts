@@ -68,3 +68,16 @@ export enum LevelActionId {
 	MixOrLRLevelInMatrix = 'mixlev_to_mtx',
 	GroupLevelInMatrix = 'grplev_to_mtx',
 }
+
+/**
+ * Action IDs for all actions setting the pan/balance of a mixer source in a
+ * mixer sink.
+ */
+export enum PanBalanceActionId {
+	InputChannelPanBalanceInMixOrLR = 'chpan_to_mix',
+	GroupPanBalanceInMixOrLR = 'grppan_to_mix',
+	FXReturnPanBalanceInMixOrLR = 'fxrpan_to_mix',
+	FXReturnPanBalanceInGroup = 'fxrpan_to_grp',
+	MixOrLRPanBalanceInMatrix = 'mixpan_to_mtx',
+	GroupPanBalanceInMatrix = 'grppan_to_mtx',
+}

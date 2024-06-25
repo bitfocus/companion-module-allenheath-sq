@@ -1,4 +1,4 @@
-import { LevelActionId } from './actions/action-ids.js'
+import { LevelActionId, PanBalanceActionId } from './actions/action-ids.js'
 import { assignActions } from './actions/assign.js'
 import { muteActions } from './actions/mute.js'
 import { sceneActions } from './actions/scene.js'
@@ -415,7 +415,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	}
 
 	/* Pan Balance */
-	actions['chpan_to_mix'] = {
+	actions[PanBalanceActionId.InputChannelPanBalanceInMixOrLR] = {
 		name: 'Pan/Bal channel level to mix',
 		options: [
 			{
@@ -454,7 +454,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['grppan_to_mix'] = {
+	actions[PanBalanceActionId.GroupPanBalanceInMixOrLR] = {
 		name: 'Pan/Bal group level to mix',
 		options: [
 			{
@@ -493,7 +493,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['fxrpan_to_mix'] = {
+	actions[PanBalanceActionId.FXReturnPanBalanceInMixOrLR] = {
 		name: 'Pan/Bal FX return level to mix',
 		options: [
 			{
@@ -532,7 +532,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['fxrpan_to_grp'] = {
+	actions[PanBalanceActionId.FXReturnPanBalanceInGroup] = {
 		name: 'Fader FX return level to group',
 		options: [
 			{
@@ -574,7 +574,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['mixpan_to_mtx'] = {
+	actions[PanBalanceActionId.MixOrLRPanBalanceInMatrix] = {
 		name: 'Pan/Bal mix level to matrix',
 		options: [
 			{
@@ -618,7 +618,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['grppan_to_mtx'] = {
+	actions[PanBalanceActionId.GroupPanBalanceInMatrix] = {
 		name: 'Pan/Bal group level to matrix',
 		options: [
 			{
