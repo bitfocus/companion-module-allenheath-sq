@@ -1,4 +1,4 @@
-import { LevelActionId, PanBalanceActionId } from './actions/action-ids.js'
+import { LevelActionId, OutputActionId, PanBalanceActionId } from './actions/action-ids.js'
 import { assignActions } from './actions/assign.js'
 import { muteActions } from './actions/mute.js'
 import { sceneActions } from './actions/scene.js'
@@ -394,7 +394,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['level_to_output'] = {
+	actions[OutputActionId.OutputLevel] = {
 		name: 'Fader level to output',
 		options: [
 			{
@@ -657,7 +657,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['pan_to_output'] = {
+	actions[OutputActionId.OutputPanBalance] = {
 		name: 'Pan/Bal level to output',
 		options: [
 			{
