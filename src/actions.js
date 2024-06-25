@@ -1,3 +1,4 @@
+import { LevelActionId } from './actions/action-ids.js'
 import { assignActions } from './actions/assign.js'
 import { muteActions } from './actions/mute.js'
 import { sceneActions } from './actions/scene.js'
@@ -63,7 +64,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 	Object.assign(actions, assignActions(self, mixer, choices))
 
 	/* Level */
-	actions['chlev_to_mix'] = {
+	actions[LevelActionId.InputChannelLevelInMixOrLR] = {
 		name: 'Fader channel level to mix',
 		options: [
 			{
@@ -105,7 +106,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['grplev_to_mix'] = {
+	actions[LevelActionId.GroupLevelInMixOrLR] = {
 		name: 'Fader group level to mix',
 		options: [
 			{
@@ -141,7 +142,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['fxrlev_to_mix'] = {
+	actions[LevelActionId.FXReturnLevelInMixOrLR] = {
 		name: 'Fader FX return level to mix',
 		options: [
 			{
@@ -177,7 +178,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['fxrlev_to_grp'] = {
+	actions[LevelActionId.FXReturnLevelInGroup] = {
 		name: 'Fader FX return level to group',
 		options: [
 			{
@@ -213,7 +214,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['chlev_to_fxs'] = {
+	actions[LevelActionId.InputChannelLevelInFXSend] = {
 		name: 'Fader channel level to FX send',
 		options: [
 			{
@@ -249,7 +250,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['grplev_to_fxs'] = {
+	actions[LevelActionId.GroupLevelInFXSend] = {
 		name: 'Fader group level to FX send',
 		options: [
 			{
@@ -285,7 +286,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['fxslev_to_fxs'] = {
+	actions[LevelActionId.FXReturnLevelInFXSend] = {
 		name: 'Fader FX return level to FX send',
 		options: [
 			{
@@ -321,7 +322,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['mixlev_to_mtx'] = {
+	actions[LevelActionId.MixOrLRLevelInMatrix] = {
 		name: 'Fader mix level to matrix',
 		options: [
 			{
@@ -357,7 +358,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		},
 	}
 
-	actions['grplev_to_mtx'] = {
+	actions[LevelActionId.GroupLevelInMatrix] = {
 		name: 'Fader group level to matrix',
 		options: [
 			{
