@@ -45,3 +45,8 @@ export enum SceneActionId {
 	SceneRecall = 'scene_recall',
 	SceneStep = 'scene_step',
 }
+
+/** Action IDs for all actions that operate softkeys. */
+export enum SoftKeyId {
+	SoftKey = 'key_soft',
+}

@@ -1,6 +1,7 @@
 import { assignActions } from './actions/assign.js'
 import { muteActions } from './actions/mute.js'
 import { sceneActions } from './actions/scene.js'
+import { softKeyActions } from './actions/softkey.js'
 
 /**
  *
@@ -57,38 +58,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		// Soft Rotary
 	}
 
-	actions['key_soft'] = {
-		name: 'Press Softkey',
-		options: [
-			{
-				type: 'dropdown',
-				label: 'Soft Key',
-				id: 'softKey',
-				default: 0,
-				choices: choices.softKeys,
-				minChoicesForSearch: 0,
-			},
-			{
-				type: 'dropdown',
-				label: 'Key type',
-				id: 'pressedsk',
-				default: '1',
-				choices: [
-					{ id: '0', label: 'Toggle' },
-					{ id: '1', label: 'Press' },
-					{ id: '2', label: 'Release' },
-				],
-				minChoicesForSearch: 5,
-			},
-		],
-		callback: async ({ options: opt }) => {
-			let softKey = parseInt(opt.softKey)
-			let keyValu = opt.pressedsk == '0' || opt.pressedsk == '1' ? true : false
-			let tch = (keyValu ? 0x90 : 0x80) | midi.channel
-			const commands = [[tch, 0x30 + softKey, keyValu ? 0x7f : 0]]
-			mixer.midi.sendCommands(commands)
-		},
-	}
+	Object.assign(actions, softKeyActions(self, mixer, choices))
 
 	Object.assign(actions, assignActions(self, mixer, choices))
 

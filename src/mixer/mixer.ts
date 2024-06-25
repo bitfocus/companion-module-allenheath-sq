@@ -772,4 +772,28 @@ export class Mixer {
 		// make the MSB/LSB parameter math do the desired thing.
 		this.#setPanBalance(fader, panBalance, 0, 'lr', PanBalanceOutput)
 	}
+
+	/** Press (and do not subsequently release) a softkey. */
+	pressSoftKey(softKey: number): void {
+		if (softKey < 0 || this.model.count.softKey <= softKey) {
+			throw new Error(`Attempting to press invalid softkey ${softKey}`)
+		}
+
+		const midi = this.midi
+		const command = [0x90 | midi.channel, 0x30 + softKey, 0x7f]
+		// XXX
+		void midi.sendCommands([command])
+	}
+
+	/** Release a previously-pressed softkey. */
+	releaseSoftKey(softKey: number): void {
+		if (softKey < 0 || this.model.count.softKey <= softKey) {
+			throw new Error(`Attempting to release invalid softkey ${softKey}`)
+		}
+
+		const midi = this.midi
+		const command = [0x80 | midi.channel, 0x30 + softKey, 0x00]
+		// XXX
+		void midi.sendCommands([command])
+	}
 }
