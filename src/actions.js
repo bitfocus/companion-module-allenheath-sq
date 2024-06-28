@@ -14,7 +14,6 @@ import { softKeyActions } from './actions/softkey.js'
  */
 export function getActions(self, mixer, choices, connectionLabel) {
 	const model = mixer.model
-	const midi = mixer.midi
 
 	const FadingOption = {
 		type: 'dropdown',
@@ -420,7 +419,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				let opt = action.options
 				let val = self.getLevel(opt.input, opt.assign, model.count.mix, [0x50, 0x50], [0, 0x44])
 				mixer.midi.send(val.commands[0])
-				opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
 			callback: async ({ options }) => {
 				const { input: inputChannel, leveldb: panBalance, assign: mixOrLR } = options
@@ -458,7 +457,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				let opt = action.options
 				let val = self.getLevel(opt.input, opt.assign, model.count.mix, [0x50, 0x55], [0x30, 0x04])
 				mixer.midi.send(val.commands[0])
-				opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
 			callback: async ({ options }) => {
 				const { input: group, leveldb: panBalance, assign: mixOrLR } = options
@@ -496,7 +495,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				let opt = action.options
 				let val = self.getLevel(opt.input, opt.assign, model.count.mix, [0x50, 0x56], [0x3c, 0x14])
 				mixer.midi.send(val.commands[0])
-				opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
 			callback: async ({ options }) => {
 				const { input: fxReturn, leveldb: panBalance, assign: mixOrLR } = options
@@ -534,7 +533,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				let opt = action.options
 				let val = self.getLevel(opt.input, opt.assign, model.count.group, [0, 0x5b], [0, 0x34])
 				mixer.midi.send(val.commands[0])
-				opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
 			callback: async ({ options }) => {
 				// XXX The SQ MIDI Protocol document (Issue 3) includes a table for
@@ -575,7 +574,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				let opt = action.options
 				let val = self.getLevel(opt.input, opt.assign, model.count.matrix, [0x5e, 0x5e], [0x24, 0x27])
 				mixer.midi.send(val.commands[0])
-				opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
 			callback: async ({ options }) => {
 				const { input: mixOrLR, leveldb: panBalance, assign: matrix } = options
@@ -618,7 +617,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				let opt = action.options
 				let val = self.getLevel(opt.input, opt.assign, model.count.matrix, [0, 0x5e], [0, 0x4b])
 				mixer.midi.send(val.commands[0])
-				opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
 			callback: async ({ options }) => {
 				const { input: group, leveldb: panBalance, assign: matrix } = options
@@ -670,7 +669,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				let opt = action.options
 				let val = self.getLevel(opt.input, 99, 0, [0x5f, 0], [0, 0])
 				mixer.midi.send(val.commands[0])
-				opt.showvar = `\$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
 			callback: async ({ options }) => {
 				const { input: fader, leveldb: panBalance } = options
