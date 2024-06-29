@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals'
-import { type LevelChoice, panBalanceLevelToVCVF } from './pan-balance.js'
+import { type PanBalance, panBalanceLevelToVCVF } from './pan-balance.js'
 
 describe('pan/balance choices to VC/VF', () => {
 	test('exact cases', () => {
@@ -32,7 +32,7 @@ describe('pan/balance choices to VC/VF', () => {
 			['R70', 0x6c, 0x65],
 			['R80', 0x73, 0x18],
 			['R90', 0x79, 0x4b],
-		] satisfies [LevelChoice, number, number][]
+		] satisfies [PanBalance, number, number][]
 
 		for (const [level, expectedVC, expectedVF] of tests) {
 			const [actualVC, actualVF] = panBalanceLevelToVCVF(level)

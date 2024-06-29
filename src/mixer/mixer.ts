@@ -21,8 +21,7 @@ import {
 	type Param,
 } from './parameters.js'
 import { dBToDec, decTodB } from '../utils.js'
-
-type PanBalance = any
+import type { PanBalanceChoice } from '../actions/pan-balance.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -553,7 +552,13 @@ export class Mixer {
 	 * @param base
 	 *   The base MSB/LSB for the desired source-to-sink pan/balance settings.
 	 */
-	#setPanBalance(source: number, panBalance: PanBalance, sink: number, sinkType: InputOutputType, base: Param): void {
+	#setPanBalance(
+		source: number,
+		panBalance: PanBalanceChoice,
+		sink: number,
+		sinkType: InputOutputType,
+		base: Param,
+	): void {
 		const sinkCount = this.model.count[sinkType]
 		if (sinkCount <= sink) {
 			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
@@ -607,7 +612,7 @@ export class Mixer {
 	#setPanBalanceInMixOrLR(
 		source: number,
 		sourceType: PanBalanceInMixOrLRType,
-		panBalance: PanBalance,
+		panBalance: PanBalanceChoice,
 		mixOrLR: number,
 	): void {
 		const count = this.model.count
@@ -646,7 +651,7 @@ export class Mixer {
 	#setPanBalanceInSink(
 		source: number,
 		sourceType: InputOutputType,
-		panBalance: PanBalance,
+		panBalance: PanBalanceChoice,
 		sink: number,
 		sinkType: InputOutputType,
 		paramsType: PanBalanceInSinkType,
@@ -671,7 +676,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
 	 */
-	setInputChannelPanBalanceInMixOrLR(channel: number, pan: PanBalance, mixOrLR: number): void {
+	setInputChannelPanBalanceInMixOrLR(channel: number, pan: PanBalanceChoice, mixOrLR: number): void {
 		this.#setPanBalanceInMixOrLR(channel, 'inputChannel', pan, mixOrLR)
 	}
 
@@ -685,7 +690,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
 	 */
-	setGroupPanBalanceInMixOrLR(group: number, panBalance: PanBalance, mixOrLR: number): void {
+	setGroupPanBalanceInMixOrLR(group: number, panBalance: PanBalanceChoice, mixOrLR: number): void {
 		this.#setPanBalanceInMixOrLR(group, 'group', panBalance, mixOrLR)
 	}
 
@@ -699,7 +704,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
 	 */
-	setFXReturnPanBalanceInMixOrLR(fxReturn: number, panBalance: PanBalance, mixOrLR: number): void {
+	setFXReturnPanBalanceInMixOrLR(fxReturn: number, panBalance: PanBalanceChoice, mixOrLR: number): void {
 		this.#setPanBalanceInMixOrLR(fxReturn, 'fxReturn', panBalance, mixOrLR)
 	}
 
@@ -713,7 +718,7 @@ export class Mixer {
 	 * @param group
 	 *   A group, e.g. `2` for group 3.
 	 */
-	setFXReturnPanBalanceInGroup(fxReturn: number, panBalance: PanBalance, group: number): void {
+	setFXReturnPanBalanceInGroup(fxReturn: number, panBalance: PanBalanceChoice, group: number): void {
 		this.#setPanBalanceInSink(fxReturn, 'fxReturn', panBalance, group, 'group', 'fxReturn-group')
 	}
 
@@ -725,7 +730,7 @@ export class Mixer {
 	 * @param matrix
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
-	setLRPanBalanceInMatrix(panBalance: PanBalance, matrix: number): void {
+	setLRPanBalanceInMatrix(panBalance: PanBalanceChoice, matrix: number): void {
 		this.#setPanBalanceInSink(0, 'lr', panBalance, matrix, 'matrix', 'lr-matrix')
 	}
 
@@ -739,7 +744,7 @@ export class Mixer {
 	 * @param matrix
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
-	setMixPanBalanceInMatrix(mix: number, panBalance: PanBalance, matrix: number): void {
+	setMixPanBalanceInMatrix(mix: number, panBalance: PanBalanceChoice, matrix: number): void {
 		this.#setPanBalanceInSink(mix, 'mix', panBalance, matrix, 'matrix', 'mix-matrix')
 	}
 
@@ -753,7 +758,7 @@ export class Mixer {
 	 * @param matrix
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
-	setGroupPanBalanceInMatrix(group: number, panBalance: PanBalance, matrix: number): void {
+	setGroupPanBalanceInMatrix(group: number, panBalance: PanBalanceChoice, matrix: number): void {
 		this.#setPanBalanceInSink(group, 'group', panBalance, matrix, 'matrix', 'group-matrix')
 	}
 
@@ -767,7 +772,7 @@ export class Mixer {
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
-	setOutputPanBalance(fader: number, panBalance: PanBalance): void {
+	setOutputPanBalance(fader: number, panBalance: PanBalanceChoice): void {
 		// Abuse LR as a "sink" whose category contains exactly one element to
 		// make the MSB/LSB parameter math do the desired thing.
 		this.#setPanBalance(fader, panBalance, 0, 'lr', PanBalanceOutput)

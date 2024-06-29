@@ -1,6 +1,6 @@
 import type { DropdownChoice } from '@companion-module/base'
 import type { Model } from './mixer/model.js'
-import { createPanLevels } from './mixer/pan-balance.js'
+import { createPanLevels } from './actions/pan-balance.js'
 
 function createInputChannels(model: Model): DropdownChoice[] {
 	const inputChannels: DropdownChoice[] = []

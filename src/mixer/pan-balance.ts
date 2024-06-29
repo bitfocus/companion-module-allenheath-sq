@@ -1,6 +1,4 @@
-import { type DropdownChoice } from '@companion-module/base'
-
-export type LevelChoice = 'CTR' | `L${number}` | `R${number}`
+export type PanBalance = 'CTR' | `L${number}` | `R${number}`
 
 const CENTER = (0x3f << 7) | 0x7f
 const MAX = (0x7f << 7) + 0x7f
@@ -16,7 +14,7 @@ const MAX = (0x7f << 7) + 0x7f
  *   pan/balance to what `level` specifies.  Except for 100%-left, 100%-right,
  *   and center, these values are not guaranteed to be exact.
  */
-export function panBalanceLevelToVCVF(level: LevelChoice): [number, number] {
+export function panBalanceLevelToVCVF(level: PanBalance): [number, number] {
 	// Convert L100, L95, ..., L5, CTR, R5, ... R95, R100 to
 	// 0, 5, ..., 195, 200.
 	let lv
@@ -39,7 +37,7 @@ export function panBalanceLevelToVCVF(level: LevelChoice): [number, number] {
  * is _not_ guaranteed to be a valid pan/balance-level option value, as those
  * options are restricted to 5% increments.
  */
-export function vcvfToReadablePanBalance(vc: number, vf: number): LevelChoice {
+export function vcvfToReadablePanBalance(vc: number, vf: number): PanBalance {
 	const data = (vc << 7) | vf
 	let val = parseFloat(((data - CENTER) / 81.9).toFixed(0))
 	if (val > 100) {
@@ -58,15 +56,4 @@ export function vcvfToReadablePanBalance(vc: number, vf: number): LevelChoice {
 		return `L${amount}`
 	}
 	return `R${amount}`
-}
-
-export function createPanLevels(): DropdownChoice[] {
-	const panLevels = []
-	panLevels.push({ label: `Step Right`, id: 998 }, { label: `Step Left`, id: 999 })
-	for (let i = -100; i <= 100; i = i + 5) {
-		const pos = i < 0 ? `L${Math.abs(i)}` : i == 0 ? `CTR` : `R${Math.abs(i)}`
-		panLevels.push({ label: `${pos}`, id: `${pos}` })
-	}
-
-	return panLevels
 }
