@@ -1,8 +1,14 @@
-import type { CompanionInputFieldDropdown, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type {
+	CompanionActionInfo,
+	CompanionInputFieldDropdown,
+	CompanionOptionValues,
+	DropdownChoice,
+} from '@companion-module/base'
 import { type ActionDefinitions, PanBalanceActionId } from './action-ids.js'
 import { type Choices } from '../choices.js'
-import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { ParamHalf, SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'
+import type { InputOutputType, Model } from '../mixer/model.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { type PanBalance } from '../mixer/pan-balance.js'
 
@@ -53,6 +59,22 @@ function getPanBalance(instance: sqInstance, options: CompanionOptionValues): Pa
 
 	instance.log('error', `Invalid pan/balance specified, aborting action: ${JSON.stringify(rawOptionVal)}`)
 	return null
+}
+
+function subscribeOperation(
+	instance: sqInstance,
+	mixer: Mixer,
+	model: Model,
+	action: CompanionActionInfo,
+	connectionLabel: string,
+	sinkType: InputOutputType,
+	oMB: ParamHalf,
+	oLB: ParamHalf,
+): void {
+	const opt = action.options
+	const val = instance.getLevel(Number(opt.input), Number(opt.assign), model.count[sinkType], oMB, oLB)
+	mixer.midi.send(val.commands[0])
+	opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 }
 
 /**
@@ -110,10 +132,7 @@ export function panBalanceActions(
 				},
 			],
 			subscribe: async (action) => {
-				const opt = action.options
-				const val = instance.getLevel(Number(opt.input), Number(opt.assign), model.count.mix, [0x50, 0x50], [0, 0x44])
-				mixer.midi.send(val.commands[0])
-				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				subscribeOperation(instance, mixer, model, action, connectionLabel, 'mix', [0x50, 0x50], [0, 0x44])
 			},
 			callback: async ({ options }) => {
 				const inputChannel = toSourceOrSink(instance, model, options.input, 'inputChannel')
@@ -162,16 +181,7 @@ export function panBalanceActions(
 				},
 			],
 			subscribe: async (action) => {
-				const opt = action.options
-				const val = instance.getLevel(
-					Number(opt.input),
-					Number(opt.assign),
-					model.count.mix,
-					[0x50, 0x55],
-					[0x30, 0x04],
-				)
-				mixer.midi.send(val.commands[0])
-				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				subscribeOperation(instance, mixer, model, action, connectionLabel, 'mix', [0x50, 0x55], [0x30, 0x04])
 			},
 			callback: async ({ options }) => {
 				const group = toSourceOrSink(instance, model, options.input, 'group')
@@ -220,16 +230,7 @@ export function panBalanceActions(
 				},
 			],
 			subscribe: async (action) => {
-				const opt = action.options
-				const val = instance.getLevel(
-					Number(opt.input),
-					Number(opt.assign),
-					model.count.mix,
-					[0x50, 0x56],
-					[0x3c, 0x14],
-				)
-				mixer.midi.send(val.commands[0])
-				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				subscribeOperation(instance, mixer, model, action, connectionLabel, 'mix', [0x50, 0x56], [0x3c, 0x14])
 			},
 			callback: async ({ options }) => {
 				const fxReturn = toSourceOrSink(instance, model, options.input, 'fxReturn')
@@ -278,10 +279,7 @@ export function panBalanceActions(
 				},
 			],
 			subscribe: async (action) => {
-				const opt = action.options
-				const val = instance.getLevel(Number(opt.input), Number(opt.assign), model.count.group, [0, 0x5b], [0, 0x34])
-				mixer.midi.send(val.commands[0])
-				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				subscribeOperation(instance, mixer, model, action, connectionLabel, 'group', [0, 0x5b], [0, 0x34])
 			},
 			callback: async ({ options }) => {
 				// XXX The SQ MIDI Protocol document (Issue 3) includes a table
@@ -333,16 +331,7 @@ export function panBalanceActions(
 				},
 			],
 			subscribe: async (action) => {
-				const opt = action.options
-				const val = instance.getLevel(
-					Number(opt.input),
-					Number(opt.assign),
-					model.count.matrix,
-					[0x5e, 0x5e],
-					[0x24, 0x27],
-				)
-				mixer.midi.send(val.commands[0])
-				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				subscribeOperation(instance, mixer, model, action, connectionLabel, 'matrix', [0x5e, 0x5e], [0x24, 0x27])
 			},
 			callback: async ({ options }) => {
 				const mixOrLR = toMixOrLR(instance, model, options.input)
@@ -395,10 +384,7 @@ export function panBalanceActions(
 				},
 			],
 			subscribe: async (action) => {
-				const opt = action.options
-				const val = instance.getLevel(Number(opt.input), Number(opt.assign), model.count.matrix, [0, 0x5e], [0, 0x4b])
-				mixer.midi.send(val.commands[0])
-				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
+				subscribeOperation(instance, mixer, model, action, connectionLabel, 'matrix', [0, 0x5e], [0, 0x4b])
 			},
 			callback: async ({ options }) => {
 				const group = toSourceOrSink(instance, model, options.input, 'group')
