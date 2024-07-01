@@ -204,13 +204,13 @@ export class MidiSession {
 				ost = true
 			}
 
-			const db = mixer.decTodB(vc, vf)
+			const level = mixer.levelFromNRPNData(vc, vf)
 			instance.setVariableValues({
-				[levelKey]: db,
+				[levelKey]: level,
 			})
 
 			if (!ost) {
-				mixer.lastValue[levelKey] = db
+				mixer.lastValue[levelKey] = level
 			}
 		})
 		mixerChannelParser.on('pan_level', (msb: number, lsb: number, vc: number, vf: number) => {
