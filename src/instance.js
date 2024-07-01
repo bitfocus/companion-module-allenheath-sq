@@ -5,7 +5,7 @@ import { InstanceBase, InstanceStatus } from '@companion-module/base'
 import { GetConfigFields } from './config.js'
 
 import { getActions } from './actions.js'
-import { getFeedbacks } from './feedbacks.js'
+import { getFeedbacks } from './feedbacks/feedbacks.js'
 import { getVariables } from './variables.js'
 import { getPresets } from './presets.js'
 

@@ -4,8 +4,8 @@ import {
 	type CompanionFeedbackDefinitions,
 	type DropdownChoice,
 } from '@companion-module/base'
-import type { Choices } from './choices.js'
-import type { Mixer } from './mixer/mixer.js'
+import type { Choices } from '../choices.js'
+import type { Mixer } from '../mixer/mixer.js'
 
 const WHITE = combineRgb(255, 255, 255)
 const CARMINE_RED = combineRgb(153, 0, 51)
