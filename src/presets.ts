@@ -1,18 +1,22 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 import type { Model } from './mixer/model.js'
+import { MuteActionId } from './actions/action-ids.js'
+import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
+
+type MuteType = keyof typeof MuteFeedbackId & keyof typeof MuteActionId
 
 export function getPresets(self: sqInstance, model: Model, talkbackChannel: number): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
 
 	/* MUTE */
-	const createtMute = (cat: string, lab: string, typ: string, cnt: number, nr = true): void => {
+	const createtMute = (cat: string, lab: string, typ: MuteType, cnt: number, nr = true): void => {
 		for (let i = 0; i < cnt; i++) {
 			const suffix = cnt > 1 ? `_${i}` : ''
-			presets[`preset_${typ}${suffix}`] = {
+			presets[`preset_${MuteActionId[typ]}${suffix}`] = {
 				type: 'button',
 				category: cat,
 				name: lab + (nr ? ' ' + (i + 1) : ''),
@@ -26,7 +30,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 					{
 						down: [
 							{
-								actionId: typ,
+								actionId: MuteActionId[typ],
 								options: {
 									strip: i,
 									mute: 0,
@@ -38,7 +42,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 				],
 				feedbacks: [
 					{
-						feedbackId: typ,
+						feedbackId: MuteFeedbackId[typ],
 						options: {
 							channel: i,
 						},
@@ -48,15 +52,15 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 		}
 	}
 
-	createtMute('Mute Input', 'Input channel', 'mute_input', model.count.inputChannel)
-	createtMute('Mute Mix - Group', 'LR', 'mute_lr', 1, false)
-	createtMute('Mute Mix - Group', 'Aux', 'mute_aux', model.count.mix)
-	createtMute('Mute Mix - Group', 'Group', 'mute_group', model.count.group)
-	createtMute('Mute Mix - Group', 'Matrix', 'mute_matrix', model.count.matrix)
-	createtMute('Mute FX', 'FX Send', 'mute_fx_send', model.count.fxSend)
-	createtMute('Mute FX', 'FX Return', 'mute_fx_return', model.count.fxReturn)
-	createtMute('Mute DCA', 'DCA', 'mute_dca', model.count.dca)
-	createtMute('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', model.count.muteGroup)
+	createtMute('Mute Input', 'Input channel', 'MuteInputChannel', model.count.inputChannel)
+	createtMute('Mute Mix - Group', 'LR', 'MuteLR', 1, false)
+	createtMute('Mute Mix - Group', 'Aux', 'MuteMix', model.count.mix)
+	createtMute('Mute Mix - Group', 'Group', 'MuteGroup', model.count.group)
+	createtMute('Mute Mix - Group', 'Matrix', 'MuteMatrix', model.count.matrix)
+	createtMute('Mute FX', 'FX Send', 'MuteFXSend', model.count.fxSend)
+	createtMute('Mute FX', 'FX Return', 'MuteFXReturn', model.count.fxReturn)
+	createtMute('Mute DCA', 'DCA', 'MuteDCA', model.count.dca)
+	createtMute('Mute MuteGroup', 'MuteGroup', 'MuteMuteGroup', model.count.muteGroup)
 
 	/* TALKBACK*/
 	model.forEachMix((mix, mixLabel, mixDesc) => {
@@ -137,7 +141,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 	})
 
 	/* MUTE + FADER LEVEL */
-	const createtMuteLevel = (cat: string, lab: string, typ: string, ch: number, mix: number): void => {
+	const createtMuteLevel = (cat: string, lab: string, typ: MuteType, ch: number, mix: number): void => {
 		const mixId = mix === 99 ? 'lr' : `mix${mix}`
 		presets[`preset_mute_input${ch}_${mixId}`] = {
 			type: 'button',
@@ -153,7 +157,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 				{
 					down: [
 						{
-							actionId: typ,
+							actionId: MuteActionId[typ],
 							options: {
 								strip: ch,
 								mute: 0,
@@ -165,7 +169,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 			],
 			feedbacks: [
 				{
-					feedbackId: typ,
+					feedbackId: MuteFeedbackId[typ],
 					options: {
 						channel: ch,
 					},
@@ -181,7 +185,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 			createtMuteLevel(
 				`Mt+dB CH-${mixLabel}`,
 				`${channelLabel}\\n${mixLabel}\\n$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
-				'mute_input',
+				'MuteInputChannel',
 				channel,
 				mix,
 			)
