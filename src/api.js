@@ -123,7 +123,8 @@ export default {
 		}
 	},
 
-	fadeLevel: async function (fd, ch, mx, ct, lv, oMB, oLB, cnfg = this.mixer.faderLaw) {
+	fadeLevel: async function (fd, ch, mx, ct, lv, oMB, oLB) {
+		const cnfg = this.mixer.faderLaw
 		var self = this
 
 		if (fd == 0) {

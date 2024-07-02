@@ -48,7 +48,6 @@ export interface SQInstanceInterface {
 		lv: Level,
 		oMB: ParamHalf,
 		oLB: ParamHalf,
-		cnfg?: FaderLaw,
 	): Promise<number[][]>
 	getRemoteLevel(): void
 }
