@@ -2,10 +2,12 @@ import { computeEitherParameters } from './mixer/parameters.js'
 import { sleep } from './utils/sleep.js'
 
 export default {
-	setLevel: async function (ch, mx, ct, lv, oMB, oLB, cnfg = this.mixer.faderLaw) {
+	setLevel: async function (ch, mx, ct, lv, oMB, oLB) {
 		var self = this
 
+		/** @type {import('./mixer/mixer.js').Mixer} */
 		const mixer = this.mixer
+		const cnfg = mixer.faderLaw
 
 		let levelCmds = []
 
@@ -129,7 +131,7 @@ export default {
 
 		if (fd == 0) {
 			//if the user did not choose a fade time
-			return await self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
+			return await self.setLevel(ch, mx, ct, lv, oMB, oLB)
 		} else {
 			const mixer = this.mixer
 			const midi = mixer.midi
@@ -225,7 +227,7 @@ export default {
 							end -= 6
 						} else {
 							//it's a +1/-1 (or less) step command, so just immediately step without fading
-							return self.setLevel(ch, mx, ct, lv, oMB, oLB, cnfg)
+							return self.setLevel(ch, mx, ct, lv, oMB, oLB)
 						}
 
 						//make sure the new level is within the bounds of the mixer

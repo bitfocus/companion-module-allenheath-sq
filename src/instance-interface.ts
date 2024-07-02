@@ -1,6 +1,6 @@
 import type { InstanceBase, SomeCompanionConfigField } from '@companion-module/base'
 import type { SQInstanceConfig } from './config.js'
-import type { FaderLaw, Mixer } from './mixer/mixer.js'
+import type { Mixer } from './mixer/mixer.js'
 
 export type ParamHalf = readonly [number, number]
 
@@ -24,15 +24,7 @@ export interface SQInstanceInterface {
 	getConfigFields(): SomeCompanionConfigField[]
 
 	// Defined in api.js, added via Object.assign.
-	setLevel(
-		ch: number,
-		mx: number,
-		ct: number,
-		lv: Level,
-		oMB: ParamHalf,
-		oLB: ParamHalf,
-		cnfg?: FaderLaw,
-	): Promise<number[][]>
+	setLevel(ch: number, mx: number, ct: number, lv: Level, oMB: ParamHalf, oLB: ParamHalf): Promise<number[][]>
 	getLevel(
 		ch: number,
 		mx: number,
