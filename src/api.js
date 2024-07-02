@@ -79,9 +79,7 @@ export default {
 		})
 
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
-			let tm = mixer.dBToDec(lv, cnfg)
-			var VC = tm[0]
-			var VF = tm[1]
+			var [VC, VF] = mixer.nrpnDataFromLevel(lv)
 		}
 
 		const midi = mixer.midi
@@ -91,7 +89,7 @@ export default {
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
-				let rtn = mixer.dBToDec(mixer.lastValue[levelKey], cnfg)
+				let rtn = mixer.nrpnDataFromLevel(mixer.lastValue[levelKey])
 				VC = rtn[0]
 				VF = rtn[1]
 				lv = 997
@@ -139,9 +137,7 @@ export default {
 			const midiSocket = midi.socket
 			if (midiSocket !== null) {
 				let setFade = (MSB, LSB, lv) => {
-					let val = mixer.dBToDec(lv)
-					let VC = val[0]
-					let VF = val[1]
+					const [VC, VF] = mixer.nrpnDataFromLevel(lv)
 					midi.send(midi.nrpnData(MSB, LSB, VC, VF))
 
 					lv = parseFloat(lv).toFixed(1)

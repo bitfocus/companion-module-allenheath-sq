@@ -75,3 +75,58 @@ export function levelFromNRPNData(vc: number, vf: number, faderLaw: FaderLaw): L
 			throw new Error(`Bad fader law: ${faderLaw}`)
 	}
 }
+
+/**
+ * Convert a fader level to a `VC`/`VF` data byte pair approximately equivalent
+ * to it under the given `faderLaw`.
+ */
+export function nrpnDataFromLevel(level: Level, faderLaw: FaderLaw): [number, number] {
+	// `[0, 0]` with both fader laws is -∞.
+	if (level === '-inf') {
+		return [0, 0]
+	}
+
+	// `level` must be a number in range (-90, 10] at this point.  Enforce this
+	// to assist understanding the operations performed below.
+	if (!(-90 < level && level <= 10)) {
+		throw new Error(`Unexpected out-of-range level: ${level}`)
+	}
+
+	switch (faderLaw) {
+		case 'LinearTaper': {
+			// As above, there is no explanation or justification for this
+			// formula except "it seems to fit well enough...".
+			const val = 15196 + level * 118.775
+			const vcvf = Math.round(val)
+			return [(vcvf >> 7) & 0x7f, vcvf & 0x7f]
+		}
+
+		case 'AudioTaper': {
+			// There doesn't seem to be any ready explanation of the algorithm
+			// below, save that it's roughly consistent with example values in
+			// the SQ MIDI Protocol document.
+			let candidateVC
+			if (5 < level) {
+				candidateVC = 127 - (10 - level) * 3
+			} else if (0 < level) {
+				candidateVC = 115 - (5 - level) * 4
+			} else if (-5 < level) {
+				candidateVC = 99 + (0 - level) * 5
+			} else if (-10 < level) {
+				candidateVC = 79 + (5 + level) * 4
+			} else if (-40 < level) {
+				candidateVC = 63 + (10 + level) * 1.778
+			} else {
+				candidateVC = 15 + (40 + level) * 0.2
+			}
+
+			const vc = Math.floor(candidateVC)
+			const vf = Math.floor((candidateVC - vc) * 100)
+			return [vc, vf]
+		}
+
+		default:
+			assertNever(faderLaw)
+			throw new Error(`Bad fader law: ${faderLaw}`)
+	}
+}

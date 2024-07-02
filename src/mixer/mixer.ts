@@ -1,5 +1,5 @@
 import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
-import type { Level as InstanceLevel, SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { MidiSession, type NRPNDataMessage } from '../midi/session.js'
 import { type InputOutputType, Model } from './model.js'
 import type { ModelId } from './models.js'
@@ -20,8 +20,7 @@ import {
 	PanBalanceOutput,
 	type Param,
 } from './parameters.js'
-import { dBToDec } from '../utils.js'
-import { type Level, levelFromNRPNData } from './level.js'
+import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import type { PanBalanceChoice } from '../actions/pan-balance.js'
 
 /**
@@ -131,8 +130,15 @@ export class Mixer {
 		this.midi.stop(status)
 	}
 
-	dBToDec(lv: InstanceLevel, typ = this.faderLaw): [number, number] {
-		return dBToDec(lv, typ) as any
+	/**
+	 * Convert a fader level to a `[VC, VF]` data byte pair approximately
+	 * equivalent to it under the mixer's current fader law.
+	 *
+	 * @param level
+	 *   The fader level to convert.
+	 */
+	nrpnDataFromLevel(level: Level): [number, number] {
+		return nrpnDataFromLevel(level, this.faderLaw)
 	}
 
 	/**
