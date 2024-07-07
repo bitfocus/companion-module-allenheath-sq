@@ -1,10 +1,9 @@
-import { type InputValue } from '@companion-module/base'
 import { type Choices } from '../choices.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { AssignActionId, type ActionDefinitions } from './action-ids.js'
-import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 
 /**
  * Convert the options value for a multidropdown field of numbered sinks into a
@@ -19,11 +18,7 @@ import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
  * @returns
  *   An array of sinks.
  */
-function assignOptionToSinks(
-	assign: InputValue | undefined,
-	model: Model,
-	sinkType: Exclude<InputOutputType, 'mix'>,
-): number[] {
+function assignOptionToSinks(assign: OptionValue, model: Model, sinkType: Exclude<InputOutputType, 'mix'>): number[] {
 	if (!Array.isArray(assign)) {
 		return []
 	}
@@ -50,7 +45,7 @@ function assignOptionToSinks(
  * @returns
  *   An array of sinks.
  */
-function mixesAndLRAssignOptionToSinks(mixAssign: InputValue | undefined, model: Model): number[] {
+function mixesAndLRAssignOptionToSinks(mixAssign: OptionValue, model: Model): number[] {
 	if (!Array.isArray(mixAssign)) {
 		return []
 	}

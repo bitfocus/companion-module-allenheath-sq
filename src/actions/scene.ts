@@ -2,9 +2,9 @@ import { type Model } from '../mixer/model.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { SceneActionId, type ActionDefinitions } from './action-ids.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import { type CompanionOptionValues } from '@companion-module/base'
+import { type OptionValue } from './to-source-or-sink.js'
 
-function toScene(instance: sqInstance, model: Model, sceneOption: CompanionOptionValues['scene']): number | null {
+function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): number | null {
 	const scene = Number(sceneOption) - 1
 	if (0 <= scene && scene < model.count.scene) {
 		return scene
@@ -17,7 +17,7 @@ function toScene(instance: sqInstance, model: Model, sceneOption: CompanionOptio
 const StepMin = -50
 const StepMax = 50
 
-function toSceneStep(instance: sqInstance, stepOption: CompanionOptionValues['scene']): number | null {
+function toSceneStep(instance: sqInstance, stepOption: OptionValue): number | null {
 	const step = Number(stepOption)
 	if (StepMin <= step && step <= StepMax) {
 		return step

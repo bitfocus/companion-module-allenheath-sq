@@ -3,6 +3,7 @@ import { type SQInstanceInterface as sqInstance } from '../instance-interface.js
 import { type InputOutputType } from '../mixer/model.js'
 import { type Model } from '../mixer/model.js'
 
+/** The type of an option value. */
 export type OptionValue = CompanionOptionValues[keyof CompanionOptionValues]
 
 /**
