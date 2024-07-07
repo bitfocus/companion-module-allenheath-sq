@@ -9,6 +9,7 @@ import { type Choices } from '../choices.js'
 import { type ActionDefinitions, MuteActionId } from './action-ids.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { MuteOperation } from '../mixer/mixer.js'
+import { toSourceOrSink } from './to-source-or-sink.js'
 
 function StripOption(label: string, choices: DropdownChoice[]): CompanionInputFieldDropdown {
 	return {
@@ -59,10 +60,8 @@ function getMuteOptions(
 	options: CompanionOptionValues,
 	type: InputOutputType,
 ): MuteOptions | null {
-	const stripOption = options.strip
-	const strip = Number(stripOption)
-	if (model.count[type] <= strip) {
-		instance.log('error', `Mute strip ${type} choice has invalid value, action aborted: ${JSON.stringify(stripOption)}`)
+	const strip = toSourceOrSink(instance, model, options.strip, type)
+	if (strip === null) {
 		return null
 	}
 
