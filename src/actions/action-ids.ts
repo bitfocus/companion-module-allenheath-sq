@@ -32,6 +32,7 @@ export enum AssignActionId {
 	ChannelToMix = 'ch_to_mix',
 	ChannelToGroup = 'ch_to_grp',
 	GroupToMix = 'grp_to_mix',
+	FXReturnToMix = 'fxr_to_mix',
 	FXReturnToGroup = 'fxr_to_grp',
 	ChannelToFXSend = 'ch_to_fxs',
 	GroupToFXSend = 'grp_to_fxs',

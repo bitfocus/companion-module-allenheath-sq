@@ -124,6 +124,10 @@ export const AssignToMixOrLRBase = {
 		normal: { MSB: 0x65, LSB: 0x04 },
 		lr: { MSB: 0x60, LSB: 0x30 },
 	},
+	fxReturn: {
+		normal: { MSB: 0x66, LSB: 0x14 },
+		lr: { MSB: 0x60, LSB: 0x3c },
+	},
 } satisfies SourceToMixOrLR
 
 export type AssignToMixOrLRType = keyof typeof AssignToMixOrLRBase

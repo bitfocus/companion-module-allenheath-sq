@@ -187,6 +187,42 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 			},
 		},
 
+		[AssignActionId.FXReturnToMix]: {
+			name: 'Assign FX return to mix',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'FX Return',
+					id: 'inputFxr',
+					default: 0,
+					choices: choices.fxReturns,
+					minChoicesForSearch: 0,
+				},
+				{
+					type: 'multidropdown',
+					label: 'Mix',
+					id: 'mixAssign',
+					default: [],
+					choices: choices.mixesAndLR,
+				},
+				{
+					type: 'checkbox',
+					label: 'Active',
+					id: 'mixActive',
+					default: true,
+				},
+			],
+			callback: async ({ options }) => {
+				const fxReturn = toSourceOrSink(instance, model, options.inputFxr, 'fxReturn')
+				if (fxReturn === null) {
+					return
+				}
+				const active = Boolean(options.mixActive)
+				const mixes = mixesAndLRAssignOptionToSinks(options.mixAssign, mixer.model)
+				mixer.assignFXReturnToMixesAndLR(fxReturn, active, mixes)
+			},
+		},
+
 		[AssignActionId.FXReturnToGroup]: {
 			name: 'Assign FX Return to group',
 			options: [

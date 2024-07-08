@@ -448,6 +448,21 @@ export class Mixer {
 	}
 
 	/**
+	 * Assign the given FX return to the supplied mixes (possibly including the
+	 * LR mix), making it active or inactive dependent on `active`.
+	 *
+	 * @param fxReturn
+	 *   The FX return to alter in mixes.
+	 * @param active
+	 *   Whether to make the FX return active or inactive in the mixes.
+	 * @param mixes
+	 *   The mixes to activate it in, potentially including the LR mix.
+	 */
+	assignFXReturnToMixesAndLR(fxReturn: number, active: boolean, mixes: readonly number[]): void {
+		this.#assignSourceToMixesAndLR(fxReturn, 'fxReturn', active, mixes)
+	}
+
+	/**
 	 * Assign the given FX return to the supplied groups, making it active
 	 * or inactive dependent on `active`.
 	 *
