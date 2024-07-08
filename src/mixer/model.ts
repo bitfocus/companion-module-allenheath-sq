@@ -19,8 +19,7 @@ export type InputOutputCounts = {
 	scene: number
 
 	// Encode LR as its own "category" so we can pretend the LR mix is a
-	// one-element category when computing parameter numbers for
-	// LR-to-matrix assignments.
+	// one-element category when computing various types of parameter numbers.
 	lr: 1
 }
 

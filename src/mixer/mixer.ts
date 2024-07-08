@@ -9,7 +9,6 @@ import {
 	type AssignToMixOrLRType,
 	AssignToSinkBase,
 	type AssignToSinkType,
-	computeLRParameters,
 	computeParameters,
 	MuteBases,
 	type MuteType,
@@ -269,23 +268,6 @@ export class Mixer {
 	}
 
 	/**
-	 * Assign a `source` to LR or remove its assignment, depending on `active`.
-	 *
-	 * @param source
-	 *   The number of the source to assign, counting from zero.
-	 * @param active
-	 *   If `true`, the source will be made active in LR.  If `false`, it will
-	 *   be made inactive.
-	 * @param base
-	 *   `MSB`/`LSB` referring to the expected source if `source === 0`.
-	 */
-	#assignToLR(source: number, active: boolean, base: Param): NRPNDataMessage {
-		const { MSB, LSB } = computeLRParameters(source, base)
-
-		return this.midi.nrpnData(MSB, LSB, 0, active ? 1 : 0)
-	}
-
-	/**
 	 * Assign a `source` to `sink` or remove its assignment, depending on
 	 * `active`.
 	 *
@@ -299,10 +281,9 @@ export class Mixer {
 	 *   counting from zero.  (For example, if there are 12 total groups and the
 	 *   sink is a group, this will be in range `[0, 12)`).
 	 * @param sinkType
-	 *   TThe type of sink that `sink` is.
+	 *   The type of `sink`.
 	 * @param base
 	 *   `MSB`/`LSB` referring to the expected source if `source === 0`.
-	 * @returns {number[]}
 	 */
 	#assignToSink(
 		source: number,
@@ -352,7 +333,7 @@ export class Mixer {
 
 		const commands = mixes.map((sink) => {
 			return sink === 99
-				? this.#assignToLR(source, active, lr)
+				? this.#assignToSink(source, active, 0, 'lr', lr)
 				: this.#assignToSink(source, active, sink, 'mix', normal)
 		})
 
