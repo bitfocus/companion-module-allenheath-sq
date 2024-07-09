@@ -26,7 +26,6 @@
 		}
 	},
 	"eslintIgnore": [
-		"src/actions.js",
 		"src/api.js",
 		"src/instance.js",
 		"src/actions/old-level.js",

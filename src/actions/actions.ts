@@ -1,21 +1,37 @@
-import { assignActions } from './actions/assign.js'
-import { muteActions } from './actions/mute.js'
-import { oldLevelActions } from './actions/old-level.js'
-import { oldOutputActions } from './actions/old-output.js'
-import { panBalanceActions } from './actions/pan-balance.js'
-import { sceneActions } from './actions/scene.js'
-import { softKeyActions } from './actions/softkey.js'
+import { type CompanionInputFieldDropdown } from '@companion-module/base'
+import { type ActionDefinitions, type ActionId } from './action-ids.js'
+import { assignActions } from './assign.js'
+import { type Choices } from '../choices.js'
+import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import { type Mixer } from '../mixer/mixer.js'
+import { muteActions } from './mute.js'
+import { oldLevelActions } from './old-level.js'
+import { oldOutputActions } from './old-output.js'
+import { panBalanceActions } from './pan-balance.js'
+import { sceneActions } from './scene.js'
+import { softKeyActions } from './softkey.js'
 
 /**
+ * Get all action definitions exposed by this module.
  *
- * @param {import('./instance-interface.js').SQInstanceInterface} self
- * @param {import('./mixer/mixer.js').Mixer} mixer
- * @param {import('./choices.js').Choices} choices
- * @param {string} connectionLabel
+ * @param self
+ *   The instance for which definitions are being generated.
+ * @param mixer
+ *   The mixer in use by the instance.
+ * @param choices
+ *   Option choices for use in the actions.
+ * @param connectionLabel
+ *   The label of the SQ instance.
  * @returns
+ *   All actions defined by this module.
  */
-export function getActions(self, mixer, choices, connectionLabel) {
-	const FadingOption = {
+export function getActions(
+	self: sqInstance,
+	mixer: Mixer,
+	choices: Choices,
+	connectionLabel: string,
+): ActionDefinitions<ActionId> {
+	const FadingOption: CompanionInputFieldDropdown = {
 		type: 'dropdown',
 		label: 'Fading',
 		id: 'fade',
@@ -39,7 +55,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		default: 0,
 		choices: choices.levels,
 		minChoicesForSearch: 0,
-	}
+	} as const
 
 	const PanLevelOption = {
 		type: 'dropdown',
@@ -48,7 +64,7 @@ export function getActions(self, mixer, choices, connectionLabel) {
 		default: 'CTR',
 		choices: choices.panLevels,
 		minChoicesForSearch: 0,
-	}
+	} as const
 
 	return {
 		...muteActions(self, mixer, choices),
