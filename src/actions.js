@@ -1,5 +1,6 @@
 import { LevelActionId, OutputActionId } from './actions/action-ids.js'
 import { assignActions } from './actions/assign.js'
+import { getFadeTimeSeconds } from './actions/level.js'
 import { muteActions } from './actions/mute.js'
 import { panBalanceActions } from './actions/pan-balance.js'
 import { sceneActions } from './actions/scene.js'
@@ -89,13 +90,17 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
-				if (opt.fade == 0) {
-					//make it super short like 0.2
-					opt.fade = 0.2
+				let fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
+				if (fadeTimeSeconds === 0) {
+					// Make it super short like 0.2s.
+					fadeTimeSeconds = 0.2
 				}
 
 				const commands = await self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.mix,
@@ -130,8 +135,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
 				const commands = self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.mix,
@@ -165,8 +174,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
 				const commands = self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.mix,
@@ -200,8 +213,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
 				const commands = self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.group,
@@ -235,8 +252,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
 				const commands = self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.fxSend,
@@ -270,8 +291,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
 				const commands = self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.fxSend,
@@ -305,8 +330,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
 				const commands = self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.fxSend,
@@ -340,8 +369,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
 				const commands = self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.matrix,
@@ -375,8 +408,12 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
 				const commands = self.fadeLevel(
-					opt.fade,
+					fadeTimeSeconds,
 					opt.input,
 					opt.assign,
 					model.count.matrix,
@@ -407,7 +444,11 @@ export function getActions(self, mixer, choices, connectionLabel) {
 				FadingOption,
 			],
 			callback: async ({ options: opt }) => {
-				const commands = self.fadeLevel(opt.fade, opt.input, 99, 0, opt.leveldb, [0x4f, 0], [0, 0])
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
+				if (fadeTimeSeconds === null) {
+					return
+				}
+				const commands = self.fadeLevel(fadeTimeSeconds, opt.input, 99, 0, opt.leveldb, [0x4f, 0], [0, 0])
 				mixer.midi.sendCommands(commands)
 			},
 		},

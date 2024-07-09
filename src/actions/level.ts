@@ -1,4 +1,5 @@
-import { type DropdownChoice } from '@companion-module/base'
+import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 
 /** Compute the set of level options for level-setting actions. */
 export function createLevels(): DropdownChoice[] {
@@ -25,4 +26,19 @@ export function createLevels(): DropdownChoice[] {
 		levels.push({ label: `${i} dB`, id: i })
 	}
 	return levels
+}
+
+/**
+ * Given options for a fade-to-level action, compute the time the fade should
+ * take.  On failure log an error and return null, otherwise return the fade
+ * time, in seconds.
+ */
+export function getFadeTimeSeconds(instance: sqInstance, options: CompanionOptionValues): number | null {
+	const fadeSeconds = Number(options.fade)
+	if (fadeSeconds >= 0) {
+		return fadeSeconds
+	}
+
+	instance.log('error', `Bad fade time ${fadeSeconds} seconds, aborting`)
+	return null
 }
