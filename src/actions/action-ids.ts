@@ -88,15 +88,12 @@ export enum OutputActionId {
 	OutputPanBalance = 'pan_to_output',
 }
 
-const ActionId = {
-	...MuteActionId,
-	...AssignActionId,
-	...SceneActionId,
-	...SoftKeyId,
-	...LevelActionId,
-	...PanBalanceActionId,
-	...OutputActionId,
-} as const
-
 /** All action IDs. */
-export type ActionId = keyof typeof ActionId
+export type ActionId =
+	| MuteActionId
+	| AssignActionId
+	| SceneActionId
+	| SoftKeyId
+	| LevelActionId
+	| PanBalanceActionId
+	| OutputActionId
