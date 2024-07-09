@@ -4,13 +4,26 @@ import type {
 	CompanionOptionValues,
 	DropdownChoice,
 } from '@companion-module/base'
-import { type ActionDefinitions, PanBalanceActionId } from './action-ids.js'
+import { type ActionDefinitions } from './action-ids.js'
 import { type Choices } from '../choices.js'
 import type { ParamHalf, SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { type PanBalance } from '../mixer/pan-balance.js'
+
+/**
+ * Action IDs for all actions setting the pan/balance of a mixer source in a
+ * mixer sink.
+ */
+export enum PanBalanceActionId {
+	InputChannelPanBalanceInMixOrLR = 'chpan_to_mix',
+	GroupPanBalanceInMixOrLR = 'grppan_to_mix',
+	FXReturnPanBalanceInMixOrLR = 'fxrpan_to_mix',
+	FXReturnPanBalanceInGroup = 'fxrpan_to_grp',
+	MixOrLRPanBalanceInMatrix = 'mixpan_to_mtx',
+	GroupPanBalanceInMatrix = 'grppan_to_mtx',
+}
 
 /** Compute the set of pan/balance level options for pan/balance actions. */
 export function createPanLevels(): DropdownChoice[] {

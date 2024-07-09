@@ -1,4 +1,4 @@
-import { OutputActionId } from './action-ids.js'
+import { OutputActionId } from './output.js'
 import { getFadeTimeSeconds } from './level.js'
 
 /**
@@ -20,7 +20,7 @@ import { getFadeTimeSeconds } from './level.js'
  *   An action option specifying pan amounts for the output.
  * @param {string} connectionLabel
  *   The label of the SQ instance.
- * @returns {import('./action-ids.js').ActionDefinitions<import('./action-ids.js').OutputActionId>}
+ * @returns {import('./action-ids.js').ActionDefinitions<import('./output.js').OutputActionId>}
  *   The set of all output-adjustment action definitions.
  */
 export function oldOutputActions(self, mixer, choices, levelOption, fadingOption, panLevelOption, connectionLabel) {

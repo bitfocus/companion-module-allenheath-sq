@@ -1,4 +1,4 @@
-import { LevelActionId } from './action-ids.js'
+import { LevelActionId } from './level.js'
 import { getFadeTimeSeconds } from './level.js'
 
 /**
@@ -16,7 +16,7 @@ import { getFadeTimeSeconds } from './level.js'
  * @param {import('@companion-module/base').CompanionInputFieldDropdown} fadingOption
  *   An action option specifying various fade times over which the set to level
  *   should take place.
- * @returns {import('./action-ids.js').ActionDefinitions<import('./action-ids.js').LevelActionId>}
+ * @returns {import('./action-ids.js').ActionDefinitions<import('./level.js').LevelActionId>}
  *   The set of all level action definitions.
  */
 export function oldLevelActions(self, mixer, choices, levelOption, fadingOption) {

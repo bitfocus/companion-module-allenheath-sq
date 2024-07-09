@@ -1,8 +1,14 @@
 import { type Model } from '../mixer/model.js'
 import { type Mixer } from '../mixer/mixer.js'
-import { SceneActionId, type ActionDefinitions } from './action-ids.js'
+import { type ActionDefinitions } from './action-ids.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type OptionValue } from './to-source-or-sink.js'
+
+/** Action IDs for all actions that change the mixer's current scene. */
+export enum SceneActionId {
+	SceneRecall = 'scene_recall',
+	SceneStep = 'scene_step',
+}
 
 function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): number | null {
 	const scene = Number(sceneOption) - 1

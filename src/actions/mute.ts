@@ -6,10 +6,26 @@ import {
 import { type Mixer } from '../mixer/mixer.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Choices } from '../choices.js'
-import { type ActionDefinitions, MuteActionId } from './action-ids.js'
+import { type ActionDefinitions } from './action-ids.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { MuteOperation } from '../mixer/mixer.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
+
+/**
+ * Action IDs for all actions that mute, unmute, or toggle muting of a mixer
+ * input/output.
+ */
+export enum MuteActionId {
+	MuteInputChannel = 'mute_input',
+	MuteLR = 'mute_lr',
+	MuteMix = 'mute_aux',
+	MuteGroup = 'mute_group',
+	MuteMatrix = 'mute_matrix',
+	MuteFXSend = 'mute_fx_send',
+	MuteFXReturn = 'mute_fx_return',
+	MuteDCA = 'mute_dca',
+	MuteMuteGroup = 'mute_mutegroup',
+}
 
 function StripOption(label: string, choices: DropdownChoice[]): CompanionInputFieldDropdown {
 	return {

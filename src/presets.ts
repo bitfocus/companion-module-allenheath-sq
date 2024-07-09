@@ -1,7 +1,7 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 import type { Model } from './mixer/model.js'
-import { MuteActionId } from './actions/action-ids.js'
+import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 
 const White = combineRgb(255, 255, 255)

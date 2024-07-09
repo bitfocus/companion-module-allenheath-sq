@@ -2,8 +2,25 @@ import { type Choices } from '../choices.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
-import { AssignActionId, type ActionDefinitions } from './action-ids.js'
+import { type ActionDefinitions } from './action-ids.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+
+/**
+ * Action IDs for all actions that activate/deactivate a mixer source within a
+ * sink.
+ */
+export enum AssignActionId {
+	ChannelToMix = 'ch_to_mix',
+	ChannelToGroup = 'ch_to_grp',
+	GroupToMix = 'grp_to_mix',
+	FXReturnToMix = 'fxr_to_mix',
+	FXReturnToGroup = 'fxr_to_grp',
+	ChannelToFXSend = 'ch_to_fxs',
+	GroupToFXSend = 'grp_to_fxs',
+	FXReturnToFXSend = 'fxr_to_fxs',
+	MixToMatrix = 'mix_to_mtx',
+	GroupToMatrix = 'grp_to_mtx',
+}
 
 /**
  * Convert the options value for a multidropdown field of numbered sinks into a

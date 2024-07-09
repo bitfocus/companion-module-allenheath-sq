@@ -1,9 +1,14 @@
 import { type CompanionOptionValues } from '@companion-module/base'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import { SoftKeyId, type ActionDefinitions } from './action-ids.js'
+import { type ActionDefinitions } from './action-ids.js'
 import { type Model } from '../mixer/model.js'
 import { type Choices } from '../choices.js'
 import { type Mixer } from '../mixer/mixer.js'
+
+/** Action IDs for all actions that operate softkeys. */
+export enum SoftKeyId {
+	SoftKey = 'key_soft',
+}
 
 enum SoftKeyOp {
 	Toggle = '0',
