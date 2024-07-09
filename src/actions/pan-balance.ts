@@ -4,7 +4,7 @@ import type {
 	CompanionOptionValues,
 	DropdownChoice,
 } from '@companion-module/base'
-import { type ActionDefinitions } from './action-ids.js'
+import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { ParamHalf, SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'

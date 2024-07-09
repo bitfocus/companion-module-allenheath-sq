@@ -1,6 +1,6 @@
 import { type Model } from '../mixer/model.js'
 import { type Mixer } from '../mixer/mixer.js'
-import { type ActionDefinitions } from './action-ids.js'
+import { type ActionDefinitions } from './actionid.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type OptionValue } from './to-source-or-sink.js'
 

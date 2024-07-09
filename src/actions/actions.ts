@@ -1,5 +1,5 @@
 import { type CompanionInputFieldDropdown } from '@companion-module/base'
-import { type ActionDefinitions, type ActionId } from './action-ids.js'
+import { type ActionDefinitions, type ActionId } from './actionid.js'
 import { assignActions } from './assign.js'
 import { type Choices } from '../choices.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'

@@ -6,7 +6,7 @@ import {
 import { type Mixer } from '../mixer/mixer.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Choices } from '../choices.js'
-import { type ActionDefinitions } from './action-ids.js'
+import { type ActionDefinitions } from './actionid.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { MuteOperation } from '../mixer/mixer.js'
 import { toSourceOrSink } from './to-source-or-sink.js'

@@ -2,7 +2,7 @@ import { type Choices } from '../choices.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
-import { type ActionDefinitions } from './action-ids.js'
+import { type ActionDefinitions } from './actionid.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 
 /**
