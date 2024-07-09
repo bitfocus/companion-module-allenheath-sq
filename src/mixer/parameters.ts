@@ -157,6 +157,32 @@ export const AssignToSinkBase = {
 export type AssignToSinkType = keyof typeof AssignToSinkBase
 
 /**
+ * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
+ * levels of a source of the given type in a sink of the given type.  (Note that
+ * the `'mix'` category is mixes only and never includes the LR mix.)
+ *
+ * These values are the pairs at top left of the relevant table sections in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ */
+export const LevelInSinkBase = {
+	'inputChannel-mix': { MSB: 0x40, LSB: 0x44 },
+	'inputChannel-lr': { MSB: 0x40, LSB: 0x00 },
+	'group-mix': { MSB: 0x45, LSB: 0x04 },
+	'group-lr': { MSB: 0x40, LSB: 0x30 },
+	'group-fxSend': { MSB: 0x4d, LSB: 0x54 },
+	'fxReturn-mix': { MSB: 0x46, LSB: 0x14 },
+	'fxReturn-lr': { MSB: 0x40, LSB: 0x3c },
+	'fxReturn-fxSend': { MSB: 0x4e, LSB: 0x04 },
+	'fxReturn-group': { MSB: 0x4b, LSB: 0x34 },
+	'inputChannel-fxSend': { MSB: 0x4c, LSB: 0x14 },
+	'mix-matrix': { MSB: 0x4e, LSB: 0x27 },
+	'lr-matrix': { MSB: 0x4e, LSB: 0x24 },
+	'group-matrix': { MSB: 0x4e, LSB: 0x4b },
+} satisfies SourceToSink
+
+export type LevelInSinkType = keyof typeof LevelInSinkBase
+
+/**
  * Base parameter MSB/LSB values corresponding to setting the mixer pan/balance
  * level of the given source category in mixes or LR.
  *
