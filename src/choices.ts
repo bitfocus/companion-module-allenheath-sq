@@ -1,5 +1,6 @@
 import type { DropdownChoice } from '@companion-module/base'
 import type { Model } from './mixer/model.js'
+import { createLevels } from './actions/level.js'
 import { createPanLevels } from './actions/pan-balance.js'
 
 function createInputChannels(model: Model): DropdownChoice[] {
@@ -80,32 +81,6 @@ function createSoftKeys(model: Model): DropdownChoice[] {
 		softKeys.push({ label: softKeyLabel, id: softKey })
 	})
 	return softKeys
-}
-
-function createLevels() {
-	const levels: DropdownChoice[] = []
-	levels.push(
-		{ label: `Last dB value`, id: 1000 },
-		{ label: `Step +0.1 dB`, id: 'step+0.1' }, //added
-		{ label: `Step +1 dB`, id: 'step+1' },
-		{ label: `Step +3 dB`, id: 'step+3' }, //added
-		{ label: `Step +6 dB`, id: 'step+6' }, //added
-		{ label: `Step -0.1 dB`, id: 'step-0.1' }, //added
-		{ label: `Step -1 dB`, id: 'step-1' },
-		{ label: `Step -3 dB`, id: 'step-3' }, //added
-		{ label: `Step -6 dB`, id: 'step-6' }, //added
-	)
-	for (let i = -90; i <= -40; i = i + 5) {
-		const id = i == -90 ? '-inf' : i
-		levels.push({ label: `${i} dB`, id })
-	}
-	for (let i = -39; i <= -10; i = i + 1) {
-		levels.push({ label: `${i} dB`, id: i })
-	}
-	for (let i = -9.5; i <= 10; i = i + 0.5) {
-		levels.push({ label: `${i} dB`, id: i })
-	}
-	return levels
 }
 
 function createAllFaders(model: Model): DropdownChoice[] {
