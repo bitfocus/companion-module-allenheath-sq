@@ -30,6 +30,7 @@
 		"src/api.js",
 		"src/instance.js",
 		"src/actions/old-level.js",
+		"src/actions/old-output.js",
 		"jest.config.ts",
 		"dist/**/*.js",
 		"pkg/**/*.js"
