@@ -1,4 +1,4 @@
-import { LevelActionId, OutputActionId, PanBalanceActionId } from './actions/action-ids.js'
+import { LevelActionId, OutputActionId } from './actions/action-ids.js'
 import { assignActions } from './actions/assign.js'
 import { muteActions } from './actions/mute.js'
 import { panBalanceActions } from './actions/pan-balance.js'
