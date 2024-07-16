@@ -329,12 +329,12 @@ export class Mixer {
 			throw new Error(`Attempting to assign out-of-range ${sourceType} ${source}`)
 		}
 
-		const { normal, lr } = AssignToMixOrLRBase[sourceType]
+		const { mix: mixBase, lr: lrBase } = AssignToMixOrLRBase[sourceType]
 
 		const commands = mixes.map((sink) => {
 			return sink === 99
-				? this.#assignToSink(source, active, 0, 'lr', lr)
-				: this.#assignToSink(source, active, sink, 'mix', normal)
+				? this.#assignToSink(source, active, 0, 'lr', lrBase)
+				: this.#assignToSink(source, active, sink, 'mix', mixBase)
 		})
 
 		// XXX
@@ -634,12 +634,12 @@ export class Mixer {
 			throw new Error(`Attempting to set pan/balance for out-of-range ${sourceType} ${source}`)
 		}
 
-		const { normal, lr } = PanBalanceInMixOrLRBase[sourceType]
+		const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase[sourceType]
 
 		if (mixOrLR === 99) {
-			this.#setPanBalance(source, panBalance, 0, 'lr', lr)
+			this.#setPanBalance(source, panBalance, 0, 'lr', lrBase)
 		} else {
-			this.#setPanBalance(source, panBalance, mixOrLR, 'mix', normal)
+			this.#setPanBalance(source, panBalance, mixOrLR, 'mix', mixBase)
 		}
 	}
 

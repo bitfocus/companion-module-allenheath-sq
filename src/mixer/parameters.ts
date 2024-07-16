@@ -77,7 +77,7 @@ export function computeEitherParameters(
 
 type SourceToMixOrLR = {
 	[key: string]: {
-		normal: Param
+		mix: Param
 		lr: Param
 	}
 }
@@ -117,15 +117,15 @@ export type MuteType = keyof typeof MuteBases
  */
 export const AssignToMixOrLRBase = {
 	inputChannel: {
-		normal: { MSB: 0x60, LSB: 0x44 },
+		mix: { MSB: 0x60, LSB: 0x44 },
 		lr: { MSB: 0x60, LSB: 0x00 },
 	},
 	group: {
-		normal: { MSB: 0x65, LSB: 0x04 },
+		mix: { MSB: 0x65, LSB: 0x04 },
 		lr: { MSB: 0x60, LSB: 0x30 },
 	},
 	fxReturn: {
-		normal: { MSB: 0x66, LSB: 0x14 },
+		mix: { MSB: 0x66, LSB: 0x14 },
 		lr: { MSB: 0x60, LSB: 0x3c },
 	},
 } satisfies SourceToMixOrLR
@@ -165,15 +165,15 @@ export type AssignToSinkType = keyof typeof AssignToSinkBase
  */
 export const PanBalanceInMixOrLRBase = {
 	inputChannel: {
-		normal: { MSB: 0x50, LSB: 0x44 },
+		mix: { MSB: 0x50, LSB: 0x44 },
 		lr: { MSB: 0x50, LSB: 0x00 },
 	},
 	group: {
-		normal: { MSB: 0x55, LSB: 0x04 },
+		mix: { MSB: 0x55, LSB: 0x04 },
 		lr: { MSB: 0x50, LSB: 0x30 },
 	},
 	fxReturn: {
-		normal: { MSB: 0x56, LSB: 0x14 },
+		mix: { MSB: 0x56, LSB: 0x14 },
 		lr: { MSB: 0x50, LSB: 0x3c },
 	},
 } satisfies SourceToMixOrLR
