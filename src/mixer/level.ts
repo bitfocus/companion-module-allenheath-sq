@@ -97,7 +97,7 @@ export function nrpnDataFromLevel(level: Level, faderLaw: FaderLaw): [number, nu
 			// As above, there is no explanation or justification for this
 			// formula except "it seems to fit well enough...".
 			const val = 15196 + level * 118.775
-			const vcvf = Math.round(val)
+			const vcvf = Math.floor(val)
 			return [(vcvf >> 7) & 0x7f, vcvf & 0x7f]
 		}
 
