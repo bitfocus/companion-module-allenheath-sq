@@ -117,8 +117,8 @@ export type MuteType = keyof typeof MuteBases
  */
 export const AssignToMixOrLRBase = {
 	inputChannel: {
-		normal: { MSB: 0x60, LSB: 0x00 },
-		lr: { MSB: 0x60, LSB: 0x44 },
+		normal: { MSB: 0x60, LSB: 0x44 },
+		lr: { MSB: 0x60, LSB: 0x00 },
 	},
 	group: {
 		normal: { MSB: 0x65, LSB: 0x04 },
