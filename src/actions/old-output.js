@@ -2,6 +2,33 @@ import { OutputActionId } from './output.js'
 import { getFadeTimeSeconds } from './level.js'
 
 /**
+ *
+ * @param {import('../instance-interface.js').SQInstanceInterface} self
+ * @param {import('../mixer/mixer.js').Mixer} mixer
+ * @param {import('@companion-module/base').CompanionOptionValues} options
+ */
+function fadeLevelToOutputAction(self, mixer, options) {
+	const fadeTimeSeconds = getFadeTimeSeconds(self, options)
+	if (fadeTimeSeconds === null) {
+		return
+	}
+
+	const commands = self.fadeLevel(fadeTimeSeconds, options.input, 99, 0, options.leveldb, [0x4f, 0], [0, 0])
+	mixer.midi.sendCommands(commands)
+}
+
+/**
+ *
+ * @param {import('../instance-interface.js').SQInstanceInterface} self
+ * @param {import('../mixer/mixer.js').Mixer} mixer
+ * @param {import('./to-source-or-sink.js').OptionValue} options
+ */
+function panBalanceToOutputAction(self, mixer, options) {
+	const { input: fader, leveldb: panBalance } = options
+	mixer.setOutputPanBalance(fader, panBalance)
+}
+
+/**
  * Generate action definitions for adjusting the levels or pan/balance of
  * various mixer sinks when they're assigned to mixer outputs.
  *
@@ -39,13 +66,8 @@ export function oldOutputActions(self, mixer, choices, levelOption, fadingOption
 				levelOption,
 				fadingOption,
 			],
-			callback: async ({ options: opt }) => {
-				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
-				if (fadeTimeSeconds === null) {
-					return
-				}
-				const commands = self.fadeLevel(fadeTimeSeconds, opt.input, 99, 0, opt.leveldb, [0x4f, 0], [0, 0])
-				mixer.midi.sendCommands(commands)
+			callback: async ({ options }) => {
+				fadeLevelToOutputAction(self, mixer, options)
 			},
 		},
 
@@ -75,8 +97,7 @@ export function oldOutputActions(self, mixer, choices, levelOption, fadingOption
 				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 			},
 			callback: async ({ options }) => {
-				const { input: fader, leveldb: panBalance } = options
-				mixer.setOutputPanBalance(fader, panBalance)
+				panBalanceToOutputAction(self, mixer, options)
 			},
 		},
 	}
