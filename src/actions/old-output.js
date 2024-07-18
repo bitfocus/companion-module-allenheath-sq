@@ -40,7 +40,7 @@ export function oldOutputActions(self, mixer, choices, levelOption, fadingOption
 				fadingOption,
 			],
 			callback: async ({ options: opt }) => {
-				const fadeTimeSeconds = getFadeTimeSeconds(opt)
+				const fadeTimeSeconds = getFadeTimeSeconds(self, opt)
 				if (fadeTimeSeconds === null) {
 					return
 				}
