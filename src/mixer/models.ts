@@ -57,3 +57,29 @@ export const SQModels: { [K in ModelId]: ModelType } = {
 		sceneCount: 300,
 	},
 }
+
+/**
+ * Get the value of a particular SQ model characteristic, where that
+ * characteristic is being presumed to have the same value across all SQ mixer
+ * models.  If the characteristic in fact varies across models, this function
+ * will throw.
+ *
+ * @param countType
+ *   The particular SQ characteristic to query.
+ * @throws
+ *   A TypeError if the characteristic isn't the same across all SQ models.
+ * @returns
+ *   The value of the characteristic.
+ */
+export function getCommonCount(countType: keyof ModelType): number {
+	return Object.values(SQModels).reduce((count, model) => {
+		const thisCount = model[countType]
+		if (count === -1) {
+			return thisCount
+		}
+		if (count !== thisCount) {
+			throw new TypeError(`SQ ${countType} is not constant across models`)
+		}
+		return count
+	}, -1)
+}

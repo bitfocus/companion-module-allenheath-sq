@@ -1,5 +1,5 @@
 import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
-import { DefaultModel, SQModels } from './mixer/models.js'
+import { DefaultModel, getCommonCount } from './mixer/models.js'
 
 export interface SQInstanceConfig {
 	host: string
@@ -29,17 +29,7 @@ function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
 	// The number of input channels depends on how many input channels the
 	// user's chosen SQ model has.  Currently all SQs have the same number of
 	// input channels, so use that count.
-	let inputChannelCount = -1
-	for (const { chCount } of Object.values(SQModels)) {
-		if (inputChannelCount < 0) {
-			inputChannelCount = chCount
-		} else if (inputChannelCount !== chCount) {
-			throw new Error('update this now that SQs have different input channel counts')
-		}
-	}
-	if (inputChannelCount < 0) {
-		throw new Error('missing SQ models?')
-	}
+	const inputChannelCount = getCommonCount('chCount')
 
 	const DefaultTalkbackInputChannelChoices = []
 	for (let i = 0; i < inputChannelCount; i++) {
