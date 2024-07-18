@@ -1,5 +1,5 @@
 import { LevelActionId } from './level.js'
-import { getFadeTimeSeconds } from './level.js'
+import { getFadeTimeSeconds } from './fading.js'
 
 /**
  * Generate action definitions for setting the levels of sources in sinks: input

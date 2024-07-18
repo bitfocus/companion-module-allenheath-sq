@@ -1,5 +1,5 @@
 import { OutputActionId } from './output.js'
-import { getFadeTimeSeconds } from './level.js'
+import { getFadeTimeSeconds } from './fading.js'
 
 /**
  *
