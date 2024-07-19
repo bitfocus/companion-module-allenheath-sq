@@ -1,5 +1,6 @@
 import { OutputActionId } from './output.js'
 import { getFadeTimeSeconds } from './fading.js'
+import { SinkLevelInOutputBase } from '../mixer/parameters.js'
 
 /**
  *
@@ -14,6 +15,24 @@ function fadeLevelToOutputAction(self, mixer, options) {
 	}
 
 	const commands = self.fadeLevel(fadeTimeSeconds, options.input, 99, 0, options.leveldb, [0x4f, 0], [0, 0])
+	mixer.midi.sendCommands(commands)
+}
+
+/**
+ *
+ * @param {import('../instance-interface.js').SQInstanceInterface} self
+ * @param {import('../mixer/mixer.js').Mixer} mixer
+ * @param {import('@companion-module/base').CompanionOptionValues} options
+ * @param {import('../mixer/parameters.js').SinkLevelInOutputType} type
+ */
+function fadeLevelToSpecificOutputAction(self, mixer, options, type) {
+	const fadeTimeSeconds = getFadeTimeSeconds(self, options)
+	if (fadeTimeSeconds === null) {
+		return
+	}
+
+	const { MSB, LSB } = SinkLevelInOutputBase[type]
+	const commands = self.fadeLevel(fadeTimeSeconds, options.input, 99, 0, options.leveldb, [MSB, 0], [LSB, 0])
 	mixer.midi.sendCommands(commands)
 }
 
@@ -68,6 +87,95 @@ export function oldOutputActions(self, mixer, choices, levelOption, fadingOption
 			],
 			callback: async ({ options }) => {
 				fadeLevelToOutputAction(self, mixer, options)
+			},
+		},
+
+		[OutputActionId.LRLevelOutput]: {
+			name: 'LR fader level to output',
+			options: [
+				// There's only one LR, so don't include an input option.
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				options.input = 0 // XXX hack to select the 0th 'lr' sink
+				fadeLevelToSpecificOutputAction(self, mixer, options, 'lr')
+			},
+		},
+
+		[OutputActionId.MixLevelOutput]: {
+			name: 'Mix fader level to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.mixes,
+					minChoicesForSearch: 0,
+				},
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				fadeLevelToSpecificOutputAction(self, mixer, options, 'mix')
+			},
+		},
+
+		[OutputActionId.FXSendLevelOutput]: {
+			name: 'FX Send fader level to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.fxSends,
+					minChoicesForSearch: 0,
+				},
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				fadeLevelToSpecificOutputAction(self, mixer, options, 'fxSend')
+			},
+		},
+
+		[OutputActionId.MatrixLevelOutput]: {
+			name: 'Matrix fader level to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.matrixes,
+					minChoicesForSearch: 0,
+				},
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				fadeLevelToSpecificOutputAction(self, mixer, options, 'matrix')
+			},
+		},
+
+		[OutputActionId.DCALevelOutput]: {
+			name: 'DCA fader level to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.dcas,
+					minChoicesForSearch: 0,
+				},
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				fadeLevelToSpecificOutputAction(self, mixer, options, 'dca')
 			},
 		},
 
