@@ -18,7 +18,6 @@ import {
 	type PanBalanceInMixOrLRType,
 	PanBalanceInSinkBase,
 	type PanBalanceInSinkType,
-	PanBalanceOutput,
 	type Param,
 	type SinkPanBalanceInOutputType,
 	SinkPanBalanceInOutputBase,
@@ -1087,22 +1086,6 @@ export class Mixer {
 	 */
 	setGroupPanBalanceInMatrix(group: number, panBalance: PanBalanceChoice, matrix: number): void {
 		this.#setPanBalanceInSink(group, 'group', panBalance, matrix, 'matrix', 'group-matrix')
-	}
-
-	/**
-	 * Set the pan/balance of any of various outputs in their own right, not fed
-	 * into anything.  (For example, this can be used to pan LR all the way left
-	 * or right.)
-	 *
-	 * @param fader
-	 *   A fader value from the list of valid choices.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 */
-	setOutputPanBalance(fader: number, panBalance: PanBalanceChoice): void {
-		// Abuse LR as a "sink" whose category contains exactly one element to
-		// make the MSB/LSB parameter math do the desired thing.
-		this.#setPanBalance(fader, panBalance, 0, 'lr', PanBalanceOutput)
 	}
 
 	/**

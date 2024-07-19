@@ -246,16 +246,6 @@ export const SinkLevelInOutputBase = {
 export type SinkLevelInOutputType = keyof typeof SinkLevelInOutputBase
 
 /**
- * Base parameter MSB/LSB corresponding to setting balance of sources used
- * directly as outputs.
- *
- * This value comes from the top of the LR/mixes/matrixes to "Output" table
- * under "Balance Parameter Number - Master Sends" in the
- * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
- */
-export const PanBalanceOutput = { MSB: 0x5f, LSB: 0x00 } satisfies Param
-
-/**
  * Base parameter MSB/LSB corresponding to setting balance of various source
  * categories when assigned as mixer outputs.
  *

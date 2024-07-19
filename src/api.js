@@ -420,7 +420,6 @@ export default {
 		if (this.config.status == 'delay') {
 			sleep(300)
 		}
-		self.subscribeActions('pan_to_output')
 		self.subscribeActions(OutputActionId.LRPanBalanceOutput)
 		self.subscribeActions(OutputActionId.MixPanBalanceOutput)
 		self.subscribeActions(OutputActionId.MatrixPanBalanceOutput)

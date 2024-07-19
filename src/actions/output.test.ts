@@ -2,11 +2,15 @@ import type { CompanionActionInfo } from '@companion-module/base'
 import { describe, expect, test } from '@jest/globals'
 import {
 	convertOldLevelToOutputActionToSinkSpecific,
+	convertOldPanToOutputActionToSinkSpecific,
 	isOldLevelToOutputAction,
+	isOldPanToOutputAction,
 	ObsoleteLevelToOutputId,
+	ObsoletePanToOutputId,
 	OutputActionId,
 } from './output.js'
 import type { Level } from '../mixer/level.js'
+import type { PanBalanceChoice } from './pan-balance.js'
 
 function makeObsoleteOutputLevelAction(input: number, level: Level, fadeSeconds: number): CompanionActionInfo {
 	const cai: CompanionActionInfo = {
@@ -175,5 +179,130 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(isOldLevelToOutputAction(badObsoleteOutputLevelAction)).toBe(true)
 		expect(badObsoleteOutputLevelAction.actionId).toBe(ObsoleteLevelToOutputId)
 		expect(badObsoleteOutputLevelAction.options.input).toBe(40)
+	})
+})
+
+function makeObsoleteOutputPanBalanceAction(input: number, panBalance: PanBalanceChoice): CompanionActionInfo {
+	const cai: CompanionActionInfo = {
+		id: 'abcOdOefghiOFjBkGHlJm',
+		controlId: '1/0/0',
+		actionId: ObsoletePanToOutputId,
+		options: {
+			input,
+			leveldb: panBalance,
+		},
+	}
+
+	return cai
+}
+
+describe('obsolete output action convert to sink-specific output pan/balance action', () => {
+	test('lr', () => {
+		const lrNeedsUpgrade = makeObsoleteOutputPanBalanceAction(0, 'CTR')
+
+		expect(isOldPanToOutputAction(lrNeedsUpgrade)).toBe(true)
+		expect('input' in lrNeedsUpgrade.options).toBe(true)
+
+		convertOldPanToOutputActionToSinkSpecific(lrNeedsUpgrade)
+
+		expect(isOldPanToOutputAction(lrNeedsUpgrade)).toBe(false)
+		expect(lrNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
+		expect(lrNeedsUpgrade.actionId).toBe(OutputActionId.LRPanBalanceOutput)
+		expect('input' in lrNeedsUpgrade.options).toBe(false)
+	})
+
+	test('mix 1', () => {
+		const mixNeedsUpgrade = makeObsoleteOutputPanBalanceAction(1, 'CTR')
+
+		expect(isOldPanToOutputAction(mixNeedsUpgrade)).toBe(true)
+		expect(mixNeedsUpgrade.options.input).toBe(1)
+
+		convertOldPanToOutputActionToSinkSpecific(mixNeedsUpgrade)
+
+		expect(isOldPanToOutputAction(mixNeedsUpgrade)).toBe(false)
+		expect(mixNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
+		expect(mixNeedsUpgrade.actionId).toBe(OutputActionId.MixPanBalanceOutput)
+		expect(mixNeedsUpgrade.options.input).toBe(0)
+	})
+
+	test('mix 12', () => {
+		const mixNeedsUpgrade = makeObsoleteOutputPanBalanceAction(12, 'CTR')
+
+		expect(isOldPanToOutputAction(mixNeedsUpgrade)).toBe(true)
+		expect(mixNeedsUpgrade.options.input).toBe(12)
+
+		convertOldPanToOutputActionToSinkSpecific(mixNeedsUpgrade)
+
+		expect(isOldPanToOutputAction(mixNeedsUpgrade)).toBe(false)
+		expect(mixNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
+		expect(mixNeedsUpgrade.actionId).toBe(OutputActionId.MixPanBalanceOutput)
+		expect(mixNeedsUpgrade.options.input).toBe(11)
+	})
+
+	test('invalid past mix 12', () => {
+		const badObsoleteOutputPanBalanceAction = makeObsoleteOutputPanBalanceAction(13, 'CTR')
+
+		expect(isOldPanToOutputAction(badObsoleteOutputPanBalanceAction)).toBe(true)
+		expect(badObsoleteOutputPanBalanceAction.options.input).toBe(13)
+
+		convertOldPanToOutputActionToSinkSpecific(badObsoleteOutputPanBalanceAction)
+
+		expect(isOldPanToOutputAction(badObsoleteOutputPanBalanceAction)).toBe(true)
+		expect(badObsoleteOutputPanBalanceAction.actionId).toBe(ObsoletePanToOutputId)
+		expect(badObsoleteOutputPanBalanceAction.options.input).toBe(13)
+	})
+
+	test('invalid before matrix 1', () => {
+		const badObsoleteOutputPanBalanceAction = makeObsoleteOutputPanBalanceAction(16, 'CTR')
+
+		expect(isOldPanToOutputAction(badObsoleteOutputPanBalanceAction)).toBe(true)
+		expect(badObsoleteOutputPanBalanceAction.options.input).toBe(16)
+
+		convertOldPanToOutputActionToSinkSpecific(badObsoleteOutputPanBalanceAction)
+
+		expect(isOldPanToOutputAction(badObsoleteOutputPanBalanceAction)).toBe(true)
+		expect(badObsoleteOutputPanBalanceAction.actionId).toBe(ObsoletePanToOutputId)
+		expect(badObsoleteOutputPanBalanceAction.options.input).toBe(16)
+	})
+
+	test('matrix 1', () => {
+		const matrixNeedsUpgrade = makeObsoleteOutputPanBalanceAction(17, 'CTR')
+
+		expect(isOldPanToOutputAction(matrixNeedsUpgrade)).toBe(true)
+		expect(matrixNeedsUpgrade.options.input).toBe(17)
+
+		convertOldPanToOutputActionToSinkSpecific(matrixNeedsUpgrade)
+
+		expect(isOldPanToOutputAction(matrixNeedsUpgrade)).toBe(false)
+		expect(matrixNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
+		expect(matrixNeedsUpgrade.actionId).toBe(OutputActionId.MatrixPanBalanceOutput)
+		expect(matrixNeedsUpgrade.options.input).toBe(0)
+	})
+
+	test('matrix 3', () => {
+		const matrixNeedsUpgrade = makeObsoleteOutputPanBalanceAction(19, 'CTR')
+
+		expect(isOldPanToOutputAction(matrixNeedsUpgrade)).toBe(true)
+		expect(matrixNeedsUpgrade.options.input).toBe(19)
+
+		convertOldPanToOutputActionToSinkSpecific(matrixNeedsUpgrade)
+
+		expect(isOldPanToOutputAction(matrixNeedsUpgrade)).toBe(false)
+		expect(matrixNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
+		expect(matrixNeedsUpgrade.actionId).toBe(OutputActionId.MatrixPanBalanceOutput)
+		expect(matrixNeedsUpgrade.options.input).toBe(2)
+	})
+
+	test('invalid past matrix 3', () => {
+		const matrixNeedsUpgrade = makeObsoleteOutputPanBalanceAction(20, 'CTR')
+
+		expect(isOldPanToOutputAction(matrixNeedsUpgrade)).toBe(true)
+		expect(matrixNeedsUpgrade.options.input).toBe(20)
+
+		convertOldPanToOutputActionToSinkSpecific(matrixNeedsUpgrade)
+
+		expect(isOldPanToOutputAction(matrixNeedsUpgrade)).toBe(true)
+		expect(matrixNeedsUpgrade.actionId).toBe(ObsoletePanToOutputId)
+		expect(matrixNeedsUpgrade.options.input).toBe(20)
 	})
 })

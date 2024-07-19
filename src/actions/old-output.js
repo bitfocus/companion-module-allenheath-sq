@@ -23,17 +23,6 @@ function fadeLevelToSpecificOutputAction(self, mixer, options, type) {
 }
 
 /**
- *
- * @param {import('../instance-interface.js').SQInstanceInterface} self
- * @param {import('../mixer/mixer.js').Mixer} mixer
- * @param {import('./to-source-or-sink.js').OptionValue} options
- */
-function panBalanceToOutputAction(self, mixer, options) {
-	const { input: fader, leveldb: panBalance } = options
-	mixer.setOutputPanBalance(fader, panBalance)
-}
-
-/**
  * Generate action definitions for adjusting the levels or pan/balance of
  * various mixer sinks when they're assigned to mixer outputs.
  *
@@ -150,31 +139,6 @@ export function oldOutputActions(self, mixer, choices, levelOption, fadingOption
 			],
 			callback: async ({ options }) => {
 				fadeLevelToSpecificOutputAction(self, mixer, options, 'dca')
-			},
-		},
-
-		[OutputActionId.OutputPanBalance]: {
-			name: 'Pan/Bal level to output',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Fader',
-					id: 'input',
-					default: 0,
-					choices: choices.panBalanceFaders,
-					minChoicesForSearch: 0,
-				},
-				panLevelOption,
-				ShowVar,
-			],
-			subscribe: async (action) => {
-				let opt = action.options
-				let val = self.getLevel(opt.input, 99, 0, [0x5f, 0], [0, 0])
-				mixer.midi.send(val.commands[0])
-				opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
-			},
-			callback: async ({ options }) => {
-				panBalanceToOutputAction(self, mixer, options)
 			},
 		},
 
