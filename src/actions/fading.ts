@@ -1,5 +1,8 @@
 import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { Model } from '../mixer/model.js'
+import type { InputOutputType } from '../mixer/model.js'
+import { toSourceOrSink } from './to-source-or-sink.js'
 
 /** Compute the set of level options for level-setting actions. */
 export function createLevels(): DropdownChoice[] {
@@ -26,6 +29,27 @@ export function createLevels(): DropdownChoice[] {
 		levels.push({ label: `${i} dB`, id: i })
 	}
 	return levels
+}
+
+/**
+ * Get the number of the specified fader from options for a fading action.
+ *
+ * @param instance
+ *   The instance in use.
+ * @param model
+ *   The model of the mixer.
+ * @param options
+ *   Options specified for the action.
+ * @param type
+ *   The type of the fader.
+ */
+export function getFader(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	type: InputOutputType,
+): number | null {
+	return toSourceOrSink(instance, model, options.input, type)
 }
 
 /**

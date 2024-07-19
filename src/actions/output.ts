@@ -10,6 +10,10 @@ export enum OutputActionId {
 	DCALevelOutput = 'dca_level_output',
 
 	OutputPanBalance = 'pan_to_output',
+
+	LRPanBalanceOutput = 'lr_panbalance_output',
+	MixPanBalanceOutput = 'mix_panbalance_output',
+	MatrixPanBalanceOutput = 'matrix_panbalance_output',
 }
 
 /**

@@ -1,6 +1,8 @@
 import { OutputActionId } from './output.js'
-import { getFadeTimeSeconds } from './fading.js'
+import { getFader, getFadeTimeSeconds } from './fading.js'
 import { SinkLevelInOutputBase } from '../mixer/parameters.js'
+import { getPanBalance, subscribeOperation } from './pan-balance.js'
+import { toSourceOrSink } from './to-source-or-sink.js'
 
 /**
  *
@@ -54,6 +56,13 @@ function panBalanceToOutputAction(self, mixer, options) {
  *   The set of all output-adjustment action definitions.
  */
 export function oldOutputActions(self, mixer, choices, levelOption, fadingOption, panLevelOption, connectionLabel) {
+	const ShowVar = {
+		type: 'textinput',
+		label: 'Variable to show level (click config button to refresh)',
+		id: 'showvar',
+		default: '',
+	}
+
 	return {
 		[OutputActionId.LRLevelOutput]: {
 			name: 'LR fader level to output',
@@ -156,12 +165,7 @@ export function oldOutputActions(self, mixer, choices, levelOption, fadingOption
 					minChoicesForSearch: 0,
 				},
 				panLevelOption,
-				{
-					type: 'textinput',
-					label: 'Variable to show level (click config button to refresh)',
-					id: 'showvar',
-					default: '',
-				},
+				ShowVar,
 			],
 			subscribe: async (action) => {
 				let opt = action.options
@@ -171,6 +175,90 @@ export function oldOutputActions(self, mixer, choices, levelOption, fadingOption
 			},
 			callback: async ({ options }) => {
 				panBalanceToOutputAction(self, mixer, options)
+			},
+		},
+
+		[OutputActionId.LRPanBalanceOutput]: {
+			name: 'LR Pan/Bal to output',
+			options: [
+				// There's only one LR, so don't include a fader option.
+				panLevelOption,
+				ShowVar,
+			],
+			subscribe: async (action) => {
+				subscribeOperation(self, mixer, mixer.model, action, connectionLabel, 'lr', [0x5f, 0], [0, 0])
+			},
+			callback: async ({ options }) => {
+				const panBalanceChoice = getPanBalance(self, options)
+				if (panBalanceChoice === null) {
+					return
+				}
+
+				mixer.setLROutputPanBalance(panBalanceChoice)
+			},
+		},
+
+		[OutputActionId.MixPanBalanceOutput]: {
+			name: 'Mix Pan/Bal to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.mixes,
+					minChoicesForSearch: 0,
+				},
+				panLevelOption,
+				ShowVar,
+			],
+			subscribe: async (action) => {
+				subscribeOperation(self, mixer, mixer.model, action, connectionLabel, 'mix', [0x5f, 0], [0x01, 0])
+			},
+			callback: async ({ options }) => {
+				const mix = getFader(self, mixer.model, options, 'mix')
+				if (mix === null) {
+					return
+				}
+
+				const panBalanceChoice = getPanBalance(self, options)
+				if (panBalanceChoice === null) {
+					return
+				}
+
+				mixer.setMixOutputPanBalance(mix, panBalanceChoice)
+			},
+		},
+
+		[OutputActionId.MatrixPanBalanceOutput]: {
+			name: 'Matrix Pan/Bal to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.matrixes,
+					minChoicesForSearch: 0,
+				},
+				panLevelOption,
+				ShowVar,
+			],
+			subscribe: async (action) => {
+				subscribeOperation(self, mixer, mixer.model, action, connectionLabel, 'matrix', [0x5f, 0], [0x11, 0])
+			},
+			callback: async ({ options }) => {
+				const matrix = getFader(self, mixer.model, options, 'matrix')
+				if (matrix === null) {
+					return
+				}
+
+				const panBalanceChoice = getPanBalance(self, options)
+				if (panBalanceChoice === null) {
+					return
+				}
+
+				mixer.setMatrixOutputPanBalance(matrix, panBalanceChoice)
 			},
 		},
 	}

@@ -1,3 +1,4 @@
+import { OutputActionId } from './actions/output.js'
 import { computeEitherParameters } from './mixer/parameters.js'
 import { sleep } from './utils/sleep.js'
 
@@ -420,5 +421,8 @@ export default {
 			sleep(300)
 		}
 		self.subscribeActions('pan_to_output')
+		self.subscribeActions(OutputActionId.LRPanBalanceOutput)
+		self.subscribeActions(OutputActionId.MixPanBalanceOutput)
+		self.subscribeActions(OutputActionId.MatrixPanBalanceOutput)
 	},
 }
