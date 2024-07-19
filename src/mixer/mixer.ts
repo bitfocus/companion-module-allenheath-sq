@@ -20,6 +20,8 @@ import {
 	type PanBalanceInSinkType,
 	PanBalanceOutput,
 	type Param,
+	type SinkPanBalanceInOutputType,
+	SinkPanBalanceInOutputBase,
 } from './parameters.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import type { PanBalanceChoice } from '../actions/pan-balance.js'
@@ -1096,6 +1098,61 @@ export class Mixer {
 		// Abuse LR as a "sink" whose category contains exactly one element to
 		// make the MSB/LSB parameter math do the desired thing.
 		this.#setPanBalance(fader, panBalance, 0, 'lr', PanBalanceOutput)
+	}
+
+	/**
+	 * Set the pan/balance of a `sink` of type `sinkType` when assigned to
+	 * physical mixer outputs.
+	 *
+	 * @param sink
+	 *   A sink, e.g. a value in the range `[0, 3)` if `sink` is a matrix
+	 *   and the mixer supports 3 mixes.
+	 * @param sinkType
+	 *   The type of `sink`.
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 */
+	#setPanBalanceSinkAsOutput(sink: number, sinkType: SinkPanBalanceInOutputType, panBalance: PanBalanceChoice): void {
+		const count = this.model.count
+		if (count[sinkType] <= sink) {
+			throw new Error(`Attempting to set pan/balance for out-of-range ${sinkType} ${sink} used as output`)
+		}
+
+		const base = SinkPanBalanceInOutputBase[sinkType]
+		// Abuse LR as a "sink" whose category contains exactly one element to
+		// make the MSB/LSB parameter math do the desired thing.
+		this.#setPanBalance(sink, panBalance, 0, 'lr', base)
+	}
+
+	/**
+	 * Set the balance of LR when assigned to physical mixer outputs.
+	 *
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 */
+	setLROutputPanBalance(panBalance: PanBalanceChoice): void {
+		this.#setPanBalanceSinkAsOutput(0, 'lr', panBalance)
+	}
+
+	/**
+	 * Set the balance of a mix (not including LR) when assigned to physical
+	 * mixer outputs.
+	 *
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 */
+	setMixOutputPanBalance(mix: number, panBalance: PanBalanceChoice): void {
+		this.#setPanBalanceSinkAsOutput(mix, 'mix', panBalance)
+	}
+
+	/**
+	 * Set the balance of a matrix when assigned to physical mixer outputs.
+	 *
+	 * @param panBalance
+	 *   A pan/balance choice; see `createPanLevels` for details.
+	 */
+	setMatrixOutputPanBalance(matrix: number, panBalance: PanBalanceChoice): void {
+		this.#setPanBalanceSinkAsOutput(matrix, 'matrix', panBalance)
 	}
 
 	/** Press (and do not subsequently release) a softkey. */
