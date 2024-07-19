@@ -7,22 +7,6 @@ import { SinkLevelInOutputBase } from '../mixer/parameters.js'
  * @param {import('../instance-interface.js').SQInstanceInterface} self
  * @param {import('../mixer/mixer.js').Mixer} mixer
  * @param {import('@companion-module/base').CompanionOptionValues} options
- */
-function fadeLevelToOutputAction(self, mixer, options) {
-	const fadeTimeSeconds = getFadeTimeSeconds(self, options)
-	if (fadeTimeSeconds === null) {
-		return
-	}
-
-	const commands = self.fadeLevel(fadeTimeSeconds, options.input, 99, 0, options.leveldb, [0x4f, 0], [0, 0])
-	mixer.midi.sendCommands(commands)
-}
-
-/**
- *
- * @param {import('../instance-interface.js').SQInstanceInterface} self
- * @param {import('../mixer/mixer.js').Mixer} mixer
- * @param {import('@companion-module/base').CompanionOptionValues} options
  * @param {import('../mixer/parameters.js').SinkLevelInOutputType} type
  */
 function fadeLevelToSpecificOutputAction(self, mixer, options, type) {
@@ -71,25 +55,6 @@ function panBalanceToOutputAction(self, mixer, options) {
  */
 export function oldOutputActions(self, mixer, choices, levelOption, fadingOption, panLevelOption, connectionLabel) {
 	return {
-		[OutputActionId.OutputLevel]: {
-			name: 'Fader level to output',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Fader',
-					id: 'input',
-					default: 0,
-					choices: choices.allFaders,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
-			callback: async ({ options }) => {
-				fadeLevelToOutputAction(self, mixer, options)
-			},
-		},
-
 		[OutputActionId.LRLevelOutput]: {
 			name: 'LR fader level to output',
 			options: [
