@@ -21,6 +21,8 @@ import {
 	type Param,
 	type SinkPanBalanceInOutputType,
 	SinkPanBalanceInOutputBase,
+	SinkLevelInOutputBase,
+	type SinkLevelInOutputType,
 } from './parameters.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import type { PanBalanceChoice } from '../actions/pan-balance.js'
@@ -1086,6 +1088,131 @@ export class Mixer {
 	 */
 	setGroupPanBalanceInMatrix(group: number, panBalance: PanBalanceChoice, matrix: number): void {
 		this.#setPanBalanceInSink(group, 'group', panBalance, matrix, 'matrix', 'group-matrix')
+	}
+
+	/**
+	 * Fade the level of the given sink used as a mixer output from `start` to
+	 * `end` over `fadeTimeMs` milliseconds.
+	 *
+	 * @param sink
+	 *   The number of the sink within its type, e.g. `2` for mix 3.
+	 * @param sinkType
+	 *   The type that `sink` is, e.g. `'mix'` for mix 3.
+	 * @param start
+	 *   The presumed level at start of the fade.  (This *should* be equal to
+	 *   the current level; if it isn't, the effect will be to immediately jump
+	 *   to a level near `start` and then fade from that to `end` over
+	 *   `fadeTimeMs`.)
+	 * @param end
+	 *   The desired level at end of the fade.
+	 * @param fadeTimeMs
+	 *   The amount of time, in milliseconds, that the fade should take.  (The
+	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
+	 */
+	#fadeSinkAsOutput(sink: number, sinkType: SinkLevelInOutputType, start: Level, end: Level, fadeTimeMs: number): void {
+		const count = this.model.count
+		const sinkCount = count[sinkType]
+		if (!(sink < sinkCount)) {
+			throw new RangeError(`Attempting to fade level of nonexistent ${sinkType} ${sink} as mixer output`)
+		}
+
+		const { MSB, LSB } = computeParameters(sink, 0, 1, SinkLevelInOutputBase[sinkType])
+		this.#fadeToLevel(MSB, LSB, start, end, fadeTimeMs)
+	}
+
+	/**
+	 * Fade the level of LR used as a mixer output from `start` to `end` over
+	 * `fadeTimeMs` milliseconds.
+	 *
+	 * @param start
+	 *   The presumed level at start of the fade.  (This *should* be equal to
+	 *   the current level; if it isn't, the effect will be to immediately jump
+	 *   to a level near `start` and then fade from that to `end` over
+	 *   `fadeTimeMs`.)
+	 * @param end
+	 *   The desired level at end of the fade.
+	 * @param fadeTimeMs
+	 *   The amount of time, in milliseconds, that the fade should take.  (The
+	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
+	 */
+	fadeLROutputLevel(start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSinkAsOutput(0, 'lr', start, end, fadeTimeMs)
+	}
+
+	/**
+	 * Fade the level of the given mix used as a mixer output from `start` to
+	 * `end` over `fadeTimeMs` milliseconds.
+	 *
+	 * @param start
+	 *   The presumed level at start of the fade.  (This *should* be equal to
+	 *   the current level; if it isn't, the effect will be to immediately jump
+	 *   to a level near `start` and then fade from that to `end` over
+	 *   `fadeTimeMs`.)
+	 * @param end
+	 *   The desired level at end of the fade.
+	 * @param fadeTimeMs
+	 *   The amount of time, in milliseconds, that the fade should take.  (The
+	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
+	 */
+	fadeMixOutputLevel(mix: number, start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSinkAsOutput(mix, 'mix', start, end, fadeTimeMs)
+	}
+
+	/**
+	 * Fade the level of the given FX send used as a mixer output from `start`
+	 * to `end` over `fadeTimeMs` milliseconds.
+	 *
+	 * @param start
+	 *   The presumed level at start of the fade.  (This *should* be equal to
+	 *   the current level; if it isn't, the effect will be to immediately jump
+	 *   to a level near `start` and then fade from that to `end` over
+	 *   `fadeTimeMs`.)
+	 * @param end
+	 *   The desired level at end of the fade.
+	 * @param fadeTimeMs
+	 *   The amount of time, in milliseconds, that the fade should take.  (The
+	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
+	 */
+	fadeFXSendOutputLevel(fxSend: number, start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSinkAsOutput(fxSend, 'fxSend', start, end, fadeTimeMs)
+	}
+
+	/**
+	 * Fade the level of the given matrix used as a mixer output from `start`
+	 * to `end` over `fadeTimeMs` milliseconds.
+	 *
+	 * @param start
+	 *   The presumed level at start of the fade.  (This *should* be equal to
+	 *   the current level; if it isn't, the effect will be to immediately jump
+	 *   to a level near `start` and then fade from that to `end` over
+	 *   `fadeTimeMs`.)
+	 * @param end
+	 *   The desired level at end of the fade.
+	 * @param fadeTimeMs
+	 *   The amount of time, in milliseconds, that the fade should take.  (The
+	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
+	 */
+	fadeMatrixOutputLevel(matrix: number, start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSinkAsOutput(matrix, 'matrix', start, end, fadeTimeMs)
+	}
+
+	/**
+	 * Fade the level of the given DCA used as a mixer output from `start` to
+	 * `end` over `fadeTimeMs` milliseconds.
+	 *
+	 * @param start
+	 *   The presumed level at start of the fade.  (This *should* be equal to
+	 *   the current level; if it isn't, the effect will be to immediately jump
+	 *   to a level near `start` and then fade from that to `end` over
+	 *   `fadeTimeMs`.)
+	 * @param end
+	 *   The desired level at end of the fade.
+	 * @param fadeTimeMs
+	 *   The amount of time, in milliseconds, that the fade should take.  (The
+	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
+	 */
+	fadeDCAOutputLevel(dca: number, start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSinkAsOutput(dca, 'dca', start, end, fadeTimeMs)
 	}
 
 	/**
