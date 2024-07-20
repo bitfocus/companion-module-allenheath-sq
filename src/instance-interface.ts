@@ -24,7 +24,6 @@ export interface SQInstanceInterface {
 	getConfigFields(): sqInstance['getConfigFields']
 
 	// Defined in api.js, added via Object.assign.
-	setLevel(ch: number, mx: number, ct: number, lv: Level, oMB: ParamHalf, oLB: ParamHalf): Promise<number[][]>
 	getLevel(
 		ch: number,
 		mx: number,
@@ -32,14 +31,5 @@ export interface SQInstanceInterface {
 		oMB: ParamHalf,
 		oLB: ParamHalf,
 	): { commands: [number[]]; channel: [number, number] }
-	fadeLevel(
-		fd: number,
-		ch: number,
-		mx: number,
-		ct: number,
-		lv: Level,
-		oMB: ParamHalf,
-		oLB: ParamHalf,
-	): Promise<number[][]>
 	getRemoteLevel(): void
 }
