@@ -6,8 +6,7 @@ import { type SQInstanceInterface as sqInstance } from '../instance-interface.js
 import { levelActions } from './level.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { muteActions } from './mute.js'
-import { outputActions as oldOutputActions } from './old-output.js'
-import { outputActions as newOutputActions } from './output.js'
+import { outputActions } from './output.js'
 import { panBalanceActions } from './pan-balance.js'
 import { sceneActions } from './scene.js'
 import { softKeyActions } from './softkey.js'
@@ -66,8 +65,6 @@ export function getActions(
 		choices: choices.panLevels,
 		minChoicesForSearch: 0,
 	} as const
-
-	const outputActions = Math.random() >= 0 ? oldOutputActions : newOutputActions
 
 	return {
 		...muteActions(self, mixer, choices),
