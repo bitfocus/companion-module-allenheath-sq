@@ -1,5 +1,25 @@
-import type { CompanionMigrationAction } from '@companion-module/base'
+import type {
+	CompanionInputFieldDropdown,
+	CompanionMigrationAction,
+	CompanionOptionValues,
+} from '@companion-module/base'
 import { getCommonCount } from '../mixer/models.js'
+import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { Mixer } from '../mixer/mixer.js'
+import type { Choices } from '../choices.js'
+import type { ActionDefinitions } from './actionid.js'
+import {
+	type Param,
+	SinkLevelInOutputBase,
+	type SinkLevelInOutputType,
+	type SinkPanBalanceInOutputType,
+	SinkPanBalanceInOutputBase,
+	computeParameters,
+} from '../mixer/parameters.js'
+import { getFadeParameters, getFader } from './fading.js'
+import { toSourceOrSink } from './to-source-or-sink.js'
+import type { Model } from '../mixer/model.js'
+import { getPanBalance, type PanBalanceChoice } from './pan-balance.js'
 
 /** Action IDs for all actions affecting sinks used as direct mixer outputs. */
 export enum OutputActionId {
@@ -201,4 +221,369 @@ export function convertOldPanToOutputActionToSinkSpecific(action: CompanionMigra
 
 	options.input = newInput
 	action.actionId = newActionId
+}
+
+type FadeLevelInfo = {
+	sink: number
+	param: Param
+}
+
+function getLevelType(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	sinkType: SinkLevelInOutputType,
+): FadeLevelInfo | null {
+	const sink = toSourceOrSink(instance, model, options.input, sinkType)
+	if (sink === null) {
+		return null
+	}
+
+	return {
+		sink,
+		param: SinkLevelInOutputBase[sinkType],
+	}
+}
+
+type PanBalanceInfo = {
+	fader: number
+	panBalanceChoice: PanBalanceChoice
+}
+
+function getPanBalanceType(
+	self: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	type: SinkPanBalanceInOutputType,
+): PanBalanceInfo | null {
+	const fader = getFader(self, model, options, type)
+	if (fader === null) {
+		return null
+	}
+
+	const panBalanceChoice = getPanBalance(self, options)
+	if (panBalanceChoice === null) {
+		return null
+	}
+
+	return {
+		fader,
+		panBalanceChoice,
+	}
+}
+
+/**
+ * Generate action definitions for adjusting the levels or pan/balance of
+ * various mixer sinks when they're assigned to mixer outputs.
+ *
+ * @param self
+ *   The instance for which actions are being generated.
+ * @param mixer
+ *   The mixer object to use when executing the actions.
+ * @param choices
+ *   Option choices for use in the actions.
+ * @param levelOption
+ *   An action option specifying all levels an output can be set to.
+ * @param fadingOption
+ *   An action option specifying various fade times over which the set to level
+ *   should take place.
+ * @param panLevelOption
+ *   An action option specifying pan amounts for the output.
+ * @param connectionLabel
+ *   The label of the SQ instance.
+ * @returns
+ *   The set of all output-adjustment action definitions.
+ */
+export function outputActions(
+	self: sqInstance,
+	mixer: Mixer,
+	choices: Choices,
+	levelOption: CompanionInputFieldDropdown,
+	fadingOption: CompanionInputFieldDropdown,
+	panLevelOption: CompanionInputFieldDropdown,
+	connectionLabel: string,
+): ActionDefinitions<OutputActionId> {
+	const model = mixer.model
+
+	const ShowVar = {
+		type: 'textinput',
+		label: 'Instance variable containing pan/balance level (click Learn to refresh)',
+		id: 'showvar',
+		default: '',
+	} as const
+
+	return {
+		[OutputActionId.LRLevelOutput]: {
+			name: 'LR fader level to output',
+			options: [
+				// There's only one LR, so don't include an input option.
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				const param = SinkLevelInOutputBase['lr']
+				const fade = getFadeParameters(self, options, param)
+				if (fade === null) {
+					return
+				}
+				const { start, end, fadeTimeMs } = fade
+
+				mixer.fadeLROutputLevel(start, end, fadeTimeMs)
+			},
+		},
+
+		[OutputActionId.MixLevelOutput]: {
+			name: 'Mix fader level to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.mixes,
+					minChoicesForSearch: 0,
+				},
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				const levelType = getLevelType(self, model, options, 'mix')
+				if (levelType === null) {
+					return
+				}
+				const { sink: mix, param } = levelType
+
+				const fade = getFadeParameters(self, options, param)
+				if (fade === null) {
+					return
+				}
+				const { start, end, fadeTimeMs } = fade
+
+				mixer.fadeMixOutputLevel(mix, start, end, fadeTimeMs)
+			},
+		},
+
+		[OutputActionId.FXSendLevelOutput]: {
+			name: 'FX Send fader level to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.fxSends,
+					minChoicesForSearch: 0,
+				},
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				const levelType = getLevelType(self, model, options, 'fxSend')
+				if (levelType === null) {
+					return
+				}
+				const { sink: fxSend, param } = levelType
+
+				const fade = getFadeParameters(self, options, param)
+				if (fade === null) {
+					return
+				}
+				const { start, end, fadeTimeMs } = fade
+
+				mixer.fadeFXSendOutputLevel(fxSend, start, end, fadeTimeMs)
+			},
+		},
+
+		[OutputActionId.MatrixLevelOutput]: {
+			name: 'Matrix fader level to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.matrixes,
+					minChoicesForSearch: 0,
+				},
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				const levelType = getLevelType(self, model, options, 'matrix')
+				if (levelType === null) {
+					return
+				}
+				const { sink: matrix, param } = levelType
+
+				const fade = getFadeParameters(self, options, param)
+				if (fade === null) {
+					return
+				}
+				const { start, end, fadeTimeMs } = fade
+
+				mixer.fadeMatrixOutputLevel(matrix, start, end, fadeTimeMs)
+			},
+		},
+
+		[OutputActionId.DCALevelOutput]: {
+			name: 'DCA fader level to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.dcas,
+					minChoicesForSearch: 0,
+				},
+				levelOption,
+				fadingOption,
+			],
+			callback: async ({ options }) => {
+				const levelType = getLevelType(self, model, options, 'dca')
+				if (levelType === null) {
+					return
+				}
+				const { sink: dca, param } = levelType
+
+				const fade = getFadeParameters(self, options, param)
+				if (fade === null) {
+					return
+				}
+				const { start, end, fadeTimeMs } = fade
+
+				mixer.fadeDCAOutputLevel(dca, start, end, fadeTimeMs)
+			},
+		},
+
+		[OutputActionId.LRPanBalanceOutput]: {
+			name: 'LR Pan/Bal to output',
+			options: [
+				// There's only one LR, so don't include a fader option.
+				panLevelOption,
+				ShowVar,
+			],
+			learn: async ({ options }) => {
+				const { MSB, LSB } = SinkPanBalanceInOutputBase['lr']
+
+				return {
+					...options,
+					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+				}
+			},
+			subscribe: async (_action) => {
+				const { MSB, LSB } = SinkPanBalanceInOutputBase['lr']
+
+				// Send a "get" so the pan/balance variable is defined.
+				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
+			},
+			callback: async ({ options }) => {
+				const panBalanceChoice = getPanBalance(self, options)
+				if (panBalanceChoice === null) {
+					return
+				}
+
+				mixer.setLROutputPanBalance(panBalanceChoice)
+			},
+		},
+
+		[OutputActionId.MixPanBalanceOutput]: {
+			name: 'Mix Pan/Bal to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.mixes,
+					minChoicesForSearch: 0,
+				},
+				panLevelOption,
+				ShowVar,
+			],
+			learn: async ({ options }) => {
+				const mix = getFader(self, model, options, 'mix')
+				if (mix === null) {
+					return
+				}
+
+				const base = SinkPanBalanceInOutputBase['mix']
+				const { MSB, LSB } = computeParameters(mix, 0, 1, base)
+
+				return {
+					...options,
+					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+				}
+			},
+			subscribe: async ({ options }) => {
+				const mix = getFader(self, model, options, 'mix')
+				if (mix === null) {
+					return
+				}
+
+				const { MSB, LSB } = computeParameters(mix, 0, 1, SinkPanBalanceInOutputBase['mix'])
+
+				// Send a "get" so the pan/balance variable is defined.
+				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
+			},
+			callback: async ({ options }) => {
+				const panBalance = getPanBalanceType(self, model, options, 'mix')
+				if (panBalance === null) {
+					return
+				}
+				const { fader: mix, panBalanceChoice } = panBalance
+
+				mixer.setMixOutputPanBalance(mix, panBalanceChoice)
+			},
+		},
+
+		[OutputActionId.MatrixPanBalanceOutput]: {
+			name: 'Matrix Pan/Bal to output',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Fader',
+					id: 'input',
+					default: 0,
+					choices: choices.matrixes,
+					minChoicesForSearch: 0,
+				},
+				panLevelOption,
+				ShowVar,
+			],
+			learn: async ({ options }) => {
+				const matrix = getFader(self, model, options, 'matrix')
+				if (matrix === null) {
+					return
+				}
+
+				const { MSB, LSB } = computeParameters(matrix, 0, 1, SinkPanBalanceInOutputBase['matrix'])
+
+				return {
+					...options,
+					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+				}
+			},
+			subscribe: async ({ options }) => {
+				const matrix = getFader(self, model, options, 'matrix')
+				if (matrix === null) {
+					return
+				}
+
+				const { MSB, LSB } = computeParameters(matrix, 0, 1, SinkPanBalanceInOutputBase['matrix'])
+
+				// Send a "get" so the pan/balance variable is defined.
+				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
+			},
+			callback: async ({ options }) => {
+				const panBalance = getPanBalanceType(self, model, options, 'matrix')
+				if (panBalance === null) {
+					return
+				}
+				const { fader: matrix, panBalanceChoice } = panBalance
+
+				mixer.setMatrixOutputPanBalance(matrix, panBalanceChoice)
+			},
+		},
+	}
 }

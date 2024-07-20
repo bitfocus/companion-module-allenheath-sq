@@ -1,14 +1,8 @@
-import type {
-	CompanionActionInfo,
-	CompanionInputFieldDropdown,
-	CompanionOptionValues,
-	DropdownChoice,
-} from '@companion-module/base'
+import type { CompanionInputFieldDropdown, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
-import type { ParamHalf, SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'
-import type { InputOutputType, Model } from '../mixer/model.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { type PanBalance } from '../mixer/pan-balance.js'
 import { repr } from '../utils/pretty.js'
@@ -79,22 +73,6 @@ export function getPanBalance(instance: sqInstance, options: CompanionOptionValu
 
 	instance.log('error', `Invalid pan/balance specified, aborting action: ${repr(rawOptionVal)}`)
 	return null
-}
-
-export function subscribeOperation(
-	instance: sqInstance,
-	mixer: Mixer,
-	model: Model,
-	action: CompanionActionInfo,
-	connectionLabel: string,
-	sinkType: InputOutputType,
-	oMB: ParamHalf,
-	oLB: ParamHalf,
-): void {
-	const opt = action.options
-	const val = instance.getLevel(Number(opt.input), Number(opt.assign), model.count[sinkType], oMB, oLB)
-	mixer.midi.send(val.commands[0])
-	opt.showvar = `$(${connectionLabel}:pan_${val.channel[0]}.${val.channel[1]})`
 }
 
 /**
