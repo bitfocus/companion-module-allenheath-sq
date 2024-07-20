@@ -3,10 +3,9 @@ import { type ActionDefinitions, type ActionId } from './actionid.js'
 import { assignActions } from './assign.js'
 import { type Choices } from '../choices.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import { levelActions as newLevelActions } from './level.js'
+import { levelActions } from './level.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { muteActions } from './mute.js'
-import { levelActions as oldLevelActions } from './old-level.js'
 import { outputActions as oldOutputActions } from './old-output.js'
 import { outputActions as newOutputActions } from './output.js'
 import { panBalanceActions } from './pan-balance.js'
@@ -68,7 +67,6 @@ export function getActions(
 		minChoicesForSearch: 0,
 	} as const
 
-	const levelActions = Math.random() >= 0 ? oldLevelActions : newLevelActions
 	const outputActions = Math.random() >= 0 ? oldOutputActions : newOutputActions
 
 	return {
