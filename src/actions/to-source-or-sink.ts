@@ -59,3 +59,50 @@ export function toMixOrLR(instance: sqInstance, model: Model, optionValue: Optio
 	instance.log('error', `Invalid mix-or-LR (${optionValue})`)
 	return null
 }
+
+type SourceSinkType = InputOutputType | 'mix-or-lr'
+
+/**
+ * Convert an option value referring to a source or sink -- or either a mix *or*
+ * LR -- to its numeric value and actual type (which will be the input type
+ * unless mix-or-LR is specified, in which case the resulting type will be mix
+ * or LR).
+ *
+ * @param instance
+ *   The active module instance.
+ * @param model
+ *   The mixer model.
+ * @param optionValue
+ *   The option value identifying a source of type `type`.
+ * @param type
+ *   The expected type of the source/sink.  If this is `'mix-or-lr`', then the
+ *   option value is permitted to refer to either a mix or LR.
+ * @returns
+ *   `[n, type]` where `n` is the number of the source/sink (which will be `0`
+ *   to `n - 1`) and `type` is its actual type.
+ */
+export function toInputOutput(
+	instance: sqInstance,
+	model: Model,
+	optionValue: OptionValue,
+	type: SourceSinkType,
+): [number, InputOutputType] | null {
+	if (type === 'mix-or-lr') {
+		const inputOutput = toMixOrLR(instance, model, optionValue)
+		if (inputOutput === null) {
+			return null
+		}
+		if (inputOutput === 99) {
+			return [0, 'lr']
+		}
+
+		return [inputOutput, 'mix']
+	}
+
+	const inputOutput = toSourceOrSink(instance, model, optionValue, type)
+	if (inputOutput === null) {
+		return null
+	}
+
+	return [inputOutput, type]
+}

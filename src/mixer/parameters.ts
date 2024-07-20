@@ -157,6 +157,54 @@ export const AssignToSinkBase = {
 export type AssignToSinkType = keyof typeof AssignToSinkBase
 
 /**
+ * The base parameter MSB/LSB value corresponding to manipulation of the level
+ * of a mix (not including LR) in a matrix.
+ */
+const MixInMatrixLevelBase = { MSB: 0x4e, LSB: 0x27 }
+
+/**
+ * The base parameter MSB/LSB value corresponding to manipulation of the level
+ * of LR in a matrix.
+ */
+const LRInMatrixLevelBase = { MSB: 0x4e, LSB: 0x24 }
+
+/**
+ * The base parameter MSB/LSB value corresponding to manipulation of the level
+ * of an input channel in a mix (not including LR).
+ */
+const InputChannelInMixLevelBase = { MSB: 0x40, LSB: 0x44 }
+
+/**
+ * The base parameter MSB/LSB value corresponding to manipulation of the level
+ * of an input channel in LR.
+ */
+const InputChannelInLRLevelBase = { MSB: 0x40, LSB: 0x00 }
+
+/**
+ * The base parameter MSB/LSB value corresponding to manipulation of the level
+ * of a group in a mix (not including LR).
+ */
+const GroupInMixLevelBase = { MSB: 0x45, LSB: 0x04 }
+
+/**
+ * The base parameter MSB/LSB value corresponding to manipulation of the level
+ * of a group in LR.
+ */
+const GroupInLRLevelBase = { MSB: 0x40, LSB: 0x30 }
+
+/**
+ * The base parameter MSB/LSB value corresponding to manipulation of the level
+ * of an FX return in a mix (not including LR).
+ */
+const FXReturnInMixLevelBase = { MSB: 0x46, LSB: 0x14 }
+
+/**
+ * The base parameter MSB/LSB value corresponding to manipulation of the level
+ * of an FX return in LR.
+ */
+const FXReturnInLRLevelBase = { MSB: 0x40, LSB: 0x3c }
+
+/**
  * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
  * levels of a source of the given type in a sink of the given type.  (Note that
  * the `'mix'` category is mixes only and never includes the LR mix.)
@@ -165,22 +213,66 @@ export type AssignToSinkType = keyof typeof AssignToSinkBase
  * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
  */
 export const LevelInSinkBase = {
-	'inputChannel-mix': { MSB: 0x40, LSB: 0x44 },
-	'inputChannel-lr': { MSB: 0x40, LSB: 0x00 },
-	'group-mix': { MSB: 0x45, LSB: 0x04 },
-	'group-lr': { MSB: 0x40, LSB: 0x30 },
+	'inputChannel-mix': InputChannelInMixLevelBase,
+	'inputChannel-lr': InputChannelInLRLevelBase,
+	'group-mix': GroupInMixLevelBase,
+	'group-lr': GroupInLRLevelBase,
 	'group-fxSend': { MSB: 0x4d, LSB: 0x54 },
-	'fxReturn-mix': { MSB: 0x46, LSB: 0x14 },
-	'fxReturn-lr': { MSB: 0x40, LSB: 0x3c },
+	'fxReturn-mix': FXReturnInMixLevelBase,
+	'fxReturn-lr': FXReturnInLRLevelBase,
 	'fxReturn-fxSend': { MSB: 0x4e, LSB: 0x04 },
 	'fxReturn-group': { MSB: 0x4b, LSB: 0x34 },
 	'inputChannel-fxSend': { MSB: 0x4c, LSB: 0x14 },
-	'mix-matrix': { MSB: 0x4e, LSB: 0x27 },
-	'lr-matrix': { MSB: 0x4e, LSB: 0x24 },
+	'mix-matrix': MixInMatrixLevelBase,
+	'lr-matrix': LRInMatrixLevelBase,
 	'group-matrix': { MSB: 0x4e, LSB: 0x4b },
 } satisfies SourceToSink
 
 export type LevelInSinkType = keyof typeof LevelInSinkBase
+
+/**
+ * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
+ * levels of a source of the given type in a sink that's either a mix or LR.
+ *
+ * These values are the pairs at top left of relevant subtables in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ *
+ * XXX Can we avoid having two different tables to look up these base values?
+ */
+export const LevelInMixOrLRBase = {
+	inputChannel: {
+		mix: InputChannelInMixLevelBase,
+		lr: InputChannelInLRLevelBase,
+	},
+	group: {
+		mix: GroupInMixLevelBase,
+		lr: GroupInLRLevelBase,
+	},
+	fxReturn: {
+		mix: FXReturnInMixLevelBase,
+		lr: FXReturnInLRLevelBase,
+	},
+} satisfies SourceToMixOrLR
+
+export type LevelInMixOrLRType = keyof typeof LevelInMixOrLRBase
+
+/**
+ * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
+ * levels of a source that's either a mix or LR in a sink of the given type.
+ *
+ * These values are the pairs at top left of relevant subtables in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ *
+ * XXX Can we avoid having two different tables to look up these base values?
+ */
+export const MixOrLRLevelInSinkBase = {
+	matrix: {
+		mix: MixInMatrixLevelBase,
+		lr: LRInMatrixLevelBase,
+	},
+} satisfies SourceToMixOrLR
+
+export type LRLevelInSinkType = keyof typeof MixOrLRLevelInSinkBase
 
 /**
  * Base parameter MSB/LSB values corresponding to setting the mixer pan/balance

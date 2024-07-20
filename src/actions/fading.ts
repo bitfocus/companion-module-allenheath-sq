@@ -1,8 +1,10 @@
 import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import type { Model } from '../mixer/model.js'
-import type { InputOutputType } from '../mixer/model.js'
+import type { Level } from '../mixer/level.js'
+import type { InputOutputType, Model } from '../mixer/model.js'
+import type { Param } from '../mixer/parameters.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
+import { repr } from '../utils/pretty.js'
 
 /** Compute the set of level options for level-setting actions. */
 export function createLevels(): DropdownChoice[] {
@@ -68,4 +70,99 @@ export function getFadeTimeSeconds(instance: sqInstance, options: CompanionOptio
 
 	instance.log('error', `Bad fade time ${fadeSeconds} seconds, aborting`)
 	return null
+}
+
+type FadeParameters = {
+	start: Level
+	end: Level
+	fadeTimeMs: number
+}
+
+export const MsPerSecond = 1000
+
+/**
+ * Get the start, end, and duration of a fade of the given NRPN.
+ *
+ * @param instance
+ *   The instance in use.
+ * @param options
+ *   Options specified for the action.
+ * @param MSB
+ *   The MSB of the NRPN.
+ * @param LSB
+ *   The LSB of the NRPN.
+ * @returns
+ *   Information about the requested fade.
+ */
+export function getFadeParameters(
+	instance: sqInstance,
+	options: CompanionOptionValues,
+	{ MSB, LSB }: Param,
+): FadeParameters | null {
+	const fadeTimeMs = Number(options.fade) * MsPerSecond
+	if (!(fadeTimeMs >= 0)) {
+		instance.log('error', `Bad fade time ${fadeTimeMs} milliseconds, aborting`)
+		return null
+	}
+
+	// XXX It should be possible to eliminate the fallibility and range/type
+	//     errors by not storing the previous level in a barely-typed
+	//     variable.
+	let start: Level
+	{
+		const levelValue = instance.getVariableValue(`level_${MSB}.${LSB}`)
+		switch (typeof levelValue) {
+			case 'string':
+				if (levelValue !== '-inf') {
+					instance.log('error', `Bad start level: ${levelValue}`)
+					return null
+				}
+				start = '-inf'
+				break
+			case 'number':
+				if (!(-90 < levelValue && levelValue <= 10)) {
+					instance.log('error', `Bad start level: ${levelValue}`)
+					return null
+				}
+				start = levelValue
+				break
+			default:
+				instance.log('error', `Bad start level`)
+				return null
+		}
+	}
+
+	let end: Level
+	const levelOption = options.leveldb
+	if (typeof levelOption === 'number' && -90 < levelOption && levelOption <= 10) {
+		end = levelOption
+	} else if (levelOption === '-inf') {
+		end = '-inf'
+	} else if (levelOption === 1000) {
+		end = start
+	} else if (typeof levelOption === 'string' && levelOption.startsWith('step')) {
+		const stepAmount = Number(levelOption.slice(4))
+		if (Number.isNaN(stepAmount)) {
+			instance.log('error', `Unexpected step amount: ${repr(levelOption)}`)
+			return null
+		}
+
+		const endLevel = (start === '-inf' ? -90 : start) + stepAmount
+		if (endLevel <= -90) {
+			end = '-inf'
+		} else if (10 <= endLevel) {
+			end = 10
+		} else {
+			end = endLevel
+		}
+	} else {
+		instance.log('error', `Bad level request: ${repr(levelOption)}`)
+		return null
+	}
+
+	return {
+		start,
+		end,
+		fadeTimeMs,
+	}
 }

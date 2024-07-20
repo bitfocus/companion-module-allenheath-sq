@@ -19,7 +19,7 @@ import { getFadeTimeSeconds } from './fading.js'
  * @returns {import('./actionid.js').ActionDefinitions<import('./level.js').LevelActionId>}
  *   The set of all level action definitions.
  */
-export function oldLevelActions(self, mixer, choices, levelOption, fadingOption) {
+export function levelActions(self, mixer, choices, levelOption, fadingOption) {
 	const model = mixer.model
 
 	return {
