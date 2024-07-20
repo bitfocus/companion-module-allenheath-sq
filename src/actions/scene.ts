@@ -3,6 +3,7 @@ import { type Mixer } from '../mixer/mixer.js'
 import { type ActionDefinitions } from './actionid.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type OptionValue } from './to-source-or-sink.js'
+import { repr } from '../utils/pretty.js'
 
 /** Action IDs for all actions that change the mixer's current scene. */
 export enum SceneActionId {
@@ -16,7 +17,7 @@ function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): 
 		return scene
 	}
 
-	instance.log('error', `Attempting to recall invalid scene ${JSON.stringify(sceneOption)}, ignoring`)
+	instance.log('error', `Attempting to recall invalid scene ${repr(sceneOption)}, ignoring`)
 	return null
 }
 
@@ -29,7 +30,7 @@ function toSceneStep(instance: sqInstance, stepOption: OptionValue): number | nu
 		return step
 	}
 
-	instance.log('error', `Attempting to step an invalid amount ${JSON.stringify(stepOption)}, ignoring`)
+	instance.log('error', `Attempting to step an invalid amount ${repr(stepOption)}, ignoring`)
 	return null
 }
 

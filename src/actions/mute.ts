@@ -10,6 +10,7 @@ import { type ActionDefinitions } from './actionid.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { MuteOperation } from '../mixer/mixer.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
+import { repr } from '../utils/pretty.js'
 
 /**
  * Action IDs for all actions that mute, unmute, or toggle muting of a mixer
@@ -89,7 +90,7 @@ function getMuteOptions(
 		case MuteOperation.Off:
 			return { strip, op }
 		default:
-			instance.log('error', `Mute option has invalid value, action aborted: ${JSON.stringify(muteOption)}`)
+			instance.log('error', `Mute option has invalid value, action aborted: ${repr(muteOption)}`)
 			return null
 	}
 }

@@ -11,6 +11,7 @@ import { type Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { type PanBalance } from '../mixer/pan-balance.js'
+import { repr } from '../utils/pretty.js'
 
 /**
  * Action IDs for all actions setting the pan/balance of a mixer source in a
@@ -70,7 +71,7 @@ function getPanBalance(instance: sqInstance, options: CompanionOptionValues): Pa
 		}
 	}
 
-	instance.log('error', `Invalid pan/balance specified, aborting action: ${JSON.stringify(rawOptionVal)}`)
+	instance.log('error', `Invalid pan/balance specified, aborting action: ${repr(rawOptionVal)}`)
 	return null
 }
 

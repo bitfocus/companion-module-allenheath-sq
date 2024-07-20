@@ -12,3 +12,20 @@ export function prettyBytes(message: readonly number[]): string {
 export function manyPrettyBytes(...messages: readonly number[][]): string {
 	return messages.map(prettyBytes).join(' ')
 }
+
+type Representable =
+	| undefined
+	| null
+	| boolean
+	| number
+	| string
+	| readonly Representable[]
+	| { [key: string]: Representable }
+
+/** Generate a debug representation of `val`. */
+export function repr(val: Representable): string {
+	if (val === undefined) {
+		return 'undefined'
+	}
+	return JSON.stringify(val)
+}

@@ -4,6 +4,7 @@ import { type ActionDefinitions } from './actionid.js'
 import { type Model } from '../mixer/model.js'
 import { type Choices } from '../choices.js'
 import { type Mixer } from '../mixer/mixer.js'
+import { repr } from '../utils/pretty.js'
 
 /** Action IDs for all actions that operate softkeys. */
 export enum SoftKeyId {
@@ -35,7 +36,7 @@ function getSoftKeyOptions(instance: sqInstance, model: Model, options: Companio
 		case SoftKeyOp.Toggle:
 			return { softKey, op }
 		default:
-			instance.log('error', `Bad softkey option value ${JSON.stringify(op)}, ignoring`)
+			instance.log('error', `Bad softkey option value ${repr(op)}, ignoring`)
 			return null
 	}
 }

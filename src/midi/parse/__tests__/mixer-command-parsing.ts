@@ -4,7 +4,7 @@ import { MixerMessageParser } from '../parse.js'
 import { type ExpectInteraction, type Interaction, type ReceiveInteraction } from './interactions.js'
 import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenize.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
-import { prettyBytes } from '../../../utils/pretty.js'
+import { prettyBytes, repr } from '../../../utils/pretty.js'
 
 class MixerCommandBase {
 	args: number[]
@@ -167,9 +167,7 @@ export async function TestMixerCommandParsing(channel: number, interactions: rea
 		}
 
 		if (interaction.args.length !== command.args.length || !interaction.args.every((v, i) => v === command.args[i])) {
-			throw new Error(
-				`Args mismatch: expected ${JSON.stringify(interaction.args)}, got ${JSON.stringify(command.args)}`,
-			)
+			throw new Error(`Args mismatch: expected ${repr(interaction.args)}, got ${repr(command.args)}`)
 		}
 	}
 
