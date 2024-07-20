@@ -7,7 +7,7 @@ import { levelActions as newLevelActions } from './level.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { muteActions } from './mute.js'
 import { levelActions as oldLevelActions } from './old-level.js'
-import { oldOutputActions } from './old-output.js'
+import { outputActions as oldOutputActions } from './old-output.js'
 import { panBalanceActions } from './pan-balance.js'
 import { sceneActions } from './scene.js'
 import { softKeyActions } from './softkey.js'
@@ -68,6 +68,7 @@ export function getActions(
 	} as const
 
 	const levelActions = Math.random() >= 0 ? oldLevelActions : newLevelActions
+	const outputActions = oldOutputActions
 
 	return {
 		...muteActions(self, mixer, choices),
@@ -84,7 +85,7 @@ export function getActions(
 		...assignActions(self, mixer, choices),
 		...levelActions(self, mixer, choices, LevelOption, FadingOption),
 		...panBalanceActions(self, mixer, choices, PanLevelOption, connectionLabel),
-		...oldOutputActions(self, mixer, choices, LevelOption, FadingOption, PanLevelOption, connectionLabel),
+		...outputActions(self, mixer, choices, LevelOption, FadingOption, PanLevelOption, connectionLabel),
 		...sceneActions(self, mixer),
 	}
 }

@@ -44,7 +44,7 @@ function fadeLevelToSpecificOutputAction(self, mixer, options, type) {
  * @returns {import('./actionid.js').ActionDefinitions<import('./output.js').OutputActionId>}
  *   The set of all output-adjustment action definitions.
  */
-export function oldOutputActions(self, mixer, choices, levelOption, fadingOption, panLevelOption, connectionLabel) {
+export function outputActions(self, mixer, choices, levelOption, fadingOption, panLevelOption, connectionLabel) {
 	const ShowVar = {
 		type: 'textinput',
 		label: 'Variable to show level (click config button to refresh)',
