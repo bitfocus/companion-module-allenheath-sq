@@ -34,7 +34,10 @@ export function createLevels(): DropdownChoice[] {
  * time, in seconds.
  */
 export function getFadeTimeSeconds(instance: sqInstance, options: CompanionOptionValues): number | null {
-	const fadeSeconds = Number(options.fade)
+	// Presets that incidentally invoke this function don't always seem to have
+	// specified a fade time, so treat a missing fade as zero to support them.
+	const fade = options.fade
+	const fadeSeconds = fade === undefined ? 0 : Number(fade)
 	if (fadeSeconds >= 0) {
 		return fadeSeconds
 	}
