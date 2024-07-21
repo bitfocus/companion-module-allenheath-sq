@@ -82,7 +82,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 				{
 					down: [
 						{
-							actionId: AssignActionId.ChannelToMix,
+							actionId: AssignActionId.InputChannelToMix,
 							options: {
 								inputChannel: talkbackChannel,
 								mixAssign: [LR],
@@ -90,7 +90,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 							},
 						},
 						{
-							actionId: AssignActionId.ChannelToMix,
+							actionId: AssignActionId.InputChannelToMix,
 							options: {
 								inputChannel: `${talkbackChannel}`,
 								mixAssign: [mix],
@@ -115,7 +115,7 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 					],
 					up: [
 						{
-							actionId: AssignActionId.ChannelToMix,
+							actionId: AssignActionId.InputChannelToMix,
 							options: {
 								inputChannel: `${talkbackChannel}`,
 								mixAssign: [mix],

@@ -10,8 +10,8 @@ import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink
  * sink.
  */
 export enum AssignActionId {
-	ChannelToMix = 'ch_to_mix',
-	ChannelToGroup = 'ch_to_grp',
+	InputChannelToMix = 'ch_to_mix',
+	InputChannelToGroup = 'ch_to_grp',
 	GroupToMix = 'grp_to_mix',
 	FXReturnToMix = 'fxr_to_mix',
 	FXReturnToGroup = 'fxr_to_grp',
@@ -96,7 +96,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 	const model = mixer.model
 
 	return {
-		[AssignActionId.ChannelToMix]: {
+		[AssignActionId.InputChannelToMix]: {
 			name: 'Assign channel to mix',
 			options: [
 				{
@@ -132,7 +132,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 			},
 		},
 
-		[AssignActionId.ChannelToGroup]: {
+		[AssignActionId.InputChannelToGroup]: {
 			name: 'Assign channel to group',
 			options: [
 				{
