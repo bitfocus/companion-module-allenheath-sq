@@ -85,7 +85,7 @@ export default {
 		const midi = mixer.midi
 
 		if (lv < 998 || ['L', 'R', 'C'].indexOf(lv.toString().slice(0, 1)) != -1 || lv == '-inf') {
-			levelCmds.push(midi.nrpnData(MSB, LSB, VC, FV))
+			levelCmds.push(midi.nrpnData(MSB, LSB, VC, VF))
 		} else {
 			if (lv == 1000) {
 				/* Last dB value */
