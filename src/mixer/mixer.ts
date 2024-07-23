@@ -1,6 +1,6 @@
 import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import { MidiSession, type NRPNDataMessage } from '../midi/session.js'
+import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../midi/session.js'
 import { type InputOutputType, Model } from './model.js'
 import type { ModelId } from './models.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
@@ -141,6 +141,11 @@ export class Mixer {
 	/** Stop this mixer connection. */
 	stop(status = InstanceStatus.Disconnected): void {
 		this.midi.stop(status)
+	}
+
+	/** Compute a mixer "get" command to retrieve the value of an NRPN. */
+	getNRPNValue(msb: number, lsb: number): NRPNIncDecMessage {
+		return this.midi.nrpnIncrement(msb, lsb, 0x7f)
 	}
 
 	/**
@@ -913,7 +918,7 @@ export class Mixer {
 			modifyPanBalanceCommand,
 			// Query the new pan/balance value to update its variable.
 			// XXX check later -- possibly only stepping left/right need this
-			midi.nrpnIncrement(MSB, LSB, 0x7f),
+			this.getNRPNValue(MSB, LSB),
 		])
 	}
 

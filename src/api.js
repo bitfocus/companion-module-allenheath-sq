@@ -107,7 +107,7 @@ export default {
 		}
 
 		// Retrive value after set command
-		levelCmds.push(midi.nrpnIncrement(MSB, LSB, 0x7f))
+		levelCmds.push(mixer.getNRPNValue(MSB, LSB))
 
 		return levelCmds
 	},
@@ -115,10 +115,11 @@ export default {
 	getLevel: function (ch, mx, ct, oMB, oLB) {
 		const { MSB, LSB } = computeEitherParameters(ch, mx, ct, { MSB: oMB[1], LSB: oLB[1] }, { MSB: oMB[0], LSB: oLB[0] })
 
-		const midi = this.mixer.midi
+		/** @type {import('./mixer/mixer.js').Mixer} */
+		const mixer = this.mixer
 
 		return {
-			commands: [midi.nrpnIncrement(MSB, LSB, 0x7f)],
+			commands: [mixer.getNRPNValue(MSB, LSB)],
 			channel: [MSB, LSB],
 		}
 	},
