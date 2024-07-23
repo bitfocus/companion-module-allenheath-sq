@@ -1,28 +1,11 @@
-import type {
-	CompanionStaticUpgradeProps,
-	CompanionStaticUpgradeResult,
-	CompanionUpgradeContext,
+import {
+	type CompanionStaticUpgradeProps,
+	type CompanionStaticUpgradeResult,
+	type CompanionUpgradeContext,
+	EmptyUpgradeScript,
 } from '@companion-module/base'
 import { configIsMissingModel, type SQInstanceConfig } from './config.js'
 import { DefaultModel } from './mixer/models.js'
-
-/**
- * A do-nothing upgrade script.
- *
- * Because Companion records last-upgrade-performed status by index into the
- * `UpgradeScripts` array, this function can't be deleted even though it does
- * nothing.
- */
-function DummyUpgradeScript(
-	_context: CompanionUpgradeContext<SQInstanceConfig>,
-	_props: CompanionStaticUpgradeProps<SQInstanceConfig>,
-): CompanionStaticUpgradeResult<SQInstanceConfig> {
-	return {
-		updatedConfig: null,
-		updatedActions: [],
-		updatedFeedbacks: [],
-	}
-}
 
 /**
  * This module once supported 'scene_recall' and 'current_scene' actions that
@@ -73,7 +56,7 @@ function EnsureModel(
 }
 
 export const UpgradeScripts = [
-	DummyUpgradeScript,
+	EmptyUpgradeScript,
 	CoalesceSceneRecallActions,
 	EnsureModel,
 	// placeholder comment to force array contents to format one entry per line
