@@ -80,7 +80,7 @@ export class sqInstance extends InstanceBase {
 		this.setActionDefinitions(getActions(this, mixer, choices, config.label))
 		this.setFeedbackDefinitions(getFeedbacks(mixer, choices))
 		this.setVariableDefinitions(getVariables(this, model))
-		this.setPresetDefinitions(getPresets(this, model, config.talkback))
+		this.setPresetDefinitions(getPresets(model, config.talkback, config.label))
 
 		//this.checkVariables();
 		this.checkFeedbacks()

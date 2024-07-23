@@ -1,10 +1,10 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 import type { Model } from './mixer/model.js'
 import { AssignActionId } from './actions/assign.js'
 import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
+import { computeEitherParameters, LevelInSinkBase } from './mixer/parameters.js'
 
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
@@ -13,7 +13,7 @@ type MuteType = keyof typeof MuteFeedbackId & keyof typeof MuteActionId
 
 const LR = 99
 
-export function getPresets(self: sqInstance, model: Model, talkbackChannel: number): CompanionPresetDefinitions {
+export function getPresets(model: Model, talkbackChannel: number, connectionLabel: string): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
 
 	/* MUTE */
@@ -185,10 +185,17 @@ export function getPresets(self: sqInstance, model: Model, talkbackChannel: numb
 	// Input -> Mix
 	model.forEachInputChannel((channel, channelLabel) => {
 		model.forEachMixAndLR((mix, mixLabel) => {
-			const rsp = self.getLevel(channel, mix, model.count.mix, [0x40, 0x40], [0, 0x44])
+			const { MSB, LSB } = computeEitherParameters(
+				channel,
+				mix,
+				model.count.mix,
+				LevelInSinkBase['inputChannel-mix'],
+				LevelInSinkBase['inputChannel-lr'],
+			)
+
 			createtMuteLevel(
 				`Mt+dB CH-${mixLabel}`,
-				`${channelLabel}\\n${mixLabel}\\n$(SQ:level_${rsp['channel'][0]}.${rsp['channel'][1]}) dB`,
+				`${channelLabel}\\n${mixLabel}\\n$(${connectionLabel}:level_${MSB}.${LSB}) dB`,
 				'MuteInputChannel',
 				channel,
 				mix,
