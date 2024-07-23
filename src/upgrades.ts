@@ -6,6 +6,7 @@ import {
 } from '@companion-module/base'
 import { configIsMissingModel, type SQInstanceConfig } from './config.js'
 import { DefaultModel } from './mixer/models.js'
+import { ObsoleteSetCurrentSceneId, SceneActionId } from './actions/scene.js'
 
 /**
  * This module once supported 'scene_recall' and 'current_scene' actions that
@@ -23,8 +24,8 @@ function CoalesceSceneRecallActions(
 	}
 
 	for (const action of props.actions) {
-		if (action.actionId === 'current_scene') {
-			action.actionId = 'scene_recall'
+		if (action.actionId === ObsoleteSetCurrentSceneId) {
+			action.actionId = SceneActionId.SceneRecall
 
 			result.updatedActions.push(action)
 		}

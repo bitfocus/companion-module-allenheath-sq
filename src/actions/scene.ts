@@ -11,6 +11,13 @@ export enum SceneActionId {
 	SceneStep = 'scene_step',
 }
 
+/**
+ * The action ID of an action whose implementation was identical to that of
+ * `SceneActionId.SceneRecall` in every way, so all uses of it are upgraded to
+ * that action in an upgrade script.
+ */
+export const ObsoleteSetCurrentSceneId = 'current_scene'
+
 function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): number | null {
 	const scene = Number(sceneOption) - 1
 	if (0 <= scene && scene < model.count.scene) {
