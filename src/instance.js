@@ -78,10 +78,12 @@ export class sqInstance extends InstanceBase {
 
 		const choices = new Choices(model)
 
-		this.setActionDefinitions(getActions(this, mixer, choices, config.label))
+		const connectionLabel = String(config.label)
+
+		this.setActionDefinitions(getActions(this, mixer, choices, connectionLabel))
 		this.setFeedbackDefinitions(getFeedbacks(mixer, choices))
 		this.setVariableDefinitions(getVariables(this, model))
-		this.setPresetDefinitions(getPresets(model, config.talkback, config.label))
+		this.setPresetDefinitions(getPresets(model, config.talkback, connectionLabel))
 
 		//this.checkVariables();
 		this.checkFeedbacks()

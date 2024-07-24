@@ -8,6 +8,7 @@ export interface SQInstanceConfig {
 	talkback: number
 	midich: number
 	status: string
+	label: string
 	verbose: boolean
 }
 
@@ -23,6 +24,22 @@ export function configIsMissingModel(config: SQInstanceConfig | null): config is
  */
 export function addModelOptionToConfig(config: SQInstanceConfig): void {
 	config.model = DefaultModel
+}
+
+export const DefaultLabel = 'SQ'
+
+/**
+ * Determine whether the given instance config is missing a `'label'` property.
+ */
+export function configIsMissingLabel(config: SQInstanceConfig | null): config is SQInstanceConfig {
+	return config !== null && !('label' in config)
+}
+
+/**
+ * Add the 'label' option (defaulting to SQ) to a config that's missing one.
+ */
+export function addLabelOptionToConfig(config: SQInstanceConfig): void {
+	config.label = DefaultLabel
 }
 
 function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
@@ -111,6 +128,13 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 				{ id: 'delay', label: 'Delayed at startup' },
 				{ id: 'nosts', label: 'Not at startup' },
 			],
+		},
+		{
+			type: 'textinput',
+			id: 'label',
+			label: 'Connection label (for displaying pan/balance variables correctly)',
+			width: 6,
+			default: 'SQ',
 		},
 		{
 			type: 'checkbox',

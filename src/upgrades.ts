@@ -4,7 +4,7 @@ import {
 	type CompanionUpgradeContext,
 	EmptyUpgradeScript,
 } from '@companion-module/base'
-import { configIsMissingModel, type SQInstanceConfig } from './config.js'
+import { configIsMissingLabel, configIsMissingModel, DefaultLabel, type SQInstanceConfig } from './config.js'
 import { DefaultModel } from './mixer/models.js'
 import { ObsoleteSetCurrentSceneId, SceneActionId } from './actions/scene.js'
 
@@ -56,10 +56,34 @@ function EnsureModel(
 	return result
 }
 
+/**
+ * Ensure a 'label' property containing a connection label is present in configs
+ * that lack it.
+ */
+function EnsureConnectionLabel(
+	_context: CompanionUpgradeContext<SQInstanceConfig>,
+	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
+): CompanionStaticUpgradeResult<SQInstanceConfig> {
+	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
+	}
+
+	const oldConfig = props.config
+	if (configIsMissingLabel(oldConfig)) {
+		oldConfig.label = DefaultLabel
+		result.updatedConfig = oldConfig
+	}
+
+	return result
+}
+
 export const UpgradeScripts = [
 	EmptyUpgradeScript,
 	CoalesceSceneRecallActions,
 	EnsureModel,
+	EnsureConnectionLabel,
 	// placeholder comment to force array contents to format one entry per line
 ]
 
