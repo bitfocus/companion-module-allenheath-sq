@@ -19,6 +19,8 @@ export interface SQInstanceInterface {
 	checkFeedbacks: sqInstance['checkFeedbacks']
 	getVariableValue: sqInstance['getVariableValue']
 
+	setExtraVariable: sqInstance['setExtraVariable']
+
 	getConfigFields(): sqInstance['getConfigFields']
 
 	// Defined in api.js, added via Object.assign.

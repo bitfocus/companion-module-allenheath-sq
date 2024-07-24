@@ -62,6 +62,54 @@ export class sqInstance extends InstanceBase {
 		return GetConfigFields()
 	}
 
+	/**
+	 * Set the value of a variable that doesn't exist when this instance is
+	 * initialized, but only is brought into existence if/when it is needed.
+	 *
+	 * @param {import('@companion-module/base').CompanionVariableDefinition['variableId']} variableId
+	 *   The id of the variable, i.e. the part that appears to right of the
+	 *   colon in `$(SQ:ident)`.
+	 * @param {import('@companion-module/base').CompanionVariableDefinition['name']} _name
+	 *   A user-exposed description of the variable.
+	 * @param {import('@companion-module/base').CompanionVariableValue} variableValue
+	 *   The value of the variable.
+	 */
+	setExtraVariable(variableId, _name, variableValue) {
+		// The name of this potentially newly-defined variable is currently not
+		// used.  If we wanted to, we could redefine the entire variable set
+		// (with this new variable included), to expose this new variable in
+		// UI (for example, in variable autocomplete in text fields that support
+		// variables).  But that's a large amount of churn for just a single
+		// variable, with quadratically increasing cost (define N variables,
+		// define N + 1 variables, define N + 2 variables...).  So for now we
+		// use `disableVariableValidation` to add the variable without all that
+		// extra support.  Perhaps Companion itself will grow an API to define
+		// individual extra variables, and then we can use the name in that API.
+
+		const { instanceOptions } = this
+		const { disableVariableValidation: oldValue } = instanceOptions
+		try {
+			instanceOptions.disableVariableValidation = true
+
+			this.setVariableValues({
+				[variableId]: variableValue,
+			})
+		} finally {
+			instanceOptions.disableVariableValidation = oldValue
+		}
+	}
+
+	initVariableDefinitions(model) {
+		this.setVariableDefinitions(getVariables(this, model))
+
+		this.setVariableValues({
+			// This value may very well be wrong, but there's no defined way to
+			// query what the current scene is, nor to be updated if it changes
+			// and this module didn't do it.
+			currentScene: 1,
+		})
+	}
+
 	async configUpdated(config) {
 		this.mixer?.stop(InstanceStatus.Disconnected)
 
@@ -72,17 +120,13 @@ export class sqInstance extends InstanceBase {
 
 		this.config = config
 
-		this.setVariableValues({
-			currentScene: 1,
-		})
-
 		const choices = new Choices(model)
 
 		const connectionLabel = String(config.label)
 
+		this.initVariableDefinitions(model)
 		this.setActionDefinitions(getActions(this, mixer, choices, connectionLabel))
 		this.setFeedbackDefinitions(getFeedbacks(mixer, choices))
-		this.setVariableDefinitions(getVariables(this, model))
 		this.setPresetDefinitions(getPresets(model, config.talkback, connectionLabel))
 
 		//this.checkVariables();

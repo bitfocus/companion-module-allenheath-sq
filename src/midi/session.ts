@@ -217,9 +217,16 @@ export class MidiSession {
 			verboseLog(
 				`Pan received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
 			)
-			instance.setVariableValues({
-				[`pan_${msb}.${lsb}`]: vcvfToReadablePanBalance(vc, vf),
-			})
+
+			// It would be nice to mention the source-sink relationship the NRPN
+			// refers to, but we haven't defined a way to work backwards from
+			// MSB/LSB to semantic meaning.  A name that includes MSB/LSB (in
+			// hex as in the SQ MIDI Protocol document) is minimally viable.
+			const name = `Pan/Balance MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}`
+
+			const variableId = `pan_${msb}.${lsb}`
+			const variableValue = vcvfToReadablePanBalance(vc, vf)
+			instance.setExtraVariable(variableId, name, variableValue)
 		})
 
 		return new MixerMessageParser(this.channel, verboseLog, tokenizer, mixerChannelParser).run()
