@@ -15,7 +15,7 @@ export enum AssignActionId {
 	GroupToMix = 'grp_to_mix',
 	FXReturnToMix = 'fxr_to_mix',
 	FXReturnToGroup = 'fxr_to_grp',
-	ChannelToFXSend = 'ch_to_fxs',
+	InputChannelToFXSend = 'ch_to_fxs',
 	GroupToFXSend = 'grp_to_fxs',
 	FXReturnToFXSend = 'fxr_to_fxs',
 	MixToMatrix = 'mix_to_mtx',
@@ -276,7 +276,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 			},
 		},
 
-		[AssignActionId.ChannelToFXSend]: {
+		[AssignActionId.InputChannelToFXSend]: {
 			name: 'Assign channel to FX Send',
 			options: [
 				{
