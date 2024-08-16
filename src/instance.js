@@ -32,6 +32,7 @@ function toFaderLaw(faderLawOpt) {
 }
 
 export class sqInstance extends InstanceBase {
+	/** @type {import('./config.js').SQInstanceConfig} */
 	config
 
 	/** @type {?Mixer} */
