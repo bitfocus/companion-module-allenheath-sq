@@ -1,8 +1,6 @@
 import type { sqInstance } from './instance.js'
 
-export type ParamHalf = readonly [number, number]
-
-export type Level = number | string
+type ParamHalf = readonly [number, number]
 
 export interface SQInstanceInterface {
 	// Not declared, simply added in configUpdated
