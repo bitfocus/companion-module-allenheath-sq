@@ -1,3 +1,5 @@
+import { LR } from './model.js'
+
 /** A MIDI parameter number as its 7-bit MSB and LSB. */
 export type Param = { MSB: number; LSB: number }
 
@@ -8,8 +10,8 @@ export type Param = { MSB: number; LSB: number }
  *   The number of the source within its category, e.g. the fifth input channel
  *   would be `4`.
  *
- *   Note: `source` **must not** be the LR mix encoded as `99`!  To handle an LR
- *   source, specify `source === 0` and set `base` as if *that one line* in the
+ *   Note: `source` **must not** be the LR mix!  To handle an LR source, specify
+ *   `source === 0` and set `base` as if *that one line* in the
  *   [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf)
  *   were an entire table.)
  * @param base
@@ -22,7 +24,7 @@ export type Param = { MSB: number; LSB: number }
  */
 
 export function computeLRParameters(source: number, base: Param): Param {
-	if (source === 99) {
+	if (source === LR) {
 		throw new Error('LR-to-LR must be specially handled')
 	}
 	return { MSB: base.MSB, LSB: base.LSB + source }
@@ -35,8 +37,8 @@ export function computeLRParameters(source: number, base: Param): Param {
  *   The number of the source within its category, e.g. the fifth input channel
  *   would be `4`.
  *
- *   Note: `source` **must not** be the LR mix encoded as `99`!  To handle an LR
- *   source, specify `source === 0` and set `base` as if *that one line* in the
+ *   Note: `source` **must not** be the LR mix!  To handle an LR source, specify
+ *   `source === 0` and set `base` as if *that one line* in the
  *   [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf)
  *   were an entire table.)
  * @param sink
@@ -54,10 +56,10 @@ export function computeLRParameters(source: number, base: Param): Param {
  */
 
 export function computeParameters(source: number, sink: number, sinkCount: number, base: Param): Param {
-	if (source === 99) {
+	if (source === LR) {
 		throw new Error('LR source must be manually converted to 0 with parameter base appropriately adjusted')
 	}
-	if (sink === 99) {
+	if (sink === LR) {
 		throw new Error('Use computeLRParameters to compute parameters for an LR sink ')
 	}
 
@@ -72,7 +74,7 @@ export function computeEitherParameters(
 	base: Param,
 	lrBase: Param,
 ): Param {
-	return sink === 99 ? computeLRParameters(source, lrBase) : computeParameters(source, sink, sinkCount, base)
+	return sink === LR ? computeLRParameters(source, lrBase) : computeParameters(source, sink, sinkCount, base)
 }
 
 type SourceToMixOrLR = {
@@ -140,8 +142,8 @@ export type AssignToMixOrLRType = keyof typeof AssignToMixOrLRBase
  * These values are the pairs at top left of the relevant tables in the
  * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
  * (Or table *section*, in the cases of `'lr-matrix'` and `'mix-matrix'`,
- * because the former must be treated specially due to LR being encoded with
- * value `99` .)
+ * because the former must be treated specially due to LR being specially
+ * encoded.)
  */
 export const AssignToSinkBase = {
 	'inputChannel-group': { MSB: 0x66, LSB: 0x74 },
@@ -307,8 +309,8 @@ export type PanBalanceInMixOrLRType = keyof typeof PanBalanceInMixOrLRBase
  * These values are the pairs at top left of the relevant tables in the
  * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
  * (Or table *section*, in the cases of `'lr-matrix'` and `'mix-matrix'`,
- * because the former must be treated specially due to LR being encoded with
- * value `99` .)
+ * because the former must be treated specially due to LR being specially
+ * encoded.)
  */
 export const PanBalanceInSinkBase = {
 	'fxReturn-group': { MSB: 0x5b, LSB: 0x34 },

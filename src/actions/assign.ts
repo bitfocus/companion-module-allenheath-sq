@@ -1,6 +1,7 @@
 import { type Choices } from '../choices.js'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'
+import { LR } from '../mixer/model.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { type ActionDefinitions } from './actionid.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
@@ -71,7 +72,7 @@ function mixesAndLRAssignOptionToSinks(mixAssign: OptionValue, model: Model): nu
 	const sinks: number[] = []
 	for (const item of mixAssign) {
 		const sink = Number(item)
-		if (sink < sinkCount || sink === 99) {
+		if (sink < sinkCount || sink === LR) {
 			sinks.push(sink)
 		}
 	}
@@ -417,7 +418,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 
 				const active = Boolean(options.mtxActive)
 				const matrixes = assignOptionToSinks(options.mtxAssign, mixer.model, 'matrix')
-				if (mixOrLR === 99) {
+				if (mixOrLR === LR) {
 					mixer.assignLRToMatrixes(active, matrixes)
 				} else {
 					mixer.assignMixToMatrixes(mixOrLR, active, matrixes)

@@ -1,5 +1,5 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import type { Model } from './mixer/model.js'
+import { LR, type Model } from './mixer/model.js'
 import { AssignActionId } from './actions/assign.js'
 import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
@@ -10,8 +10,6 @@ const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
 
 type MuteType = keyof typeof MuteFeedbackId & keyof typeof MuteActionId
-
-const LR = 99
 
 export function getPresets(model: Model, talkbackChannel: number, connectionLabel: string): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}

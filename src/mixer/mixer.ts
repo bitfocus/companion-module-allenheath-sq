@@ -26,6 +26,7 @@ import {
 } from './parameters.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import type { PanBalanceChoice } from '../actions/pan-balance.js'
+import { LR } from './model.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -352,7 +353,7 @@ export class Mixer {
 		const { mix: mixBase, lr: lrBase } = AssignToMixOrLRBase[sourceType]
 
 		const commands = mixes.map((sink) => {
-			return sink === 99
+			return sink === LR
 				? this.#assignToSink(source, active, 0, 'lr', lrBase)
 				: this.#assignToSink(source, active, sink, 'mix', mixBase)
 		})
@@ -950,7 +951,7 @@ export class Mixer {
 
 		const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase[sourceType]
 
-		if (mixOrLR === 99) {
+		if (mixOrLR === LR) {
 			this.#setPanBalance(source, panBalance, 0, 'lr', lrBase)
 		} else {
 			this.#setPanBalance(source, panBalance, mixOrLR, 'mix', mixBase)
@@ -1002,7 +1003,7 @@ export class Mixer {
 	 * @param pan
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
+	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
 	setInputChannelPanBalanceInMixOrLR(channel: number, pan: PanBalanceChoice, mixOrLR: number): void {
 		this.#setPanBalanceInMixOrLR(channel, 'inputChannel', pan, mixOrLR)
@@ -1016,7 +1017,7 @@ export class Mixer {
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
+	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
 	setGroupPanBalanceInMixOrLR(group: number, panBalance: PanBalanceChoice, mixOrLR: number): void {
 		this.#setPanBalanceInMixOrLR(group, 'group', panBalance, mixOrLR)
@@ -1030,7 +1031,7 @@ export class Mixer {
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Aux 3, or LR (encoded as `99`).
+	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
 	setFXReturnPanBalanceInMixOrLR(fxReturn: number, panBalance: PanBalanceChoice, mixOrLR: number): void {
 		this.#setPanBalanceInMixOrLR(fxReturn, 'fxReturn', panBalance, mixOrLR)

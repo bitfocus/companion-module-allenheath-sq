@@ -2,6 +2,7 @@ import { type CompanionOptionValues } from '@companion-module/base'
 import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type InputOutputType } from '../mixer/model.js'
 import { type Model } from '../mixer/model.js'
+import { LR } from '../mixer/model.js'
 
 /** The type of an option value. */
 export type OptionValue = CompanionOptionValues[keyof CompanionOptionValues]
@@ -52,7 +53,7 @@ export function toSourceOrSink(
  */
 export function toMixOrLR(instance: sqInstance, model: Model, optionValue: OptionValue): number | null {
 	const n = Number(optionValue)
-	if (n < model.count.mix || n === 99) {
+	if (n < model.count.mix || n === LR) {
 		return n
 	}
 
@@ -92,7 +93,7 @@ export function toInputOutput(
 		if (inputOutput === null) {
 			return null
 		}
-		if (inputOutput === 99) {
+		if (inputOutput === LR) {
 			return [0, 'lr']
 		}
 

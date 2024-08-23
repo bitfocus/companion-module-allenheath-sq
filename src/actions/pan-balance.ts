@@ -3,6 +3,7 @@ import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer } from '../mixer/mixer.js'
+import { LR } from '../mixer/model.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { type PanBalance } from '../mixer/pan-balance.js'
 import { repr } from '../utils/pretty.js'
@@ -462,7 +463,7 @@ export function panBalanceActions(
 				}
 
 				const [source, base] =
-					mixOrLR === 99 ? [0, PanBalanceInSinkBase['lr-matrix']] : [mixOrLR, PanBalanceInSinkBase['mix-matrix']]
+					mixOrLR === LR ? [0, PanBalanceInSinkBase['lr-matrix']] : [mixOrLR, PanBalanceInSinkBase['mix-matrix']]
 
 				const { MSB, LSB } = computeParameters(source, matrix, model.count.matrix, base)
 
@@ -485,7 +486,7 @@ export function panBalanceActions(
 				}
 
 				const [source, base] =
-					mixOrLR === 99 ? [0, PanBalanceInSinkBase['lr-matrix']] : [mixOrLR, PanBalanceInSinkBase['mix-matrix']]
+					mixOrLR === LR ? [0, PanBalanceInSinkBase['lr-matrix']] : [mixOrLR, PanBalanceInSinkBase['mix-matrix']]
 
 				const { MSB, LSB } = computeParameters(source, matrix, model.count.matrix, base)
 
@@ -508,7 +509,7 @@ export function panBalanceActions(
 					return
 				}
 
-				if (mixOrLR === 99) {
+				if (mixOrLR === LR) {
 					mixer.setLRPanBalanceInMatrix(panBalance, matrix)
 				} else {
 					mixer.setMixPanBalanceInMatrix(mixOrLR, panBalance, matrix)
