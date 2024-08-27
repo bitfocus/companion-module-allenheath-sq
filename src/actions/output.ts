@@ -289,8 +289,6 @@ function getPanBalanceType(
  *   should take place.
  * @param panLevelOption
  *   An action option specifying pan amounts for the output.
- * @param connectionLabel
- *   The label of the SQ instance.
  * @returns
  *   The set of all output-adjustment action definitions.
  */
@@ -301,7 +299,6 @@ export function outputActions(
 	levelOption: CompanionInputFieldDropdown,
 	fadingOption: CompanionInputFieldDropdown,
 	panLevelOption: CompanionInputFieldDropdown,
-	connectionLabel: string,
 ): ActionDefinitions<OutputActionId> {
 	const model = mixer.model
 
@@ -468,7 +465,7 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${self.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (_action) => {
@@ -512,7 +509,7 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${self.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async ({ options }) => {
@@ -561,7 +558,7 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${self.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async ({ options }) => {

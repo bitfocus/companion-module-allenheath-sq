@@ -16,6 +16,7 @@ export type InputOutputCounts = {
 	dca: number
 	muteGroup: number
 	softKey: number
+	rotaryKey: number
 	scene: number
 
 	// Encode LR as its own "category" so we can pretend the LR mix is a
@@ -52,6 +53,7 @@ export class Model {
 			dca: sqModel.dcaCount,
 			muteGroup: sqModel.muteGroupCount,
 			softKey: sqModel.softKeyCount,
+			rotaryKey: sqModel.RotaryKey,
 			scene: sqModel.sceneCount,
 			lr: 1,
 		}

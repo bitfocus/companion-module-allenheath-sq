@@ -1,7 +1,7 @@
 import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import callback from '../callback.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import type { Mixer } from '../mixer/mixer.js'
+import { type Mixer, RetrieveStatusAtStartup } from '../mixer/mixer.js'
 import { vcvfToReadablePanBalance } from '../mixer/pan-balance.js'
 import { MidiTokenizer } from './tokenize/tokenize.js'
 import { MixerMessageParser } from './parse/parse.js'
@@ -69,27 +69,6 @@ export class MidiSession {
 	socket: TCPHelper | null = null
 
 	/**
-	 * The hostname of the mixer.
-	 */
-	host = ''
-
-	/**
-	 * The MIDI channel setting used by the mixer.  (This will be 0-15 for
-	 * channels 1-16 as displayed in mixer UI.)
-	 */
-	channel = 0
-
-	/**
-	 * When/how to retrieve all levels, routing, etc. from the mixer.
-	 */
-	retrieveStatus = 'nosts'
-
-	/**
-	 * Whether verbose logging is enabled.
-	 */
-	verbose = false
-
-	/**
 	 * Create an SQ mixer abstraction for the given instance.
 	 */
 	constructor(mixer: Mixer, instance: sqInstance) {
@@ -98,29 +77,19 @@ export class MidiSession {
 	}
 
 	/**
-	 * Start a MIDI-over-TCP session with `host:51325`, and retrieve mixer
+	 * Start a MIDI-over-TCP session to `${host}:51325`, and retrieve mixer
 	 * status consistent with `retrieveStatus`.
 	 *
 	 * @param host
 	 *   The hostname/IP address of the mixer.
-	 * @param midiChannel
-	 *   The MIDI channel setting used by the mixer.  (This will be 0-15 for
-	 *   channels 1-16 as displayed in mixer UI.)
 	 * @param retrieveStatus
 	 *   When/how to retrieve the current status of mixer levels and routing.
-	 * @param verbose
-	 *   Whether verbose logging of mixer operations should be enabled.
 	 */
-	start(host: string, channel: number, retrieveStatus: string, verbose: boolean): void {
+	start(host: string, retrieveStatus: RetrieveStatusAtStartup): void {
 		this.stop(InstanceStatus.Connecting)
 
 		const socket = new TCPHelper(host, SQMidiPort)
 		this.socket = socket
-
-		this.host = host
-		this.channel = channel
-		this.retrieveStatus = retrieveStatus
-		this.verbose = verbose
 
 		const instance = this.#instance
 
@@ -144,7 +113,7 @@ export class MidiSession {
 			instance.log('info', `Connected to ${host}:${SQMidiPort}`)
 			instance.updateStatus(InstanceStatus.Ok)
 
-			if (retrieveStatus === 'nosts') {
+			if (retrieveStatus === RetrieveStatusAtStartup.None) {
 				return
 			}
 
@@ -152,7 +121,7 @@ export class MidiSession {
 			sleep(300)
 			instance.getRemoteLevel()
 
-			if (retrieveStatus === 'full') {
+			if (retrieveStatus === RetrieveStatusAtStartup.Fully) {
 				setTimeout(() => {
 					instance.getRemoteLevel()
 				}, 4000)
@@ -166,7 +135,7 @@ export class MidiSession {
 		const instance = this.#instance
 
 		const verboseLog = (msg: string) => {
-			if (this.verbose) {
+			if (instance.options.verbose) {
 				instance.log('debug', msg)
 			}
 		}
@@ -229,7 +198,7 @@ export class MidiSession {
 			instance.setExtraVariable(variableId, name, variableValue)
 		})
 
-		return new MixerMessageParser(this.channel, verboseLog, tokenizer, mixerChannelParser).run()
+		return new MixerMessageParser(instance.options.midiChannel, verboseLog, tokenizer, mixerChannelParser).run()
 	}
 
 	/**
@@ -266,7 +235,7 @@ export class MidiSession {
 	 * where `N` is the session MIDI channel.
 	 */
 	nrpnData(msb: number, lsb: number, vc: number, vf: number): NRPNDataMessage {
-		const BN = 0xb0 | this.channel
+		const BN = 0xb0 | this.#instance.options.midiChannel
 		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x06, vc, BN, 0x26, vf]
 	}
 
@@ -280,7 +249,7 @@ export class MidiSession {
 	 * where `N` is the session MIDI channel.
 	 */
 	nrpnIncrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
-		const BN = 0xb0 | this.channel
+		const BN = 0xb0 | this.#instance.options.midiChannel
 		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x60, val]
 	}
 
@@ -294,7 +263,7 @@ export class MidiSession {
 	 * where `N` is the session MIDI channel.
 	 */
 	nrpnDecrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
-		const BN = 0xb0 | this.channel
+		const BN = 0xb0 | this.#instance.options.midiChannel
 		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x61, val]
 	}
 
@@ -307,8 +276,9 @@ export class MidiSession {
 	 *   scenes 1-300 in its UI.
 	 */
 	sceneChange(scene: number): SceneChangeMessage {
-		const BN = 0xb0 | this.channel
-		const CN = 0xc0 | this.channel
+		const midiChannel = this.#instance.options.midiChannel
+		const BN = 0xb0 | midiChannel
+		const CN = 0xc0 | midiChannel
 		const sceneUpper = (scene >> 7) & 0x0f
 		const sceneLower = scene & 0x7f
 		return [BN, 0, sceneUpper, CN, sceneLower]
@@ -320,8 +290,9 @@ export class MidiSession {
 	send(data: readonly number[]): void {
 		const socket = this.socket
 		if (socket !== null && socket.isConnected) {
-			if (this.verbose) {
-				this.#instance.log('debug', `SEND: ${prettyBytes(data)} to ${this.host}`)
+			const instance = this.#instance
+			if (instance.options.verbose) {
+				instance.log('debug', `SEND: ${prettyBytes(data)} to ${instance.options.host}`)
 			}
 
 			// XXX This needs to be handled better.

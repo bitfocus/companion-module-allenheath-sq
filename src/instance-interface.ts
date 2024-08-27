@@ -3,8 +3,7 @@ import type { sqInstance } from './instance.js'
 type ParamHalf = readonly [number, number]
 
 export interface SQInstanceInterface {
-	// Not declared, simply added in configUpdated
-	config: sqInstance['config']
+	options: sqInstance['options']
 
 	mixer: sqInstance['mixer']
 

@@ -1,15 +1,18 @@
-import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
+import { type InputValue, Regex, type SomeCompanionConfigField } from '@companion-module/base'
 import { DefaultModel, getCommonCount } from './mixer/models.js'
 
+/**
+ * The `TConfig` object type used to store instance configuration info.
+ *
+ * Nothing ensures that Companion config objects conform to the `TConfig` type
+ * specified by a module.  Therefore we leave this type underdefined, not
+ * well-defined, so that configuration info will be defensively processed.  (We
+ * use `SQInstanceOptions` to store configuration choices as well-typed values
+ * for the long haul.  See the `options.ts:optionsFromConfig` destructuring
+ * parameter for a list of the field/types we expect to find in config objects.)
+ */
 export interface SQInstanceConfig {
-	host: string
-	model: string
-	level: string
-	talkback: number
-	midich: number
-	status: string
-	label: string
-	verbose: boolean
+	[key: string]: InputValue | undefined
 }
 
 /**
@@ -26,7 +29,8 @@ export function addModelOptionToConfig(config: SQInstanceConfig): void {
 	config.model = DefaultModel
 }
 
-export const DefaultLabel = 'SQ'
+/** The default label for a connection from `companion/manifest.json`. */
+export const DefaultConnectionLabel = 'SQ'
 
 /**
  * Determine whether the given instance config is missing a `'label'` property.
@@ -39,7 +43,7 @@ export function configIsMissingLabel(config: SQInstanceConfig | null): config is
  * Add the 'label' option (defaulting to SQ) to a config that's missing one.
  */
 export function addLabelOptionToConfig(config: SQInstanceConfig): void {
-	config.label = DefaultLabel
+	config.label = DefaultConnectionLabel
 }
 
 function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
@@ -134,7 +138,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			id: 'label',
 			label: 'Connection label (for displaying pan/balance variables correctly)',
 			width: 6,
-			default: 'SQ',
+			default: DefaultConnectionLabel,
 		},
 		{
 			type: 'checkbox',

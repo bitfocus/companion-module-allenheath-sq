@@ -88,8 +88,6 @@ export function getPanBalance(instance: sqInstance, options: CompanionOptionValu
  *   Choice definitions for the mixer.
  * @param panLevelOption
  *   An input option containing a list of usable pan/balance positions.
- * @param connectionLabel
- *   The label of this instance's connection.
  * @returns
  *   The set of all pan/balance action definitions.
  */
@@ -98,7 +96,6 @@ export function panBalanceActions(
 	mixer: Mixer,
 	choices: Choices,
 	panLevelOption: CompanionInputFieldDropdown,
-	connectionLabel: string,
 ): ActionDefinitions<PanBalanceActionId> {
 	const model = mixer.model
 
@@ -148,7 +145,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -227,7 +224,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -306,7 +303,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -385,7 +382,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -469,7 +466,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -554,7 +551,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {

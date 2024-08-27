@@ -1,4 +1,5 @@
 import { OutputActionId } from './actions/output.js'
+import { RetrieveStatusAtStartup } from './mixer/mixer.js'
 import { computeEitherParameters } from './mixer/parameters.js'
 import { sleep } from './utils/sleep.js'
 
@@ -16,6 +17,7 @@ export default {
 	},
 
 	getRemoteLevel: function () {
+		/** @type {import('./instance-interface.js').SQInstanceInterface} */
 		var self = this
 		const model = self.mixer.model
 
@@ -112,12 +114,14 @@ export default {
 			buff.push(rsp.commands[0])
 		})
 
+		const delayStatusRetrieval = self.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
+
 		if (buff.length > 0 && self.mixer.midi.socket !== null) {
 			let ctr = 0
 			for (let i = 0; i < buff.length; i++) {
 				self.mixer.midi.send(buff[i])
 				ctr++
-				if (this.config.status == 'delay') {
+				if (delayStatusRetrieval) {
 					if (ctr == 20) {
 						ctr = 0
 						sleep(300)
@@ -127,27 +131,27 @@ export default {
 		}
 
 		self.subscribeActions('chpan_to_mix')
-		if (this.config.status == 'delay') {
+		if (delayStatusRetrieval) {
 			sleep(300)
 		}
 		self.subscribeActions('grppan_to_mix')
-		if (this.config.status == 'delay') {
+		if (delayStatusRetrieval) {
 			sleep(300)
 		}
 		self.subscribeActions('fxrpan_to_mix')
-		if (this.config.status == 'delay') {
+		if (delayStatusRetrieval) {
 			sleep(300)
 		}
 		self.subscribeActions('fxrpan_to_grp')
-		if (this.config.status == 'delay') {
+		if (delayStatusRetrieval) {
 			sleep(300)
 		}
 		self.subscribeActions('mixpan_to_mtx')
-		if (this.config.status == 'delay') {
+		if (delayStatusRetrieval) {
 			sleep(300)
 		}
 		self.subscribeActions('grppan_to_mtx')
-		if (this.config.status == 'delay') {
+		if (delayStatusRetrieval) {
 			sleep(300)
 		}
 		self.subscribeActions(OutputActionId.LRPanBalanceOutput)

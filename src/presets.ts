@@ -5,13 +5,14 @@ import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 import { computeEitherParameters, LevelInSinkBase } from './mixer/parameters.js'
+import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
 
 type MuteType = keyof typeof MuteFeedbackId & keyof typeof MuteActionId
 
-export function getPresets(model: Model, talkbackChannel: number, connectionLabel: string): CompanionPresetDefinitions {
+export function getPresets(instance: sqInstance, model: Model): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
 
 	/* MUTE */
@@ -82,7 +83,7 @@ export function getPresets(model: Model, talkbackChannel: number, connectionLabe
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: talkbackChannel,
+								inputChannel: instance.options.talkbackChannel,
 								mixAssign: [LR],
 								mixActive: false,
 							},
@@ -90,7 +91,7 @@ export function getPresets(model: Model, talkbackChannel: number, connectionLabe
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: `${talkbackChannel}`,
+								inputChannel: instance.options.talkbackChannel,
 								mixAssign: [mix],
 								mixActive: true,
 							},
@@ -98,7 +99,7 @@ export function getPresets(model: Model, talkbackChannel: number, connectionLabe
 						{
 							actionId: LevelActionId.InputChannelLevelInMixOrLR,
 							options: {
-								input: talkbackChannel,
+								input: instance.options.talkbackChannel,
 								assign: mix,
 								level: 49,
 							},
@@ -106,7 +107,7 @@ export function getPresets(model: Model, talkbackChannel: number, connectionLabe
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								strip: talkbackChannel,
+								strip: instance.options.talkbackChannel,
 								mute: 2,
 							},
 						},
@@ -115,7 +116,7 @@ export function getPresets(model: Model, talkbackChannel: number, connectionLabe
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: `${talkbackChannel}`,
+								inputChannel: instance.options.talkbackChannel,
 								mixAssign: [mix],
 								mixActive: false,
 							},
@@ -123,7 +124,7 @@ export function getPresets(model: Model, talkbackChannel: number, connectionLabe
 						{
 							actionId: LevelActionId.InputChannelLevelInMixOrLR,
 							options: {
-								input: talkbackChannel,
+								input: instance.options.talkbackChannel,
 								assign: mix,
 								level: 0,
 							},
@@ -131,7 +132,7 @@ export function getPresets(model: Model, talkbackChannel: number, connectionLabe
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								strip: talkbackChannel,
+								strip: instance.options.talkbackChannel,
 								mute: 1,
 							},
 						},
@@ -193,7 +194,7 @@ export function getPresets(model: Model, talkbackChannel: number, connectionLabe
 
 			createtMuteLevel(
 				`Mt+dB CH-${mixLabel}`,
-				`${channelLabel}\\n${mixLabel}\\n$(${connectionLabel}:level_${MSB}.${LSB}) dB`,
+				`${channelLabel}\\n${mixLabel}\\n$(${instance.options.connectionLabel}:level_${MSB}.${LSB}) dB`,
 				'MuteInputChannel',
 				channel,
 				mix,

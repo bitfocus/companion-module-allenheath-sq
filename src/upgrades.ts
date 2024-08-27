@@ -4,7 +4,7 @@ import {
 	type CompanionUpgradeContext,
 	EmptyUpgradeScript,
 } from '@companion-module/base'
-import { configIsMissingLabel, configIsMissingModel, DefaultLabel, type SQInstanceConfig } from './config.js'
+import { configIsMissingLabel, configIsMissingModel, DefaultConnectionLabel, type SQInstanceConfig } from './config.js'
 import { DefaultModel } from './mixer/models.js'
 import {
 	convertOldLevelToOutputActionToSinkSpecific,
@@ -78,7 +78,7 @@ function EnsureConnectionLabel(
 
 	const oldConfig = props.config
 	if (configIsMissingLabel(oldConfig)) {
-		oldConfig.label = DefaultLabel
+		oldConfig.label = DefaultConnectionLabel
 		result.updatedConfig = oldConfig
 	}
 

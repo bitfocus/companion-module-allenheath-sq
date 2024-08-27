@@ -2,7 +2,6 @@ import { type CompanionVariableValue, InstanceStatus } from '@companion-module/b
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../midi/session.js'
 import { type InputOutputType, Model } from './model.js'
-import type { ModelId } from './models.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
 	AssignToMixOrLRBase,
@@ -44,6 +43,39 @@ import { LR } from './model.js'
  */
 export type FaderLaw = 'LinearTaper' | 'AudioTaper'
 
+/**
+ * The extent to which the mixer's current status (levels of sources in sinks,
+ * mute states, etc.) should be retrieved at startup.
+ *
+ * Retrieving full mixer state requires sending the mixer a large amount of MIDI
+ * messages (around 26KB of data on last check), then receiving a similar amount
+ * of MIDI messages in response, briefly clogging the connection in both
+ * directions.
+ *
+ * This option allows some flexibility in how status is retrieved to mitigate
+ * this issue.
+ */
+export enum RetrieveStatusAtStartup {
+	/**
+	 * Fully retrieve mixer status at connection startup.  This ties up the
+	 * mixer for the longest time, but when done there's no need to sync
+	 * something on-demand later.
+	 */
+	Fully = 'full',
+
+	/**
+	 * Slightly delay retrieving mixer status after connection startup, then
+	 * stagger the retrieving of full status over a few seconds.
+	 */
+	Delayed = 'delay',
+
+	/**
+	 * Don't retrieve any mixer status at connection startup.  Instead retrieve
+	 * individual statuses as they're needed.
+	 */
+	None = 'nosts',
+}
+
 export enum MuteOperation {
 	Toggle = 0,
 	On = 1,
@@ -71,9 +103,6 @@ export class Mixer {
 	 * The model of this mixer.
 	 */
 	model: Model
-
-	/** The NRPN fader law setting in the mixer. */
-	faderLaw: FaderLaw = 'LinearTaper'
 
 	/**
 	 * The MIDI transport used to interact with the mixer.
@@ -108,36 +137,16 @@ export class Mixer {
 	 */
 	currentScene = 0
 
-	/**
-	 * @param instance
-	 *   The instance controlling this mixer.
-	 */
-	constructor(instance: sqInstance, model: ModelId) {
+	/** Create a mixer for the given instance. */
+	constructor(instance: sqInstance) {
 		this.#instance = instance
-		this.model = new Model(model)
+		this.model = new Model(instance.options.model)
 		this.midi = new MidiSession(this, instance)
 	}
 
-	/**
-	 * Start operating an SQ mixer running at `host:51325`.  Retrieve current
-	 * mixer status consistent with `retrieveStatus`, and log mixer interactions
-	 * consistent with `verbose`.
-	 *
-	 * @param host
-	 *   The hostname/IP address of the mixer.
-	 * @param midiChannel
-	 *   The MIDI channel setting used by the mixer.  (This will be 0-15 for
-	 *   channels 1-16 as displayed in mixer UI.)
-	 * @param faderLaw
-	 *    The NRPN fader law set in the mixer.
-	 * @param retrieveStatus
-	 *   When/how to retrieve the current status of mixer levels and routing.
-	 * @param verbose
-	 *   Whether verbose logging of mixer operations should be enabled.
-	 */
-	start(host: string, midiChannel: number, faderLaw: FaderLaw, retrieveStatus: string, verbose: boolean): void {
-		this.faderLaw = faderLaw
-		this.midi.start(host, midiChannel, retrieveStatus, verbose)
+	/** Start operating the SQ mixer, using options from the instance. */
+	start(host: string): void {
+		this.midi.start(host, this.#instance.options.retrieveStatusAtStartup)
 	}
 
 	/** Stop this mixer connection. */
@@ -158,7 +167,7 @@ export class Mixer {
 	 *   The fader level to convert.
 	 */
 	nrpnDataFromLevel(level: Level): [number, number] {
-		return nrpnDataFromLevel(level, this.faderLaw)
+		return nrpnDataFromLevel(level, this.#instance.options.faderLaw)
 	}
 
 	/**
@@ -173,7 +182,7 @@ export class Mixer {
 	 *   The approximate encoded `Level`.
 	 */
 	levelFromNRPNData(vc: number, vf: number): Level {
-		return levelFromNRPNData(vc, vf, this.faderLaw)
+		return levelFromNRPNData(vc, vf, this.#instance.options.faderLaw)
 	}
 
 	/**
@@ -1278,7 +1287,7 @@ export class Mixer {
 		}
 
 		const midi = this.midi
-		const command = [0x90 | midi.channel, 0x30 + softKey, 0x7f]
+		const command = [0x90 | this.#instance.options.midiChannel, 0x30 + softKey, 0x7f]
 		// XXX
 		void midi.sendCommands([command])
 	}
@@ -1290,7 +1299,7 @@ export class Mixer {
 		}
 
 		const midi = this.midi
-		const command = [0x80 | midi.channel, 0x30 + softKey, 0x00]
+		const command = [0x80 | this.#instance.options.midiChannel, 0x30 + softKey, 0x00]
 		// XXX
 		void midi.sendCommands([command])
 	}

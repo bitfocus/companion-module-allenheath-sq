@@ -3,6 +3,7 @@
 import { InstanceBase, InstanceStatus } from '@companion-module/base'
 
 import { GetConfigFields } from './config.js'
+import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
 
 import { getActions } from './actions/actions.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
@@ -14,26 +15,9 @@ import api from './api.js'
 import { Choices } from './choices.js'
 import { Mixer } from './mixer/mixer.js'
 
-/**
- * Convert the fader law option value to a properly-typed value.
- *
- * @param {import('@companion-module/base').InputValue | undefined} faderLawOpt
- * @returns {import('./mixer/mixer.js').FaderLaw}
- */
-function toFaderLaw(faderLawOpt) {
-	const law = String(faderLawOpt)
-	switch (law) {
-		case 'LinearTaper':
-		case 'AudioTaper':
-			return law
-		default:
-			return 'LinearTaper'
-	}
-}
-
 export class sqInstance extends InstanceBase {
-	/** @type {import('./config.js').SQInstanceConfig} */
-	config
+	/** Options dictating the behavior of this instance. */
+	options = noConnectionOptions()
 
 	/** @type {Mixer | null} */
 	mixer = null
@@ -125,31 +109,37 @@ export class sqInstance extends InstanceBase {
 
 	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['configUpdated']} */
 	async configUpdated(config) {
+		const oldOptions = this.options
+
+		const newOptions = optionsFromConfig(config)
+		this.options = newOptions
+
+		if (canUpdateOptionsWithoutRestarting(oldOptions, newOptions)) {
+			return
+		}
+
 		this.mixer?.stop(InstanceStatus.Disconnected)
 
-		const mixer = new Mixer(this, config.model)
+		const mixer = new Mixer(this, newOptions.model)
 		this.mixer = mixer
 
 		const model = mixer.model
 
-		this.config = config
-
 		const choices = new Choices(model)
 
-		const connectionLabel = String(config.label)
-
 		this.initVariableDefinitions(model)
-		this.setActionDefinitions(getActions(this, mixer, choices, connectionLabel))
+		this.setActionDefinitions(getActions(this, mixer, choices))
 		this.setFeedbackDefinitions(getFeedbacks(mixer, choices))
-		this.setPresetDefinitions(getPresets(model, config.talkback, connectionLabel))
+		this.setPresetDefinitions(getPresets(this, model))
 
 		//this.checkVariables();
 		this.checkFeedbacks()
 
-		if (config.host) {
-			mixer.start(config.host, config.midich - 1, toFaderLaw(config.level), config.status, config.verbose)
-		} else {
+		const host = newOptions.host
+		if (host === null) {
 			mixer.stop(InstanceStatus.BadConfig)
+		} else {
+			mixer.start(host)
 		}
 	}
 }

@@ -20,17 +20,10 @@ import { softKeyActions } from './softkey.js'
  *   The mixer in use by the instance.
  * @param choices
  *   Option choices for use in the actions.
- * @param connectionLabel
- *   The label of the SQ instance.
  * @returns
  *   All actions defined by this module.
  */
-export function getActions(
-	self: sqInstance,
-	mixer: Mixer,
-	choices: Choices,
-	connectionLabel: string,
-): ActionDefinitions<ActionId> {
+export function getActions(self: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<ActionId> {
 	const FadingOption: CompanionInputFieldDropdown = {
 		type: 'dropdown',
 		label: 'Fading',
@@ -70,7 +63,7 @@ export function getActions(
 		...muteActions(self, mixer, choices),
 		...(() => {
 			const rotaryActions = {}
-			if (self.config.model == 'SQ6' || self.config.model == 'SQ7') {
+			if (mixer.model.count.rotaryKey > 0) {
 				// Soft Rotary
 			} else {
 				// No Soft Rotary
@@ -80,8 +73,8 @@ export function getActions(
 		...softKeyActions(self, mixer, choices),
 		...assignActions(self, mixer, choices),
 		...levelActions(self, mixer, choices, LevelOption, FadingOption),
-		...panBalanceActions(self, mixer, choices, PanLevelOption, connectionLabel),
-		...outputActions(self, mixer, choices, LevelOption, FadingOption, PanLevelOption, connectionLabel),
+		...panBalanceActions(self, mixer, choices, PanLevelOption),
+		...outputActions(self, mixer, choices, LevelOption, FadingOption, PanLevelOption),
 		...sceneActions(self, mixer),
 	}
 }
