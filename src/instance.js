@@ -35,9 +35,14 @@ export class sqInstance extends InstanceBase {
 	/** @type {import('./config.js').SQInstanceConfig} */
 	config
 
-	/** @type {?Mixer} */
+	/** @type {Mixer | null} */
 	mixer = null
 
+	/**
+	 * Construct an `sqInstance`.
+	 *
+	 * @param {ConstructorParameters<typeof InstanceBase<import('./config.js').SQInstanceConfig>>[0]} internal
+	 */
 	constructor(internal) {
 		super(internal)
 
@@ -47,6 +52,7 @@ export class sqInstance extends InstanceBase {
 		})
 	}
 
+	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['destroy']} */
 	async destroy() {
 		if (this.mixer !== null) {
 			this.mixer.stop(InstanceStatus.Disconnected)
@@ -54,10 +60,12 @@ export class sqInstance extends InstanceBase {
 		}
 	}
 
+	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['init']} */
 	async init(config) {
 		this.configUpdated(config)
 	}
 
+	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['getConfigFields']} */
 	getConfigFields() {
 		return GetConfigFields()
 	}
@@ -99,6 +107,11 @@ export class sqInstance extends InstanceBase {
 		}
 	}
 
+	/**
+	 * Set variable definitions for this instance.
+	 *
+	 * @param {import('./mixer/model.js').Model} model
+	 */
 	initVariableDefinitions(model) {
 		this.setVariableDefinitions(getVariables(this, model))
 
@@ -110,6 +123,7 @@ export class sqInstance extends InstanceBase {
 		})
 	}
 
+	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['configUpdated']} */
 	async configUpdated(config) {
 		this.mixer?.stop(InstanceStatus.Disconnected)
 
