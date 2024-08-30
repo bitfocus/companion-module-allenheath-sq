@@ -165,9 +165,47 @@ export function canUpdateOptionsWithoutRestarting(
 	oldOptions: SQInstanceOptions,
 	newOptions: SQInstanceOptions,
 ): boolean {
-	// For now, as in the past, updating any option forces the connection to be
-	// restarted.  This will be refined in the future.
-	void oldOptions
-	void newOptions
-	return false
+	// A different host straightforwardly requires a connection restart.
+	if (oldOptions.host !== newOptions.host) {
+		return false
+	}
+
+	// Changing mixer model alters choices used in options.  Choice generation
+	// presently is tied to mixer connection restarting, so force a restart if
+	// the model changes.
+	if (oldOptions.model !== newOptions.model) {
+		return false
+	}
+
+	// A different fader law changes the meaning of all level messages and can't
+	// really be synced up with any messages presently in flight, so forces a
+	// restart.
+	if (oldOptions.faderLaw !== newOptions.faderLaw) {
+		return false
+	}
+
+	// Talkback channel is only used in the talkback-controlling presets, which
+	// will always reflect the latest talkback channel when added as Companion
+	// buttons, so we don't need to restart for a change.
+
+	// Changing MIDI channel could result in messages on old/new MIDI channel
+	// being missed, so force a restart.
+	if (oldOptions.midiChannel !== newOptions.midiChannel) {
+		return false
+	}
+
+	// Once the mixer connection is started up, a change in status retrieval
+	// option is irrelevant, so don't restart for such change.
+
+	// Verbose logging can be flipped on and off live without restart -- and
+	// you really want it to, because verbose logging of 26KB of startup status
+	// retrieval is extremely slow (particularly if the instance debug log is
+	// open.)
+
+	// The connection label is only used to expose the variable names for
+	// pan/balance variables that are "Learn"ed at runtime, so don't restart for
+	// a label change.
+
+	// Otherwise we can update options without restarting.
+	return true
 }
