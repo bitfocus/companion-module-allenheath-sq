@@ -14,7 +14,7 @@ import { softKeyActions } from './softkey.js'
 /**
  * Get all action definitions exposed by this module.
  *
- * @param self
+ * @param instance
  *   The instance for which definitions are being generated.
  * @param mixer
  *   The mixer in use by the instance.
@@ -23,7 +23,7 @@ import { softKeyActions } from './softkey.js'
  * @returns
  *   All actions defined by this module.
  */
-export function getActions(self: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<ActionId> {
+export function getActions(instance: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<ActionId> {
 	const FadingOption: CompanionInputFieldDropdown = {
 		type: 'dropdown',
 		label: 'Fading',
@@ -60,7 +60,7 @@ export function getActions(self: sqInstance, mixer: Mixer, choices: Choices): Ac
 	} as const
 
 	return {
-		...muteActions(self, mixer, choices),
+		...muteActions(instance, mixer, choices),
 		...(() => {
 			const rotaryActions = {}
 			if (mixer.model.count.rotaryKey > 0) {
@@ -70,11 +70,11 @@ export function getActions(self: sqInstance, mixer: Mixer, choices: Choices): Ac
 			}
 			return rotaryActions
 		})(),
-		...softKeyActions(self, mixer, choices),
-		...assignActions(self, mixer, choices),
-		...levelActions(self, mixer, choices, LevelOption, FadingOption),
-		...panBalanceActions(self, mixer, choices, PanLevelOption),
-		...outputActions(self, mixer, choices, LevelOption, FadingOption, PanLevelOption),
-		...sceneActions(self, mixer),
+		...softKeyActions(instance, mixer, choices),
+		...assignActions(instance, mixer, choices),
+		...levelActions(instance, mixer, choices, LevelOption, FadingOption),
+		...panBalanceActions(instance, mixer, choices, PanLevelOption),
+		...outputActions(instance, mixer, choices, LevelOption, FadingOption, PanLevelOption),
+		...sceneActions(instance, mixer),
 	}
 }

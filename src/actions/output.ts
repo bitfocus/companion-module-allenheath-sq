@@ -251,17 +251,17 @@ type PanBalanceInfo = {
 }
 
 function getPanBalanceType(
-	self: sqInstance,
+	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
 	type: SinkPanBalanceInOutputType,
 ): PanBalanceInfo | null {
-	const fader = getFader(self, model, options, type)
+	const fader = getFader(instance, model, options, type)
 	if (fader === null) {
 		return null
 	}
 
-	const panBalanceChoice = getPanBalance(self, options)
+	const panBalanceChoice = getPanBalance(instance, options)
 	if (panBalanceChoice === null) {
 		return null
 	}
@@ -276,7 +276,7 @@ function getPanBalanceType(
  * Generate action definitions for adjusting the levels or pan/balance of
  * various mixer sinks when they're assigned to mixer outputs.
  *
- * @param self
+ * @param instance
  *   The instance for which actions are being generated.
  * @param mixer
  *   The mixer object to use when executing the actions.
@@ -293,7 +293,7 @@ function getPanBalanceType(
  *   The set of all output-adjustment action definitions.
  */
 export function outputActions(
-	self: sqInstance,
+	instance: sqInstance,
 	mixer: Mixer,
 	choices: Choices,
 	levelOption: CompanionInputFieldDropdown,
@@ -319,7 +319,7 @@ export function outputActions(
 			],
 			callback: async ({ options }) => {
 				const param = SinkLevelInOutputBase['lr']
-				const fade = getFadeParameters(self, options, param)
+				const fade = getFadeParameters(instance, options, param)
 				if (fade === null) {
 					return
 				}
@@ -344,13 +344,13 @@ export function outputActions(
 				fadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(self, model, options, 'mix')
+				const levelType = getLevelType(instance, model, options, 'mix')
 				if (levelType === null) {
 					return
 				}
 				const { sink: mix, param } = levelType
 
-				const fade = getFadeParameters(self, options, param)
+				const fade = getFadeParameters(instance, options, param)
 				if (fade === null) {
 					return
 				}
@@ -375,13 +375,13 @@ export function outputActions(
 				fadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(self, model, options, 'fxSend')
+				const levelType = getLevelType(instance, model, options, 'fxSend')
 				if (levelType === null) {
 					return
 				}
 				const { sink: fxSend, param } = levelType
 
-				const fade = getFadeParameters(self, options, param)
+				const fade = getFadeParameters(instance, options, param)
 				if (fade === null) {
 					return
 				}
@@ -406,13 +406,13 @@ export function outputActions(
 				fadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(self, model, options, 'matrix')
+				const levelType = getLevelType(instance, model, options, 'matrix')
 				if (levelType === null) {
 					return
 				}
 				const { sink: matrix, param } = levelType
 
-				const fade = getFadeParameters(self, options, param)
+				const fade = getFadeParameters(instance, options, param)
 				if (fade === null) {
 					return
 				}
@@ -437,13 +437,13 @@ export function outputActions(
 				fadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(self, model, options, 'dca')
+				const levelType = getLevelType(instance, model, options, 'dca')
 				if (levelType === null) {
 					return
 				}
 				const { sink: dca, param } = levelType
 
-				const fade = getFadeParameters(self, options, param)
+				const fade = getFadeParameters(instance, options, param)
 				if (fade === null) {
 					return
 				}
@@ -465,7 +465,7 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${self.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (_action) => {
@@ -475,7 +475,7 @@ export function outputActions(
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
 			},
 			callback: async ({ options }) => {
-				const panBalanceChoice = getPanBalance(self, options)
+				const panBalanceChoice = getPanBalance(instance, options)
 				if (panBalanceChoice === null) {
 					return
 				}
@@ -499,7 +499,7 @@ export function outputActions(
 				ShowVar,
 			],
 			learn: async ({ options }) => {
-				const mix = getFader(self, model, options, 'mix')
+				const mix = getFader(instance, model, options, 'mix')
 				if (mix === null) {
 					return
 				}
@@ -509,11 +509,11 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${self.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async ({ options }) => {
-				const mix = getFader(self, model, options, 'mix')
+				const mix = getFader(instance, model, options, 'mix')
 				if (mix === null) {
 					return
 				}
@@ -524,7 +524,7 @@ export function outputActions(
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
 			},
 			callback: async ({ options }) => {
-				const panBalance = getPanBalanceType(self, model, options, 'mix')
+				const panBalance = getPanBalanceType(instance, model, options, 'mix')
 				if (panBalance === null) {
 					return
 				}
@@ -549,7 +549,7 @@ export function outputActions(
 				ShowVar,
 			],
 			learn: async ({ options }) => {
-				const matrix = getFader(self, model, options, 'matrix')
+				const matrix = getFader(instance, model, options, 'matrix')
 				if (matrix === null) {
 					return
 				}
@@ -558,11 +558,11 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${self.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async ({ options }) => {
-				const matrix = getFader(self, model, options, 'matrix')
+				const matrix = getFader(instance, model, options, 'matrix')
 				if (matrix === null) {
 					return
 				}
@@ -573,7 +573,7 @@ export function outputActions(
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
 			},
 			callback: async ({ options }) => {
-				const panBalance = getPanBalanceType(self, model, options, 'matrix')
+				const panBalance = getPanBalanceType(instance, model, options, 'matrix')
 				if (panBalance === null) {
 					return
 				}
