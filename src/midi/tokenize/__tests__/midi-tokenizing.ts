@@ -2,7 +2,7 @@ import { TCPHelper } from '@companion-module/base'
 import net from 'net'
 import { type Interaction } from './interactions.js'
 import { type MidiMessage, type MidiMessageEvents, MidiTokenizer } from '../tokenize.js'
-import { prettyByte, prettyBytes } from '../../../utils/pretty.js'
+import { prettyByte, prettyBytes, repr } from '../../../utils/pretty.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
 
 /** Turn on extra logging in performing test interactions to debug tests. */
@@ -151,7 +151,7 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 					const actualMessage = await getNextMessage()
 					if (actualMessage.type !== 'system-real-time') {
 						throw new Error(
-							`Expected system real time message ${prettyByte(interaction.message)}, got ${actualMessage}`,
+							`Expected system real time message ${prettyByte(interaction.message)}, got ${repr(actualMessage)}`,
 						)
 					}
 					break

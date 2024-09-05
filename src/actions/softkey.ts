@@ -29,16 +29,24 @@ function getSoftKeyOptions(instance: sqInstance, model: Model, options: Companio
 		return null
 	}
 
-	const op = String(options.pressedsk)
-	switch (op) {
-		case SoftKeyOp.Press:
-		case SoftKeyOp.Release:
-		case SoftKeyOp.Toggle:
-			return { softKey, op }
+	const option = String(options.pressedsk)
+	let op
+	switch (option) {
+		case '1':
+			op = SoftKeyOp.Press
+			break
+		case '2':
+			op = SoftKeyOp.Release
+			break
+		case '0':
+			op = SoftKeyOp.Toggle
+			break
 		default:
-			instance.log('error', `Bad softkey option value ${repr(op)}, ignoring`)
+			instance.log('error', `Bad softkey option value ${repr(option)}, ignoring`)
 			return null
 	}
+
+	return { softKey, op }
 }
 
 /**

@@ -13,9 +13,7 @@ export function promiseWithResolvers<T>(): {
 
 	return {
 		promise,
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		resolve: promiseResolve!,
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		reject: promiseReject!,
 	}
 }

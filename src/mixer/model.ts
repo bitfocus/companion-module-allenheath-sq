@@ -34,7 +34,7 @@ export type InputOutputType = keyof InputOutputCounts
  * have different types.  But action options currently use `99` to encode LR,
  * and that probably needs to change before this can be changed to e.g. `'lr'`.)
  */
-export const LR = 99 as const
+export const LR = 99
 
 export class Model {
 	readonly count: InputOutputCounts

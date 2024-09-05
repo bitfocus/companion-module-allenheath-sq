@@ -10,6 +10,10 @@ import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
 
+// Doesn't this lint make *no sense* for intersections?  The intersection of two
+// types that *do not* duplicate is just `never`, which makes any such
+// intersection's result totally vacuous...right?
+// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
 type MuteType = keyof typeof MuteFeedbackId & keyof typeof MuteActionId
 
 export function getPresets(instance: sqInstance, model: Model): CompanionPresetDefinitions {

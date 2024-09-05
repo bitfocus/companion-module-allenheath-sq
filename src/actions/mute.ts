@@ -83,16 +83,24 @@ function getMuteOptions(
 	}
 
 	const muteOption = options.mute
-	const op = Number(muteOption)
-	switch (op) {
-		case MuteOperation.Toggle:
-		case MuteOperation.On:
-		case MuteOperation.Off:
-			return { strip, op }
+	const option = Number(muteOption)
+	let op
+	switch (option) {
+		case 0:
+			op = MuteOperation.Toggle
+			break
+		case 1:
+			op = MuteOperation.On
+			break
+		case 2:
+			op = MuteOperation.Off
+			break
 		default:
 			instance.log('error', `Mute option has invalid value, action aborted: ${repr(muteOption)}`)
 			return null
 	}
+
+	return { strip, op }
 }
 
 /**
