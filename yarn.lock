@@ -423,9 +423,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@companion-module/tools@npm:~2.0.0":
-  version: 2.0.0
-  resolution: "@companion-module/tools@npm:2.0.0"
+"@companion-module/tools@npm:~2.0.2":
+  version: 2.0.2
+  resolution: "@companion-module/tools@npm:2.0.2"
   dependencies:
     "@eslint/js": "npm:^9.9.1"
     eslint-config-prettier: "npm:^9.1.0"
@@ -453,7 +453,7 @@ __metadata:
     companion-generate-manifest: scripts/generate-manifest.js
     companion-module-build: scripts/build.js
     companion-module-check: scripts/check.js
-  checksum: 10c0/09aa92d9ac20e3b70e330060cc2052fb9cd928687a59be1489314dabcb504a1cbf0ec5574f3abd7b4bdad884c8e85ec1588b85534938c1c119eb642d7bb45190
+  checksum: 10c0/e6b2c42d77a1a3614cf79a2779c67b7f0f092747c139d482d07f6bc617df2782719911428ea846c2834f222f8fdfc57dd81267e91d5b12a55cd50d076f029edf
   languageName: node
   linkType: hard
 
@@ -1582,7 +1582,7 @@ __metadata:
   resolution: "allenheath-sq@workspace:."
   dependencies:
     "@companion-module/base": "npm:~1.10.0"
-    "@companion-module/tools": "npm:~2.0.0"
+    "@companion-module/tools": "npm:~2.0.2"
     "@jest/globals": "npm:^29.7.0"
     "@types/node": "npm:^18.19.10"
     eslint: "npm:^9.9.1"
