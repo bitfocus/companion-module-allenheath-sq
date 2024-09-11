@@ -43,7 +43,7 @@
 		"eventemitter3": "^5.0.1"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "~2.0.2",
+		"@companion-module/tools": "~2.0.3",
 		"@jest/globals": "^29.7.0",
 		"@types/node": "^18.19.10",
 		"eslint": "^9.9.1",
