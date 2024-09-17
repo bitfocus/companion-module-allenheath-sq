@@ -43,7 +43,7 @@
 		"eventemitter3": "^5.0.1"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "~2.0.3",
+		"@companion-module/tools": "~2.0.4",
 		"@jest/globals": "^29.7.0",
 		"@types/node": "^18.19.10",
 		"eslint": "^9.9.1",
@@ -56,7 +56,7 @@
 		"ts-jest": "^29.1.4",
 		"ts-node": "^10.9.2",
 		"typescript": "~5.5.4",
-		"typescript-eslint": "^8.4.0"
+		"typescript-eslint": "~8.4.0"
 	},
 	"packageManager": "yarn@4.4.1"
 }
