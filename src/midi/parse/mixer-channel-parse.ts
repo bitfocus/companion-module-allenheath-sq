@@ -4,8 +4,8 @@ import EventEmitter from 'eventemitter3'
 export interface MixerMessageEvents {
 	// (It's unfortunate that this interface encodes NRPN MSB/LSB parameters to
 	// this degree.  But the underlying modeling of the mixer reiterates MSB/LSB
-	// in a bunch of places -- in `callback.mute` keys, in variable names, in
-	// `lastValue` and `fdbState` keys, in conversions between level encoding
+	// in a bunch of places -- in `CallbackInfo.mute` keys, in variable names,
+	// in `lastValue` and `fdbState` keys, in conversions between level encoding
 	// and level value -- so we can't really do any better.)
 
 	/** A scene change to `newScene` (zero-based) occurred. */

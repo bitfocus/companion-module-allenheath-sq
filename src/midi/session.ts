@@ -1,5 +1,5 @@
 import { InstanceStatus, TCPHelper } from '@companion-module/base'
-import callback from '../callback.js'
+import { CallbackInfo, type CallbackInfoType } from '../callback.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer, RetrieveStatusAtStartup } from '../mixer/mixer.js'
 import { vcvfToReadablePanBalance } from '../mixer/pan-balance.js'
@@ -157,7 +157,9 @@ export class MidiSession {
 			verboseLog(`Mute received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VF=${prettyByte(vf)}`)
 
 			mixer.fdbState[`mute_${msb}.${lsb}`] = vf === 0x01
-			instance.checkFeedbacks((callback.mute as any)[msb + ':' + lsb][0])
+
+			const CI: CallbackInfoType = CallbackInfo
+			instance.checkFeedbacks(CI.mute[`${msb}:${lsb}`][0])
 		})
 		mixerChannelParser.on('fader_level', (msb: number, lsb: number, vc: number, vf: number) => {
 			verboseLog(
@@ -218,7 +220,7 @@ export class MidiSession {
 	 * all inputs and outputs.
 	 */
 	#retrieveMuteStatuses(): void {
-		for (const key in callback.mute) {
+		for (const key in CallbackInfo.mute) {
 			const mblb = key.toString().split(':')
 			this.send(this.nrpnIncrement(Number(mblb[0]), Number(mblb[1]), 0x7f))
 		}

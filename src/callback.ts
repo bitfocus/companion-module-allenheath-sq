@@ -1,4 +1,10 @@
-export default {
+export type CallbackInfoType = {
+	mute: {
+		readonly [key: `${number}:${number}`]: readonly [string, number]
+	}
+}
+
+export const CallbackInfo = {
 	mute: {
 		'0:0': ['mute_input', 0],
 		'0:1': ['mute_input', 1],
@@ -105,4 +111,4 @@ export default {
 		'4:6': ['mute_mutegroup', 6],
 		'4:7': ['mute_mutegroup', 7],
 	},
-}
+} satisfies CallbackInfoType
