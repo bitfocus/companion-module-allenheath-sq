@@ -120,7 +120,7 @@ export class sqInstance extends InstanceBase {
 
 		this.mixer?.stop(InstanceStatus.Disconnected)
 
-		const mixer = new Mixer(this, newOptions.model)
+		const mixer = new Mixer(this)
 		this.mixer = mixer
 
 		const model = mixer.model
