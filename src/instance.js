@@ -15,6 +15,9 @@ import api from './api.js'
 import { Choices } from './choices.js'
 import { Mixer } from './mixer/mixer.js'
 
+/**
+ * @extends InstanceBase<import('./config.js').SQInstanceConfig>
+ */
 export class sqInstance extends InstanceBase {
 	/** Options dictating the behavior of this instance. */
 	options = noConnectionOptions()
@@ -36,7 +39,6 @@ export class sqInstance extends InstanceBase {
 		})
 	}
 
-	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['destroy']} */
 	async destroy() {
 		if (this.mixer !== null) {
 			this.mixer.stop(InstanceStatus.Disconnected)
@@ -44,12 +46,10 @@ export class sqInstance extends InstanceBase {
 		}
 	}
 
-	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['init']} */
 	async init(config) {
 		this.configUpdated(config)
 	}
 
-	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['getConfigFields']} */
 	getConfigFields() {
 		return GetConfigFields()
 	}
@@ -107,7 +107,6 @@ export class sqInstance extends InstanceBase {
 		})
 	}
 
-	/** @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['configUpdated']} */
 	async configUpdated(config) {
 		const oldOptions = this.options
 
