@@ -4,8 +4,8 @@ import { AssignActionId } from './actions/assign.js'
 import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
+import type { sqInstance } from './instance.js'
 import { computeEitherParameters, LevelInSinkBase } from './mixer/parameters.js'
-import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
