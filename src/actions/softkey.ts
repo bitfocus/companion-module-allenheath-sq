@@ -1,9 +1,9 @@
 import { type CompanionOptionValues } from '@companion-module/base'
-import { type SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type ActionDefinitions } from './actionid.js'
-import { type Model } from '../mixer/model.js'
 import { type Choices } from '../choices.js'
+import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
+import { type Model } from '../mixer/model.js'
 import { repr } from '../utils/pretty.js'
 
 /** Action IDs for all actions that operate softkeys. */

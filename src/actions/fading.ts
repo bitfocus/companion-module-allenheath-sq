@@ -1,5 +1,5 @@
 import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
-import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import type { Param } from '../mixer/parameters.js'

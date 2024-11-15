@@ -3,11 +3,13 @@ import type {
 	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
-import { getCommonCount } from '../mixer/models.js'
-import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
-import type { Mixer } from '../mixer/mixer.js'
-import type { Choices } from '../choices.js'
 import type { ActionDefinitions } from './actionid.js'
+import type { Choices } from '../choices.js'
+import { getFadeParameters, getFader } from './fading.js'
+import type { sqInstance } from '../instance.js'
+import type { Mixer } from '../mixer/mixer.js'
+import type { Model } from '../mixer/model.js'
+import { getCommonCount } from '../mixer/models.js'
 import {
 	type Param,
 	SinkLevelInOutputBase,
@@ -16,10 +18,8 @@ import {
 	SinkPanBalanceInOutputBase,
 	computeParameters,
 } from '../mixer/parameters.js'
-import { getFadeParameters, getFader } from './fading.js'
-import { toSourceOrSink } from './to-source-or-sink.js'
-import type { Model } from '../mixer/model.js'
 import { getPanBalance, type PanBalanceChoice } from './pan-balance.js'
+import { toSourceOrSink } from './to-source-or-sink.js'
 
 /** Action IDs for all actions affecting sinks used as direct mixer outputs. */
 export enum OutputActionId {

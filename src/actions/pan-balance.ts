@@ -1,7 +1,7 @@
 import type { CompanionInputFieldDropdown, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
-import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { LR } from '../mixer/model.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
