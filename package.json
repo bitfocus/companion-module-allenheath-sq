@@ -1,6 +1,6 @@
 {
 	"name": "allenheath-sq",
-	"version": "2.0.2",
+	"version": "2.1.0-dev",
 	"type": "module",
 	"main": "dist/main.js",
 	"scripts": {
