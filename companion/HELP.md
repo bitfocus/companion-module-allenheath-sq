@@ -23,6 +23,23 @@ Controls the Allen & Heath SQ.
 - Talkback macro
 - Scene step increment
 
+New in v.2.1.0
+
+- Fix scene recalling if the mixer MIDI channel isn't 1
+- Add Step +/-0.1dB choices for setting signal levels
+- Permit setting signal levels between -85dB and -40dB
+- Make setting signal level to +10dB work
+- Make assigning the LR mix to matrixes work correctly
+- Allow setting the pan/balance of matrix 3 used as an output
+- Make setting the pan/balance of LR in a matrix work
+- Add an action to make active/inactive an FX return in LR/mixes
+- Define pan/balance variables on-demand as pan/balance change messages are sent by the mixer
+- Restart module instances in response to configuration changes only if absolutely required
+
+New in v.2.0.0 (not released)
+
+- Convert to Companion v3 format
+
 New in v.1.1.0
 
 - Add listener for MIDI inbound data
