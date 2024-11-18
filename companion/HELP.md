@@ -18,6 +18,7 @@ Controls the Allen & Heath SQ.
 ## Special Functions:
 
 - Current scene display variable
+- Scene recall variable (usable in triggers to respond to scene recalls)
 - Current dB Fader Level display variables
 - Current Pan level display variables
 - Talkback macro
@@ -35,6 +36,7 @@ New in v.2.1.0
 - Add an action to make active/inactive an FX return in LR/mixes
 - Define pan/balance variables on-demand as pan/balance change messages are sent by the mixer
 - Restart module instances in response to configuration changes only if absolutely required
+- Add a `sceneRecalledTrigger` variable whose value changes every time a scene is recalled, suitable for use in triggers
 
 New in v.2.0.0 (not released)
 
