@@ -2,13 +2,29 @@ import type { CompanionVariableDefinition } from '@companion-module/base'
 import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 import type { Model } from './mixer/model.js'
 
-export function getVariables(instance: sqInstance, model: Model): CompanionVariableDefinition[] {
-	const variables: CompanionVariableDefinition[] = []
+/**
+ * The variable ID for the variable containing the last recalled scene
+ * (1-indexed).
+ */
+export const CurrentSceneId = 'currentScene'
 
-	variables.push({
-		name: 'Scene - Current',
-		variableId: 'currentScene',
-	})
+/**
+ * The variable ID for the variable updated every time a scene is recalled
+ * intended for use in triggers.
+ */
+export const SceneRecalledTriggerId = 'sceneRecalledTrigger'
+
+export function getVariables(instance: sqInstance, model: Model): CompanionVariableDefinition[] {
+	const variables: CompanionVariableDefinition[] = [
+		{
+			name: 'Scene - Scene Recalled',
+			variableId: SceneRecalledTriggerId,
+		},
+		{
+			name: 'Scene - Current',
+			variableId: CurrentSceneId,
+		},
+	]
 
 	model.forEachInputChannel((channel, channelLabel) => {
 		model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {

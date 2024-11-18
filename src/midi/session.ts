@@ -8,6 +8,7 @@ import { MixerMessageParser } from './parse/parse.js'
 import { MidiTokenizer } from './tokenize/tokenize.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { asyncSleep, sleep } from '../utils/sleep.js'
+import { CurrentSceneId, SceneRecalledTriggerId } from '../variables.js'
 
 /**
  * The port number used for MIDI-over-TCP connections to SQ mixers.
@@ -129,6 +130,26 @@ export class MidiSession {
 		})
 	}
 
+	/**
+	 * React to a mixer scene being recalled.
+	 *
+	 * @param newScene
+	 *   The zero-indexed scene that was recalled.
+	 */
+	#sceneRecalled(newScene: number): void {
+		this.#mixer.currentScene = newScene
+
+		const instance = this.#instance
+		const sceneRecalledTrigger = Number(instance.getVariableValue(SceneRecalledTriggerId)!)
+		instance.setVariableValues({
+			[SceneRecalledTriggerId]: sceneRecalledTrigger + 1,
+
+			// The currentScene variable is 1-indexed, consistent with how
+			// the current scene is displayed to users in mixer UI.
+			[CurrentSceneId]: newScene + 1,
+		})
+	}
+
 	/** Read and process mixer reply messages from `socket`. */
 	async #processMixerReplies(socket: TCPHelper) {
 		const mixer = this.#mixer
@@ -144,14 +165,9 @@ export class MidiSession {
 
 		const mixerChannelParser = new MixerChannelParser(verboseLog)
 		mixerChannelParser.on('scene', (newScene: number) => {
-			verboseLog(`Scene changed: ${newScene}`)
+			verboseLog(`Scene recalled: ${newScene}`)
 
-			mixer.currentScene = newScene
-			instance.setVariableValues({
-				// The currentScene variable is 1-indexed, consistent with how
-				// the current scene is displayed to users in mixer UI.
-				currentScene: newScene + 1,
-			})
+			this.#sceneRecalled(newScene)
 		})
 		mixerChannelParser.on('mute', (msb: number, lsb: number, vf: number) => {
 			verboseLog(`Mute received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VF=${prettyByte(vf)}`)
