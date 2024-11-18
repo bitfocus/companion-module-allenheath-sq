@@ -3,11 +3,11 @@ import { CallbackInfo, type CallbackInfoType } from '../callback.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer, RetrieveStatusAtStartup } from '../mixer/mixer.js'
 import { vcvfToReadablePanBalance } from '../mixer/pan-balance.js'
-import { MidiTokenizer } from './tokenize/tokenize.js'
+import { MixerChannelParser } from './parse/mixer-channel-parse.js'
 import { MixerMessageParser } from './parse/parse.js'
+import { MidiTokenizer } from './tokenize/tokenize.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { asyncSleep, sleep } from '../utils/sleep.js'
-import { MixerChannelParser } from './parse/mixer-channel-parse.js'
 
 /**
  * The port number used for MIDI-over-TCP connections to SQ mixers.

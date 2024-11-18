@@ -1,19 +1,16 @@
 // Allen & Heath SQ Series
 
 import { InstanceBase, InstanceStatus } from '@companion-module/base'
-
-import { GetConfigFields } from './config.js'
-import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
-
 import { getActions } from './actions/actions.js'
+import { Choices } from './choices.js'
+import { GetConfigFields } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
-import { getVariables } from './variables.js'
+import { Mixer } from './mixer/mixer.js'
+import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
 import { getPresets } from './presets.js'
+import { getVariables } from './variables.js'
 
 import api from './api.js'
-
-import { Choices } from './choices.js'
-import { Mixer } from './mixer/mixer.js'
 
 /**
  * @extends InstanceBase<import('./config.js').SQInstanceConfig>
