@@ -4,12 +4,14 @@ import {
 	addModelOptionToConfig,
 	configIsMissingLabel,
 	configIsMissingModel,
+	configUnnecessarilySpecifiesLabel,
+	removeLabelOptionFromConfig,
 	type SQInstanceConfig,
 } from './config.js'
 
 describe('config upgrade to specify a missing model', () => {
 	test('config without model', () => {
-		const configMissingModel = {
+		const configMissingModel: SQInstanceConfig = {
 			host: '127.0.0.1',
 			level: 'LinearTaper',
 			talkback: 0,
@@ -17,7 +19,7 @@ describe('config upgrade to specify a missing model', () => {
 			status: 'full',
 			label: 'SQ',
 			verbose: false,
-		} as SQInstanceConfig
+		}
 
 		expect(configIsMissingModel(configMissingModel)).toBe(true)
 
@@ -62,7 +64,7 @@ describe('config upgrade to specify a missing model', () => {
 
 describe('config upgrade to specify a missing label', () => {
 	test('config without label', () => {
-		const configMissingLabel = {
+		const configMissingLabel: SQInstanceConfig = {
 			host: '127.0.0.1',
 			model: 'SQ5',
 			level: 'LinearTaper',
@@ -70,7 +72,7 @@ describe('config upgrade to specify a missing label', () => {
 			midich: 0,
 			status: 'full',
 			verbose: false,
-		} as SQInstanceConfig
+		}
 
 		expect(configIsMissingLabel(configMissingLabel)).toBe(true)
 
@@ -94,5 +96,41 @@ describe('config upgrade to specify a missing label', () => {
 
 		expect(configIsMissingLabel(configWithLabelSQ5)).toBe(false)
 		expect(configWithLabelSQ5.label).toBe('sq5')
+	})
+})
+
+describe('config upgrade to remove an unnecessary label', () => {
+	test('config without label', () => {
+		const configMissingLabel: SQInstanceConfig = {
+			host: '127.0.0.1',
+			model: 'SQ5',
+			level: 'LinearTaper',
+			talkback: 0,
+			midich: 0,
+			status: 'full',
+			verbose: false,
+		}
+
+		expect(configUnnecessarilySpecifiesLabel(configMissingLabel)).toBe(false)
+	})
+
+	test('config with label', () => {
+		const configWithLabel: SQInstanceConfig = {
+			host: '127.0.0.1',
+			model: 'SQ5',
+			level: 'LinearTaper',
+			talkback: 0,
+			midich: 0,
+			status: 'full',
+			verbose: false,
+			label: 'SQ',
+		}
+
+		expect(configUnnecessarilySpecifiesLabel(configWithLabel)).toBe(true)
+
+		removeLabelOptionFromConfig(configWithLabel)
+
+		expect(configUnnecessarilySpecifiesLabel(configWithLabel)).toBe(false)
+		expect('label' in configWithLabel).toBe(false)
 	})
 })

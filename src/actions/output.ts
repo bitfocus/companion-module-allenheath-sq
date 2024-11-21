@@ -465,7 +465,7 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (_action) => {
@@ -509,7 +509,7 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async ({ options }) => {
@@ -558,7 +558,7 @@ export function outputActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async ({ options }) => {

@@ -4,7 +4,14 @@ import {
 	type CompanionUpgradeContext,
 	EmptyUpgradeScript,
 } from '@companion-module/base'
-import { configIsMissingLabel, configIsMissingModel, DefaultConnectionLabel, type SQInstanceConfig } from './config.js'
+import {
+	configIsMissingLabel,
+	configIsMissingModel,
+	configUnnecessarilySpecifiesLabel,
+	DefaultConnectionLabel,
+	removeLabelOptionFromConfig,
+	type SQInstanceConfig,
+} from './config.js'
 import { DefaultModel } from './mixer/models.js'
 import {
 	convertOldLevelToOutputActionToSinkSpecific,
@@ -165,6 +172,35 @@ function RewriteCombinedOutputPanBalanceActionsToSinkSpecificOutputPanBalanceAct
 	return result
 }
 
+/**
+ * This module used to have a `'label'` option, in which the user was expected
+ * to (re-)specify the instance label.  This label was then used in the "Learn"
+ * operation for various actions, as well as in various preset definitions.
+ *
+ * But it turns out the instance label is accessible as `InstanceBase.label`
+ * which is always up-to-date, so there's no point in having the config option.
+ *
+ * This upgrade script removes the `'label'` option from configs that have it.
+ */
+function RemoveUnnecessaryConnectionLabel(
+	_context: CompanionUpgradeContext<SQInstanceConfig>,
+	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
+): CompanionStaticUpgradeResult<SQInstanceConfig> {
+	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
+	}
+
+	const oldConfig = props.config
+	if (configUnnecessarilySpecifiesLabel(oldConfig)) {
+		removeLabelOptionFromConfig(oldConfig)
+		result.updatedConfig = oldConfig
+	}
+
+	return result
+}
+
 export const UpgradeScripts = [
 	EmptyUpgradeScript,
 	CoalesceSceneRecallActions,
@@ -172,6 +208,11 @@ export const UpgradeScripts = [
 	EnsureConnectionLabel,
 	RewriteCombinedOutputLevelActionsToSinkSpecificOutputLevelActions,
 	RewriteCombinedOutputPanBalanceActionsToSinkSpecificOutputPanBalanceActions,
+	// ...yes, we added the `'label'` config option above because we thought it
+	// was the only way to get the instance label, and now we're removing it
+	// because there in fact *is* a way to get that label without requiring that
+	// users redundantly specify it.  So it goes.
+	RemoveUnnecessaryConnectionLabel,
 ]
 
 /*

@@ -40,10 +40,24 @@ export function configIsMissingLabel(config: SQInstanceConfig | null): config is
 }
 
 /**
- * Add the 'label' option (defaulting to SQ) to a config that's missing one.
+ * Add the `'label'` option (defaulting to SQ) to a config that's missing one.
  */
 export function addLabelOptionToConfig(config: SQInstanceConfig): void {
 	config.label = DefaultConnectionLabel
+}
+
+/**
+ * Determine whether the given instance config specifies a `'label'` property
+ * that is unnecessary because `InstanceBase.label` is the real deal and is
+ * always up-to-date.
+ */
+export function configUnnecessarilySpecifiesLabel(config: SQInstanceConfig | null): config is SQInstanceConfig {
+	return config !== null && 'label' in config
+}
+
+/** Remove the `'label'` option from a config that has it. */
+export function removeLabelOptionFromConfig(config: SQInstanceConfig): void {
+	delete config.label
 }
 
 function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
@@ -132,13 +146,6 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 				{ id: 'delay', label: 'Delayed at startup' },
 				{ id: 'nosts', label: 'Not at startup' },
 			],
-		},
-		{
-			type: 'textinput',
-			id: 'label',
-			label: 'Connection label (for displaying pan/balance variables correctly)',
-			width: 6,
-			default: DefaultConnectionLabel,
 		},
 		{
 			type: 'checkbox',

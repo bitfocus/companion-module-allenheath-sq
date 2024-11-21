@@ -198,7 +198,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 
 			createtMuteLevel(
 				`Mt+dB CH-${mixLabel}`,
-				`${channelLabel}\\n${mixLabel}\\n$(${instance.options.connectionLabel}:level_${MSB}.${LSB}) dB`,
+				`${channelLabel}\\n${mixLabel}\\n$(${instance.label}:level_${MSB}.${LSB}) dB`,
 				'MuteInputChannel',
 				channel,
 				mix,

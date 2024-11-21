@@ -145,7 +145,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -224,7 +224,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -303,7 +303,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -382,7 +382,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -466,7 +466,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {
@@ -551,7 +551,7 @@ export function panBalanceActions(
 
 				return {
 					...options,
-					showvar: `$(${instance.options.connectionLabel}:pan_${MSB}.${LSB})`,
+					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
 			subscribe: async (action) => {

@@ -1,7 +1,7 @@
 import { type ModelId, DefaultModel } from './mixer/models.js'
 import type { FaderLaw } from './mixer/mixer.js'
 import { RetrieveStatusAtStartup } from './mixer/mixer.js'
-import { DefaultConnectionLabel, type SQInstanceConfig } from './config.js'
+import type { SQInstanceConfig } from './config.js'
 import { Regex } from '@companion-module/base'
 
 /** Options information controlling the operation of a mixer instance. */
@@ -40,9 +40,6 @@ export type SQInstanceOptions = {
 	 * logging is enabled.
 	 */
 	verbose: boolean
-
-	/** The label used to identify this Companion instance/connection. */
-	connectionLabel: string
 }
 
 function toHost(host: SQInstanceConfig['host']): string | null {
@@ -109,10 +106,6 @@ function toVerbose(verbose: SQInstanceConfig['verbose']): boolean {
 	return Boolean(verbose)
 }
 
-function toConnectionLabel(label: SQInstanceConfig['label']): string {
-	return typeof label === 'undefined' ? DefaultConnectionLabel : String(label)
-}
-
 /** Compute instance options from instance configuration info. */
 export function optionsFromConfig({
 	// Comments indicate the expected types of the various config fields.
@@ -123,7 +116,6 @@ export function optionsFromConfig({
 	midich, // number
 	status, // string
 	verbose, // boolean
-	label, // string
 }: SQInstanceConfig): SQInstanceOptions {
 	return {
 		host: toHost(host),
@@ -133,7 +125,6 @@ export function optionsFromConfig({
 		midiChannel: toMidiChannel(midich),
 		retrieveStatusAtStartup: toRetrieveStatusAtStartup(status),
 		verbose: toVerbose(verbose),
-		connectionLabel: toConnectionLabel(label),
 	}
 }
 
@@ -151,7 +142,6 @@ export function noConnectionOptions(): SQInstanceOptions {
 		midiChannel: 0,
 		retrieveStatusAtStartup: RetrieveStatusAtStartup.Fully,
 		verbose: false,
-		connectionLabel: DefaultConnectionLabel,
 	}
 }
 
@@ -201,10 +191,6 @@ export function canUpdateOptionsWithoutRestarting(
 	// you really want it to, because verbose logging of 26KB of startup status
 	// retrieval is extremely slow (particularly if the instance debug log is
 	// open.)
-
-	// The connection label is only used to expose the variable names for
-	// pan/balance variables that are "Learn"ed at runtime, so don't restart for
-	// a label change.
 
 	// Otherwise we can update options without restarting.
 	return true

@@ -23,6 +23,14 @@ export class sqInstance extends InstanceBase {
 	mixer = null
 
 	/**
+	 * The last label specified for this instance, or `null` if there wasn't a
+	 * last label.
+	 *
+	 * @type {string | null}
+	 */
+	#lastLabel = null
+
+	/**
 	 * Construct an `sqInstance`.
 	 *
 	 * @param {ConstructorParameters<typeof InstanceBase<import('./config.js').SQInstanceConfig>>[0]} internal
@@ -113,6 +121,17 @@ export class sqInstance extends InstanceBase {
 		this.options = newOptions
 
 		if (canUpdateOptionsWithoutRestarting(oldOptions, newOptions)) {
+			const label = this.label
+			if (label !== this.#lastLabel) {
+				// The instance label might be altered just before
+				// `configUpdated` is called.  The instance label is used in the
+				// "Learn" operation for some actions -- and it'll always be
+				// up-to-date in these uses.  But it's also hardcoded in some
+				// presets, so if the label changes, we must redefine presets
+				// even if we don't have to restart the connection.
+				this.#lastLabel = label
+				this.setPresetDefinitions(getPresets(this, this.mixer.model))
+			}
 			return
 		}
 
@@ -128,6 +147,8 @@ export class sqInstance extends InstanceBase {
 		this.initVariableDefinitions(model)
 		this.setActionDefinitions(getActions(this, mixer, choices))
 		this.setFeedbackDefinitions(getFeedbacks(mixer, choices))
+
+		this.#lastLabel = this.label
 		this.setPresetDefinitions(getPresets(this, model))
 
 		//this.checkVariables();
