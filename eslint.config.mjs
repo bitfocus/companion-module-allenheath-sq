@@ -39,12 +39,7 @@ const customConfig = [
 		ignores: ['eslint.config.*'],
 		rules: {
 			'n/no-missing-import': 'off',
-			'n/no-unpublished-import': [
-				'error',
-				{
-					allowModules: ['@jest/globals'],
-				},
-			],
+			'n/no-unpublished-import': 'error',
 			'@typescript-eslint/consistent-type-imports': [
 				'error',
 				{
