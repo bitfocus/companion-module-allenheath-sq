@@ -21,7 +21,7 @@ export function createLevels(): DropdownChoice[] {
 		{ label: `Step -6 dB`, id: 'step-6' },
 	)
 	for (let i = -90; i <= -40; i = i + 5) {
-		const id = i == -90 ? '-inf' : i
+		const id = i === -90 ? '-inf' : i
 		levels.push({ label: `${i} dB`, id })
 	}
 	for (let i = -39; i <= -10; i = i + 1) {

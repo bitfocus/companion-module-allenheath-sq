@@ -47,7 +47,7 @@ export function vcvfToReadablePanBalance(vc: number, vf: number): PanBalance {
 		val = -100
 	}
 
-	if (val == 0) {
+	if (val === 0) {
 		return 'CTR'
 	}
 

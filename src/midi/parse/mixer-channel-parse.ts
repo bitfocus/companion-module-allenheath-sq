@@ -135,7 +135,7 @@ export class MixerChannelParser extends EventEmitter<MixerMessageEvents> {
 
 						// Mute
 						if (msb === 0x00 || msb === 0x02 || msb === 0x04) {
-							if (vc == 0x00 && vf < 0x02) {
+							if (vc === 0x00 && vf < 0x02) {
 								this.emit('mute', msb, lsb, vf)
 							} else {
 								verboseLog(`Malformed mute message, ignoring: ${manyPrettyBytes(first, second, third, fourth)}`)
