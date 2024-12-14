@@ -157,7 +157,8 @@ export async function TestMixerCommandParsing(channel: number, interactions: rea
 	async function expectEvent(type: MixerCommand['type'], interaction: ExpectInteraction): Promise<void> {
 		console.log(`Performing ${interaction.type} for ${interaction.args}`)
 		const result = await commandIter.nextCommand()
-		if (result.done) {
+		const noNextCommand = Boolean(result.done)
+		if (noNextCommand) {
 			throw new Error(`Expected ${type} but ran out of commands`)
 		}
 

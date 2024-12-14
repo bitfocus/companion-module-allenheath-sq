@@ -34,7 +34,8 @@ export class SocketReader {
 	 * no more data can be read.
 	 */
 	async read(): Promise<boolean> {
-		return !(await this.#gen.next()).done
+		const done = Boolean((await this.#gen.next()).done)
+		return !done
 	}
 
 	private constructor(source: TCPHelper, data: number[]) {

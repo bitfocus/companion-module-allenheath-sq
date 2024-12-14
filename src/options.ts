@@ -76,12 +76,20 @@ function toFaderLaw(faderLawOpt: SQInstanceConfig['level']): FaderLaw {
 	}
 }
 
+function toNumberDefaultZero(v: SQInstanceConfig[string]): number {
+	if (typeof v === 'undefined') {
+		return 0
+	}
+
+	return Number(v)
+}
+
 function toTalkbackChannel(ch: SQInstanceConfig['talkback']): number {
-	return Number(ch || 0)
+	return toNumberDefaultZero(ch)
 }
 
 function toMidiChannel(midich: SQInstanceConfig['midich']): number {
-	const n = Number(midich || 0)
+	const n = toNumberDefaultZero(midich)
 	if (1 <= n && n <= 16) {
 		return n - 1
 	}

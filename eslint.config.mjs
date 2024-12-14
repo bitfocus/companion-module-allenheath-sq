@@ -40,6 +40,7 @@ const customConfig = [
 		rules: {
 			'n/no-missing-import': 'off',
 			'n/no-unpublished-import': 'error',
+			'@typescript-eslint/strict-boolean-expressions': 'error',
 			eqeqeq: 'error',
 			radix: 'error',
 			'@typescript-eslint/consistent-type-imports': [
