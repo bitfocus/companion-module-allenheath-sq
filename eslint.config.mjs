@@ -43,6 +43,8 @@ const customConfig = [
 			'@typescript-eslint/strict-boolean-expressions': 'error',
 			eqeqeq: 'error',
 			radix: 'error',
+			'no-eval': 'error',
+			'no-implied-eval': 'error',
 			'@typescript-eslint/consistent-type-imports': [
 				'error',
 				{
