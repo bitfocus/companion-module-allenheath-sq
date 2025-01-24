@@ -20,14 +20,11 @@
 	},
 	"prettier": "@companion-module/tools/.prettierrc.json",
 	"lint-staged": {
-		"*.{css,json,md,scss}": [
+		"*.{css,json,md,scss,yaml}": [
 			"prettier --write"
 		],
 		"*.{ts,tsx,js,jsx}": [
 			"yarn lint:raw --fix"
-		],
-		"*.yaml": [
-			"prettier --write"
 		]
 	},
 	"engines": {
