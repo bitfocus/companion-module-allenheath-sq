@@ -46,20 +46,30 @@ export const ObsoleteLevelToOutputId = 'level_to_output'
  */
 export const ObsoletePanToOutputId = 'pan_to_output'
 
-/** Determine whether an action is an obsolete "Fader level to output" action */
-export function isOldLevelToOutputAction(action: CompanionMigrationAction): boolean {
-	return action.actionId === ObsoleteLevelToOutputId
-}
-
 /**
- * Mutate an obsolete "Fader level to output" action into a "level to output"
- * action that's specific to the exact type of sink set in the action, e.g.
- * "LR level to output" or "Mix level to output".
+ * Adjusting the level of various mixer sinks that can be assigned to physical
+ * mixer outputs used to be done in one "Fader level to output" action.  One of
+ * its options was a laundry list of all sinks (LR/mix/FX send/matrix/DCA) that
+ * could be assigned to physical mixer outputs.  Each option value corresponded
+ * exactly to the necessary offset from an NRPN base for all level-output NRPNs.
+ * This meshed with internal fading logic but introduced a conceptual hurdle --
+ * and prevented sensibly exposing output-level-modifying functionality in
+ * `Mixer` without replicating the peculiar NRPN calculations.
  *
- * @param action
- *   The obsolete action to mutate.
+ * For clarity, and to reduce this NRPN encoding dependence, this action was
+ * split into one action per sink category: separate "LR fader level to output",
+ * "Mix fader level to output", &c. actions.  Each action identifies its sink
+ * the normal way sources and sinks are identified, i.e. with a number in
+ * `[0, sinkCount)` for sinks 1 to N.
+ *
+ * This function rewrites any old-style "level to output" actions to new,
+ * sink-type-specific actions.
  */
-export function convertOldLevelToOutputActionToSinkSpecific(action: CompanionMigrationAction): void {
+export function tryConvertOldLevelToOutputActionToSinkSpecific(action: CompanionMigrationAction): boolean {
+	if (action.actionId !== ObsoleteLevelToOutputId) {
+		return false
+	}
+
 	const mixCount = getCommonCount('mixCount')
 	const fxsCount = getCommonCount('fxsCount')
 	const mtxCount = getCommonCount('mtxCount')
@@ -106,14 +116,14 @@ export function convertOldLevelToOutputActionToSinkSpecific(action: CompanionMig
 	if (input < 0) {
 		// No valid inputs below zero.  Do nothing so an invalid option is
 		// retained as-is.
-		return
+		return false
 	} else if (input < 1) {
 		// LR is 0.
 		// The new action doesn't include an input property because there's only
 		// one LR.
 		delete options.input
 		action.actionId = OutputActionId.LRLevelOutput
-		return
+		return true
 	} else if (input < 1 + mixCount) {
 		// Mix is [0x1, 0x1 + 12).
 		newInput = input - 1
@@ -129,7 +139,7 @@ export function convertOldLevelToOutputActionToSinkSpecific(action: CompanionMig
 	} else if (input < 1 + mixCount + fxsCount + mtxCount + 12) {
 		// This 12-element gap in the NRPN table doesn't encode anything.  Do
 		// nothing so an invalid option is retained as-is.
-		return
+		return false
 	} else if (input < 1 + mixCount + fxsCount + mtxCount + 12 + dcaCount) {
 		// DCA is [0x20, 0x20 + 8).
 		newInput = input - (1 + mixCount + fxsCount + mtxCount + 12)
@@ -137,11 +147,12 @@ export function convertOldLevelToOutputActionToSinkSpecific(action: CompanionMig
 	} else {
 		// All other numbers are invalid encodings.  Do nothing so an invalid
 		// option is retained as-is.
-		return
+		return false
 	}
 
 	options.input = newInput
 	action.actionId = newActionId
+	return true
 }
 
 /**

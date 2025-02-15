@@ -1,13 +1,12 @@
 import type { CompanionActionInfo } from '@companion-module/base'
 import { describe, expect, test } from '@jest/globals'
 import {
-	convertOldLevelToOutputActionToSinkSpecific,
 	convertOldPanToOutputActionToSinkSpecific,
-	isOldLevelToOutputAction,
 	isOldPanToOutputAction,
 	ObsoleteLevelToOutputId,
 	ObsoletePanToOutputId,
 	OutputActionId,
+	tryConvertOldLevelToOutputActionToSinkSpecific,
 } from './output.js'
 import type { Level } from '../mixer/level.js'
 import type { PanBalanceChoice } from './pan-balance.js'
@@ -31,114 +30,124 @@ describe('obsolete output action convert to sink-specific output level action', 
 	test('lr', () => {
 		const lrNeedsUpgrade = makeObsoleteOutputLevelAction(0, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(lrNeedsUpgrade)).toBe(true)
+		expect(lrNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
 		expect('input' in lrNeedsUpgrade.options).toBe(true)
 
-		convertOldLevelToOutputActionToSinkSpecific(lrNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(lrNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(lrNeedsUpgrade)).toBe(false)
 		expect(lrNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(lrNeedsUpgrade.actionId).toBe(OutputActionId.LRLevelOutput)
 		expect('input' in lrNeedsUpgrade.options).toBe(false)
+
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(lrNeedsUpgrade)).toBe(false)
 	})
 
 	test('mix 1', () => {
 		const mixNeedsUpgrade = makeObsoleteOutputLevelAction(1, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(mixNeedsUpgrade)).toBe(true)
+		expect(mixNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(mixNeedsUpgrade.options.input).toBe(1)
 
-		convertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(mixNeedsUpgrade)).toBe(false)
 		expect(mixNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(mixNeedsUpgrade.actionId).toBe(OutputActionId.MixLevelOutput)
 		expect(mixNeedsUpgrade.options.input).toBe(0)
-	})
 
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(false)
+	})
 	test('mix 12', () => {
 		const mixNeedsUpgrade = makeObsoleteOutputLevelAction(12, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(mixNeedsUpgrade)).toBe(true)
+		expect(mixNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(mixNeedsUpgrade.options.input).toBe(12)
 
-		convertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(mixNeedsUpgrade)).toBe(false)
 		expect(mixNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(mixNeedsUpgrade.actionId).toBe(OutputActionId.MixLevelOutput)
 		expect(mixNeedsUpgrade.options.input).toBe(11)
+
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(false)
 	})
 
 	test('FX send 1', () => {
 		const fxSendNeedsUpgrade = makeObsoleteOutputLevelAction(13, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(fxSendNeedsUpgrade)).toBe(true)
+		expect(fxSendNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(fxSendNeedsUpgrade.options.input).toBe(13)
 
-		convertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(fxSendNeedsUpgrade)).toBe(false)
 		expect(fxSendNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(fxSendNeedsUpgrade.actionId).toBe(OutputActionId.FXSendLevelOutput)
 		expect(fxSendNeedsUpgrade.options.input).toBe(0)
-	})
 
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)).toBe(false)
+	})
 	test('FX send 4', () => {
 		const fxSendNeedsUpgrade = makeObsoleteOutputLevelAction(16, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(fxSendNeedsUpgrade)).toBe(true)
+		expect(fxSendNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(fxSendNeedsUpgrade.options.input).toBe(16)
 
-		convertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(fxSendNeedsUpgrade)).toBe(false)
 		expect(fxSendNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(fxSendNeedsUpgrade.actionId).toBe(OutputActionId.FXSendLevelOutput)
 		expect(fxSendNeedsUpgrade.options.input).toBe(3)
+
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)).toBe(false)
 	})
 
 	test('matrix 1', () => {
 		const matrixSendNeedsUpgrade = makeObsoleteOutputLevelAction(17, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(matrixSendNeedsUpgrade)).toBe(true)
+		expect(matrixSendNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(matrixSendNeedsUpgrade.options.input).toBe(17)
 
-		convertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(matrixSendNeedsUpgrade)).toBe(false)
 		expect(matrixSendNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(matrixSendNeedsUpgrade.actionId).toBe(OutputActionId.MatrixLevelOutput)
 		expect(matrixSendNeedsUpgrade.options.input).toBe(0)
-	})
 
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)).toBe(false)
+	})
 	test('matrix 3', () => {
 		const matrixSendNeedsUpgrade = makeObsoleteOutputLevelAction(19, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(matrixSendNeedsUpgrade)).toBe(true)
+		expect(matrixSendNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(matrixSendNeedsUpgrade.options.input).toBe(19)
 
-		convertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(matrixSendNeedsUpgrade)).toBe(false)
 		expect(matrixSendNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(matrixSendNeedsUpgrade.actionId).toBe(OutputActionId.MatrixLevelOutput)
 		expect(matrixSendNeedsUpgrade.options.input).toBe(2)
+
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)).toBe(false)
 	})
 
 	test('nether region between matrix 3 and DCA 1, 20', () => {
 		const badObsoleteOutputLevelAction = makeObsoleteOutputLevelAction(20, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(badObsoleteOutputLevelAction)).toBe(true)
+		expect(badObsoleteOutputLevelAction.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(badObsoleteOutputLevelAction.options.input).toBe(20)
 
-		convertOldLevelToOutputActionToSinkSpecific(badObsoleteOutputLevelAction)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(badObsoleteOutputLevelAction)).toBe(false)
 
-		expect(isOldLevelToOutputAction(badObsoleteOutputLevelAction)).toBe(true)
 		expect(badObsoleteOutputLevelAction.actionId).toBe(ObsoleteLevelToOutputId)
 		expect(badObsoleteOutputLevelAction.options.input).toBe(20)
 	})
 	test('nether region between matrix 3 and DCA 1, 31', () => {
 		const badObsoleteOutputLevelAction = makeObsoleteOutputLevelAction(31, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(badObsoleteOutputLevelAction)).toBe(true)
+		expect(badObsoleteOutputLevelAction.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(badObsoleteOutputLevelAction.options.input).toBe(31)
 
-		convertOldLevelToOutputActionToSinkSpecific(badObsoleteOutputLevelAction)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(badObsoleteOutputLevelAction)).toBe(false)
 
-		expect(isOldLevelToOutputAction(badObsoleteOutputLevelAction)).toBe(true)
 		expect(badObsoleteOutputLevelAction.actionId).toBe(ObsoleteLevelToOutputId)
 		expect(badObsoleteOutputLevelAction.options.input).toBe(31)
 	})
@@ -146,37 +155,40 @@ describe('obsolete output action convert to sink-specific output level action', 
 	test('DCA 1', () => {
 		const dcaNeedsUpgrade = makeObsoleteOutputLevelAction(32, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(dcaNeedsUpgrade)).toBe(true)
+		expect(dcaNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(dcaNeedsUpgrade.options.input).toBe(32)
 
-		convertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(dcaNeedsUpgrade)).toBe(false)
 		expect(dcaNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(dcaNeedsUpgrade.actionId).toBe(OutputActionId.DCALevelOutput)
 		expect(dcaNeedsUpgrade.options.input).toBe(0)
-	})
 
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)).toBe(false)
+	})
 	test('DCA 8', () => {
 		const dcaNeedsUpgrade = makeObsoleteOutputLevelAction(39, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(dcaNeedsUpgrade)).toBe(true)
+		expect(dcaNeedsUpgrade.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(dcaNeedsUpgrade.options.input).toBe(39)
 
-		convertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)).toBe(true)
 
-		expect(isOldLevelToOutputAction(dcaNeedsUpgrade)).toBe(false)
 		expect(dcaNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
 		expect(dcaNeedsUpgrade.actionId).toBe(OutputActionId.DCALevelOutput)
 		expect(dcaNeedsUpgrade.options.input).toBe(7)
+
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)).toBe(false)
 	})
 
 	test('invalid after DCA 8', () => {
 		const badObsoleteOutputLevelAction = makeObsoleteOutputLevelAction(40, '-inf', 0)
 
-		expect(isOldLevelToOutputAction(badObsoleteOutputLevelAction)).toBe(true)
+		expect(badObsoleteOutputLevelAction.actionId).toBe(ObsoleteLevelToOutputId)
+		expect(badObsoleteOutputLevelAction.options.input).toBe(40)
 
-		convertOldLevelToOutputActionToSinkSpecific(badObsoleteOutputLevelAction)
+		expect(tryConvertOldLevelToOutputActionToSinkSpecific(badObsoleteOutputLevelAction)).toBe(false)
 
-		expect(isOldLevelToOutputAction(badObsoleteOutputLevelAction)).toBe(true)
 		expect(badObsoleteOutputLevelAction.actionId).toBe(ObsoleteLevelToOutputId)
 		expect(badObsoleteOutputLevelAction.options.input).toBe(40)
 	})

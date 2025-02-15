@@ -7,10 +7,9 @@ import {
 	EmptyUpgradeScript,
 } from '@companion-module/base'
 import {
-	convertOldLevelToOutputActionToSinkSpecific,
 	convertOldPanToOutputActionToSinkSpecific,
-	isOldLevelToOutputAction,
 	isOldPanToOutputAction,
+	tryConvertOldLevelToOutputActionToSinkSpecific,
 } from './actions/output.js'
 import { tryCoalesceSceneRecallActions } from './actions/scene.js'
 import {
@@ -69,46 +68,6 @@ function ConfigUpdater(
  * This upgrade script rewrites old-style "level to output" actions to new,
  * sink-type-specific actions.
  */
-function RewriteCombinedOutputLevelActionsToSinkSpecificOutputLevelActions(
-	_context: CompanionUpgradeContext<SQInstanceConfig>,
-	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
-): CompanionStaticUpgradeResult<SQInstanceConfig> {
-	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
-		updatedConfig: null,
-		updatedActions: [],
-		updatedFeedbacks: [],
-	}
-
-	for (const action of props.actions) {
-		if (isOldLevelToOutputAction(action)) {
-			convertOldLevelToOutputActionToSinkSpecific(action)
-
-			result.updatedActions.push(action)
-		}
-	}
-
-	return result
-}
-
-/**
- * Adjusting the level of various mixer sinks that can be assigned to physical
- * mixer outputs used to be done in one "Fader level to output" action.  One of
- * its options was a laundry list of all sinks (LR/mix/FX send/matrix/DCA) that
- * could be assigned to physical mixer outputs.  Each option value corresponded
- * exactly to the necessary offset from an NRPN base for all level-output NRPNs.
- * This meshed with internal fading logic but introduced a conceptual hurdle --
- * and prevented sensibly exposing output-level-modifying functionality in
- * `Mixer` without replicating the peculiar NRPN calculations.
- *
- * For clarity, and to reduce this NRPN encoding dependence, this action was
- * split into one action per sink category: separate "LR fader level to output",
- * "Mix fader level to output", &c. actions.  Each action identifies its sink
- * the normal way sources and sinks are identified, i.e. with a number in
- * `[0, sinkCount)` for sinks 1 to N.
- *
- * This upgrade script rewrites old-style "level to output" actions to new,
- * sink-type-specific actions.
- */
 function RewriteCombinedOutputPanBalanceActionsToSinkSpecificOutputPanBalanceActions(
 	_context: CompanionUpgradeContext<SQInstanceConfig>,
 	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
@@ -135,7 +94,7 @@ export const UpgradeScripts = [
 	ActionUpdater(tryCoalesceSceneRecallActions),
 	ConfigUpdater(tryEnsureModelOptionInConfig),
 	ConfigUpdater(tryEnsureLabelInConfig),
-	RewriteCombinedOutputLevelActionsToSinkSpecificOutputLevelActions,
+	ActionUpdater(tryConvertOldLevelToOutputActionToSinkSpecific),
 	RewriteCombinedOutputPanBalanceActionsToSinkSpecificOutputPanBalanceActions,
 	// ...yes, we added the `'label'` config option above because we thought it
 	// was the only way to get the instance label, and now we're removing it
