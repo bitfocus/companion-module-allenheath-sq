@@ -1,9 +1,18 @@
 import {
+	type CompanionMigrationAction,
 	type CompanionStaticUpgradeProps,
 	type CompanionStaticUpgradeResult,
+	type CompanionStaticUpgradeScript,
 	type CompanionUpgradeContext,
 	EmptyUpgradeScript,
 } from '@companion-module/base'
+import {
+	convertOldLevelToOutputActionToSinkSpecific,
+	convertOldPanToOutputActionToSinkSpecific,
+	isOldLevelToOutputAction,
+	isOldPanToOutputAction,
+} from './actions/output.js'
+import { tryCoalesceSceneRecallActions } from './actions/scene.js'
 import {
 	configIsMissingLabel,
 	configIsMissingModel,
@@ -13,38 +22,20 @@ import {
 	type SQInstanceConfig,
 } from './config.js'
 import { DefaultModel } from './mixer/models.js'
-import {
-	convertOldLevelToOutputActionToSinkSpecific,
-	convertOldPanToOutputActionToSinkSpecific,
-	isOldLevelToOutputAction,
-	isOldPanToOutputAction,
-} from './actions/output.js'
-import { ObsoleteSetCurrentSceneId, SceneActionId } from './actions/scene.js'
 
-/**
- * This module once supported 'scene_recall' and 'current_scene' actions that
- * were exactly identical (other than in actionId and the name for each visible
- * in UI).  Rewrite the latter sort of action to instead encode the former.
- */
-function CoalesceSceneRecallActions(
-	_context: CompanionUpgradeContext<SQInstanceConfig>,
-	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
-): CompanionStaticUpgradeResult<SQInstanceConfig> {
-	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
-		updatedConfig: null,
-		updatedActions: [],
-		updatedFeedbacks: [],
-	}
-
-	for (const action of props.actions) {
-		if (action.actionId === ObsoleteSetCurrentSceneId) {
-			action.actionId = SceneActionId.SceneRecall
-
-			result.updatedActions.push(action)
+function ActionUpdater(
+	tryUpdate: (action: CompanionMigrationAction) => boolean,
+): CompanionStaticUpgradeScript<SQInstanceConfig> {
+	return (
+		_context: CompanionUpgradeContext<SQInstanceConfig>,
+		props: CompanionStaticUpgradeProps<SQInstanceConfig>,
+	) => {
+		return {
+			updatedActions: props.actions.filter(tryUpdate),
+			updatedConfig: null,
+			updatedFeedbacks: [],
 		}
 	}
-
-	return result
 }
 
 /**
@@ -203,7 +194,7 @@ function RemoveUnnecessaryConnectionLabel(
 
 export const UpgradeScripts = [
 	EmptyUpgradeScript,
-	CoalesceSceneRecallActions,
+	ActionUpdater(tryCoalesceSceneRecallActions),
 	EnsureModel,
 	EnsureConnectionLabel,
 	RewriteCombinedOutputLevelActionsToSinkSpecificOutputLevelActions,

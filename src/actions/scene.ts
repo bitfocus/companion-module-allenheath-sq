@@ -1,3 +1,4 @@
+import type { CompanionMigrationAction } from '@companion-module/base'
 import { type Model } from '../mixer/model.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type ActionDefinitions } from './actionid.js'
@@ -16,7 +17,21 @@ export enum SceneActionId {
  * `SceneActionId.SceneRecall` in every way, so all uses of it are upgraded to
  * that action in an upgrade script.
  */
-export const ObsoleteSetCurrentSceneId = 'current_scene'
+const ObsoleteSetCurrentSceneId = 'current_scene'
+
+/**
+ * This module once supported 'scene_recall' and 'current_scene' actions that
+ * were exactly identical (other than in actionId and the name for each visible
+ * in UI).  Rewrite the latter sort of action to instead encode the former.
+ */
+export function tryCoalesceSceneRecallActions(action: CompanionMigrationAction): boolean {
+	if (action.actionId !== ObsoleteSetCurrentSceneId) {
+		return false
+	}
+
+	action.actionId = SceneActionId.SceneRecall
+	return true
+}
 
 function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): number | null {
 	const scene = Number(sceneOption) - 1
