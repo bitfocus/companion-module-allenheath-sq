@@ -156,21 +156,30 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 }
 
 /**
- * Determine whether an action is an obsolete "Pan/Bal level to output" action.
- */
-export function isOldPanToOutputAction(action: CompanionMigrationAction): boolean {
-	return action.actionId === ObsoletePanToOutputId
-}
-
-/**
- * Mutate an obsolete "Pan/Bal level to output" action into a "<sink> Pan/Bal to
- * output" action specific to the type of sink in the action, e.g. "Mix Pan/Bal
- * to output" or "Matrix Pan/Bal to output".
+ * Adjusting the pan/balance of various mixer sinks that can be assigned to
+ * physical mixer outputs used to be done in one "Fader Pan/Bal level to output"
+ * action.  One of its options was a laundry list of all sinks
+ * (LR/mix/FX send/matrix/DCA) that could be assigned to physical mixer outputs.
+ * Each option value corresponded exactly to the necessary offset from an NRPN
+ * base for all pan/balance-output NRPNs.  This meshed with internal fading
+ * logic but introduced a conceptual hurdle -- and prevented sensibly exposing
+ * pan/balance-output-modifying functionality in `Mixer` without replicating the
+ * peculiar NRPN calculations.
  *
- * @param action
- *   The obsolete action to mutate.
+ * For clarity, and to reduce this NRPN encoding dependence, this action was
+ * split into one action per sink category: separate "LR Pan/Bal to output",
+ * "Mix Pan/Bal to output", &c. actions.  Each action identifies its sink the
+ * normal way sources and sinks are identified, i.e. with a number in
+ * `[0, sinkCount)` for sinks 1 to N.
+ *
+ * This function rewrites actions that are old-style "pan/balance to output"
+ * actions to new, sink-type-specific actions.
  */
-export function convertOldPanToOutputActionToSinkSpecific(action: CompanionMigrationAction): void {
+export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMigrationAction): boolean {
+	if (action.actionId !== ObsoletePanToOutputId) {
+		return false
+	}
+
 	const mixCount = getCommonCount('mixCount')
 	const mtxCount = getCommonCount('mtxCount')
 
@@ -206,32 +215,33 @@ export function convertOldPanToOutputActionToSinkSpecific(action: CompanionMigra
 	if (input < 0) {
 		// No valid inputs below zero.  Leave the action un-mutated in invalid
 		// state.
-		return
+		return false
 	} else if (input < 1) {
 		// LR is 0.
 		// The new action doesn't include an input property because there's only
 		// one LR.
 		delete options.input
 		action.actionId = OutputActionId.LRPanBalanceOutput
-		return
+		return true
 	} else if (input < 1 + mixCount) {
 		// Mix is [1, 1 + 12).
 		newInput = input - 1
 		newActionId = OutputActionId.MixPanBalanceOutput
 	} else if (input < 1 + mixCount + 4) {
 		// No valid inputs from [13, 17).  Again leave alone.
-		return
+		return false
 	} else if (input < 1 + mixCount + 4 + mtxCount) {
 		// Matrix is [17, 17 + 3).
 		newInput = input - (1 + mixCount + 4)
 		newActionId = OutputActionId.MatrixPanBalanceOutput
 	} else {
 		// All other numbers are invalid encodings.  Again do nothing.
-		return
+		return false
 	}
 
 	options.input = newInput
 	action.actionId = newActionId
+	return true
 }
 
 type FadeLevelInfo = {
