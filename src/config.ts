@@ -27,20 +27,18 @@ export function tryEnsureModelOptionInConfig(oldConfig: SQInstanceConfig | null)
 }
 
 /** The default label for a connection from `companion/manifest.json`. */
-export const DefaultConnectionLabel = 'SQ'
+const DefaultConnectionLabel = 'SQ'
 
 /**
- * Determine whether the given instance config is missing a `'label'` property.
+ * Ensure a 'label' property containing a connection label is present in configs
+ * that lack it.
  */
-export function configIsMissingLabel(config: SQInstanceConfig | null): config is SQInstanceConfig {
-	return config !== null && !('label' in config)
-}
-
-/**
- * Add the `'label'` option (defaulting to SQ) to a config that's missing one.
- */
-export function addLabelOptionToConfig(config: SQInstanceConfig): void {
-	config.label = DefaultConnectionLabel
+export function tryEnsureLabelInConfig(oldConfig: SQInstanceConfig | null): boolean {
+	if (oldConfig !== null && !('label' in oldConfig)) {
+		oldConfig.label = DefaultConnectionLabel
+		return true
+	}
+	return false
 }
 
 /**

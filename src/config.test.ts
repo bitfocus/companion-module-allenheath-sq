@@ -1,10 +1,9 @@
 import { describe, expect, test } from '@jest/globals'
 import {
-	addLabelOptionToConfig,
-	configIsMissingLabel,
 	configUnnecessarilySpecifiesLabel,
 	removeLabelOptionFromConfig,
 	type SQInstanceConfig,
+	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 } from './config.js'
 
@@ -83,11 +82,11 @@ describe('config upgrade to specify a missing label', () => {
 			verbose: false,
 		}
 
-		expect(configIsMissingLabel(configMissingLabel)).toBe(true)
+		expect('label' in configMissingLabel).toBe(false)
 
-		addLabelOptionToConfig(configMissingLabel)
+		expect(tryEnsureLabelInConfig(configMissingLabel)).toBe(true)
 
-		expect(configIsMissingLabel(configMissingLabel)).toBe(false)
+		expect('label' in configMissingLabel).toBe(true)
 		expect(configMissingLabel.label).toBe('SQ')
 	})
 
@@ -103,7 +102,12 @@ describe('config upgrade to specify a missing label', () => {
 			verbose: false,
 		}
 
-		expect(configIsMissingLabel(configWithLabelSQ5)).toBe(false)
+		expect('label' in configWithLabelSQ5).toBe(true)
+		expect(configWithLabelSQ5.label).toBe('sq5')
+
+		expect(tryEnsureLabelInConfig(configWithLabelSQ5)).toBe(false)
+
+		expect('label' in configWithLabelSQ5).toBe(true)
 		expect(configWithLabelSQ5.label).toBe('sq5')
 	})
 })

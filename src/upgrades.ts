@@ -14,11 +14,10 @@ import {
 } from './actions/output.js'
 import { tryCoalesceSceneRecallActions } from './actions/scene.js'
 import {
-	configIsMissingLabel,
 	configUnnecessarilySpecifiesLabel,
-	DefaultConnectionLabel,
 	removeLabelOptionFromConfig,
 	type SQInstanceConfig,
+	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 } from './config.js'
 
@@ -50,29 +49,6 @@ function ConfigUpdater(
 			updatedFeedbacks: [],
 		}
 	}
-}
-
-/**
- * Ensure a 'label' property containing a connection label is present in configs
- * that lack it.
- */
-function EnsureConnectionLabel(
-	_context: CompanionUpgradeContext<SQInstanceConfig>,
-	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
-): CompanionStaticUpgradeResult<SQInstanceConfig> {
-	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
-		updatedConfig: null,
-		updatedActions: [],
-		updatedFeedbacks: [],
-	}
-
-	const oldConfig = props.config
-	if (configIsMissingLabel(oldConfig)) {
-		oldConfig.label = DefaultConnectionLabel
-		result.updatedConfig = oldConfig
-	}
-
-	return result
 }
 
 /**
@@ -188,7 +164,7 @@ export const UpgradeScripts = [
 	EmptyUpgradeScript,
 	ActionUpdater(tryCoalesceSceneRecallActions),
 	ConfigUpdater(tryEnsureModelOptionInConfig),
-	EnsureConnectionLabel,
+	ConfigUpdater(tryEnsureLabelInConfig),
 	RewriteCombinedOutputLevelActionsToSinkSpecificOutputLevelActions,
 	RewriteCombinedOutputPanBalanceActionsToSinkSpecificOutputPanBalanceActions,
 	// ...yes, we added the `'label'` config option above because we thought it
