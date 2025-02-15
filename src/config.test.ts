@@ -1,10 +1,9 @@
 import { describe, expect, test } from '@jest/globals'
 import {
-	configUnnecessarilySpecifiesLabel,
-	removeLabelOptionFromConfig,
 	type SQInstanceConfig,
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
+	tryRemoveUnnecessaryLabelInConfig,
 } from './config.js'
 
 describe('config upgrade to specify a missing model', () => {
@@ -124,7 +123,11 @@ describe('config upgrade to remove an unnecessary label', () => {
 			verbose: false,
 		}
 
-		expect(configUnnecessarilySpecifiesLabel(configMissingLabel)).toBe(false)
+		expect('label' in configMissingLabel).toBe(false)
+
+		expect(tryRemoveUnnecessaryLabelInConfig(configMissingLabel)).toBe(false)
+
+		expect('label' in configMissingLabel).toBe(false)
 	})
 
 	test('config with label', () => {
@@ -139,11 +142,10 @@ describe('config upgrade to remove an unnecessary label', () => {
 			label: 'SQ',
 		}
 
-		expect(configUnnecessarilySpecifiesLabel(configWithLabel)).toBe(true)
+		expect('label' in configWithLabel).toBe(true)
 
-		removeLabelOptionFromConfig(configWithLabel)
+		expect(tryRemoveUnnecessaryLabelInConfig(configWithLabel)).toBe(true)
 
-		expect(configUnnecessarilySpecifiesLabel(configWithLabel)).toBe(false)
 		expect('label' in configWithLabel).toBe(false)
 	})
 })

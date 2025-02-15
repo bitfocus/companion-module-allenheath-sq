@@ -42,17 +42,23 @@ export function tryEnsureLabelInConfig(oldConfig: SQInstanceConfig | null): bool
 }
 
 /**
- * Determine whether the given instance config specifies a `'label'` property
- * that is unnecessary because `InstanceBase.label` is the real deal and is
- * always up-to-date.
+ * This module used to have a `'label'` option (regrettably see the function
+ * above), in which the user was expected to (re-)specify the instance label.
+ * This label was then used in the "Learn" operation for various actions, as
+ * well as in various preset definitions.
+ *
+ * But it turns out the instance label is accessible as `InstanceBase.label`
+ * which is always up-to-date, so there's no point in having the config option.
+ *
+ * This function detects and, if present, removes the `'label'` option from
+ * configs that have it.
  */
-export function configUnnecessarilySpecifiesLabel(config: SQInstanceConfig | null): config is SQInstanceConfig {
-	return config !== null && 'label' in config
-}
-
-/** Remove the `'label'` option from a config that has it. */
-export function removeLabelOptionFromConfig(config: SQInstanceConfig): void {
-	delete config.label
+export function tryRemoveUnnecessaryLabelInConfig(oldConfig: SQInstanceConfig | null): boolean {
+	if (oldConfig !== null && 'label' in oldConfig) {
+		delete oldConfig.label
+		return true
+	}
+	return false
 }
 
 function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {

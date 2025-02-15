@@ -14,11 +14,10 @@ import {
 } from './actions/output.js'
 import { tryCoalesceSceneRecallActions } from './actions/scene.js'
 import {
-	configUnnecessarilySpecifiesLabel,
-	removeLabelOptionFromConfig,
 	type SQInstanceConfig,
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
+	tryRemoveUnnecessaryLabelInConfig,
 } from './config.js'
 
 function ActionUpdater(
@@ -131,35 +130,6 @@ function RewriteCombinedOutputPanBalanceActionsToSinkSpecificOutputPanBalanceAct
 	return result
 }
 
-/**
- * This module used to have a `'label'` option, in which the user was expected
- * to (re-)specify the instance label.  This label was then used in the "Learn"
- * operation for various actions, as well as in various preset definitions.
- *
- * But it turns out the instance label is accessible as `InstanceBase.label`
- * which is always up-to-date, so there's no point in having the config option.
- *
- * This upgrade script removes the `'label'` option from configs that have it.
- */
-function RemoveUnnecessaryConnectionLabel(
-	_context: CompanionUpgradeContext<SQInstanceConfig>,
-	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
-): CompanionStaticUpgradeResult<SQInstanceConfig> {
-	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
-		updatedConfig: null,
-		updatedActions: [],
-		updatedFeedbacks: [],
-	}
-
-	const oldConfig = props.config
-	if (configUnnecessarilySpecifiesLabel(oldConfig)) {
-		removeLabelOptionFromConfig(oldConfig)
-		result.updatedConfig = oldConfig
-	}
-
-	return result
-}
-
 export const UpgradeScripts = [
 	EmptyUpgradeScript,
 	ActionUpdater(tryCoalesceSceneRecallActions),
@@ -171,7 +141,7 @@ export const UpgradeScripts = [
 	// was the only way to get the instance label, and now we're removing it
 	// because there in fact *is* a way to get that label without requiring that
 	// users redundantly specify it.  So it goes.
-	RemoveUnnecessaryConnectionLabel,
+	ConfigUpdater(tryRemoveUnnecessaryLabelInConfig),
 ]
 
 /*
