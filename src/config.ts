@@ -16,17 +16,14 @@ export interface SQInstanceConfig {
 }
 
 /**
- * Determine whether the given instance config is missing a `'model'` property.
+ * Ensure a 'model' property is present in configs that lack it.
  */
-export function configIsMissingModel(config: SQInstanceConfig | null): config is SQInstanceConfig {
-	return config !== null && !('model' in config)
-}
-
-/**
- * Add the 'model' option (defaulting to SQ5) to a config that's missing one.
- */
-export function addModelOptionToConfig(config: SQInstanceConfig): void {
-	config.model = DefaultModel
+export function tryEnsureModelOptionInConfig(oldConfig: SQInstanceConfig | null): boolean {
+	if (oldConfig !== null && !('model' in oldConfig)) {
+		oldConfig.model = DefaultModel
+		return true
+	}
+	return false
 }
 
 /** The default label for a connection from `companion/manifest.json`. */

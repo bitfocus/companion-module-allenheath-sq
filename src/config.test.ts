@@ -1,12 +1,11 @@
 import { describe, expect, test } from '@jest/globals'
 import {
 	addLabelOptionToConfig,
-	addModelOptionToConfig,
 	configIsMissingLabel,
-	configIsMissingModel,
 	configUnnecessarilySpecifiesLabel,
 	removeLabelOptionFromConfig,
 	type SQInstanceConfig,
+	tryEnsureModelOptionInConfig,
 } from './config.js'
 
 describe('config upgrade to specify a missing model', () => {
@@ -21,11 +20,11 @@ describe('config upgrade to specify a missing model', () => {
 			verbose: false,
 		}
 
-		expect(configIsMissingModel(configMissingModel)).toBe(true)
+		expect('model' in configMissingModel).toBe(false)
 
-		addModelOptionToConfig(configMissingModel)
+		expect(tryEnsureModelOptionInConfig(configMissingModel)).toBe(true)
 
-		expect(configIsMissingModel(configMissingModel)).toBe(false)
+		expect('model' in configMissingModel).toBe(true)
 		expect(configMissingModel.model).toBe('SQ5')
 	})
 
@@ -41,12 +40,17 @@ describe('config upgrade to specify a missing model', () => {
 			verbose: false,
 		}
 
-		expect(configIsMissingModel(configWithModelSQ5)).toBe(false)
+		expect('model' in configWithModelSQ5).toBe(true)
+		expect(configWithModelSQ5.model).toBe('SQ5')
+
+		expect(tryEnsureModelOptionInConfig(configWithModelSQ5)).toBe(false)
+
+		expect('model' in configWithModelSQ5).toBe(true)
 		expect(configWithModelSQ5.model).toBe('SQ5')
 	})
 
 	test("config with model='SQ7'", () => {
-		const configWithModelSQ5: SQInstanceConfig = {
+		const configWithModelSQ7: SQInstanceConfig = {
 			host: '127.0.0.1',
 			model: 'SQ7',
 			level: 'LinearTaper',
@@ -57,8 +61,13 @@ describe('config upgrade to specify a missing model', () => {
 			verbose: false,
 		}
 
-		expect(configIsMissingModel(configWithModelSQ5)).toBe(false)
-		expect(configWithModelSQ5.model).toBe('SQ7')
+		expect('model' in configWithModelSQ7).toBe(true)
+		expect(configWithModelSQ7.model).toBe('SQ7')
+
+		expect(tryEnsureModelOptionInConfig(configWithModelSQ7)).toBe(false)
+
+		expect('model' in configWithModelSQ7).toBe(true)
+		expect(configWithModelSQ7.model).toBe('SQ7')
 	})
 })
 

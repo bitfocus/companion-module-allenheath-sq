@@ -15,13 +15,12 @@ import {
 import { tryCoalesceSceneRecallActions } from './actions/scene.js'
 import {
 	configIsMissingLabel,
-	configIsMissingModel,
 	configUnnecessarilySpecifiesLabel,
 	DefaultConnectionLabel,
 	removeLabelOptionFromConfig,
 	type SQInstanceConfig,
+	tryEnsureModelOptionInConfig,
 } from './config.js'
-import { DefaultModel } from './mixer/models.js'
 
 function ActionUpdater(
 	tryUpdate: (action: CompanionMigrationAction) => boolean,
@@ -38,26 +37,19 @@ function ActionUpdater(
 	}
 }
 
-/**
- * Ensure a 'model' property is present in configs that lack it.
- */
-function EnsureModel(
-	_context: CompanionUpgradeContext<SQInstanceConfig>,
-	props: CompanionStaticUpgradeProps<SQInstanceConfig>,
-): CompanionStaticUpgradeResult<SQInstanceConfig> {
-	const result: CompanionStaticUpgradeResult<SQInstanceConfig> = {
-		updatedConfig: null,
-		updatedActions: [],
-		updatedFeedbacks: [],
+function ConfigUpdater(
+	tryUpdate: (config: SQInstanceConfig | null) => boolean,
+): CompanionStaticUpgradeScript<SQInstanceConfig> {
+	return (
+		_context: CompanionUpgradeContext<SQInstanceConfig>,
+		props: CompanionStaticUpgradeProps<SQInstanceConfig>,
+	) => {
+		return {
+			updatedActions: [],
+			updatedConfig: tryUpdate(props.config) ? props.config : null,
+			updatedFeedbacks: [],
+		}
 	}
-
-	const oldConfig = props.config
-	if (configIsMissingModel(oldConfig)) {
-		oldConfig.model = DefaultModel
-		result.updatedConfig = oldConfig
-	}
-
-	return result
 }
 
 /**
@@ -195,7 +187,7 @@ function RemoveUnnecessaryConnectionLabel(
 export const UpgradeScripts = [
 	EmptyUpgradeScript,
 	ActionUpdater(tryCoalesceSceneRecallActions),
-	EnsureModel,
+	ConfigUpdater(tryEnsureModelOptionInConfig),
 	EnsureConnectionLabel,
 	RewriteCombinedOutputLevelActionsToSinkSpecificOutputLevelActions,
 	RewriteCombinedOutputPanBalanceActionsToSinkSpecificOutputPanBalanceActions,
