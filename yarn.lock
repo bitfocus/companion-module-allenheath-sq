@@ -2063,7 +2063,6 @@ __metadata:
     prettier: "npm:^3.3.3"
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.4"
-    ts-node: "npm:^10.9.2"
     typescript: "npm:~5.8.2"
     typescript-eslint: "npm:~8.26.0"
   languageName: unknown
@@ -7256,7 +7255,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.9.2":
+"ts-node@npm:>=10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
