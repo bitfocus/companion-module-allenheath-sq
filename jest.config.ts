@@ -11,7 +11,7 @@ const config: JestConfigWithTsJest = {
 
 	// TypeScript files must first be transformed to JS for testing.
 	transform: {
-		'\\.ts$': ['ts-jest', { useESM: true }],
+		'\\.ts$': 'esbuild-jest',
 	},
 
 	// Jest doesn't like importing TypeScript files including the ".js" suffix, so

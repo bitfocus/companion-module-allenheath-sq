@@ -38,6 +38,8 @@
 		"@companion-module/tools": "~2.0.4",
 		"@jest/globals": "^29.7.0",
 		"@types/node": "^22.13.10",
+		"esbuild": "^0.25.0",
+		"esbuild-jest": "^0.5.0",
 		"eslint": "~9.19.0",
 		"eslint-plugin-prettier": "^5.2.3",
 		"husky": "^9.0.11",
