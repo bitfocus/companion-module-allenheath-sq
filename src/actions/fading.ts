@@ -60,7 +60,7 @@ type FadeParameters = {
 	fadeTimeMs: number
 }
 
-export const MsPerSecond = 1000
+const MsPerSecond = 1000
 
 /**
  * Get the start, end, and duration of a fade of the given NRPN.
