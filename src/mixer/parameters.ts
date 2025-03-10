@@ -23,7 +23,7 @@ export type Param = { MSB: number; LSB: number }
  *   [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).)
  */
 
-export function computeLRParameters(source: number, base: Param): Param {
+function computeLRParameters(source: number, base: Param): Param {
 	if (source === LR) {
 		throw new Error('LR-to-LR must be specially handled')
 	}
