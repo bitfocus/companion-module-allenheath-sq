@@ -50,7 +50,7 @@ export type NRPNIncDecMessage = [number, number, number, number, number, number,
  * two 7-bit values, concatenated, specify the scene (with mixer scene 1 encoded
  * as `0` to mixer scene 300 encoded as `299`).
  */
-export type SceneChangeMessage = [number, number, number, number, number]
+type SceneChangeMessage = [number, number, number, number, number]
 
 /** A MIDI connection to an SQ mixer. */
 export class MidiSession {

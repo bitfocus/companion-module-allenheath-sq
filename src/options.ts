@@ -5,7 +5,7 @@ import type { SQInstanceConfig } from './config.js'
 import { Regex } from '@companion-module/base'
 
 /** Options information controlling the operation of a mixer instance. */
-export type SQInstanceOptions = {
+type SQInstanceOptions = {
 	/**
 	 * The TCP/IP hostname of the mixer, or null if one was invalidly specified.
 	 */

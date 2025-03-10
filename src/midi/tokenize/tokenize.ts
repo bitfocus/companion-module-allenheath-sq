@@ -44,7 +44,7 @@ export interface Tokenizer extends EventEmitter<MidiMessageEvents> {
  * A MIDI channel message consisting of a byte in range `0x80-0xEF` and zero or
  * more data bytes in range `0x00-0x7F`.
  */
-export type ChannelMessage = {
+type ChannelMessage = {
 	readonly type: 'channel'
 	message: number[]
 }
@@ -53,7 +53,7 @@ export type ChannelMessage = {
  * A MIDI system real time message consisting of a single byte in the range
  * `0xF8-0xFF`.
  */
-export type SystemRealTimeMessage = {
+type SystemRealTimeMessage = {
 	readonly type: 'system-real-time'
 	message: number
 }
@@ -62,7 +62,7 @@ export type SystemRealTimeMessage = {
  * A MIDI system common message consisting of a byte in range `0xF1-0xF6` and
  * zero or more data bytes in range `0x00-0x7F`.
  */
-export type SystemCommonMessage = {
+type SystemCommonMessage = {
 	readonly type: 'system-common'
 	message: number[]
 }
@@ -71,7 +71,7 @@ export type SystemCommonMessage = {
  * A MIDI system exclusive message consisting of a byte in range `0xF0`, zero or
  * more data bytes in range `0x00-0x7F`, and a byte `0xF7`.
  */
-export type SystemExclusiveMessage = {
+type SystemExclusiveMessage = {
 	readonly type: 'system-exclusive'
 	message: number[]
 }

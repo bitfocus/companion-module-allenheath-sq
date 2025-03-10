@@ -1,12 +1,12 @@
 import { type ModelId, SQModels } from './models.js'
 
-export type ForEachFunctor = (n: number, label: string, desc: string) => void
+type ForEachFunctor = (n: number, label: string, desc: string) => void
 
 /**
  * A record of the count of the number of instances of every kind of input,
  * output, and scene.
  */
-export type InputOutputCounts = {
+type InputOutputCounts = {
 	inputChannel: number
 	mix: number
 	group: number
