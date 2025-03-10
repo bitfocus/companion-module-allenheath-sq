@@ -54,24 +54,6 @@ export function getFader(
 	return toSourceOrSink(instance, model, options.input, type)
 }
 
-/**
- * Given options for a fade-to-level action, compute the time the fade should
- * take.  On failure log an error and return null, otherwise return the fade
- * time, in seconds.
- */
-export function getFadeTimeSeconds(instance: sqInstance, options: CompanionOptionValues): number | null {
-	// Presets that incidentally invoke this function don't always seem to have
-	// specified a fade time, so treat a missing fade as zero to support them.
-	const fade = options.fade
-	const fadeSeconds = fade === undefined ? 0 : Number(fade)
-	if (fadeSeconds >= 0) {
-		return fadeSeconds
-	}
-
-	instance.log('error', `Bad fade time ${fadeSeconds} seconds, aborting`)
-	return null
-}
-
 type FadeParameters = {
 	start: Level
 	end: Level
@@ -99,7 +81,10 @@ export function getFadeParameters(
 	options: CompanionOptionValues,
 	{ MSB, LSB }: Param,
 ): FadeParameters | null {
-	const fadeTimeMs = Number(options.fade) * MsPerSecond
+	// Presets that incidentally invoke this function didn't always specify a
+	// fade time, so treat a missing fade as zero to support them.
+	const fade = options.fade
+	const fadeTimeMs = fade === undefined ? 0 : Number(fade) * MsPerSecond
 	if (!(fadeTimeMs >= 0)) {
 		instance.log('error', `Bad fade time ${fadeTimeMs} milliseconds, aborting`)
 		return null
