@@ -51,5 +51,8 @@
 		"typescript": "~5.8.2",
 		"typescript-eslint": "~8.26.0"
 	},
+	"resolutions": {
+		"eslint-plugin-n": "17.15.1"
+	},
 	"packageManager": "yarn@4.7.0"
 }
