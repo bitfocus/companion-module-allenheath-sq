@@ -14,19 +14,19 @@ class MixerCommandBase {
 	}
 }
 
-export class SceneReceived extends MixerCommandBase {
+class SceneReceived extends MixerCommandBase {
 	readonly type = 'scene-received'
 }
 
-export class MuteReceived extends MixerCommandBase {
+class MuteReceived extends MixerCommandBase {
 	readonly type = 'mute-received'
 }
 
-export class FaderLevelReceived extends MixerCommandBase {
+class FaderLevelReceived extends MixerCommandBase {
 	readonly type = 'fader-level-received'
 }
 
-export class PanLevelReceived extends MixerCommandBase {
+class PanLevelReceived extends MixerCommandBase {
 	readonly type = 'pan-level-received'
 }
 
