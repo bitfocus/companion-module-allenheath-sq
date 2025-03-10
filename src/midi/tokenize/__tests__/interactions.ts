@@ -49,7 +49,7 @@ export function MixerReply(bytes: readonly number[]): MixerReplyBytes {
 export function ExpectNextMessageNotReady(): NextMessageNotReady {
 	// Unlike in mixer command parsing, we can only expect message-not-ready,
 	// not message-ready.  Tokenizing acts upon a TCP socket, and mixer replies
-	// only wait for the write to have ycompleted from the point of view of the
+	// only wait for the write to have completed from the point of view of the
 	// socket *writer*, not the socket reader.  We're at the whims of the OS TCP
 	// stack as to when the sent data is actually ready.
 	//
