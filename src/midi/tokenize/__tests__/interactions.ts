@@ -135,6 +135,9 @@ export function ExpectSystemExclusiveMessage(message: readonly number[]): Expect
  * Act as if the mixer closed the socket it uses to send MIDI bytes to the
  * tokenizer, causing the tokenizer to abruptly stop receiving data in
  * ungraceful fashion.
+ *
+ * @allowunused for the moment because connection socket handling is likely too
+ * buggy to handle a mixer connection that flakes and requires adjustment
  */
 export function CloseMixerSocket(): MixerCloseSocket {
 	return { type: 'mixer-close-socket' }

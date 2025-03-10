@@ -19,17 +19,7 @@ const baseConfig = await generateEslintConfig({
  * @returns {import('eslint').Linter.Config<import('eslint').Linter.RulesRecord>}
  */
 function permitLimitedUnpublishedImports(files, allowModules) {
-	return {
-		files,
-		rules: {
-			'n/no-unpublished-import': [
-				'error',
-				{
-					allowModules,
-				},
-			],
-		},
-	}
+	return { files, rules: { 'n/no-unpublished-import': ['error', { allowModules }] } }
 }
 
 const customConfig = [
@@ -45,12 +35,7 @@ const customConfig = [
 			radix: 'error',
 			'no-eval': 'error',
 			'no-implied-eval': 'error',
-			'@typescript-eslint/consistent-type-imports': [
-				'error',
-				{
-					fixStyle: 'inline-type-imports',
-				},
-			],
+			'@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
 		},
 	},
 
@@ -60,6 +45,7 @@ const customConfig = [
 	),
 	permitLimitedUnpublishedImports(['eslint.config.mjs'], ['@companion-module/tools']),
 	permitLimitedUnpublishedImports(['jest.config.ts'], ['ts-jest']),
+	permitLimitedUnpublishedImports(['knip.config.ts'], ['knip']),
 ]
 
 export default customConfig

@@ -38,6 +38,9 @@ jobs:
           yarn lint
         env:
           CI: true
+      - name: Check for unused code
+        run: |
+          yarn knip
       - name: Run module tests
         run: |
           yarn test
