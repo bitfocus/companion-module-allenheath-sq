@@ -1,12 +1,7 @@
-import type { InstanceBase, TCPHelper } from '@companion-module/base'
+import type { TCPHelper } from '@companion-module/base'
 import { EventEmitter } from 'eventemitter3'
-import { type SQInstanceConfig } from '../../config.js'
 import { prettyBytes } from '../../utils/pretty.js'
 import { SocketReader } from '../../utils/socket-reader.js'
-
-export interface ParseInstance {
-	log: InstanceBase<SQInstanceConfig>['log']
-}
 
 export interface MidiMessageEvents {
 	/**
