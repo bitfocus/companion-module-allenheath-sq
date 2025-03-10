@@ -39,7 +39,7 @@
 		"@jest/globals": "^29.7.0",
 		"@types/node": "^22.13.10",
 		"esbuild": "^0.25.0",
-		"esbuild-jest": "^0.5.0",
+		"esbuild-jest-transform": "^2.0.1",
 		"eslint": "~9.19.0",
 		"eslint-plugin-n": "~17.10.0",
 		"husky": "^9.0.11",
