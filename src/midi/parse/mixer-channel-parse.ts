@@ -68,11 +68,11 @@ export class MixerChannelParser extends EventEmitter<MixerMessageEvents> {
 	 * Parse mixer commands from MIDI messages in a single MIDI channel.
 	 *
 	 * To use this function, first call it to produce a generator.  Then call
-	 * `.next()` on it a single time to prime it for use.  Finally, repeatedly call
-	 * call `.next(message)` on it with each MIDI message received in the channel.
-	 * The generator will process messages sent into the generator, recognize
-	 * complete and coherent mixer commands comprised of them, then emit events
-	 * at `this` for each mixer command received.
+	 * `.next()` on it a single time to prime it for use.  Finally, repeatedly
+	 * call call `.next(message)` on it with each MIDI message received in the
+	 * channel.  The generator will process messages sent into the generator,
+	 * recognize complete and coherent mixer commands comprised of them, then
+	 * emit events at `this` for each mixer command received.
 	 *
 	 * @param verboseLog
 	 *   A function that writes to the log only if verbose logging was enabled.
