@@ -1,7 +1,7 @@
 import { describe, test } from '@jest/globals'
 import { TestMixerCommandParsing } from './mixer-command-parsing.js'
 import {
-	ExpectNextMessageReadiness,
+	ExpectNextCommandReadiness,
 	ExpectMuteMessage,
 	ExpectSceneMessage,
 	ReceiveChannelMessage,
@@ -11,7 +11,7 @@ import { MuteOff, MuteOn, SceneCommand } from './commands.js'
 describe('reply processing', () => {
 	test('basic reply series', async () => {
 		return TestMixerCommandParsing(0, [
-			ExpectNextMessageReadiness(false),
+			ExpectNextCommandReadiness(false),
 			...SceneCommand(0, 129).map(ReceiveChannelMessage),
 			ExpectSceneMessage((1 << 7) + 1),
 			// Mute on, Ip48
@@ -27,12 +27,12 @@ describe('reply processing', () => {
 		return TestMixerCommandParsing(2, [
 			// Scene change
 			ReceiveChannelMessage([0xb2, 0x00, 0x01]),
-			ExpectNextMessageReadiness(false),
+			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xc2, 0x01]),
-			ExpectNextMessageReadiness(true),
+			ExpectNextCommandReadiness(true),
 			ExpectSceneMessage((1 << 7) + 1),
 			ReceiveChannelMessage([0xc2, 0x00]), // extraneous but sent by SQ-5
-			ExpectNextMessageReadiness(false),
+			ExpectNextCommandReadiness(false),
 			// Mute on, Ip48
 			...MuteOn(2, 0x00, 0x2f).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x2f, 0x01),
@@ -40,9 +40,9 @@ describe('reply processing', () => {
 			ReceiveChannelMessage([0xb2, 0x63, 0x00]),
 			ReceiveChannelMessage([0xb2, 0x62, 0x45]),
 			ReceiveChannelMessage([0xb2, 0x06, 0x00]),
-			ExpectNextMessageReadiness(false),
+			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xb2, 0x26, 0x00]),
-			ExpectNextMessageReadiness(true),
+			ExpectNextCommandReadiness(true),
 			ExpectMuteMessage(0x00, 0x45, 0x00),
 		])
 	})

@@ -18,8 +18,8 @@ type ReceiveSystemRealTime = {
 	readonly message: number
 }
 
-type NextMessageReadiness = {
-	readonly type: 'message-readiness'
+type NextCommandReadiness = {
+	readonly type: 'command-readiness'
 	ready: boolean
 }
 
@@ -47,7 +47,7 @@ export type ReceiveInteraction = ReceiveChannel | ReceiveSystemCommon | ReceiveS
 
 export type ExpectInteraction = ExpectScene | ExpectMute | ExpectFaderLevel | ExpectPanLevel
 
-export type Interaction = ReceiveInteraction | NextMessageReadiness | ExpectInteraction
+export type Interaction = ReceiveInteraction | NextCommandReadiness | ExpectInteraction
 
 /** Receive the given MIDI channel message. */
 export function ReceiveChannelMessage(message: readonly number[]): ReceiveChannel {
@@ -70,8 +70,8 @@ export function ReceiveSystemRealTimeMessage(message: number): ReceiveSystemReal
 }
 
 /** Expect that the next mixer command is ready/not ready. */
-export function ExpectNextMessageReadiness(ready: boolean): NextMessageReadiness {
-	return { type: 'message-readiness', ready }
+export function ExpectNextCommandReadiness(ready: boolean): NextCommandReadiness {
+	return { type: 'command-readiness', ready }
 }
 
 /**

@@ -141,7 +141,7 @@ class MixerCommandIter {
 	/**
 	 * Assert that the next mixer command is ready/not ready to be processed.
 	 */
-	assertNextMessageReadiness(ready: boolean): void {
+	assertNextCommandReadiness(ready: boolean): void {
 		console.log(`Expecting next message to be ${ready ? '' : 'not '}ready...`)
 		if (this.#waiting[0].resolved !== ready) {
 			throw new Error(`Expected next message to be ${ready ? '' : 'not '}ready, but was${ready ? "n't" : ''}`)
@@ -251,8 +251,8 @@ export async function TestMixerCommandParsing(channel: number, interactions: rea
 					break
 				}
 
-				case 'message-readiness': {
-					commandIter.assertNextMessageReadiness(interaction.ready)
+				case 'command-readiness': {
+					commandIter.assertNextCommandReadiness(interaction.ready)
 					break
 				}
 

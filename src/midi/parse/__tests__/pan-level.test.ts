@@ -1,6 +1,6 @@
 import { describe, test } from '@jest/globals'
 import { TestMixerCommandParsing } from './mixer-command-parsing.js'
-import { ExpectNextMessageReadiness, ReceiveChannelMessage, ExpectPanLevelMessage } from './interactions.js'
+import { ExpectNextCommandReadiness, ReceiveChannelMessage, ExpectPanLevelMessage } from './interactions.js'
 
 describe('pan/balance level commands', () => {
 	test('pan/balance', async () => {
@@ -11,7 +11,7 @@ describe('pan/balance level commands', () => {
 			// Channel 1, C-1, Note on (DAW channel, i.e. 0 = one more than 7)
 			ReceiveChannelMessage([0xc0, 0x00, 0x7f]),
 			ReceiveChannelMessage([0xb7, 0x06, 0x00]),
-			ExpectNextMessageReadiness(false),
+			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xb7, 0x26, 0x00]),
 			ExpectPanLevelMessage(0x53, 0x7d, 0x00, 0x00),
 			// abortive message, discarded
@@ -20,11 +20,11 @@ describe('pan/balance level commands', () => {
 			ReceiveChannelMessage([0xb7, 0x63, 0x55]),
 			ReceiveChannelMessage([0xb7, 0x62, 0x29]),
 			ReceiveChannelMessage([0xb7, 0x06, 0x3f]),
-			ExpectNextMessageReadiness(false),
+			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xb7, 0x26, 0x7f]),
-			ExpectNextMessageReadiness(true),
+			ExpectNextCommandReadiness(true),
 			ExpectPanLevelMessage(0x55, 0x29, 0x3f, 0x7f),
-			ExpectNextMessageReadiness(false),
+			ExpectNextCommandReadiness(false),
 		])
 	})
 })
