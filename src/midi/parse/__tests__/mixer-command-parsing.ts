@@ -32,9 +32,11 @@ class PanLevelReceived extends MixerCommandBase {
 
 type MixerCommand = SceneReceived | MuteReceived | FaderLevelReceived | PanLevelReceived
 
+/** A mock MIDI tokenizer that emits messages for MIDI events. */
 class MockTokenizer extends EventEmitter<MidiMessageEvents> implements Tokenizer {
 	#runPromise: Promise<void>
 	#resolveRun: () => void
+	#finished = false
 
 	constructor() {
 		super()
@@ -44,8 +46,17 @@ class MockTokenizer extends EventEmitter<MidiMessageEvents> implements Tokenizer
 		this.#resolveRun = resolve
 	}
 
+	/** Emit the given MIDI message. */
 	emitMessage<M extends MidiMessage>(m: M): void {
 		const { type, message } = m
+		if (this.#finished) {
+			throw new TypeError(
+				`unexpected attempt to emit ${type} message ${
+					typeof message === 'number' ? String(message) : prettyBytes(message)
+				} after tokenizer finish`,
+			)
+		}
+
 		switch (type) {
 			case 'channel':
 				this.emit('channel_message', message.slice())
@@ -62,10 +73,16 @@ class MockTokenizer extends EventEmitter<MidiMessageEvents> implements Tokenizer
 		}
 	}
 
+	/** Stop this tokenizer. */
 	finish(): void {
+		this.#finished = true
 		this.#resolveRun()
 	}
 
+	/**
+	 * Run the tokenizer.  The returned promise settles once all tokenizing is
+	 * complete (i.e. `finish` was called).
+	 */
 	async run(): Promise<void> {
 		return this.#runPromise
 	}
@@ -77,6 +94,7 @@ type Waiter = {
 	resolved: boolean
 }
 
+/** Serialize emitted mixer command events from a mixer channel parser. */
 class MixerCommandIter {
 	#gen: AsyncGenerator<MixerCommand, void, unknown>
 	#waiting: Waiter[] = [MixerCommandIter.#waiter()]
@@ -115,10 +133,14 @@ class MixerCommandIter {
 		return mci
 	}
 
+	/** Return the next mixer command iterator result. */
 	async nextCommand(): Promise<IteratorResult<MixerCommand>> {
 		return this.#gen.next()
 	}
 
+	/**
+	 * Assert that the next mixer command is ready/not ready to be processed.
+	 */
 	assertNextMessageReadiness(ready: boolean): void {
 		console.log(`Expecting next message to be ${ready ? '' : 'not '}ready...`)
 		if (this.#waiting[0].resolved !== ready) {
@@ -141,6 +163,15 @@ class MixerCommandIter {
 	}
 }
 
+/**
+ * Run the provided series of interactions to verify ensuing behavior.
+ *
+ * @param channel
+ *   The MIDI channel in which mixer commands should be processed.  (Messages in
+ *   all other MIDI channels will be ignored.)
+ * @param interactions
+ *   The series of interactions to perform to test parsing of mixer commands.
+ */
 export async function TestMixerCommandParsing(channel: number, interactions: readonly Interaction[]): Promise<void> {
 	const verboseLog = (msg: string): void => {
 		console.log(msg)

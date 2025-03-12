@@ -49,38 +49,88 @@ export type ExpectInteraction = ExpectScene | ExpectMute | ExpectFaderLevel | Ex
 
 export type Interaction = ReceiveInteraction | NextMessageReadiness | ExpectInteraction
 
+/** Receive the given MIDI channel message. */
 export function ReceiveChannelMessage(message: readonly number[]): ReceiveChannel {
 	return { type: 'receive-channel-message', message }
 }
 
+/** Receive the given MIDI system common message. */
 export function ReceiveSystemCommonMessage(message: readonly number[]): ReceiveSystemCommon {
 	return { type: 'receive-system-common-message', message }
 }
 
+/** Receive the given MIDI system exclusive message. */
 export function ReceiveSystemExclusiveMessage(message: readonly number[]): ReceiveSystemExclusive {
 	return { type: 'receive-system-exclusive-message', message }
 }
 
+/** Receive the given system real time single-byte message. */
 export function ReceiveSystemRealTimeMessage(message: number): ReceiveSystemRealTime {
 	return { type: 'receive-system-real-time', message }
 }
 
+/** Expect that the next mixer command is ready/not ready. */
 export function ExpectNextMessageReadiness(ready: boolean): NextMessageReadiness {
 	return { type: 'message-readiness', ready }
 }
 
+/**
+ * Expect that the next mixer command is a mixer scene recall command specifying
+ * the given scene.
+ *
+ * @param scene
+ *   The zero-indexed scene (i.e. `[0, 300)` for SQ mixer scenes 1-300).
+ */
 export function ExpectSceneMessage(scene: number): ExpectScene {
 	return { type: 'expect-scene', args: [scene] }
 }
 
+/**
+ * Expect that the next mixer command is a mixer mute on/off command.
+ *
+ * @param msb
+ *   The expected MSB byte.
+ * @param lsb
+ *   The expected LSB byte.
+ * @param vf
+ *   The velocity (fine) byte in the message.  (The velocity [coarse] byte in a
+ *   mute message is always zero.)
+ */
 export function ExpectMuteMessage(msb: number, lsb: number, vf: number): ExpectMute {
+	if (!(vf === 0 || vf === 1)) {
+		throw new Error(`vf=${vf} in a mixer mute command must be 0 or 1`)
+	}
 	return { type: 'expect-mute', args: [msb, lsb, vf] }
 }
 
+/**
+ * Expect that the next mixer command is a fader level-setting command.
+ *
+ * @param msb
+ *   The expected MSB byte.
+ * @param lsb
+ *   The expected LSB byte.
+ * @param vc
+ *   The velocity (coarse) byte in the message.
+ * @param vf
+ *   The velocity (fine) byte in the message.
+ */
 export function ExpectFaderLevelMessage(msb: number, lsb: number, vc: number, vf: number): ExpectFaderLevel {
 	return { type: 'expect-fader-level', args: [msb, lsb, vc, vf] }
 }
 
+/**
+ * Expect that the next mixer command is a pan/balance level-setting command.
+ *
+ * @param msb
+ *   The expected MSB byte.
+ * @param lsb
+ *   The expected LSB byte.
+ * @param vc
+ *   The velocity (coarse) byte in the message.
+ * @param vf
+ *   The velocity (fine) byte in the message.
+ */
 export function ExpectPanLevelMessage(msb: number, lsb: number, vc: number, vf: number): ExpectPanLevel {
 	return { type: 'expect-pan-level', args: [msb, lsb, vc, vf] }
 }
