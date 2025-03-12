@@ -1,6 +1,6 @@
 import type { TCPHelper } from '@companion-module/base'
 import { EventEmitter } from 'eventemitter3'
-import { prettyBytes } from '../../utils/pretty.js'
+import { prettyByte, prettyBytes } from '../../utils/pretty.js'
 import { SocketReader } from '../../utils/socket-reader.js'
 
 export interface MidiMessageEvents {
@@ -108,6 +108,11 @@ export class MidiTokenizer extends EventEmitter<MidiMessageEvents> implements To
 		this.#verboseLog = verboseLog
 	}
 
+	/**
+	 * Run this tokenizer, returning a promise that settles once all MIDI tokens
+	 * have been read.  (Because all MIDI byte sequences can be tokenized, this
+	 * means no more bytes are available, i.e. the socket has closed.)
+	 */
 	async run(): Promise<void> {
 		const socket = this.#socket
 		const verboseLog = this.#verboseLog
@@ -252,8 +257,8 @@ export class MidiTokenizer extends EventEmitter<MidiMessageEvents> implements To
 
 						default: {
 							const msg =
-								`Unreachable: lowNibble=${lowNibble} should ` +
-								'be limited to 0-7 because 0xf8-0xff were ' +
+								`Unreachable: lowNibble=${prettyByte(lowNibble)} ` +
+								'should be limited to 0-7 because 0xf8-0xff were ' +
 								'handled in the `status_byte` loop'
 							throw new Error(msg)
 						}
