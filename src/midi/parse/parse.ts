@@ -1,14 +1,31 @@
 import { type MixerChannelParser } from './mixer-channel-parse.js'
 import { prettyByte, prettyBytes } from '../../utils/pretty.js'
-import { type Tokenizer } from '../tokenize/tokenize.js'
+import type { Tokenizer } from '../tokenize/tokenize.js'
 
 /**
- * An SQ mixer message parser of all MIDI messages (of all types and in all
- * channels) sent by the mixer to this module.
+ * An SQ mixer message parser of all MIDI messages emitted by a MIDI tokenizer,
+ * that forwards along messages in the mixer MIDI channel to a channel-specific
+ * mixer channel parser.
  */
 export class MixerMessageParser {
 	#tokenizer: Tokenizer
 
+	/**
+	 * Parse tokenized MIDI channel and system messages in the supplied channel.
+	 *
+	 * @param midiChannel
+	 *   The MIDI channel whose messages are being parsed.  Messages in other
+	 *   MIDI channels will be ignored.
+	 * @param verboseLog
+	 *   A function that logs the supplied message when verbose logging is
+	 *   enabled.
+	 * @param tokenizer
+	 *   A MIDI message tokenizer that emits MIDI messages from an underlying
+	 *   raw source (such as bytes read from a socket).
+	 * @param mixerChannelParser
+	 *   A parser of MIDI messages in the `midiChannel` channel, that will be
+	 *   notified with each received MIDI message in that channel.
+	 */
 	constructor(
 		midiChannel: number,
 		verboseLog: (msg: string) => void,
@@ -53,6 +70,10 @@ export class MixerMessageParser {
 		})
 	}
 
+	/**
+	 * Run the tokenizer til all MIDI data has been tokenized, notifying the
+	 * mixer channel parser for MIDI data in the mixer MIDI channel.
+	 */
 	async run(): Promise<void> {
 		return this.#tokenizer.run()
 	}
