@@ -12,7 +12,8 @@
 		"dev": "tsc -p tsconfig.build.json --watch",
 		"lint:raw": "eslint",
 		"lint": "yarn lint:raw .",
-		"knip": "knip"
+		"knip": "knip",
+		"bt": "yarn install && yarn build && yarn lint && yarn test && yarn knip && echo PASS || echo FAIL"
 	},
 	"license": "MIT",
 	"repository": {
