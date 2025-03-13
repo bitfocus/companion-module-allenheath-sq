@@ -4,18 +4,18 @@ import {
 	ExpectNextMessageNotReady,
 	ExpectSystemExclusiveMessage,
 	ExpectSystemRealTimeMessage,
-	MixerReply,
+	MixerWriteMidiBytes,
 } from './interactions.js'
 import { SysCommonTuneRequest, SysExEnd, SysExStart, SysRTContinue } from '../../bytes.js'
 
 describe('system exclusive', () => {
 	test('noncanonical terminator (channel status)', async () => {
 		return TestMidiTokenizing([
-			MixerReply([0x33]),
+			MixerWriteMidiBytes([0x33]),
 			ExpectNextMessageNotReady(),
-			MixerReply([SysExStart]),
+			MixerWriteMidiBytes([SysExStart]),
 			ExpectNextMessageNotReady(),
-			MixerReply([0xc3]),
+			MixerWriteMidiBytes([0xc3]),
 			ExpectSystemExclusiveMessage([SysExStart, SysExEnd]),
 			ExpectNextMessageNotReady(),
 		])
@@ -23,11 +23,11 @@ describe('system exclusive', () => {
 
 	test('noncanonical terminator, system common status', async () => {
 		return TestMidiTokenizing([
-			MixerReply([0x33]),
+			MixerWriteMidiBytes([0x33]),
 			ExpectNextMessageNotReady(),
-			MixerReply([SysExStart]),
+			MixerWriteMidiBytes([SysExStart]),
 			ExpectNextMessageNotReady(),
-			MixerReply([SysCommonTuneRequest]),
+			MixerWriteMidiBytes([SysCommonTuneRequest]),
 			ExpectSystemExclusiveMessage([SysExStart, SysExEnd]),
 			ExpectNextMessageNotReady(),
 		])
@@ -35,25 +35,25 @@ describe('system exclusive', () => {
 
 	test('shortest', async () => {
 		return TestMidiTokenizing([
-			MixerReply([SysExStart]),
+			MixerWriteMidiBytes([SysExStart]),
 			ExpectNextMessageNotReady(),
-			MixerReply([SysExEnd]),
+			MixerWriteMidiBytes([SysExEnd]),
 			ExpectSystemExclusiveMessage([SysExStart, SysExEnd]),
-			MixerReply([SysExStart]),
+			MixerWriteMidiBytes([SysExStart]),
 			ExpectNextMessageNotReady(),
-			MixerReply([0x80]),
+			MixerWriteMidiBytes([0x80]),
 			ExpectSystemExclusiveMessage([SysExStart, SysExEnd]),
 		])
 	})
 
 	test('system real time cuts line', async () => {
 		return TestMidiTokenizing([
-			MixerReply([SysExStart]),
+			MixerWriteMidiBytes([SysExStart]),
 			ExpectNextMessageNotReady(),
-			MixerReply([SysRTContinue, 0x23, 0x57]),
+			MixerWriteMidiBytes([SysRTContinue, 0x23, 0x57]),
 			ExpectSystemRealTimeMessage(SysRTContinue),
 			ExpectNextMessageNotReady(),
-			MixerReply([0xf5]),
+			MixerWriteMidiBytes([0xf5]),
 			ExpectSystemExclusiveMessage([SysExStart, 0x23, 0x57, SysExEnd]),
 		])
 	})
@@ -61,11 +61,11 @@ describe('system exclusive', () => {
 	test('multiple system exclusive starts', async () => {
 		// F0 F0 F0 F0 should be interpreted as [F0 F7] [F0 F7]
 		return TestMidiTokenizing([
-			MixerReply([SysExStart]),
+			MixerWriteMidiBytes([SysExStart]),
 			ExpectNextMessageNotReady(),
-			MixerReply([SysExStart]),
+			MixerWriteMidiBytes([SysExStart]),
 			ExpectSystemExclusiveMessage([SysExStart, SysExEnd]),
-			MixerReply([SysExStart, SysExStart, SysExStart]),
+			MixerWriteMidiBytes([SysExStart, SysExStart, SysExStart]),
 			ExpectSystemExclusiveMessage([SysExStart, SysExEnd]),
 			ExpectNextMessageNotReady(),
 		])

@@ -6,25 +6,25 @@ import {
 	ExpectChannelMessage,
 	ExpectSystemExclusiveMessage,
 	ExpectSystemRealTimeMessage,
-	MixerReply,
+	MixerWriteMidiBytes,
 } from './interactions.js'
 
 describe('parse status byte', () => {
 	test('data bytes before channel status byte', async () => {
 		return TestMidiTokenizing([
-			MixerReply([0x12, 0x34, 0x56, 0xb0, 0x00]),
+			MixerWriteMidiBytes([0x12, 0x34, 0x56, 0xb0, 0x00]),
 			ExpectNextMessageNotReady(),
-			MixerReply([0x0f]),
+			MixerWriteMidiBytes([0x0f]),
 			ExpectNextMessageNotReady(),
 			ExpectChannelMessage([0xb0, 0x00, 0x0f]),
 		])
 	})
 	test('data bytes before system status byte', async () => {
 		return TestMidiTokenizing([
-			MixerReply([0x12, 0x34, 0x56, ...SysExMessage.slice(0, 2)]),
+			MixerWriteMidiBytes([0x12, 0x34, 0x56, ...SysExMessage.slice(0, 2)]),
 			ExpectNextMessageNotReady(),
-			MixerReply(SysExMessage.slice(2)),
-			MixerReply([0xc5, 0x17]),
+			MixerWriteMidiBytes(SysExMessage.slice(2)),
+			MixerWriteMidiBytes([0xc5, 0x17]),
 			ExpectSystemExclusiveMessage(SysExMessage),
 			ExpectChannelMessage([0xc5, 0x17]),
 			ExpectNextMessageNotReady(),
@@ -32,23 +32,23 @@ describe('parse status byte', () => {
 	})
 	test('data bytes before system status byte', async () => {
 		return TestMidiTokenizing([
-			MixerReply([0x12, 0x34, 0x56, ...SysExMessage.slice(0, 2)]),
+			MixerWriteMidiBytes([0x12, 0x34, 0x56, ...SysExMessage.slice(0, 2)]),
 			ExpectNextMessageNotReady(),
-			MixerReply([0xc5]), // terminate sysex
+			MixerWriteMidiBytes([0xc5]), // terminate sysex
 			ExpectSystemExclusiveMessage([...SysExMessage.slice(0, 2), SysExEnd]),
-			MixerReply([0xc5, 0x17]),
+			MixerWriteMidiBytes([0xc5, 0x17]),
 			ExpectChannelMessage([0xc5, 0x17]),
 		])
 	})
 
 	test('data bytes before system real time', async () => {
 		return TestMidiTokenizing([
-			MixerReply([0x12, 0x34, 0x56]),
+			MixerWriteMidiBytes([0x12, 0x34, 0x56]),
 			ExpectNextMessageNotReady(),
-			MixerReply([SysRTContinue]),
+			MixerWriteMidiBytes([SysRTContinue]),
 			ExpectSystemRealTimeMessage(SysRTContinue),
-			MixerReply(SysExMessage),
-			MixerReply([0xc5, 0x17]),
+			MixerWriteMidiBytes(SysExMessage),
+			MixerWriteMidiBytes([0xc5, 0x17]),
 			ExpectSystemExclusiveMessage(SysExMessage),
 			ExpectChannelMessage([0xc5, 0x17]),
 		])

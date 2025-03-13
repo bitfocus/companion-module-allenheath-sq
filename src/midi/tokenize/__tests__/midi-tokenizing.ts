@@ -127,7 +127,7 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 			const { type } = interaction
 			LOG(`Running interaction ${type}`)
 			switch (type) {
-				case 'mixer-reply': {
+				case 'mixer-write-midi-bytes': {
 					await new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
 						const { bytes } = interaction
 						sink.write(bytes, (err?: Error) => {
@@ -219,16 +219,8 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 }
 
 /**
- * Tokenize the given series of packets as MIDI data, and compare the resulting
- * series of MIDI messages against `expectedMessages`.
- *
- * Note that only channel messages are currently tokenized: system messages are
- * simply discarded.
- *
- * @param packets
- * 	  An array of arrays of bytes to parse.
- * @param expectedMessages
- *    The messages expected to result from parsing `packets`.
+ * Perform the given interactions as if by receiving bytes of MIDI data sent
+ * by a mixer to a tokenizer whose output is accordingly expected to match it.
  */
 export async function TestMidiTokenizing(interactions: readonly Interaction[]): Promise<void> {
 	LOG(`Test start`)
@@ -238,11 +230,11 @@ export async function TestMidiTokenizing(interactions: readonly Interaction[]): 
 		port: number
 	}
 
-	// MIDI parsing currently requires reading from a TCPHelper.  There may be
-	// an easier way to conjure up one that'll be fed `packets` than to spin up
-	// a full-fledged TCP server to connect to.  But this is test helper code
-	// (not even test code that needs to be reasonably skimmable by future
-	// developers).  If it gets the job done, some ugliness is tolerable.
+	// MIDI tokenizing currently requires reading from a TCPHelper.  There may
+	// be an easier way to conjure up one that'll be fed data than to spin up
+	// a full-fledged TCP server to connect to.  But this is test helper code,
+	// and not test code that needs to be especially skimmable in the future, so
+	// if it gets the job done, some ugliness is tolerable.
 	const { server, port } = await new Promise<ServerInfo>(
 		(resolve: ({ server, port }: ServerInfo) => void, reject: (err: Error) => void) => {
 			const server = net.createServer({ noDelay: true })

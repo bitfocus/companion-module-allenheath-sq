@@ -1,7 +1,7 @@
 import { prettyBytes } from '../../../utils/pretty.js'
 
-type MixerReplyBytes = {
-	readonly type: 'mixer-reply'
+type MixerWriteMidiBytes = {
+	readonly type: 'mixer-write-midi-bytes'
 	readonly bytes: Uint8Array
 }
 
@@ -34,7 +34,7 @@ type MixerCloseSocket = {
 }
 
 export type Interaction =
-	| MixerReplyBytes
+	| MixerWriteMidiBytes
 	| NextMessageNotReady
 	| ExpectChannel
 	| ExpectSystemCommon
@@ -42,8 +42,8 @@ export type Interaction =
 	| ExpectSystemExclusive
 	| MixerCloseSocket
 
-export function MixerReply(bytes: readonly number[]): MixerReplyBytes {
-	return { type: 'mixer-reply', bytes: new Uint8Array(bytes) }
+export function MixerWriteMidiBytes(bytes: readonly number[]): MixerWriteMidiBytes {
+	return { type: 'mixer-write-midi-bytes', bytes: new Uint8Array(bytes) }
 }
 
 export function ExpectNextMessageNotReady(): NextMessageNotReady {
