@@ -627,13 +627,13 @@ __metadata:
   linkType: hard
 
 "@eslint-community/eslint-utils@npm:^4.1.2, @eslint-community/eslint-utils@npm:^4.2.0, @eslint-community/eslint-utils@npm:^4.4.0, @eslint-community/eslint-utils@npm:^4.4.1":
-  version: 4.5.0
-  resolution: "@eslint-community/eslint-utils@npm:4.5.0"
+  version: 4.5.1
+  resolution: "@eslint-community/eslint-utils@npm:4.5.1"
   dependencies:
     eslint-visitor-keys: "npm:^3.4.3"
   peerDependencies:
     eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
-  checksum: 10c0/0fad96181bd73ef7254ba61dbbca460a41fe155880122db8852e75c1063617dc60005ff31a7354ecf9dbfcb46fce4349ceca5c1d24db036c5aa39a4bf622fafc
+  checksum: 10c0/b520ae1b7bd04531a5c5da2021071815df4717a9f7d13720e3a5ddccf5c9c619532039830811fcbae1c2f1c9d133e63af2435ee69e0fc0fabbd6d928c6800fb2
   languageName: node
   linkType: hard
 
@@ -1816,13 +1816,13 @@ __metadata:
     eventemitter3: "npm:^5.0.1"
     husky: "npm:^9.0.11"
     jest: "npm:^29.7.0"
-    knip: "npm:^5.45.0"
-    lint-staged: "npm:^15.4.3"
+    knip: "npm:^5.46.0"
+    lint-staged: "npm:^15.5.0"
     prettier: "npm:^3.5.3"
     rimraf: "npm:^6.0.1"
     ts-jest: "npm:^29.1.4"
     typescript: "npm:~5.8.2"
-    typescript-eslint: "npm:~8.26.0"
+    typescript-eslint: "npm:~8.26.1"
   languageName: unknown
   linkType: soft
 
@@ -2123,9 +2123,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001688":
-  version: 1.0.30001703
-  resolution: "caniuse-lite@npm:1.0.30001703"
-  checksum: 10c0/ed88e318da28e9e59c4ac3a2e3c42859558b7b713aebf03696a1f916e4ed4b70734dda82be04635e2b62ec355b8639bbed829b7b12ff528d7f9cc31a3a5bea91
+  version: 1.0.30001704
+  resolution: "caniuse-lite@npm:1.0.30001704"
+  checksum: 10c0/4efa0ece51ef58e7ce7e7c8cd7b50372bcb910581a47397be5c086c046c3cd436d123b734351fb20f638c322b339198edf89b5b632ff59bdd171c74ff7f4efcf
   languageName: node
   linkType: hard
 
@@ -2464,9 +2464,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.73":
-  version: 1.5.114
-  resolution: "electron-to-chromium@npm:1.5.114"
-  checksum: 10c0/cb86057d78f1aeb53ab6550dedacfd9496bcc6676bab7b48466c3958ba9ce0ed78c7213b1eab99ba38542cbaaa176eb7f8ea8b0274c0688b8ce3058291549430
+  version: 1.5.118
+  resolution: "electron-to-chromium@npm:1.5.118"
+  checksum: 10c0/7082f349d2bf5cc04cc66b14d53caa198200e9bd7c80b57652e4c098ac3af64b9958d5b19b657a7b2048f3d1a3098978d6a63bcfe9ce2bdba38d418fbc309859
   languageName: node
   linkType: hard
 
@@ -4288,7 +4288,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"knip@npm:^5.45.0":
+"knip@npm:^5.46.0":
   version: 5.46.0
   resolution: "knip@npm:5.46.0"
   dependencies:
@@ -4349,9 +4349,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lint-staged@npm:^15.4.3":
-  version: 15.4.3
-  resolution: "lint-staged@npm:15.4.3"
+"lint-staged@npm:^15.5.0":
+  version: 15.5.0
+  resolution: "lint-staged@npm:15.5.0"
   dependencies:
     chalk: "npm:^5.4.1"
     commander: "npm:^13.1.0"
@@ -4365,7 +4365,7 @@ __metadata:
     yaml: "npm:^2.7.0"
   bin:
     lint-staged: bin/lint-staged.js
-  checksum: 10c0/c1f71f2273bcbd992af929620f5acc6b9f6899da4b395e780e0b3ab33a0d725c239eb961873067c8c842e057c585c71dd4d44c0dc8b25539d3c2e97a3bdd6f30
+  checksum: 10c0/393b24d85d705a36e6556dc9d9b710594163be60f7789a2ca71bbf8f31debc10f7fde9cd0e868466ac2b7c154661983602decd7abbb6c685b21007bc70dbbdd6
   languageName: node
   linkType: hard
 
@@ -5948,7 +5948,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-eslint@npm:~8.26.0":
+"typescript-eslint@npm:~8.26.1":
   version: 8.26.1
   resolution: "typescript-eslint@npm:8.26.1"
   dependencies:
@@ -6352,10 +6352,10 @@ __metadata:
   linkType: hard
 
 "zx@npm:^8.1.6":
-  version: 8.4.0
-  resolution: "zx@npm:8.4.0"
+  version: 8.4.1
+  resolution: "zx@npm:8.4.1"
   bin:
     zx: build/cli.js
-  checksum: 10c0/92b9dc832916f09e5e0ff1863cd88cc090b0fe213a0f6eddc4688ecc7bc960527be0567afcff92071ceaab93bd2cc045493e4ad0b9e508c3411669d999c877ac
+  checksum: 10c0/5213322d24f95748048f6695f8b0c36d1a6faa1c31ce315c165863f75f14f3c1adedff8ddbf2e9cdffe1fdab0ca2810c46e5823e066c68a00157775cc0eac57b
   languageName: node
   linkType: hard
