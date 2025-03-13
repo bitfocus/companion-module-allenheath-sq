@@ -1,6 +1,12 @@
 import { describe, test } from '@jest/globals'
 import { TestMixerCommandParsing } from './mixer-command-parsing.js'
-import { ExpectNextCommandReadiness, ExpectSceneMessage, ReceiveChannelMessage } from './interactions.js'
+import {
+	ExpectNextCommandReadiness,
+	ExpectSceneMessage,
+	ReceiveChannelMessage,
+	ReceiveSystemRealTimeMessage,
+} from './interactions.js'
+import { SysCommonTuneRequest } from '../../bytes.js'
 
 describe('scene changes', () => {
 	test('basic scene', async () => {
@@ -20,6 +26,7 @@ describe('scene changes', () => {
 			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xb6, 0x00, 0x00]),
 			ExpectNextCommandReadiness(false),
+			ReceiveSystemRealTimeMessage(SysCommonTuneRequest),
 			ReceiveChannelMessage([0xc6, 0x05]),
 			ExpectNextCommandReadiness(true),
 			ExpectSceneMessage(5),
