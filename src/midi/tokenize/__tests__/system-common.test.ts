@@ -5,7 +5,7 @@ import {
 	SysCommonTimeCodeQuarterFrame,
 	SysExEnd,
 	SysRTContinue,
-} from './bytes.js'
+} from '../../bytes.js'
 import {
 	ExpectChannelMessage,
 	ExpectNextMessageNotReady,

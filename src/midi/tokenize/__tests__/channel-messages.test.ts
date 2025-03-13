@@ -1,6 +1,6 @@
 import { describe, test } from '@jest/globals'
 import { TestMidiTokenizing } from './midi-tokenizing.js'
-import { SysRTContinue } from './bytes.js'
+import { SysRTContinue } from '../../bytes.js'
 import {
 	ExpectChannelMessage,
 	ExpectNextMessageNotReady,

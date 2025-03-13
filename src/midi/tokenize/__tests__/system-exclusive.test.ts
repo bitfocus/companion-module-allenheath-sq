@@ -6,7 +6,7 @@ import {
 	ExpectSystemRealTimeMessage,
 	MixerReply,
 } from './interactions.js'
-import { SysCommonTuneRequest, SysExEnd, SysExStart, SysRTContinue } from './bytes.js'
+import { SysCommonTuneRequest, SysExEnd, SysExStart, SysRTContinue } from '../../bytes.js'
 
 describe('system exclusive', () => {
 	test('noncanonical terminator (channel status)', async () => {

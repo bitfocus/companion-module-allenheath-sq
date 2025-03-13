@@ -1,6 +1,6 @@
 import { describe, test } from '@jest/globals'
 import { TestMidiTokenizing } from './midi-tokenizing.js'
-import { SysExStart, SysExEnd, SysRTTimingClock, SysCommonSongPosMessage, SysCommonSongPosition } from './bytes.js'
+import { SysExStart, SysExEnd, SysRTTimingClock, SysCommonSongPosMessage, SysCommonSongPosition } from '../../bytes.js'
 import {
 	ExpectChannelMessage,
 	ExpectSystemCommonMessage,

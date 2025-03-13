@@ -1,6 +1,6 @@
 import { describe, test } from '@jest/globals'
 import { TestMidiTokenizing } from './midi-tokenizing.js'
-import { SysCommonMultiByte, SysExMessage } from './bytes.js'
+import { SysCommonMultiByte, SysExMessage } from '../../bytes.js'
 import { ExpectNextMessageNotReady, MixerReply } from './interactions.js'
 
 describe('parse status byte (ignored data to start)', () => {
