@@ -15,7 +15,6 @@ describe('parse status byte', () => {
 			MixerWriteMidiBytes([0x12, 0x34, 0x56, 0xb0, 0x00]),
 			ExpectNextMessageNotReady(),
 			MixerWriteMidiBytes([0x0f]),
-			ExpectNextMessageNotReady(),
 			ExpectChannelMessage([0xb0, 0x00, 0x0f]),
 		])
 	})
