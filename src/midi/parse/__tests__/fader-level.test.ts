@@ -1,6 +1,7 @@
 import { describe, test } from '@jest/globals'
 import { TestMixerCommandParsing } from './mixer-command-parsing.js'
 import { ExpectNextCommandReadiness, ReceiveChannelMessage, ExpectFaderLevelMessage } from './interactions.js'
+import { FaderLevel } from './commands.js'
 
 describe('fader level', () => {
 	test('various fader level tests', async () => {
@@ -28,6 +29,10 @@ describe('fader level', () => {
 			ExpectNextCommandReadiness(true),
 			ExpectFaderLevelMessage(0x45, 0x06, 0x00, 0x00),
 			ExpectNextCommandReadiness(false),
+			// Grp3 in Aux4, 0dB (linear taper)
+			...FaderLevel(5, 0x45, 0x1f, 0x76, 0x5c).map(ReceiveChannelMessage),
+			ExpectNextCommandReadiness(true),
+			ExpectFaderLevelMessage(0x45, 0x1f, 0x76, 0x5c),
 		])
 	})
 })

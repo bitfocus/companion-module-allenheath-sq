@@ -1,6 +1,7 @@
 import { describe, test } from '@jest/globals'
 import { TestMixerCommandParsing } from './mixer-command-parsing.js'
 import { ExpectNextCommandReadiness, ReceiveChannelMessage, ExpectPanLevelMessage } from './interactions.js'
+import { PanLevel } from './commands.js'
 
 describe('pan/balance level commands', () => {
 	test('pan/balance', async () => {
@@ -25,6 +26,10 @@ describe('pan/balance level commands', () => {
 			ExpectNextCommandReadiness(true),
 			ExpectPanLevelMessage(0x55, 0x29, 0x3f, 0x7f),
 			ExpectNextCommandReadiness(false),
+			// LR in Mtx1, L30%
+			...PanLevel(7, 0x5e, 0x24, 0x2c, 0x65).map(ReceiveChannelMessage),
+			ExpectNextCommandReadiness(true),
+			ExpectPanLevelMessage(0x5e, 0x24, 0x2c, 0x65),
 		])
 	})
 })
