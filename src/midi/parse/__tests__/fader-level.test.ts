@@ -1,5 +1,5 @@
 import { describe, test } from '@jest/globals'
-import { TestMixerCommandParsing } from './mixer-command-parsing.js'
+import { TestParsing } from './test-parsing.js'
 import {
 	ExpectNextCommandReadiness,
 	ReceiveChannelMessage,
@@ -11,7 +11,7 @@ import { SysCommonMultiByte } from '../../bytes.js'
 
 describe('fader level', () => {
 	test('various fader level tests', async () => {
-		return TestMixerCommandParsing(5, [
+		return TestParsing(5, [
 			// Ip23 in Aux3
 			ReceiveChannelMessage([0xb5, 0x63, 0x42]),
 			ReceiveChannelMessage([0xb5, 0x62, 0x4e]),

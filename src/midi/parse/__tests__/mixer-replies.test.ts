@@ -1,5 +1,5 @@
 import { describe, test } from '@jest/globals'
-import { TestMixerCommandParsing } from './mixer-command-parsing.js'
+import { TestParsing } from './test-parsing.js'
 import {
 	ExpectNextCommandReadiness,
 	ExpectMuteMessage,
@@ -10,7 +10,7 @@ import { MuteOff, MuteOn, SceneCommand } from './commands.js'
 
 describe('reply processing', () => {
 	test('basic reply series', async () => {
-		return TestMixerCommandParsing(0, [
+		return TestParsing(0, [
 			ExpectNextCommandReadiness(false),
 			...SceneCommand(0, 129).map(ReceiveChannelMessage),
 			ExpectSceneMessage((1 << 7) + 1),
@@ -24,7 +24,7 @@ describe('reply processing', () => {
 	})
 
 	test('basic replies with extraneous CN 00 after scene change', async () => {
-		return TestMixerCommandParsing(2, [
+		return TestParsing(2, [
 			// Scene change
 			ReceiveChannelMessage([0xb2, 0x00, 0x01]),
 			ExpectNextCommandReadiness(false),
@@ -48,7 +48,7 @@ describe('reply processing', () => {
 	})
 
 	test('basic replies with messages in different channels interspersed', async () => {
-		return TestMixerCommandParsing(0, [
+		return TestParsing(0, [
 			// Scene change
 			ReceiveChannelMessage([0xb0, 0x00, 0x01]),
 			ReceiveChannelMessage([0x97, 0x3c, 0x00]), // Channel 1, C-4, Note On (velocity 0)

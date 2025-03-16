@@ -1,8 +1,8 @@
 import EventEmitter from 'eventemitter3'
-import { MixerChannelParser, type MixerMessageEvents } from '../mixer-channel-parse.js'
-import { MixerMessageParser } from '../parse.js'
+import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
+import { Parser } from '../parse.js'
 import { type ExpectInteraction, type Interaction, type ReceiveInteraction } from './interactions.js'
-import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenize.js'
+import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenizer.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
 import { prettyBytes, repr } from '../../../utils/pretty.js'
 
@@ -109,7 +109,7 @@ class MixerCommandIter {
 		return { promise, resolve, resolved: false }
 	}
 
-	static async create(mixerChannelParser: MixerChannelParser): Promise<MixerCommandIter> {
+	static async create(mixerChannelParser: ChannelParser): Promise<MixerCommandIter> {
 		const mci = new MixerCommandIter()
 
 		const addHandler = <T extends keyof MixerMessageEvents>(
@@ -164,26 +164,27 @@ class MixerCommandIter {
 }
 
 /**
- * Run the provided series of interactions to verify ensuing behavior.
+ * Run the provided series of interactions to verify parsing of MIDI messages
+ * sent by a mixer.
  *
  * @param channel
- *   The MIDI channel in which mixer commands should be processed.  (Messages in
- *   all other MIDI channels will be ignored.)
+ *   The MIDI channel in which mixer commands are processed.  (Messages in other
+ *   MIDI channels are currently ignored.)
  * @param interactions
- *   The series of interactions to perform to test parsing of mixer commands.
+ *   The series of interactions to perform to test MIDI parsing.
  */
-export async function TestMixerCommandParsing(channel: number, interactions: readonly Interaction[]): Promise<void> {
+export async function TestParsing(channel: number, interactions: readonly Interaction[]): Promise<void> {
 	const verboseLog = (msg: string): void => {
 		console.log(msg)
 	}
 
 	const tokenizer = new MockTokenizer()
 
-	const mixerChannelParser = new MixerChannelParser(verboseLog)
+	const midiChannelParser = new ChannelParser(verboseLog)
 
-	const commandIter = await MixerCommandIter.create(mixerChannelParser)
+	const commandIter = await MixerCommandIter.create(midiChannelParser)
 
-	const runParser = new MixerMessageParser(channel, verboseLog, tokenizer, mixerChannelParser).run()
+	const runParser = new Parser(channel, verboseLog, tokenizer, midiChannelParser).run()
 
 	async function expectEvent(type: MixerCommand['type'], interaction: ExpectInteraction): Promise<void> {
 		console.log(`Performing ${interaction.type} for ${interaction.args}`)

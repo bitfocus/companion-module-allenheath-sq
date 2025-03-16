@@ -34,7 +34,7 @@ export interface MixerMessageEvents {
  * Parse MIDI replies sent by the mixer in the mixer MIDI channel, and emit
  * events corresponding to the received mixer messages.
  */
-export class MixerChannelParser extends EventEmitter<MixerMessageEvents> {
+export class ChannelParser extends EventEmitter<MixerMessageEvents> {
 	#gen: Generator<void, void, number[]>
 
 	/**

@@ -3,9 +3,9 @@ import { CallbackInfo, type CallbackInfoType } from '../callback.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
 import { type Mixer, RetrieveStatusAtStartup } from '../mixer/mixer.js'
 import { vcvfToReadablePanBalance } from '../mixer/pan-balance.js'
-import { MixerChannelParser } from './parse/mixer-channel-parse.js'
-import { MixerMessageParser } from './parse/parse.js'
-import { MidiTokenizer } from './tokenize/tokenize.js'
+import { ChannelParser } from './parse/channel-parser.js'
+import { Parser } from './parse/parse.js'
+import { MidiTokenizer } from './tokenize/tokenizer.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { asyncSleep, sleep } from '../utils/sleep.js'
 import { CurrentSceneId, SceneRecalledTriggerId } from '../variables.js'
@@ -163,7 +163,7 @@ export class MidiSession {
 
 		const tokenizer = new MidiTokenizer(socket, verboseLog)
 
-		const mixerChannelParser = new MixerChannelParser(verboseLog)
+		const mixerChannelParser = new ChannelParser(verboseLog)
 		mixerChannelParser.on('scene', (newScene: number) => {
 			verboseLog(`Scene recalled: ${newScene}`)
 
@@ -216,7 +216,7 @@ export class MidiSession {
 			instance.setExtraVariable(variableId, name, variableValue)
 		})
 
-		return new MixerMessageParser(instance.options.midiChannel, verboseLog, tokenizer, mixerChannelParser).run()
+		return new Parser(instance.options.midiChannel, verboseLog, tokenizer, mixerChannelParser).run()
 	}
 
 	/**

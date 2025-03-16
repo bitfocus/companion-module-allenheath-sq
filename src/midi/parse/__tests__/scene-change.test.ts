@@ -1,5 +1,5 @@
 import { describe, test } from '@jest/globals'
-import { TestMixerCommandParsing } from './mixer-command-parsing.js'
+import { TestParsing } from './test-parsing.js'
 import {
 	ExpectNextCommandReadiness,
 	ExpectSceneMessage,
@@ -10,7 +10,7 @@ import { SysCommonTuneRequest } from '../../bytes.js'
 
 describe('scene changes', () => {
 	test('basic scene', async () => {
-		return TestMixerCommandParsing(0, [
+		return TestParsing(0, [
 			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xb0, 0x00, 0x00]),
 			ExpectNextCommandReadiness(false),
@@ -22,7 +22,7 @@ describe('scene changes', () => {
 	})
 
 	test('basic scene with extraneous CN 00 after scene change', async () => {
-		return TestMixerCommandParsing(6, [
+		return TestParsing(6, [
 			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xb6, 0x00, 0x00]),
 			ExpectNextCommandReadiness(false),

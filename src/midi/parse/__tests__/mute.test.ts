@@ -1,5 +1,5 @@
 import { describe, test } from '@jest/globals'
-import { TestMixerCommandParsing } from './mixer-command-parsing.js'
+import { TestParsing } from './test-parsing.js'
 import {
 	ExpectNextCommandReadiness,
 	ExpectMuteMessage,
@@ -12,7 +12,7 @@ import { SysExEnd, SysExMessageShortest, SysExStart, SysRTContinue, SysRTTimingC
 
 describe('mute commands', () => {
 	test('mute on', async () => {
-		return TestMixerCommandParsing(0, [
+		return TestParsing(0, [
 			// Mute on, Ip48
 			ReceiveChannelMessage([0xb0, 0x63, 0x00]),
 			ReceiveChannelMessage([0xb0, 0x62, 0x48]),
@@ -42,7 +42,7 @@ describe('mute commands', () => {
 	})
 
 	test('mute off', async () => {
-		return TestMixerCommandParsing(3, [
+		return TestParsing(3, [
 			// Mute on, Aux4
 			ReceiveChannelMessage([0xb3, 0x63, 0x00]),
 			ReceiveChannelMessage([0xb3, 0x62, 0x2f]),
