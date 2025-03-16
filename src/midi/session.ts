@@ -4,7 +4,7 @@ import type { SQInstanceInterface as sqInstance } from '../instance-interface.js
 import { type Mixer, RetrieveStatusAtStartup } from '../mixer/mixer.js'
 import { vcvfToReadablePanBalance } from '../mixer/pan-balance.js'
 import { ChannelParser } from './parse/channel-parser.js'
-import { Parser } from './parse/parse.js'
+import { parseMidi } from './parse/parse.js'
 import { MidiTokenizer } from './tokenize/tokenizer.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { asyncSleep, sleep } from '../utils/sleep.js'
@@ -216,7 +216,7 @@ export class MidiSession {
 			instance.setExtraVariable(variableId, name, variableValue)
 		})
 
-		return new Parser(instance.options.midiChannel, verboseLog, tokenizer, mixerChannelParser).run()
+		return parseMidi(instance.options.midiChannel, verboseLog, tokenizer, mixerChannelParser)
 	}
 
 	/**

@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3'
 import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
-import { Parser } from '../parse.js'
+import { parseMidi } from '../parse.js'
 import { type ExpectInteraction, type Interaction, type ReceiveInteraction } from './interactions.js'
 import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenizer.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
@@ -184,7 +184,7 @@ export async function TestParsing(channel: number, interactions: readonly Intera
 
 	const commandIter = await MixerCommandIter.create(midiChannelParser)
 
-	const runParser = new Parser(channel, verboseLog, tokenizer, midiChannelParser).run()
+	const runParser = parseMidi(channel, verboseLog, tokenizer, midiChannelParser)
 
 	async function expectEvent(type: MixerCommand['type'], interaction: ExpectInteraction): Promise<void> {
 		console.log(`Performing ${interaction.type} for ${interaction.args}`)
