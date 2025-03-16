@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3'
 import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
-import { parseMidi } from '../parse.js'
+import { parseMidi } from '../parse-midi.js'
 import { type ExpectInteraction, type Interaction, type ReceiveInteraction } from './interactions.js'
 import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenizer.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'

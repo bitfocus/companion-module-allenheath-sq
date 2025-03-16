@@ -4,7 +4,7 @@ import type { SQInstanceInterface as sqInstance } from '../instance-interface.js
 import { type Mixer, RetrieveStatusAtStartup } from '../mixer/mixer.js'
 import { vcvfToReadablePanBalance } from '../mixer/pan-balance.js'
 import { ChannelParser } from './parse/channel-parser.js'
-import { parseMidi } from './parse/parse.js'
+import { parseMidi } from './parse/parse-midi.js'
 import { MidiTokenizer } from './tokenize/tokenizer.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { asyncSleep, sleep } from '../utils/sleep.js'
