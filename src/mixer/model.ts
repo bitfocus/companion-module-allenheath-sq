@@ -36,7 +36,7 @@ export const LR = 99
 
 export class Model {
 	/** Counts of all inputs/outputs for this mixer model. */
-	readonly count: InputOutputCounts
+	readonly inputOutputCounts: InputOutputCounts
 
 	/** The number of softkeys on the mixer. */
 	softKeys: number
@@ -51,7 +51,7 @@ export class Model {
 	constructor(modelId: ModelId) {
 		const sqModel = SQModels[modelId]
 
-		this.count = {
+		this.inputOutputCounts = {
 			inputChannel: sqModel.chCount,
 			mix: sqModel.mixCount,
 			group: sqModel.grpCount,
@@ -77,7 +77,7 @@ export class Model {
 	forEachInputChannel(f: ForEachFunctor): void {
 		const channelLabels = this.#channelLabels
 		if (channelLabels.length === 0) {
-			for (let channel = 0; channel < this.count.inputChannel; channel++) {
+			for (let channel = 0; channel < this.inputOutputCounts.inputChannel; channel++) {
 				const label = this.#channelLabel(channel)
 				channelLabels.push(label)
 			}
@@ -101,7 +101,7 @@ export class Model {
 	forEachMix(f: ForEachFunctor): void {
 		const mixLabels = this.#mixLabels
 		if (mixLabels.length === 0) {
-			for (let mix = 0; mix < this.count.mix; mix++) {
+			for (let mix = 0; mix < this.inputOutputCounts.mix; mix++) {
 				const label = this.#mixLabel(mix)
 				const desc = this.#mixDesc(mix)
 				mixLabels.push([label, desc])
@@ -131,7 +131,7 @@ export class Model {
 	forEachGroup(f: ForEachFunctor): void {
 		const groupLabels = this.#groupLabels
 		if (groupLabels.length === 0) {
-			for (let group = 0; group < this.count.group; group++) {
+			for (let group = 0; group < this.inputOutputCounts.group; group++) {
 				const label = this.#groupLabel(group)
 				const desc = this.#groupDesc(group)
 				groupLabels.push([label, desc])
@@ -156,7 +156,7 @@ export class Model {
 	forEachFxReturn(f: ForEachFunctor): void {
 		const fxReturnLabels = this.#fxReturnLabels
 		if (fxReturnLabels.length === 0) {
-			for (let fxr = 0; fxr < this.count.fxReturn; fxr++) {
+			for (let fxr = 0; fxr < this.inputOutputCounts.fxReturn; fxr++) {
 				const label = this.#fxReturnLabel(fxr)
 				const desc = this.#fxReturnDesc(fxr)
 				fxReturnLabels.push([label, desc])
@@ -181,7 +181,7 @@ export class Model {
 	forEachFxSend(f: ForEachFunctor): void {
 		const fxSendLabels = this.#fxSendLabels
 		if (fxSendLabels.length === 0) {
-			for (let fxs = 0; fxs < this.count.fxSend; fxs++) {
+			for (let fxs = 0; fxs < this.inputOutputCounts.fxSend; fxs++) {
 				const label = this.#fxSendLabel(fxs)
 				const desc = this.#fxSendDesc(fxs)
 				fxSendLabels.push([label, desc])
@@ -206,7 +206,7 @@ export class Model {
 	forEachMatrix(f: ForEachFunctor): void {
 		const matrixLabels = this.#matrixLabels
 		if (matrixLabels.length === 0) {
-			for (let matrix = 0; matrix < this.count.matrix; matrix++) {
+			for (let matrix = 0; matrix < this.inputOutputCounts.matrix; matrix++) {
 				const label = this.#matrixLabel(matrix)
 				const desc = this.#matrixDesc(matrix)
 				matrixLabels.push([label, desc])
@@ -227,7 +227,7 @@ export class Model {
 	forEachMuteGroup(f: ForEachFunctor): void {
 		const muteGroupLabels = this.#muteGroupLabels
 		if (muteGroupLabels.length === 0) {
-			for (let muteGroup = 0; muteGroup < this.count.muteGroup; muteGroup++) {
+			for (let muteGroup = 0; muteGroup < this.inputOutputCounts.muteGroup; muteGroup++) {
 				const label = this.#muteGroupLabel(muteGroup)
 				muteGroupLabels.push(label)
 			}
@@ -272,7 +272,7 @@ export class Model {
 	forEachDCA(f: ForEachFunctor): void {
 		const dcaLabels = this.#dcaLabels
 		if (dcaLabels.length === 0) {
-			for (let dca = 0; dca < this.count.dca; dca++) {
+			for (let dca = 0; dca < this.inputOutputCounts.dca; dca++) {
 				const label = this.#dcaLabel(dca)
 				dcaLabels.push(label)
 			}

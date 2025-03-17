@@ -30,7 +30,7 @@ export function toSourceOrSink(
 	type: InputOutputType,
 ): number | null {
 	const n = Number(optionValue)
-	if (n < model.count[type]) {
+	if (n < model.inputOutputCounts[type]) {
 		return n
 	}
 
@@ -52,7 +52,7 @@ export function toSourceOrSink(
  */
 export function toMixOrLR(instance: sqInstance, model: Model, optionValue: OptionValue): number | null {
 	const n = Number(optionValue)
-	if (n < model.count.mix || n === LR) {
+	if (n < model.inputOutputCounts.mix || n === LR) {
 		return n
 	}
 

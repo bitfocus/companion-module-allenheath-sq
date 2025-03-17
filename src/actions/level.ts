@@ -76,7 +76,7 @@ function getLevelType(
 		sourceType,
 		sink,
 		sinkType,
-		param: computeParameters(source, sink, model.count[sinkType], base),
+		param: computeParameters(source, sink, model.inputOutputCounts[sinkType], base),
 	}
 }
 

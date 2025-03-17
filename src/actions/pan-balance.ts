@@ -141,7 +141,13 @@ export function panBalanceActions(
 				}
 
 				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['inputChannel']
-				const { MSB, LSB } = computeEitherParameters(inputChannel, mixOrLR, model.count.mix, mixBase, lrBase)
+				const { MSB, LSB } = computeEitherParameters(
+					inputChannel,
+					mixOrLR,
+					model.inputOutputCounts.mix,
+					mixBase,
+					lrBase,
+				)
 
 				return {
 					...options,
@@ -162,7 +168,13 @@ export function panBalanceActions(
 				}
 
 				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['inputChannel']
-				const { MSB, LSB } = computeEitherParameters(inputChannel, mixOrLR, model.count.mix, mixBase, lrBase)
+				const { MSB, LSB } = computeEitherParameters(
+					inputChannel,
+					mixOrLR,
+					model.inputOutputCounts.mix,
+					mixBase,
+					lrBase,
+				)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -220,7 +232,7 @@ export function panBalanceActions(
 				}
 
 				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['group']
-				const { MSB, LSB } = computeEitherParameters(group, mixOrLR, model.count.mix, mixBase, lrBase)
+				const { MSB, LSB } = computeEitherParameters(group, mixOrLR, model.inputOutputCounts.mix, mixBase, lrBase)
 
 				return {
 					...options,
@@ -241,7 +253,7 @@ export function panBalanceActions(
 				}
 
 				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['group']
-				const { MSB, LSB } = computeEitherParameters(group, mixOrLR, model.count.mix, mixBase, lrBase)
+				const { MSB, LSB } = computeEitherParameters(group, mixOrLR, model.inputOutputCounts.mix, mixBase, lrBase)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -299,7 +311,7 @@ export function panBalanceActions(
 				}
 
 				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['fxReturn']
-				const { MSB, LSB } = computeEitherParameters(fxReturn, mixOrLR, model.count.mix, mixBase, lrBase)
+				const { MSB, LSB } = computeEitherParameters(fxReturn, mixOrLR, model.inputOutputCounts.mix, mixBase, lrBase)
 
 				return {
 					...options,
@@ -320,7 +332,7 @@ export function panBalanceActions(
 				}
 
 				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['fxReturn']
-				const { MSB, LSB } = computeEitherParameters(fxReturn, mixOrLR, model.count.mix, mixBase, lrBase)
+				const { MSB, LSB } = computeEitherParameters(fxReturn, mixOrLR, model.inputOutputCounts.mix, mixBase, lrBase)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -378,7 +390,7 @@ export function panBalanceActions(
 				}
 
 				const base = PanBalanceInSinkBase['fxReturn-group']
-				const { MSB, LSB } = computeParameters(fxReturn, group, model.count.mix, base)
+				const { MSB, LSB } = computeParameters(fxReturn, group, model.inputOutputCounts.mix, base)
 
 				return {
 					...options,
@@ -399,7 +411,7 @@ export function panBalanceActions(
 				}
 
 				const base = PanBalanceInSinkBase['fxReturn-group']
-				const { MSB, LSB } = computeParameters(fxReturn, group, model.count.group, base)
+				const { MSB, LSB } = computeParameters(fxReturn, group, model.inputOutputCounts.group, base)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -462,7 +474,7 @@ export function panBalanceActions(
 				const [source, base] =
 					mixOrLR === LR ? [0, PanBalanceInSinkBase['lr-matrix']] : [mixOrLR, PanBalanceInSinkBase['mix-matrix']]
 
-				const { MSB, LSB } = computeParameters(source, matrix, model.count.matrix, base)
+				const { MSB, LSB } = computeParameters(source, matrix, model.inputOutputCounts.matrix, base)
 
 				return {
 					...options,
@@ -485,7 +497,7 @@ export function panBalanceActions(
 				const [source, base] =
 					mixOrLR === LR ? [0, PanBalanceInSinkBase['lr-matrix']] : [mixOrLR, PanBalanceInSinkBase['mix-matrix']]
 
-				const { MSB, LSB } = computeParameters(source, matrix, model.count.matrix, base)
+				const { MSB, LSB } = computeParameters(source, matrix, model.inputOutputCounts.matrix, base)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -547,7 +559,7 @@ export function panBalanceActions(
 				}
 
 				const base = PanBalanceInSinkBase['group-matrix']
-				const { MSB, LSB } = computeParameters(group, matrix, model.count.mix, base)
+				const { MSB, LSB } = computeParameters(group, matrix, model.inputOutputCounts.mix, base)
 
 				return {
 					...options,
@@ -568,7 +580,7 @@ export function panBalanceActions(
 				}
 
 				const base = PanBalanceInSinkBase['group-matrix']
-				const { MSB, LSB } = computeParameters(group, matrix, model.count.matrix, base)
+				const { MSB, LSB } = computeParameters(group, matrix, model.inputOutputCounts.matrix, base)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])

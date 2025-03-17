@@ -59,15 +59,15 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 		}
 	}
 
-	createtMute('Mute Input', 'Input channel', 'MuteInputChannel', model.count.inputChannel)
+	createtMute('Mute Input', 'Input channel', 'MuteInputChannel', model.inputOutputCounts.inputChannel)
 	createtMute('Mute Mix - Group', 'LR', 'MuteLR', 1, false)
-	createtMute('Mute Mix - Group', 'Aux', 'MuteMix', model.count.mix)
-	createtMute('Mute Mix - Group', 'Group', 'MuteGroup', model.count.group)
-	createtMute('Mute Mix - Group', 'Matrix', 'MuteMatrix', model.count.matrix)
-	createtMute('Mute FX', 'FX Send', 'MuteFXSend', model.count.fxSend)
-	createtMute('Mute FX', 'FX Return', 'MuteFXReturn', model.count.fxReturn)
-	createtMute('Mute DCA', 'DCA', 'MuteDCA', model.count.dca)
-	createtMute('Mute MuteGroup', 'MuteGroup', 'MuteMuteGroup', model.count.muteGroup)
+	createtMute('Mute Mix - Group', 'Aux', 'MuteMix', model.inputOutputCounts.mix)
+	createtMute('Mute Mix - Group', 'Group', 'MuteGroup', model.inputOutputCounts.group)
+	createtMute('Mute Mix - Group', 'Matrix', 'MuteMatrix', model.inputOutputCounts.matrix)
+	createtMute('Mute FX', 'FX Send', 'MuteFXSend', model.inputOutputCounts.fxSend)
+	createtMute('Mute FX', 'FX Return', 'MuteFXReturn', model.inputOutputCounts.fxReturn)
+	createtMute('Mute DCA', 'DCA', 'MuteDCA', model.inputOutputCounts.dca)
+	createtMute('Mute MuteGroup', 'MuteGroup', 'MuteMuteGroup', model.inputOutputCounts.muteGroup)
 
 	/* TALKBACK*/
 	model.forEachMix((mix, mixLabel, mixDesc) => {
@@ -191,7 +191,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 			const { MSB, LSB } = computeEitherParameters(
 				channel,
 				mix,
-				model.count.mix,
+				model.inputOutputCounts.mix,
 				LevelInSinkBase['inputChannel-mix'],
 				LevelInSinkBase['inputChannel-lr'],
 			)

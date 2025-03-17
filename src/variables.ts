@@ -28,7 +28,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 
 	model.forEachInputChannel((channel, channelLabel) => {
 		model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {
-			const rsp = instance.getLevel(channel, mix, model.count.mix, [0x40, 0x40], [0, 0x44])
+			const rsp = instance.getLevel(channel, mix, model.inputOutputCounts.mix, [0x40, 0x40], [0, 0x44])
 
 			variables.push({
 				name: `${channelLabel} -> ${mixDesc} Level`,
@@ -39,7 +39,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 
 	model.forEachGroup((group, _groupLabel, groupDesc) => {
 		model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {
-			const rsp = instance.getLevel(group, mix, model.count.mix, [0x40, 0x45], [0x30, 0x04])
+			const rsp = instance.getLevel(group, mix, model.inputOutputCounts.mix, [0x40, 0x45], [0x30, 0x04])
 
 			variables.push({
 				name: `${groupDesc} -> ${mixDesc} Level`,
@@ -50,7 +50,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 
 	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 		model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {
-			const rsp = instance.getLevel(fxr, mix, model.count.mix, [0x40, 0x46], [0x3c, 0x14])
+			const rsp = instance.getLevel(fxr, mix, model.inputOutputCounts.mix, [0x40, 0x46], [0x3c, 0x14])
 
 			variables.push({
 				name: `${fxrDesc} -> ${mixDesc} Level`,
@@ -61,7 +61,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 
 	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 		model.forEachGroup((group, _groupLabel, groupDesc) => {
-			const rsp = instance.getLevel(fxr, group, model.count.group, [0, 0x4b], [0, 0x34])
+			const rsp = instance.getLevel(fxr, group, model.inputOutputCounts.group, [0, 0x4b], [0, 0x34])
 
 			variables.push({
 				name: `${fxrDesc} -> ${groupDesc} Level`,
@@ -72,7 +72,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 
 	model.forEachInputChannel((channel, _channelLabel, channelDesc) => {
 		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
-			const rsp = instance.getLevel(channel, fxs, model.count.fxSend, [0, 0x4c], [0, 0x14])
+			const rsp = instance.getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
 
 			variables.push({
 				name: `${channelDesc} -> ${fxsDesc} Level`,
@@ -83,7 +83,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 
 	model.forEachGroup((group, _groupLabel, groupDesc) => {
 		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
-			const rsp = instance.getLevel(group, fxs, model.count.fxSend, [0, 0x4d], [0, 0x54])
+			const rsp = instance.getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
 
 			variables.push({
 				name: `${groupDesc} -> ${fxsDesc} Level`,
@@ -94,7 +94,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 
 	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
-			const rsp = instance.getLevel(fxr, fxs, model.count.fxSend, [0, 0x4e], [0, 0x04])
+			const rsp = instance.getLevel(fxr, fxs, model.inputOutputCounts.fxSend, [0, 0x4e], [0, 0x04])
 
 			variables.push({
 				name: `${fxrDesc} -> ${fxsDesc} Level`,
@@ -104,7 +104,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 	})
 
 	model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
-		const rsp = instance.getLevel(0, matrix, model.count.matrix, [0, 0x4e], [0, 0x24])
+		const rsp = instance.getLevel(0, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x24])
 
 		variables.push({
 			name: `LR -> ${matrixDesc} Level`,
@@ -113,7 +113,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 	})
 	model.forEachMix((mix, _mixLabel, mixDesc) => {
 		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
-			const rsp = instance.getLevel(mix, matrix, model.count.matrix, [0x4e, 0x4e], [0x24, 0x27])
+			const rsp = instance.getLevel(mix, matrix, model.inputOutputCounts.matrix, [0x4e, 0x4e], [0x24, 0x27])
 
 			variables.push({
 				name: `${mixDesc} -> ${matrixDesc} Level`,
@@ -124,7 +124,7 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 
 	model.forEachGroup((group, _groupLabel, groupDesc) => {
 		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
-			const rsp = instance.getLevel(group, matrix, model.count.matrix, [0, 0x4e], [0, 0x4b])
+			const rsp = instance.getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
 
 			variables.push({
 				name: `${groupDesc} -> ${matrixDesc} Level`,
@@ -140,10 +140,10 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 			tmp.push({ label: mixDesc, id: mix + 1 })
 		})
 		model.forEachFxSend((fxs, fxsLabel) => {
-			tmp.push({ label: fxsLabel, id: fxs + 1 + model.count.mix })
+			tmp.push({ label: fxsLabel, id: fxs + 1 + model.inputOutputCounts.mix })
 		})
 		model.forEachMatrix((matrix, matrixLabel) => {
-			tmp.push({ label: matrixLabel, id: matrix + 1 + model.count.mix + model.count.fxSend })
+			tmp.push({ label: matrixLabel, id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend })
 		})
 		for (let j = 0; j < tmp.length; j++) {
 			const rsp = instance.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])

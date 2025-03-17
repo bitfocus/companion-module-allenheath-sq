@@ -91,18 +91,18 @@ function createAllFaders(model: Model): DropdownChoice[] {
 		allFaders.push({ label: mixLabel, id: mix + 1 })
 	})
 	model.forEachFxSend((fxs, fxsLabel) => {
-		allFaders.push({ label: fxsLabel, id: fxs + 1 + model.count.mix })
+		allFaders.push({ label: fxsLabel, id: fxs + 1 + model.inputOutputCounts.mix })
 	})
 	model.forEachMatrix((matrix, matrixLabel) => {
 		allFaders.push({
 			label: matrixLabel,
-			id: matrix + 1 + model.count.mix + model.count.fxSend,
+			id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend,
 		})
 	})
 	model.forEachDCA((dca, dcaLabel) => {
 		allFaders.push({
 			label: dcaLabel,
-			id: dca + 1 + model.count.mix + model.count.fxSend + model.count.matrix + 12,
+			id: dca + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend + model.inputOutputCounts.matrix + 12,
 		})
 	})
 

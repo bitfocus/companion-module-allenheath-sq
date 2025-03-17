@@ -41,7 +41,7 @@ function assignOptionToSinks(assign: OptionValue, model: Model, sinkType: Exclud
 		return []
 	}
 
-	const sinkCount = model.count[sinkType]
+	const sinkCount = model.inputOutputCounts[sinkType]
 	const sinks: number[] = []
 	for (const item of assign) {
 		const sink = Number(item)
@@ -68,7 +68,7 @@ function mixesAndLRAssignOptionToSinks(mixAssign: OptionValue, model: Model): nu
 		return []
 	}
 
-	const sinkCount = model.count.mix
+	const sinkCount = model.inputOutputCounts.mix
 	const sinks: number[] = []
 	for (const item of mixAssign) {
 		const sink = Number(item)

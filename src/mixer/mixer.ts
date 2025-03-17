@@ -228,7 +228,7 @@ export class Mixer {
 
 	/** Perform the supplied mute operation upon the strip of the given type. */
 	#mute(strip: number, type: MuteType, op: MuteOperation): void {
-		if (this.model.count[type] <= strip) {
+		if (this.model.inputOutputCounts[type] <= strip) {
 			throw new Error(`Attempting to mute invalid ${type} ${strip}`)
 		}
 
@@ -320,7 +320,7 @@ export class Mixer {
 		sinkType: InputOutputType,
 		base: Param,
 	): NRPNDataMessage {
-		const sinkCount = this.model.count[sinkType]
+		const sinkCount = this.model.inputOutputCounts[sinkType]
 		if (sinkCount <= sink) {
 			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
 		}
@@ -352,7 +352,7 @@ export class Mixer {
 		active: boolean,
 		mixes: readonly number[],
 	): void {
-		const count = this.model.count
+		const count = this.model.inputOutputCounts
 		if (count[sourceType] <= source) {
 			throw new Error(`Attempting to assign out-of-range ${sourceType} ${source}`)
 		}
@@ -396,7 +396,7 @@ export class Mixer {
 		sinkType: InputOutputType,
 		paramsType: AssignToSinkType,
 	): void {
-		const count = this.model.count
+		const count = this.model.inputOutputCounts
 		if (count[sourceType] <= source) {
 			throw new Error(`Attempting to assign out-of-range ${sourceType} ${source}`)
 		}
@@ -738,7 +738,7 @@ export class Mixer {
 		end: Level,
 		fadeTimeMs: number,
 	): void {
-		const count = this.model.count
+		const count = this.model.inputOutputCounts
 		if (count[sourceType] <= source) {
 			throw new RangeError(`Attempting to fade level of nonexistent ${sourceType} ${source}`)
 		}
@@ -895,7 +895,7 @@ export class Mixer {
 		sinkType: InputOutputType,
 		base: Param,
 	): void {
-		const sinkCount = this.model.count[sinkType]
+		const sinkCount = this.model.inputOutputCounts[sinkType]
 		if (sinkCount <= sink) {
 			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
 		}
@@ -951,7 +951,7 @@ export class Mixer {
 		panBalance: PanBalanceChoice,
 		mixOrLR: number,
 	): void {
-		const count = this.model.count
+		const count = this.model.inputOutputCounts
 		if (count[sourceType] <= source) {
 			throw new Error(`Attempting to set pan/balance for out-of-range ${sourceType} ${source}`)
 		}
@@ -992,7 +992,7 @@ export class Mixer {
 		sinkType: InputOutputType,
 		paramsType: PanBalanceInSinkType,
 	) {
-		const count = this.model.count
+		const count = this.model.inputOutputCounts
 		if (count[sourceType] <= source) {
 			throw new Error(`Attempting to set pan/balance for out-of-range ${sourceType} ${source}`)
 		}
@@ -1118,7 +1118,7 @@ export class Mixer {
 	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
 	#fadeSinkAsOutput(sink: number, sinkType: SinkLevelInOutputType, start: Level, end: Level, fadeTimeMs: number): void {
-		const count = this.model.count
+		const count = this.model.inputOutputCounts
 		const sinkCount = count[sinkType]
 		if (!(sink < sinkCount)) {
 			throw new RangeError(`Attempting to fade level of nonexistent ${sinkType} ${sink} as mixer output`)
@@ -1236,7 +1236,7 @@ export class Mixer {
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
 	#setPanBalanceSinkAsOutput(sink: number, sinkType: SinkPanBalanceInOutputType, panBalance: PanBalanceChoice): void {
-		const count = this.model.count
+		const count = this.model.inputOutputCounts
 		if (count[sinkType] <= sink) {
 			throw new Error(`Attempting to set pan/balance for out-of-range ${sinkType} ${sink} used as output`)
 		}
