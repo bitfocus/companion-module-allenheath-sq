@@ -1,7 +1,5 @@
 import { LR } from './model.js'
-
-/** A MIDI parameter number as its 7-bit MSB and LSB. */
-export type Param = { MSB: number; LSB: number }
+import type { Param } from './relationships.js'
 
 /**
  * Compute the MSB/LSB for a `source`-to-LR relationship.

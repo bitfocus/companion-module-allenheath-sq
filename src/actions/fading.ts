@@ -2,7 +2,7 @@ import type { CompanionOptionValues, DropdownChoice } from '@companion-module/ba
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
-import type { Param } from '../mixer/parameters.js'
+import type { Param } from '../mixer/relationships.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 import { repr } from '../utils/pretty.js'
 

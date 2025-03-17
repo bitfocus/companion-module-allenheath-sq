@@ -1,7 +1,9 @@
 import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
+import type { PanBalanceChoice } from '../actions/pan-balance.js'
 import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../midi/session.js'
-import { type InputOutputType, Model } from './model.js'
+import { type InputOutputType, LR, Model } from './model.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
 	AssignToMixOrLRBase,
@@ -17,15 +19,12 @@ import {
 	type PanBalanceInMixOrLRType,
 	PanBalanceInSinkBase,
 	type PanBalanceInSinkType,
-	type Param,
 	type SinkPanBalanceInOutputType,
 	SinkPanBalanceInOutputBase,
 	SinkLevelInOutputBase,
 	type SinkLevelInOutputType,
 } from './parameters.js'
-import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
-import type { PanBalanceChoice } from '../actions/pan-balance.js'
-import { LR } from './model.js'
+import type { Param } from './relationships.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values

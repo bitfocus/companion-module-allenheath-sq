@@ -4,7 +4,7 @@ import type { Choices } from '../choices.js'
 import { getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
-import { toInputOutput } from './to-source-or-sink.js'
+import type { InputOutputType, Model } from '../mixer/model.js'
 import {
 	computeParameters,
 	LevelInMixOrLRBase,
@@ -13,10 +13,9 @@ import {
 	type LevelInSinkType,
 	type LRLevelInSinkType,
 	MixOrLRLevelInSinkBase,
-	type Param,
 } from '../mixer/parameters.js'
-import type { Model } from '../mixer/model.js'
-import type { InputOutputType } from '../mixer/model.js'
+import type { Param } from '../mixer/relationships.js'
+import { toInputOutput } from './to-source-or-sink.js'
 
 /**
  * Action IDs for all actions that alter the level of a mixer source in a mixer
