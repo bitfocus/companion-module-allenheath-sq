@@ -13,6 +13,7 @@
 		"lint:raw": "eslint",
 		"lint": "yarn lint:raw .",
 		"knip": "knip",
+		"check": "yarn build && yarn lint && yarn knip && echo PASS || echo FAIL",
 		"bt": "yarn install && yarn build && yarn lint && yarn test && yarn knip && echo PASS || echo FAIL"
 	},
 	"license": "MIT",
