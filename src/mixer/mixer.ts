@@ -4,6 +4,7 @@ import type { SQInstanceInterface as sqInstance } from '../instance-interface.js
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../midi/session.js'
 import { type InputOutputType, LR, Model } from './model.js'
+import { calculateMuteNRPN } from './nrpn/mute.js'
 import type { Param } from './nrpn/param.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
@@ -14,7 +15,6 @@ import {
 	computeParameters,
 	LevelInSinkBase,
 	type LevelInSinkType,
-	MuteBases,
 	PanBalanceInMixOrLRBase,
 	type PanBalanceInMixOrLRType,
 	PanBalanceInSinkBase,
@@ -228,12 +228,8 @@ export class Mixer {
 
 	/** Perform the supplied mute operation upon the strip of the given type. */
 	#mute(strip: number, type: InputOutputType, op: MuteOperation): void {
-		if (this.model.inputOutputCounts[type] <= strip) {
-			throw new Error(`Attempting to mute invalid ${type} ${strip}`)
-		}
-
-		const { MSB, LSB } = MuteBases[type]
-		const key = `mute_${MSB}.${LSB + strip}` as const
+		const { MSB, LSB } = calculateMuteNRPN(this.model, type, strip)
+		const key = `mute_${MSB}.${LSB}` as const
 
 		const fdbState = this.fdbState
 		if (op !== MuteOperation.Toggle) {
@@ -245,7 +241,7 @@ export class Mixer {
 		const midi = this.midi
 
 		this.#instance.checkFeedbacks()
-		const commands = [midi.nrpnData(MSB, LSB + strip, 0, Number(fdbState[key]))]
+		const commands = [midi.nrpnData(MSB, LSB, 0, Number(fdbState[key]))]
 		// XXX
 		void midi.sendCommands(commands)
 	}

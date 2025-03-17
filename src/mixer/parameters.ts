@@ -1,4 +1,4 @@
-import { type InputOutputType, LR } from './model.js'
+import { LR } from './model.js'
 import type { Param } from './nrpn/param.js'
 
 /**
@@ -85,26 +85,6 @@ type SourceToMixOrLR = {
 type SourceToSink = {
 	[key: string]: Param
 }
-
-/**
- * Base parameter MSB/LSB values corresponding to muting/unmuting a source/sink
- * or toggling its mute status.
- *
- * These values are the pairs in the top of the relevant section of the "Mute
- * Parameter Numbers" table in the
- * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
- */
-export const MuteBases = {
-	inputChannel: { MSB: 0x00, LSB: 0x00 },
-	lr: { MSB: 0x00, LSB: 0x44 },
-	mix: { MSB: 0x00, LSB: 0x45 },
-	group: { MSB: 0x00, LSB: 0x30 },
-	matrix: { MSB: 0x00, LSB: 0x55 },
-	fxSend: { MSB: 0x00, LSB: 0x51 },
-	fxReturn: { MSB: 0x00, LSB: 0x3c },
-	dca: { MSB: 0x02, LSB: 0x00 },
-	muteGroup: { MSB: 0x04, LSB: 0x00 },
-} satisfies SourceToSink & Record<InputOutputType, Param>
 
 /**
  * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
