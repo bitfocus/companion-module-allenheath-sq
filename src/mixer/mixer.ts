@@ -5,6 +5,7 @@ import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../midi/session.js'
 import { type InputOutputType, LR, Model } from './model.js'
 import { calculateMuteNRPN } from './nrpn/mute.js'
+import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './nrpn/output.js'
 import type { Param } from './nrpn/param.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
@@ -19,10 +20,6 @@ import {
 	type PanBalanceInMixOrLRType,
 	PanBalanceInSinkBase,
 	type PanBalanceInSinkType,
-	type SinkPanBalanceInOutputType,
-	SinkPanBalanceInOutputBase,
-	SinkLevelInOutputBase,
-	type SinkLevelInOutputType,
 } from './parameters.js'
 
 /**
@@ -1113,14 +1110,15 @@ export class Mixer {
 	 *   The amount of time, in milliseconds, that the fade should take.  (The
 	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
-	#fadeSinkAsOutput(sink: number, sinkType: SinkLevelInOutputType, start: Level, end: Level, fadeTimeMs: number): void {
-		const count = this.model.inputOutputCounts
-		const sinkCount = count[sinkType]
-		if (!(sink < sinkCount)) {
-			throw new RangeError(`Attempting to fade level of nonexistent ${sinkType} ${sink} as mixer output`)
-		}
-
-		const { MSB, LSB } = computeParameters(sink, 0, 1, SinkLevelInOutputBase[sinkType])
+	#fadeSinkAsOutput(
+		sink: number,
+		sinkType: SinkAsOutputForNRPN<'level'>,
+		start: Level,
+		end: Level,
+		fadeTimeMs: number,
+	): void {
+		const calc = new OutputLevelNRPNCalculator(this.model, sinkType)
+		const { MSB, LSB } = calc.calculate(sink)
 		this.#fadeToLevel(MSB, LSB, start, end, fadeTimeMs)
 	}
 
@@ -1231,15 +1229,16 @@ export class Mixer {
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
-	#setPanBalanceSinkAsOutput(sink: number, sinkType: SinkPanBalanceInOutputType, panBalance: PanBalanceChoice): void {
-		const count = this.model.inputOutputCounts
-		if (count[sinkType] <= sink) {
-			throw new Error(`Attempting to set pan/balance for out-of-range ${sinkType} ${sink} used as output`)
-		}
+	#setPanBalanceSinkAsOutput(
+		sink: number,
+		sinkType: SinkAsOutputForNRPN<'panBalance'>,
+		panBalance: PanBalanceChoice,
+	): void {
+		const calc = new OutputBalanceNRPNCalculator(this.model, sinkType)
 
-		const base = SinkPanBalanceInOutputBase[sinkType]
-		// Abuse LR as a "sink" whose category contains exactly one element to
-		// make the MSB/LSB parameter math do the desired thing.
+		// XXX Use 0 to get the base here until #setPanBalance can be changed to
+		//     take the actual NRPN.
+		const base = calc.calculate(0)
 		this.#setPanBalance(sink, panBalance, 0, 'lr', base)
 	}
 

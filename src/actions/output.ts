@@ -10,14 +10,12 @@ import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import { getCommonCount } from '../mixer/models.js'
-import type { Param } from '../mixer/nrpn/param.js'
 import {
-	SinkLevelInOutputBase,
-	type SinkLevelInOutputType,
-	type SinkPanBalanceInOutputType,
-	SinkPanBalanceInOutputBase,
-	computeParameters,
-} from '../mixer/parameters.js'
+	OutputBalanceNRPNCalculator,
+	OutputLevelNRPNCalculator,
+	type SinkAsOutputForNRPN,
+} from '../mixer/nrpn/output.js'
+import type { Param } from '../mixer/nrpn/param.js'
 import { getPanBalance, type PanBalanceChoice } from './pan-balance.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 
@@ -274,17 +272,15 @@ function getLevelType(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-	sinkType: SinkLevelInOutputType,
+	sinkType: SinkAsOutputForNRPN<'level'>,
 ): FadeLevelInfo | null {
 	const sink = toSourceOrSink(instance, model, options.input, sinkType)
 	if (sink === null) {
 		return null
 	}
 
-	return {
-		sink,
-		param: SinkLevelInOutputBase[sinkType],
-	}
+	const param = new OutputLevelNRPNCalculator(model, sinkType).calculate(sink)
+	return { sink, param }
 }
 
 type PanBalanceInfo = {
@@ -296,7 +292,7 @@ function getPanBalanceType(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-	type: SinkPanBalanceInOutputType,
+	type: SinkAsOutputForNRPN<'panBalance'>,
 ): PanBalanceInfo | null {
 	const fader = getFader(instance, model, options, type)
 	if (fader === null) {
@@ -360,7 +356,7 @@ export function outputActions(
 				fadingOption,
 			],
 			callback: async ({ options }) => {
-				const param = SinkLevelInOutputBase['lr']
+				const param = new OutputLevelNRPNCalculator(model, 'lr').calculate(0)
 				const fade = getFadeParameters(instance, options, param)
 				if (fade === null) {
 					return
@@ -503,7 +499,7 @@ export function outputActions(
 				ShowVar,
 			],
 			learn: async ({ options }) => {
-				const { MSB, LSB } = SinkPanBalanceInOutputBase['lr']
+				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'lr').calculate(0)
 
 				return {
 					...options,
@@ -511,7 +507,7 @@ export function outputActions(
 				}
 			},
 			subscribe: async (_action) => {
-				const { MSB, LSB } = SinkPanBalanceInOutputBase['lr']
+				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'lr').calculate(0)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -546,8 +542,7 @@ export function outputActions(
 					return
 				}
 
-				const base = SinkPanBalanceInOutputBase['mix']
-				const { MSB, LSB } = computeParameters(mix, 0, 1, base)
+				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'mix').calculate(mix)
 
 				return {
 					...options,
@@ -560,7 +555,7 @@ export function outputActions(
 					return
 				}
 
-				const { MSB, LSB } = computeParameters(mix, 0, 1, SinkPanBalanceInOutputBase['mix'])
+				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'mix').calculate(mix)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -596,7 +591,7 @@ export function outputActions(
 					return
 				}
 
-				const { MSB, LSB } = computeParameters(matrix, 0, 1, SinkPanBalanceInOutputBase['matrix'])
+				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'matrix').calculate(matrix)
 
 				return {
 					...options,
@@ -609,7 +604,7 @@ export function outputActions(
 					return
 				}
 
-				const { MSB, LSB } = computeParameters(matrix, 0, 1, SinkPanBalanceInOutputBase['matrix'])
+				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'matrix').calculate(matrix)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])

@@ -296,37 +296,3 @@ export const PanBalanceInSinkBase = {
 } satisfies SourceToSink
 
 export type PanBalanceInSinkType = keyof typeof PanBalanceInSinkBase
-
-/**
- * Base parameter MSB/LSB corresponding to setting levels of various sink
- * categories when assigned to physical mixer outputs.
- *
- * These values come from the top of the LR/mixes/matrixes to "Output" tables
- * under "Level Parameter Number - Master Sends" in the
- * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
- */
-export const SinkLevelInOutputBase = {
-	lr: { MSB: 0x4f, LSB: 0x00 },
-	mix: { MSB: 0x4f, LSB: 0x01 },
-	fxSend: { MSB: 0x4f, LSB: 0x0d },
-	matrix: { MSB: 0x4f, LSB: 0x11 },
-	dca: { MSB: 0x4f, LSB: 0x20 },
-} satisfies SourceToSink
-
-export type SinkLevelInOutputType = keyof typeof SinkLevelInOutputBase
-
-/**
- * Base parameter MSB/LSB corresponding to setting balance of various source
- * categories when assigned as mixer outputs.
- *
- * These values come from the top of the LR/mixes/matrixes to "Output" tables
- * under "Balance Parameter Number - Master Sends" in the
- * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
- */
-export const SinkPanBalanceInOutputBase = {
-	lr: { MSB: 0x5f, LSB: 0x00 },
-	mix: { MSB: 0x5f, LSB: 0x01 },
-	matrix: { MSB: 0x5f, LSB: 0x11 },
-}
-
-export type SinkPanBalanceInOutputType = keyof typeof SinkPanBalanceInOutputBase
