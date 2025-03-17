@@ -20,15 +20,16 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	const presets: CompanionPresetDefinitions = {}
 
 	/* MUTE */
-	const createtMute = (cat: string, lab: string, typ: MuteType, cnt: number, nr = true): void => {
-		for (let i = 0; i < cnt; i++) {
-			const suffix = cnt > 1 ? `_${i}` : ''
-			presets[`preset_${MuteActionId[typ]}${suffix}`] = {
+	const createtMute = (category: string, label: string, type: MuteType, count: number): void => {
+		for (let i = 0; i < count; i++) {
+			const suffix = count > 1 ? `_${i}` : ''
+			const maybeSpaceNum = count > 1 ? ` ${i + 1}` : ''
+			presets[`preset_${MuteActionId[type]}${suffix}`] = {
 				type: 'button',
-				category: cat,
-				name: lab + (nr ? ' ' + (i + 1) : ''),
+				category,
+				name: `${label}${maybeSpaceNum}`,
 				style: {
-					text: lab + (nr ? ' ' + (i + 1) : ''),
+					text: `${label}${maybeSpaceNum}`,
 					size: 'auto',
 					color: White,
 					bgcolor: Black,
@@ -37,7 +38,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 					{
 						down: [
 							{
-								actionId: MuteActionId[typ],
+								actionId: MuteActionId[type],
 								options: {
 									strip: i,
 									mute: 0,
@@ -49,7 +50,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 				],
 				feedbacks: [
 					{
-						feedbackId: MuteFeedbackId[typ],
+						feedbackId: MuteFeedbackId[type],
 						options: {
 							channel: i,
 						},
@@ -60,7 +61,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	}
 
 	createtMute('Mute Input', 'Input channel', 'MuteInputChannel', model.inputOutputCounts.inputChannel)
-	createtMute('Mute Mix - Group', 'LR', 'MuteLR', 1, false)
+	createtMute('Mute Mix - Group', 'LR', 'MuteLR', model.inputOutputCounts.lr)
 	createtMute('Mute Mix - Group', 'Aux', 'MuteMix', model.inputOutputCounts.mix)
 	createtMute('Mute Mix - Group', 'Group', 'MuteGroup', model.inputOutputCounts.group)
 	createtMute('Mute Mix - Group', 'Matrix', 'MuteMatrix', model.inputOutputCounts.matrix)
