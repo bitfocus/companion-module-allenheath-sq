@@ -14,7 +14,6 @@ import {
 	LevelInSinkBase,
 	type LevelInSinkType,
 	MuteBases,
-	type MuteType,
 	PanBalanceInMixOrLRBase,
 	type PanBalanceInMixOrLRType,
 	PanBalanceInSinkBase,
@@ -24,7 +23,7 @@ import {
 	SinkLevelInOutputBase,
 	type SinkLevelInOutputType,
 } from './parameters.js'
-import type { Param } from './relationships.js'
+import type { Param, MuteType } from './relationships.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -194,7 +193,7 @@ export class Mixer {
 	 *   scenes 1-300 in its UI.
 	 */
 	setScene(scene: number): void {
-		if (scene < 0 || this.model.count.scene <= scene) {
+		if (scene < 0 || this.model.scenes <= scene) {
 			throw new Error(`Attempting to set out-of-bounds scene ${scene}`)
 		}
 
@@ -218,7 +217,7 @@ export class Mixer {
 		if (newScene < 0) {
 			newScene = 0
 		} else {
-			const sceneCount = this.model.count.scene
+			const sceneCount = this.model.scenes
 			if (sceneCount <= newScene) {
 				newScene = sceneCount - 1
 			}
@@ -1281,7 +1280,7 @@ export class Mixer {
 
 	/** Press (and do not subsequently release) a softkey. */
 	pressSoftKey(softKey: number): void {
-		if (softKey < 0 || this.model.count.softKey <= softKey) {
+		if (softKey < 0 || this.model.softKeys <= softKey) {
 			throw new Error(`Attempting to press invalid softkey ${softKey}`)
 		}
 
@@ -1293,7 +1292,7 @@ export class Mixer {
 
 	/** Release a previously-pressed softkey. */
 	releaseSoftKey(softKey: number): void {
-		if (softKey < 0 || this.model.count.softKey <= softKey) {
+		if (softKey < 0 || this.model.softKeys <= softKey) {
 			throw new Error(`Attempting to release invalid softkey ${softKey}`)
 		}
 

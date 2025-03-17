@@ -24,7 +24,7 @@ type SoftKeyOptions = {
 
 function getSoftKeyOptions(instance: sqInstance, model: Model, options: CompanionOptionValues): SoftKeyOptions | null {
 	const softKey = Number(options.softKey)
-	if (model.count.softKey <= softKey) {
+	if (model.softKeys <= softKey) {
 		instance.log('error', `Attempting to operate invalid softkey ${softKey}, ignoring`)
 		return null
 	}

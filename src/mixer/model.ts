@@ -3,8 +3,8 @@ import { type ModelId, SQModels } from './models.js'
 type ForEachFunctor = (n: number, label: string, desc: string) => void
 
 /**
- * A record of the count of the number of instances of every kind of input,
- * output, and scene.
+ * A record of the count of the number of instances of every kind of mixer input
+ * and output.
  */
 type InputOutputCounts = {
 	inputChannel: number
@@ -15,12 +15,10 @@ type InputOutputCounts = {
 	matrix: number
 	dca: number
 	muteGroup: number
-	softKey: number
-	rotaryKey: number
-	scene: number
 
-	// Encode LR as its own "category" so we can pretend the LR mix is a
-	// one-element category when computing various types of parameter numbers.
+	// LR isn't a mix in the same sense as all other mixes, because the base
+	// NRPN for source-to-LR mappings is unrelated to the base for source-to-mix
+	// mappings.   We therefore treat LR as a separate single-element category.
 	lr: 1
 }
 
@@ -37,7 +35,17 @@ export type InputOutputType = keyof InputOutputCounts
 export const LR = 99
 
 export class Model {
+	/** Counts of all inputs/outputs for this mixer model. */
 	readonly count: InputOutputCounts
+
+	/** The number of softkeys on the mixer. */
+	softKeys: number
+
+	/** The number of rotaries on the mixer. */
+	rotaryKeys: number
+
+	/** The number of scenes that can be stored in the mixer. */
+	scenes: number
 
 	/** Create a representation of a mixer identified by `modelId`. */
 	constructor(modelId: ModelId) {
@@ -52,11 +60,12 @@ export class Model {
 			matrix: sqModel.mtxCount,
 			dca: sqModel.dcaCount,
 			muteGroup: sqModel.muteGroupCount,
-			softKey: sqModel.softKeyCount,
-			rotaryKey: sqModel.RotaryKey,
-			scene: sqModel.sceneCount,
 			lr: 1,
 		}
+
+		this.softKeys = sqModel.softKeyCount
+		this.rotaryKeys = sqModel.RotaryKey
+		this.scenes = sqModel.sceneCount
 	}
 
 	#channelLabel(channel: number): string {
@@ -242,7 +251,7 @@ export class Model {
 	forEachSoftKey(f: ForEachFunctor): void {
 		const softKeyLabels = this.#softKeyLabels
 		if (softKeyLabels.length === 0) {
-			for (let softKey = 0; softKey < this.count.softKey; softKey++) {
+			for (let softKey = 0; softKey < this.softKeys; softKey++) {
 				const label = this.#softKeyLabel(softKey)
 				const desc = this.#softKeyDesc(softKey)
 				softKeyLabels.push([label, desc])

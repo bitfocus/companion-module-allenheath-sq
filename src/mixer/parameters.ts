@@ -1,5 +1,5 @@
 import { LR } from './model.js'
-import type { Param } from './relationships.js'
+import type { MuteType, Param } from './relationships.js'
 
 /**
  * Compute the MSB/LSB for a `source`-to-LR relationship.
@@ -104,9 +104,7 @@ export const MuteBases = {
 	fxReturn: { MSB: 0x00, LSB: 0x3c },
 	dca: { MSB: 0x02, LSB: 0x00 },
 	muteGroup: { MSB: 0x04, LSB: 0x00 },
-} satisfies SourceToSink
-
-export type MuteType = keyof typeof MuteBases
+} satisfies SourceToSink & Record<MuteType, Param>
 
 /**
  * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer

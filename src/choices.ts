@@ -94,7 +94,10 @@ function createAllFaders(model: Model): DropdownChoice[] {
 		allFaders.push({ label: fxsLabel, id: fxs + 1 + model.count.mix })
 	})
 	model.forEachMatrix((matrix, matrixLabel) => {
-		allFaders.push({ label: matrixLabel, id: matrix + 1 + model.count.mix + model.count.fxSend })
+		allFaders.push({
+			label: matrixLabel,
+			id: matrix + 1 + model.count.mix + model.count.fxSend,
+		})
 	})
 	model.forEachDCA((dca, dcaLabel) => {
 		allFaders.push({

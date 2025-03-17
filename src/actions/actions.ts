@@ -63,7 +63,7 @@ export function getActions(instance: sqInstance, mixer: Mixer, choices: Choices)
 		...muteActions(instance, mixer, choices),
 		...(() => {
 			const rotaryActions = {}
-			if (mixer.model.count.rotaryKey > 0) {
+			if (mixer.model.rotaryKeys > 0) {
 				// Soft Rotary
 			} else {
 				// No Soft Rotary

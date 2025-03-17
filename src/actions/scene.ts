@@ -35,7 +35,7 @@ export function tryCoalesceSceneRecallActions(action: CompanionMigrationAction):
 
 function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): number | null {
 	const scene = Number(sceneOption) - 1
-	if (0 <= scene && scene < model.count.scene) {
+	if (0 <= scene && scene < model.scenes) {
 		return scene
 	}
 
@@ -79,7 +79,7 @@ export function sceneActions(instance: sqInstance, mixer: Mixer): ActionDefiniti
 					id: 'scene',
 					default: 1,
 					min: 1,
-					max: model.count.scene,
+					max: model.scenes,
 					required: true,
 				},
 			],
