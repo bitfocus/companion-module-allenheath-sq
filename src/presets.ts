@@ -5,7 +5,8 @@ import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 import type { sqInstance } from './instance.js'
-import { computeEitherParameters, LevelInSinkBase } from './mixer/parameters.js'
+import { SourceToSinkParameterBase } from './mixer/nrpn/source-to-sink.js'
+import { computeEitherParameters } from './mixer/parameters.js'
 
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
@@ -193,8 +194,8 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 				channel,
 				mix,
 				model.inputOutputCounts.mix,
-				LevelInSinkBase['inputChannel-mix'],
-				LevelInSinkBase['inputChannel-lr'],
+				SourceToSinkParameterBase.inputChannel.mix.level,
+				SourceToSinkParameterBase.inputChannel.lr.level,
 			)
 
 			createtMuteLevel(
