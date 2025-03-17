@@ -23,7 +23,7 @@ import {
 	SinkLevelInOutputBase,
 	type SinkLevelInOutputType,
 } from './parameters.js'
-import type { Param, MuteType } from './relationships.js'
+import type { Param } from './relationships.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -227,7 +227,7 @@ export class Mixer {
 	}
 
 	/** Perform the supplied mute operation upon the strip of the given type. */
-	#mute(strip: number, type: MuteType, op: MuteOperation): void {
+	#mute(strip: number, type: InputOutputType, op: MuteOperation): void {
 		if (this.model.inputOutputCounts[type] <= strip) {
 			throw new Error(`Attempting to mute invalid ${type} ${strip}`)
 		}
