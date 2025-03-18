@@ -1,18 +1,23 @@
-import type { CompanionInputFieldDropdown, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type {
+	CompanionActionDefinition,
+	CompanionInputFieldDropdown,
+	CompanionOptionValues,
+	DropdownChoice,
+} from '@companion-module/base'
 import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
-import { LR } from '../mixer/model.js'
-import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
-import { type PanBalance } from '../mixer/pan-balance.js'
-import { repr } from '../utils/pretty.js'
+import { LR, type Model } from '../mixer/model.js'
+import type { Param } from '../mixer/nrpn/param.js'
 import {
-	computeEitherParameters,
-	computeParameters,
-	PanBalanceInMixOrLRBase,
-	PanBalanceInSinkBase,
-} from '../mixer/parameters.js'
+	BalanceNRPNCalculator,
+	type SourceForSourceInMixAndLRForNRPN,
+	type SourceSinkForNRPN,
+} from '../mixer/nrpn/source-to-sink.js'
+import { type PanBalance } from '../mixer/pan-balance.js'
+import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+import { repr } from '../utils/pretty.js'
 
 /**
  * Action IDs for all actions setting the pan/balance of a mixer source in a
@@ -76,6 +81,227 @@ export function getPanBalance(instance: sqInstance, options: CompanionOptionValu
 	return null
 }
 
+function panSourceToMixOrLR(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
+): [number, number] | null {
+	const source = toSourceOrSink(instance, model, options.input, sourceType)
+	if (source === null) {
+		return null
+	}
+
+	const mixOrLR = toMixOrLR(instance, model, options.assign)
+	if (mixOrLR === null) {
+		return null
+	}
+
+	return [source, mixOrLR]
+}
+
+function panSourceToSink(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	sourceSink: SourceSinkForNRPN<'panBalance'>,
+): [number, number] | null {
+	const source = toSourceOrSink(instance, model, options.input, sourceSink[0])
+	if (source === null) {
+		return null
+	}
+
+	const sink = toSourceOrSink(instance, model, options.assign, sourceSink[1])
+	if (sink === null) {
+		return null
+	}
+
+	return [source, sink]
+}
+
+function panSourceToMixOrLRLearnSubPrelude(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
+): Param | undefined {
+	const sourceSink = panSourceToMixOrLR(instance, model, options, sourceType)
+	if (sourceSink === null) {
+		return undefined
+	}
+
+	const [source, mixOrLR] = sourceSink
+
+	return mixOrLR === LR
+		? new BalanceNRPNCalculator(model, ['inputChannel', 'lr']).calculate(source, 0)
+		: new BalanceNRPNCalculator(model, ['inputChannel', 'mix']).calculate(source, mixOrLR)
+}
+
+function panSourceToSinkLearnSubPrelude(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	sourceSink: SourceSinkForNRPN<'panBalance'>,
+): Param | undefined {
+	const sourceSinkNums = panSourceToSink(instance, model, options, sourceSink)
+	if (sourceSinkNums === null) {
+		return undefined
+	}
+
+	const [source, sink] = sourceSinkNums
+
+	return new BalanceNRPNCalculator(model, sourceSink).calculate(source, sink)
+}
+
+function panSourceToMixOrLRLearn(
+	instance: sqInstance,
+	model: Model,
+	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
+): NonNullable<CompanionActionDefinition['learn']> {
+	return ({ options }): CompanionOptionValues | undefined => {
+		const param = panSourceToMixOrLRLearnSubPrelude(instance, model, options, sourceType)
+		if (param === undefined) {
+			return
+		}
+
+		const { MSB, LSB } = param
+
+		return {
+			...options,
+			showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
+		}
+	}
+}
+
+function panSourceToSinkLearn(
+	instance: sqInstance,
+	model: Model,
+	sourceSink: SourceSinkForNRPN<'panBalance'>,
+): NonNullable<CompanionActionDefinition['learn']> {
+	return ({ options }): CompanionOptionValues | undefined => {
+		const param = panSourceToSinkLearnSubPrelude(instance, model, options, sourceSink)
+		if (param === undefined) {
+			return
+		}
+
+		const { MSB, LSB } = param
+
+		return {
+			...options,
+			showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
+		}
+	}
+}
+
+function panSourceToMixOrLRSubscribe(
+	instance: sqInstance,
+	mixer: Mixer,
+	model: Model,
+	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
+): NonNullable<CompanionActionDefinition['subscribe']> {
+	return async ({ options }) => {
+		const param = panSourceToMixOrLRLearnSubPrelude(instance, model, options, sourceType)
+		if (param === undefined) {
+			return
+		}
+
+		const { MSB, LSB } = param
+
+		// Send a "get" so the pan/balance variable is defined.
+		void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
+	}
+}
+
+function panSourceToSinkSubscribe(
+	instance: sqInstance,
+	mixer: Mixer,
+	model: Model,
+	sourceSink: SourceSinkForNRPN<'panBalance'>,
+): NonNullable<CompanionActionDefinition['subscribe']> {
+	return async ({ options }) => {
+		const param = panSourceToSinkLearnSubPrelude(instance, model, options, sourceSink)
+		if (param === undefined) {
+			return
+		}
+
+		const { MSB, LSB } = param
+
+		// Send a "get" so the pan/balance variable is defined.
+		void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
+	}
+}
+
+function panSourceToMixOrLRCallbackPrelude(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
+): [number, number, PanBalanceChoice] | null {
+	const sourceSink = panSourceToMixOrLR(instance, model, options, sourceType)
+	if (sourceSink === null) {
+		return null
+	}
+
+	const panBalance = getPanBalance(instance, options)
+	if (panBalance === null) {
+		return null
+	}
+
+	return [...sourceSink, panBalance]
+}
+
+function panSourceToSinkCallbackPrelude(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	sourceSink: SourceSinkForNRPN<'panBalance'>,
+): [number, number, PanBalanceChoice] | null {
+	const sourceSinkNums = panSourceToSink(instance, model, options, sourceSink)
+	if (sourceSinkNums === null) {
+		return null
+	}
+
+	const panBalance = getPanBalance(instance, options)
+	if (panBalance === null) {
+		return null
+	}
+
+	return [...sourceSinkNums, panBalance]
+}
+
+function panMixOrLRToMatrix(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+): [number, number] | null {
+	const mixOrLR = toMixOrLR(instance, model, options.input)
+	if (mixOrLR === null) {
+		return null
+	}
+
+	const matrix = toSourceOrSink(instance, model, options.assign, 'matrix')
+	if (matrix === null) {
+		return null
+	}
+
+	return [mixOrLR, matrix]
+}
+
+function panMixOrLRToMatrixLearnSubPrelude(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+): Param | null {
+	const sourceSink = panMixOrLRToMatrix(instance, model, options)
+	if (sourceSink === null) {
+		return null
+	}
+	const [mixOrLR, matrix] = sourceSink
+
+	return mixOrLR === LR
+		? new BalanceNRPNCalculator(model, ['lr', 'matrix']).calculate(0, matrix)
+		: new BalanceNRPNCalculator(model, ['mix', 'matrix']).calculate(mixOrLR, matrix)
+}
 /**
  * Generate action definitions for adjusting the pan/balance of mixer sources
  * across mixer sinks.
@@ -129,71 +355,14 @@ export function panBalanceActions(
 				panLevelOption,
 				ShowVarOption,
 			],
-			learn: ({ options }, _context): CompanionOptionValues | undefined => {
-				const inputChannel = toSourceOrSink(instance, model, options.input, 'inputChannel')
-				if (inputChannel === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
-
-				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['inputChannel']
-				const { MSB, LSB } = computeEitherParameters(
-					inputChannel,
-					mixOrLR,
-					model.inputOutputCounts.mix,
-					mixBase,
-					lrBase,
-				)
-
-				return {
-					...options,
-					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
-				}
-			},
-			subscribe: async (action) => {
-				const options = action.options
-
-				const inputChannel = toSourceOrSink(instance, model, options.input, 'inputChannel')
-				if (inputChannel === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
-
-				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['inputChannel']
-				const { MSB, LSB } = computeEitherParameters(
-					inputChannel,
-					mixOrLR,
-					model.inputOutputCounts.mix,
-					mixBase,
-					lrBase,
-				)
-
-				// Send a "get" so the pan/balance variable is defined.
-				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
-			},
+			learn: panSourceToMixOrLRLearn(instance, model, 'inputChannel'),
+			subscribe: panSourceToMixOrLRSubscribe(instance, mixer, model, 'inputChannel'),
 			callback: async ({ options }) => {
-				const inputChannel = toSourceOrSink(instance, model, options.input, 'inputChannel')
-				if (inputChannel === null) {
+				const sourceSinkBalance = panSourceToMixOrLRCallbackPrelude(instance, model, options, 'inputChannel')
+				if (sourceSinkBalance === null) {
 					return
 				}
-
-				const panBalance = getPanBalance(instance, options)
-				if (panBalance === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
+				const [inputChannel, mixOrLR, panBalance] = sourceSinkBalance
 
 				mixer.setInputChannelPanBalanceInMixOrLR(inputChannel, panBalance, mixOrLR)
 			},
@@ -220,59 +389,14 @@ export function panBalanceActions(
 				panLevelOption,
 				ShowVarOption,
 			],
-			learn: ({ options }, _context): CompanionOptionValues | undefined => {
-				const group = toSourceOrSink(instance, model, options.input, 'group')
-				if (group === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
-
-				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['group']
-				const { MSB, LSB } = computeEitherParameters(group, mixOrLR, model.inputOutputCounts.mix, mixBase, lrBase)
-
-				return {
-					...options,
-					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
-				}
-			},
-			subscribe: async (action) => {
-				const options = action.options
-
-				const group = toSourceOrSink(instance, model, options.input, 'group')
-				if (group === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
-
-				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['group']
-				const { MSB, LSB } = computeEitherParameters(group, mixOrLR, model.inputOutputCounts.mix, mixBase, lrBase)
-
-				// Send a "get" so the pan/balance variable is defined.
-				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
-			},
+			learn: panSourceToMixOrLRLearn(instance, model, 'group'),
+			subscribe: panSourceToMixOrLRSubscribe(instance, mixer, model, 'group'),
 			callback: async ({ options }) => {
-				const group = toSourceOrSink(instance, model, options.input, 'group')
-				if (group === null) {
+				const sourceSinkBalance = panSourceToMixOrLRCallbackPrelude(instance, model, options, 'group')
+				if (sourceSinkBalance === null) {
 					return
 				}
-
-				const panBalance = getPanBalance(instance, options)
-				if (panBalance === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
+				const [group, mixOrLR, panBalance] = sourceSinkBalance
 
 				mixer.setGroupPanBalanceInMixOrLR(group, panBalance, mixOrLR)
 			},
@@ -299,59 +423,14 @@ export function panBalanceActions(
 				panLevelOption,
 				ShowVarOption,
 			],
-			learn: ({ options }, _context): CompanionOptionValues | undefined => {
-				const fxReturn = toSourceOrSink(instance, model, options.input, 'fxReturn')
-				if (fxReturn === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
-
-				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['fxReturn']
-				const { MSB, LSB } = computeEitherParameters(fxReturn, mixOrLR, model.inputOutputCounts.mix, mixBase, lrBase)
-
-				return {
-					...options,
-					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
-				}
-			},
-			subscribe: async (action) => {
-				const options = action.options
-
-				const fxReturn = toSourceOrSink(instance, model, options.input, 'fxReturn')
-				if (fxReturn === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
-
-				const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase['fxReturn']
-				const { MSB, LSB } = computeEitherParameters(fxReturn, mixOrLR, model.inputOutputCounts.mix, mixBase, lrBase)
-
-				// Send a "get" so the pan/balance variable is defined.
-				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
-			},
+			learn: panSourceToMixOrLRLearn(instance, model, 'fxReturn'),
+			subscribe: panSourceToMixOrLRSubscribe(instance, mixer, model, 'fxReturn'),
 			callback: async ({ options }) => {
-				const fxReturn = toSourceOrSink(instance, model, options.input, 'fxReturn')
-				if (fxReturn === null) {
+				const sourceSinkBalance = panSourceToMixOrLRCallbackPrelude(instance, model, options, 'fxReturn')
+				if (sourceSinkBalance === null) {
 					return
 				}
-
-				const panBalance = getPanBalance(instance, options)
-				if (panBalance === null) {
-					return
-				}
-
-				const mixOrLR = toMixOrLR(instance, model, options.assign)
-				if (mixOrLR === null) {
-					return
-				}
+				const [fxReturn, mixOrLR, panBalance] = sourceSinkBalance
 
 				mixer.setFXReturnPanBalanceInMixOrLR(fxReturn, panBalance, mixOrLR)
 			},
@@ -378,62 +457,14 @@ export function panBalanceActions(
 				panLevelOption,
 				ShowVarOption,
 			],
-			learn: ({ options }, _context): CompanionOptionValues | undefined => {
-				const fxReturn = toSourceOrSink(instance, model, options.input, 'fxReturn')
-				if (fxReturn === null) {
-					return
-				}
-
-				const group = toSourceOrSink(instance, model, options.assign, 'group')
-				if (group === null) {
-					return
-				}
-
-				const base = PanBalanceInSinkBase['fxReturn-group']
-				const { MSB, LSB } = computeParameters(fxReturn, group, model.inputOutputCounts.mix, base)
-
-				return {
-					...options,
-					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
-				}
-			},
-			subscribe: async (action) => {
-				const options = action.options
-
-				const fxReturn = toSourceOrSink(instance, model, options.input, 'fxReturn')
-				if (fxReturn === null) {
-					return
-				}
-
-				const group = toSourceOrSink(instance, model, options.assign, 'group')
-				if (group === null) {
-					return
-				}
-
-				const base = PanBalanceInSinkBase['fxReturn-group']
-				const { MSB, LSB } = computeParameters(fxReturn, group, model.inputOutputCounts.group, base)
-
-				// Send a "get" so the pan/balance variable is defined.
-				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
-			},
+			learn: panSourceToSinkLearn(instance, model, ['fxReturn', 'group']),
+			subscribe: panSourceToSinkSubscribe(instance, mixer, model, ['fxReturn', 'group']),
 			callback: async ({ options }) => {
-				// XXX The SQ MIDI Protocol document (Issue 3) includes a table
-				//     for this (page 26).  Issue 5 of the same document does
-				//     not.  Is this operation even a thing?
-				const fxReturn = toSourceOrSink(instance, model, options.input, 'fxReturn')
-				if (fxReturn === null) {
+				const sourceSinkBalance = panSourceToSinkCallbackPrelude(instance, model, options, ['fxReturn', 'group'])
+				if (sourceSinkBalance === null) {
 					return
 				}
-
-				const panBalance = getPanBalance(instance, options)
-				if (panBalance === null) {
-					return
-				}
-
-				const group = toSourceOrSink(instance, model, options.assign, 'group')
-				if (group === null) {
-					return
-				}
+				const [fxReturn, group, panBalance] = sourceSinkBalance
 
 				mixer.setFXReturnPanBalanceInGroup(fxReturn, panBalance, group)
 			},
@@ -461,60 +492,36 @@ export function panBalanceActions(
 				ShowVarOption,
 			],
 			learn: ({ options }, _context): CompanionOptionValues | undefined => {
-				const mixOrLR = toMixOrLR(instance, model, options.input)
-				if (mixOrLR === null) {
-					return
+				const nrpn = panMixOrLRToMatrixLearnSubPrelude(instance, model, options)
+				if (nrpn === null) {
+					return undefined
 				}
-
-				const matrix = toSourceOrSink(instance, model, options.assign, 'matrix')
-				if (matrix === null) {
-					return
-				}
-
-				const [source, base] =
-					mixOrLR === LR ? [0, PanBalanceInSinkBase['lr-matrix']] : [mixOrLR, PanBalanceInSinkBase['mix-matrix']]
-
-				const { MSB, LSB } = computeParameters(source, matrix, model.inputOutputCounts.matrix, base)
+				const { MSB, LSB } = nrpn
 
 				return {
 					...options,
 					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
 				}
 			},
-			subscribe: async (action) => {
-				const options = action.options
-
-				const mixOrLR = toMixOrLR(instance, model, options.input)
-				if (mixOrLR === null) {
-					return
+			subscribe: async ({ options }) => {
+				const nrpn = panMixOrLRToMatrixLearnSubPrelude(instance, model, options)
+				if (nrpn === null) {
+					return undefined
 				}
-
-				const matrix = toSourceOrSink(instance, model, options.assign, 'matrix')
-				if (matrix === null) {
-					return
-				}
-
-				const [source, base] =
-					mixOrLR === LR ? [0, PanBalanceInSinkBase['lr-matrix']] : [mixOrLR, PanBalanceInSinkBase['mix-matrix']]
-
-				const { MSB, LSB } = computeParameters(source, matrix, model.inputOutputCounts.matrix, base)
+				const { MSB, LSB } = nrpn
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
 			},
 			callback: async ({ options }) => {
-				const mixOrLR = toMixOrLR(instance, model, options.input)
-				if (mixOrLR === null) {
+				const sourceSink = panMixOrLRToMatrix(instance, model, options)
+				if (sourceSink === null) {
 					return
 				}
+				const [mixOrLR, matrix] = sourceSink
 
 				const panBalance = getPanBalance(instance, options)
 				if (panBalance === null) {
-					return
-				}
-
-				const matrix = toSourceOrSink(instance, model, options.assign, 'matrix')
-				if (matrix === null) {
 					return
 				}
 
@@ -547,59 +554,14 @@ export function panBalanceActions(
 				panLevelOption,
 				ShowVarOption,
 			],
-			learn: ({ options }, _context): CompanionOptionValues | undefined => {
-				const group = toSourceOrSink(instance, model, options.input, 'group')
-				if (group === null) {
-					return
-				}
-
-				const matrix = toSourceOrSink(instance, model, options.assign, 'matrix')
-				if (matrix === null) {
-					return
-				}
-
-				const base = PanBalanceInSinkBase['group-matrix']
-				const { MSB, LSB } = computeParameters(group, matrix, model.inputOutputCounts.mix, base)
-
-				return {
-					...options,
-					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
-				}
-			},
-			subscribe: async (action) => {
-				const options = action.options
-
-				const group = toSourceOrSink(instance, model, options.input, 'group')
-				if (group === null) {
-					return
-				}
-
-				const matrix = toSourceOrSink(instance, model, options.assign, 'matrix')
-				if (matrix === null) {
-					return
-				}
-
-				const base = PanBalanceInSinkBase['group-matrix']
-				const { MSB, LSB } = computeParameters(group, matrix, model.inputOutputCounts.matrix, base)
-
-				// Send a "get" so the pan/balance variable is defined.
-				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
-			},
+			learn: panSourceToSinkLearn(instance, model, ['group', 'matrix']),
+			subscribe: panSourceToSinkSubscribe(instance, mixer, model, ['group', 'matrix']),
 			callback: async ({ options }) => {
-				const group = toSourceOrSink(instance, model, options.input, 'group')
-				if (group === null) {
+				const sourceSinkBalance = panSourceToSinkCallbackPrelude(instance, model, options, ['group', 'matrix'])
+				if (sourceSinkBalance === null) {
 					return
 				}
-
-				const panBalance = getPanBalance(instance, options)
-				if (panBalance === null) {
-					return
-				}
-
-				const matrix = toSourceOrSink(instance, model, options.assign, 'matrix')
-				if (matrix === null) {
-					return
-				}
+				const [group, matrix, panBalance] = sourceSinkBalance
 
 				mixer.setGroupPanBalanceInMatrix(group, panBalance, matrix)
 			},

@@ -53,7 +53,7 @@ function computeLRParameters(source: number, base: Param): Param {
  *   [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).)
  */
 
-export function computeParameters(source: number, sink: number, sinkCount: number, base: Param): Param {
+function computeParameters(source: number, sink: number, sinkCount: number, base: Param): Param {
 	if (source === LR) {
 		throw new Error('LR source must be manually converted to 0 with parameter base appropriately adjusted')
 	}
@@ -74,59 +74,3 @@ export function computeEitherParameters(
 ): Param {
 	return sink === LR ? computeLRParameters(source, lrBase) : computeParameters(source, sink, sinkCount, base)
 }
-
-type SourceToMixOrLR = {
-	[key: string]: {
-		mix: Param
-		lr: Param
-	}
-}
-
-type SourceToSink = {
-	[key: string]: Param
-}
-
-/**
- * Base parameter MSB/LSB values corresponding to setting the mixer pan/balance
- * level of the given source category in mixes or LR.
- *
- * These values are the pairs at top left of the relevant tables in the
- * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
- */
-export const PanBalanceInMixOrLRBase = {
-	inputChannel: {
-		mix: { MSB: 0x50, LSB: 0x44 },
-		lr: { MSB: 0x50, LSB: 0x00 },
-	},
-	group: {
-		mix: { MSB: 0x55, LSB: 0x04 },
-		lr: { MSB: 0x50, LSB: 0x30 },
-	},
-	fxReturn: {
-		mix: { MSB: 0x56, LSB: 0x14 },
-		lr: { MSB: 0x50, LSB: 0x3c },
-	},
-} satisfies SourceToMixOrLR
-
-export type PanBalanceInMixOrLRType = keyof typeof PanBalanceInMixOrLRBase
-
-/**
- * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
- * pan/balance levels of the given source category in the given sink category.
- * (Note that when the source category is `'mix'`, this *doesn't* include the LR
- * mix.)
- *
- * These values are the pairs at top left of the relevant tables in the
- * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
- * (Or table *section*, in the cases of `'lr-matrix'` and `'mix-matrix'`,
- * because the former must be treated specially due to LR being specially
- * encoded.)
- */
-export const PanBalanceInSinkBase = {
-	'fxReturn-group': { MSB: 0x5b, LSB: 0x34 },
-	'lr-matrix': { MSB: 0x5e, LSB: 0x24 },
-	'mix-matrix': { MSB: 0x5e, LSB: 0x27 },
-	'group-matrix': { MSB: 0x5e, LSB: 0x4b },
-} satisfies SourceToSink
-
-export type PanBalanceInSinkType = keyof typeof PanBalanceInSinkBase

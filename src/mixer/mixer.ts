@@ -9,18 +9,12 @@ import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutp
 import type { Param } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
+	BalanceNRPNCalculator,
 	LevelNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
 } from './nrpn/source-to-sink.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
-import {
-	computeParameters,
-	PanBalanceInMixOrLRBase,
-	type PanBalanceInMixOrLRType,
-	PanBalanceInSinkBase,
-	type PanBalanceInSinkType,
-} from './parameters.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -872,27 +866,17 @@ export class Mixer {
 	 */
 	#setPanBalanceInMixOrLR(
 		source: number,
-		sourceType: PanBalanceInMixOrLRType,
+		sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 		panBalance: PanBalanceChoice,
 		mixOrLR: number,
 	): void {
-		const count = this.model.inputOutputCounts
-		if (count[sourceType] <= source) {
-			throw new Error(`Attempting to set pan/balance for out-of-range ${sourceType} ${source}`)
-		}
-
-		const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase[sourceType]
-
 		if (mixOrLR === LR) {
-			const nrpn = computeParameters(source, 0, 1, lrBase)
+			const calc = new BalanceNRPNCalculator(this.model, [sourceType, 'lr'])
+			const nrpn = calc.calculate(source, 0)
 			this.#setPanBalance(nrpn, panBalance)
 		} else {
-			const mixCount = this.model.inputOutputCounts.mix
-			if (mixCount <= mixOrLR) {
-				throw new Error(`Attempting to assign to nonexistent mix ${mixOrLR}`)
-			}
-
-			const nrpn = computeParameters(source, mixOrLR, mixCount, mixBase)
+			const calc = new BalanceNRPNCalculator(this.model, [sourceType, 'mix'])
+			const nrpn = calc.calculate(source, mixOrLR)
 			this.#setPanBalance(nrpn, panBalance)
 		}
 	}
@@ -918,25 +902,12 @@ export class Mixer {
 	 */
 	#setPanBalanceInSink(
 		source: number,
-		sourceType: InputOutputType,
 		panBalance: PanBalanceChoice,
 		sink: number,
-		sinkType: InputOutputType,
-		paramsType: PanBalanceInSinkType,
+		sourceSink: SourceSinkForNRPN<'panBalance'>,
 	) {
-		const count = this.model.inputOutputCounts
-		if (count[sourceType] <= source) {
-			throw new Error(`Attempting to set pan/balance for out-of-range ${sourceType} ${source}`)
-		}
-
-		const base = PanBalanceInSinkBase[paramsType]
-
-		const sinkCount = this.model.inputOutputCounts[sinkType]
-		if (sinkCount <= sink) {
-			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
-		}
-
-		const nrpn = computeParameters(source, sink, sinkCount, base)
+		const calc = new BalanceNRPNCalculator(this.model, sourceSink)
+		const nrpn = calc.calculate(source, sink)
 		this.#setPanBalance(nrpn, panBalance)
 	}
 
@@ -993,7 +964,7 @@ export class Mixer {
 	 *   A group, e.g. `2` for group 3.
 	 */
 	setFXReturnPanBalanceInGroup(fxReturn: number, panBalance: PanBalanceChoice, group: number): void {
-		this.#setPanBalanceInSink(fxReturn, 'fxReturn', panBalance, group, 'group', 'fxReturn-group')
+		this.#setPanBalanceInSink(fxReturn, panBalance, group, ['fxReturn', 'group'])
 	}
 
 	/**
@@ -1005,7 +976,7 @@ export class Mixer {
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
 	setLRPanBalanceInMatrix(panBalance: PanBalanceChoice, matrix: number): void {
-		this.#setPanBalanceInSink(0, 'lr', panBalance, matrix, 'matrix', 'lr-matrix')
+		this.#setPanBalanceInSink(0, panBalance, matrix, ['lr', 'matrix'])
 	}
 
 	/**
@@ -1019,7 +990,7 @@ export class Mixer {
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
 	setMixPanBalanceInMatrix(mix: number, panBalance: PanBalanceChoice, matrix: number): void {
-		this.#setPanBalanceInSink(mix, 'mix', panBalance, matrix, 'matrix', 'mix-matrix')
+		this.#setPanBalanceInSink(mix, panBalance, matrix, ['mix', 'matrix'])
 	}
 
 	/**
@@ -1033,7 +1004,7 @@ export class Mixer {
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
 	setGroupPanBalanceInMatrix(group: number, panBalance: PanBalanceChoice, matrix: number): void {
-		this.#setPanBalanceInSink(group, 'group', panBalance, matrix, 'matrix', 'group-matrix')
+		this.#setPanBalanceInSink(group, panBalance, matrix, ['group', 'matrix'])
 	}
 
 	/**

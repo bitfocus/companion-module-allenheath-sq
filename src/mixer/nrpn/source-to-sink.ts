@@ -269,3 +269,13 @@ export class LevelNRPNCalculator extends NRPNCalculator<'level'> {
 		super(model, 'level', sourceSink)
 	}
 }
+
+/**
+ * A class that can be used to calculate pan/balance NRPNs for a category of
+ * source-to-sink relationships.
+ */
+export class BalanceNRPNCalculator extends NRPNCalculator<'panBalance'> {
+	constructor(model: Model, sourceSink: SourceSinkForNRPN<'panBalance'>) {
+		super(model, 'panBalance', sourceSink)
+	}
+}
