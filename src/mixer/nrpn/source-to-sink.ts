@@ -260,3 +260,13 @@ export class AssignNRPNCalculator extends NRPNCalculator<'assign'> {
 		super(model, 'assign', sourceSink)
 	}
 }
+
+/**
+ * A class that can be used to calculate level NRPNs for a category of
+ * source-to-sink relationships.
+ */
+export class LevelNRPNCalculator extends NRPNCalculator<'level'> {
+	constructor(model: Model, sourceSink: SourceSinkForNRPN<'level'>) {
+		super(model, 'level', sourceSink)
+	}
+}

@@ -6,17 +6,16 @@ import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../mi
 import { type InputOutputType, LR, Model } from './model.js'
 import { calculateMuteNRPN } from './nrpn/mute.js'
 import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './nrpn/output.js'
+import type { Param } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
+	LevelNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
 } from './nrpn/source-to-sink.js'
-import type { Param } from './nrpn/param.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
 	computeParameters,
-	LevelInSinkBase,
-	type LevelInSinkType,
 	PanBalanceInMixOrLRBase,
 	type PanBalanceInMixOrLRType,
 	PanBalanceInSinkBase,
@@ -511,8 +510,6 @@ export class Mixer {
 	 *   The matrixes to activate it in.
 	 */
 	assignLRToMatrixes(active: boolean, matrixes: readonly number[]): void {
-		// Treat LR as if it were the sole source in a one-element source
-		// category.
 		this.#assignSourceToSinks(0, active, matrixes, ['lr', 'matrix'])
 	}
 
@@ -700,24 +697,13 @@ export class Mixer {
 	 */
 	#fadeSourceLevelInSink(
 		source: number,
-		sourceType: InputOutputType,
 		sink: number,
-		sinkType: InputOutputType,
-		levelType: LevelInSinkType,
+		sourceSink: SourceSinkForNRPN<'level'>,
 		start: Level,
 		end: Level,
 		fadeTimeMs: number,
 	): void {
-		const count = this.model.inputOutputCounts
-		if (count[sourceType] <= source) {
-			throw new RangeError(`Attempting to fade level of nonexistent ${sourceType} ${source}`)
-		}
-		const sinkCount = count[sinkType]
-		if (sinkCount <= sink) {
-			throw new RangeError(`Attempting to fade level of ${sourceType} in nonexistent ${sinkType} ${sink}`)
-		}
-
-		const { MSB, LSB } = computeParameters(source, sink, sinkCount, LevelInSinkBase[levelType])
+		const { MSB, LSB } = new LevelNRPNCalculator(this.model, sourceSink).calculate(source, sink)
 		this.#fadeToLevel(MSB, LSB, start, end, fadeTimeMs)
 	}
 
@@ -726,7 +712,7 @@ export class Mixer {
 	 * to `end` over `fadeTimeMs` milliseconds.
 	 */
 	fadeInputChannelLevelInMix(inputChannel: number, mix: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(inputChannel, 'inputChannel', mix, 'mix', 'inputChannel-mix', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(inputChannel, mix, ['inputChannel', 'mix'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -734,7 +720,7 @@ export class Mixer {
 	 * over `fadeTimeMs` milliseconds.
 	 */
 	fadeInputChannelLevelInLR(inputChannel: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(inputChannel, 'inputChannel', 0, 'lr', 'inputChannel-lr', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(inputChannel, 0, ['inputChannel', 'lr'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -742,7 +728,7 @@ export class Mixer {
 	 * over `fadeTimeMs` milliseconds.
 	 */
 	fadeGroupLevelInMix(group: number, mix: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, 'group', mix, 'mix', 'group-mix', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(group, mix, ['group', 'mix'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -750,7 +736,7 @@ export class Mixer {
 	 * `fadeTimeMs` milliseconds.
 	 */
 	fadeGroupLevelInLR(group: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, 'group', 0, 'lr', 'group-lr', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(group, 0, ['group', 'lr'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -758,7 +744,7 @@ export class Mixer {
 	 * `end` over `fadeTimeMs` milliseconds.
 	 */
 	fadeFXReturnLevelInMix(fxReturn: number, mix: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(fxReturn, 'fxReturn', mix, 'mix', 'fxReturn-mix', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(fxReturn, mix, ['fxReturn', 'mix'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -766,7 +752,7 @@ export class Mixer {
 	 * `fadeTimeMs` milliseconds.
 	 */
 	fadeFXReturnLevelInLR(fxReturn: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(fxReturn, 'fxReturn', 0, 'lr', 'fxReturn-lr', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(fxReturn, 0, ['fxReturn', 'lr'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -774,7 +760,7 @@ export class Mixer {
 	 * `end` over `fadeTimeMs` milliseconds.
 	 */
 	fadeFXReturnLevelInGroup(fxReturn: number, group: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(fxReturn, 'fxReturn', group, 'group', 'fxReturn-group', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(fxReturn, group, ['fxReturn', 'group'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -788,16 +774,7 @@ export class Mixer {
 		end: Level,
 		fadeTimeMs: number,
 	): void {
-		this.#fadeSourceLevelInSink(
-			inputChannel,
-			'inputChannel',
-			fxSend,
-			'fxSend',
-			'inputChannel-fxSend',
-			start,
-			end,
-			fadeTimeMs,
-		)
+		this.#fadeSourceLevelInSink(inputChannel, fxSend, ['inputChannel', 'fxSend'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -805,7 +782,7 @@ export class Mixer {
 	 * `end` over `fadeTimeMs` milliseconds.
 	 */
 	fadeGroupLevelInFXSend(group: number, fxSend: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, 'group', fxSend, 'fxSend', 'group-fxSend', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(group, fxSend, ['group', 'fxSend'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -813,7 +790,7 @@ export class Mixer {
 	 * to `end` over `fadeTimeMs` milliseconds.
 	 */
 	fadeFXReturnLevelInFXSend(fxReturn: number, fxSend: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(fxReturn, 'fxReturn', fxSend, 'fxSend', 'fxReturn-fxSend', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(fxReturn, fxSend, ['fxReturn', 'fxSend'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -821,7 +798,7 @@ export class Mixer {
 	 * over `fadeTimeMs` milliseconds.
 	 */
 	fadeMixLevelInMatrix(mix: number, matrix: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(mix, 'mix', matrix, 'matrix', 'mix-matrix', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(mix, matrix, ['mix', 'matrix'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -829,7 +806,7 @@ export class Mixer {
 	 * `fadeTimeMs` milliseconds.
 	 */
 	fadeLRLevelInMatrix(matrix: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(0, 'lr', matrix, 'matrix', 'lr-matrix', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(0, matrix, ['lr', 'matrix'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -837,7 +814,7 @@ export class Mixer {
 	 * `end` over `fadeTimeMs` milliseconds.
 	 */
 	fadeGroupLevelInMatrix(group: number, matrix: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, 'group', matrix, 'matrix', 'group-matrix', start, end, fadeTimeMs)
+		this.#fadeSourceLevelInSink(group, matrix, ['group', 'matrix'], start, end, fadeTimeMs)
 	}
 
 	/**
