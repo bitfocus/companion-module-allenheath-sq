@@ -26,12 +26,20 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 		},
 	]
 
-	model.forEachInputChannel((channel, channelLabel) => {
+	model.forEachInputChannel((channel, channelLabel, channelDesc) => {
 		model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {
 			const rsp = instance.getLevel(channel, mix, model.inputOutputCounts.mix, [0x40, 0x40], [0, 0x44])
 
 			variables.push({
 				name: `${channelLabel} -> ${mixDesc} Level`,
+				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+			})
+		})
+		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
+			const rsp = instance.getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
+
+			variables.push({
+				name: `${channelDesc} -> ${fxsDesc} Level`,
 				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 			})
 		})
@@ -46,6 +54,22 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 			})
 		})
+		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
+			const rsp = instance.getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
+
+			variables.push({
+				name: `${groupDesc} -> ${fxsDesc} Level`,
+				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+			})
+		})
+		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
+			const rsp = instance.getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
+
+			variables.push({
+				name: `${groupDesc} -> ${matrixDesc} Level`,
+				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+			})
+		})
 	})
 
 	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
@@ -57,9 +81,6 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 			})
 		})
-	})
-
-	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 		model.forEachGroup((group, _groupLabel, groupDesc) => {
 			const rsp = instance.getLevel(fxr, group, model.inputOutputCounts.group, [0, 0x4b], [0, 0x34])
 
@@ -68,31 +89,6 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 			})
 		})
-	})
-
-	model.forEachInputChannel((channel, _channelLabel, channelDesc) => {
-		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
-			const rsp = instance.getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
-
-			variables.push({
-				name: `${channelDesc} -> ${fxsDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
-			})
-		})
-	})
-
-	model.forEachGroup((group, _groupLabel, groupDesc) => {
-		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
-			const rsp = instance.getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
-
-			variables.push({
-				name: `${groupDesc} -> ${fxsDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
-			})
-		})
-	})
-
-	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
 			const rsp = instance.getLevel(fxr, fxs, model.inputOutputCounts.fxSend, [0, 0x4e], [0, 0x04])
 
@@ -111,23 +107,13 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 			variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 		})
 	})
+
 	model.forEachMix((mix, _mixLabel, mixDesc) => {
 		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
 			const rsp = instance.getLevel(mix, matrix, model.inputOutputCounts.matrix, [0x4e, 0x4e], [0x24, 0x27])
 
 			variables.push({
 				name: `${mixDesc} -> ${matrixDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
-			})
-		})
-	})
-
-	model.forEachGroup((group, _groupLabel, groupDesc) => {
-		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
-			const rsp = instance.getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
-
-			variables.push({
-				name: `${groupDesc} -> ${matrixDesc} Level`,
 				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
 			})
 		})
