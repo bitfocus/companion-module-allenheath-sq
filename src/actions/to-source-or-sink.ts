@@ -60,8 +60,6 @@ export function toMixOrLR(instance: sqInstance, model: Model, optionValue: Optio
 	return null
 }
 
-type SourceSinkType = InputOutputType | 'mix-or-lr'
-
 /**
  * Convert an option value referring to a source or sink -- or either a mix *or*
  * LR -- to its numeric value and actual type (which will be the input type
@@ -85,7 +83,7 @@ export function toInputOutput(
 	instance: sqInstance,
 	model: Model,
 	optionValue: OptionValue,
-	type: SourceSinkType,
+	type: InputOutputType | 'mix-or-lr',
 ): [number, InputOutputType] | null {
 	if (type === 'mix-or-lr') {
 		const inputOutput = toMixOrLR(instance, model, optionValue)

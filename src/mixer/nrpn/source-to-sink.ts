@@ -177,7 +177,6 @@ type SinkHasNRPN<Source extends InputOutputType, Sink extends InputOutputType, N
 
 /**
  * All `Sink` where mixes and LR both support all the specified NRPNs in `Sink`.
- * @allowunused because there's no mix-in-matrix assignment action yet
  */
 export type SinkForMixAndLRInSinkForNRPN<NRPN extends SourceSinkNRPN> = SinkHasNRPN<'mix', InputOutputType, NRPN> &
 	SinkHasNRPN<'lr', InputOutputType, NRPN>
