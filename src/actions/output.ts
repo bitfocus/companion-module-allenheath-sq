@@ -5,10 +5,10 @@ import type {
 } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import type { Choices } from '../choices.js'
-import { getFadeParameters, getFader } from './fading.js'
+import { getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
-import type { Model } from '../mixer/model.js'
+import type { InputOutputType, Model } from '../mixer/model.js'
 import { getCommonCount } from '../mixer/models.js'
 import type { Param } from '../mixer/nrpn/param.js'
 import {
@@ -242,6 +242,27 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 	options.input = newInput
 	action.actionId = newActionId
 	return true
+}
+
+/**
+ * Get the number of the specified fader from options for a fading action.
+ *
+ * @param instance
+ *   The instance in use.
+ * @param model
+ *   The model of the mixer.
+ * @param options
+ *   Options specified for the action.
+ * @param type
+ *   The type of the fader.
+ */
+function getFader(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	type: InputOutputType,
+): number | null {
+	return toSourceOrSink(instance, model, options.input, type)
 }
 
 type FadeLevelInfo = {
