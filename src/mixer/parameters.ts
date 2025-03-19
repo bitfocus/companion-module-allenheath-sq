@@ -87,54 +87,6 @@ type SourceToSink = {
 }
 
 /**
- * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
- * assignments from the given source category to mixes or LR.
- *
- * These values are the pairs at top left of the relevant tables in the
- * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
- */
-export const AssignToMixOrLRBase = {
-	inputChannel: {
-		mix: { MSB: 0x60, LSB: 0x44 },
-		lr: { MSB: 0x60, LSB: 0x00 },
-	},
-	group: {
-		mix: { MSB: 0x65, LSB: 0x04 },
-		lr: { MSB: 0x60, LSB: 0x30 },
-	},
-	fxReturn: {
-		mix: { MSB: 0x66, LSB: 0x14 },
-		lr: { MSB: 0x60, LSB: 0x3c },
-	},
-} satisfies SourceToMixOrLR
-
-export type AssignToMixOrLRType = keyof typeof AssignToMixOrLRBase
-
-/**
- * Base parameter MSB/LSB values corresponding to manipulations of SQ mixer
- * assignments from the given source category to the given sink category.  (Note
- * that when the source category is `'mix'`, this *doesn't* include the LR mix.)
- *
- * These values are the pairs at top left of the relevant tables in the
- * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
- * (Or table *section*, in the cases of `'lr-matrix'` and `'mix-matrix'`,
- * because the former must be treated specially due to LR being specially
- * encoded.)
- */
-export const AssignToSinkBase = {
-	'inputChannel-group': { MSB: 0x66, LSB: 0x74 },
-	'fxReturn-group': { MSB: 0x6b, LSB: 0x34 },
-	'inputChannel-fxSend': { MSB: 0x6c, LSB: 0x14 },
-	'group-fxSend': { MSB: 0x6d, LSB: 0x54 },
-	'fxReturn-fxSend': { MSB: 0x6e, LSB: 0x04 },
-	'lr-matrix': { MSB: 0x6e, LSB: 0x24 },
-	'mix-matrix': { MSB: 0x6e, LSB: 0x27 },
-	'group-matrix': { MSB: 0x6e, LSB: 0x4b },
-} satisfies SourceToSink
-
-export type AssignToSinkType = keyof typeof AssignToSinkBase
-
-/**
  * The base parameter MSB/LSB value corresponding to manipulation of the level
  * of a mix (not including LR) in a matrix.
  */

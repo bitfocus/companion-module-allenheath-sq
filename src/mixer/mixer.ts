@@ -6,13 +6,14 @@ import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../mi
 import { type InputOutputType, LR, Model } from './model.js'
 import { calculateMuteNRPN } from './nrpn/mute.js'
 import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './nrpn/output.js'
+import {
+	AssignNRPNCalculator,
+	type SourceForSourceInMixAndLRForNRPN,
+	type SourceSinkForNRPN,
+} from './nrpn/source-to-sink.js'
 import type { Param } from './nrpn/param.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
-	AssignToMixOrLRBase,
-	type AssignToMixOrLRType,
-	AssignToSinkBase,
-	type AssignToSinkType,
 	computeParameters,
 	LevelInSinkBase,
 	type LevelInSinkType,
@@ -301,25 +302,12 @@ export class Mixer {
 	 *   The number of the sink to assign, relative to all sinks of that type,
 	 *   counting from zero.  (For example, if there are 12 total groups and the
 	 *   sink is a group, this will be in range `[0, 12)`).
-	 * @param sinkType
-	 *   The type of `sink`.
-	 * @param base
-	 *   `MSB`/`LSB` referring to the expected source if `source === 0`.
+	 * @param nrpn
+	 *   A calculator of the assign NRPN dictated by `source`, `sink`, and their
+	 *   types.
 	 */
-	#assignToSink(
-		source: number,
-		active: boolean,
-		sink: number,
-		sinkType: InputOutputType,
-		base: Param,
-	): NRPNDataMessage {
-		const sinkCount = this.model.inputOutputCounts[sinkType]
-		if (sinkCount <= sink) {
-			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
-		}
-
-		const { MSB, LSB } = computeParameters(source, sink, sinkCount, base)
-
+	#assignToSink(source: number, active: boolean, sink: number, nrpn: AssignNRPNCalculator): NRPNDataMessage {
+		const { MSB, LSB } = nrpn.calculate(source, sink)
 		return this.midi.nrpnData(MSB, LSB, 0, active ? 1 : 0)
 	}
 
@@ -341,21 +329,17 @@ export class Mixer {
 	 */
 	#assignSourceToMixesAndLR(
 		source: number,
-		sourceType: AssignToMixOrLRType,
+		sourceType: SourceForSourceInMixAndLRForNRPN<'assign'>,
 		active: boolean,
 		mixes: readonly number[],
 	): void {
-		const count = this.model.inputOutputCounts
-		if (count[sourceType] <= source) {
-			throw new Error(`Attempting to assign out-of-range ${sourceType} ${source}`)
-		}
+		const mixNrpn = new AssignNRPNCalculator(this.model, [sourceType, 'mix'])
+		const lrNrpn = new AssignNRPNCalculator(this.model, [sourceType, 'lr'])
 
-		const { mix: mixBase, lr: lrBase } = AssignToMixOrLRBase[sourceType]
-
-		const commands = mixes.map((sink) => {
-			return sink === LR
-				? this.#assignToSink(source, active, 0, 'lr', lrBase)
-				: this.#assignToSink(source, active, sink, 'mix', mixBase)
+		const commands = mixes.map((mixOrLR) => {
+			return mixOrLR === LR
+				? this.#assignToSink(source, active, 0, lrNrpn)
+				: this.#assignToSink(source, active, mixOrLR, mixNrpn)
 		})
 
 		// XXX
@@ -383,21 +367,14 @@ export class Mixer {
 	 */
 	#assignSourceToSinks(
 		source: number,
-		sourceType: InputOutputType,
 		active: boolean,
 		sinks: readonly number[],
-		sinkType: InputOutputType,
-		paramsType: AssignToSinkType,
+		sourceSink: SourceSinkForNRPN<'assign'>,
 	): void {
-		const count = this.model.inputOutputCounts
-		if (count[sourceType] <= source) {
-			throw new Error(`Attempting to assign out-of-range ${sourceType} ${source}`)
-		}
-
-		const params = AssignToSinkBase[paramsType]
+		const nrpn = new AssignNRPNCalculator(this.model, sourceSink)
 
 		const commands = sinks.map((sink) => {
-			return this.#assignToSink(source, active, sink, sinkType, params)
+			return this.#assignToSink(source, active, sink, nrpn)
 		})
 
 		// XXX
@@ -431,7 +408,7 @@ export class Mixer {
 	 *   The groups to activate it in.
 	 */
 	assignInputChannelToGroups(inputChannel: number, active: boolean, groups: readonly number[]): void {
-		this.#assignSourceToSinks(inputChannel, 'inputChannel', active, groups, 'group', 'inputChannel-group')
+		this.#assignSourceToSinks(inputChannel, active, groups, ['inputChannel', 'group'])
 	}
 
 	/**
@@ -476,7 +453,7 @@ export class Mixer {
 	 *   The groups to activate it in.
 	 */
 	assignFXReturnToGroups(fxReturn: number, active: boolean, groups: readonly number[]): void {
-		this.#assignSourceToSinks(fxReturn, 'fxReturn', active, groups, 'group', 'fxReturn-group')
+		this.#assignSourceToSinks(fxReturn, active, groups, ['fxReturn', 'group'])
 	}
 
 	/**
@@ -491,7 +468,7 @@ export class Mixer {
 	 *   The FX sends to activate it in.
 	 */
 	assignInputChannelToFXSends(inputChannel: number, active: boolean, fxSends: readonly number[]): void {
-		this.#assignSourceToSinks(inputChannel, 'inputChannel', active, fxSends, 'fxSend', 'inputChannel-fxSend')
+		this.#assignSourceToSinks(inputChannel, active, fxSends, ['inputChannel', 'fxSend'])
 	}
 
 	/**
@@ -506,7 +483,7 @@ export class Mixer {
 	 *   The FX sends to activate it in.
 	 */
 	assignGroupToFXSends(group: number, active: boolean, fxSends: readonly number[]): void {
-		this.#assignSourceToSinks(group, 'group', active, fxSends, 'fxSend', 'group-fxSend')
+		this.#assignSourceToSinks(group, active, fxSends, ['group', 'fxSend'])
 	}
 
 	/**
@@ -521,7 +498,7 @@ export class Mixer {
 	 *   The FX sends to activate it in.
 	 */
 	assignFXReturnToFXSends(fxReturn: number, active: boolean, fxSends: readonly number[]): void {
-		this.#assignSourceToSinks(fxReturn, 'fxReturn', active, fxSends, 'fxSend', 'fxReturn-fxSend')
+		this.#assignSourceToSinks(fxReturn, active, fxSends, ['fxReturn', 'fxSend'])
 	}
 
 	/**
@@ -536,7 +513,7 @@ export class Mixer {
 	assignLRToMatrixes(active: boolean, matrixes: readonly number[]): void {
 		// Treat LR as if it were the sole source in a one-element source
 		// category.
-		this.#assignSourceToSinks(0, 'lr', active, matrixes, 'matrix', 'lr-matrix')
+		this.#assignSourceToSinks(0, active, matrixes, ['lr', 'matrix'])
 	}
 
 	/**
@@ -551,7 +528,7 @@ export class Mixer {
 	 *   The matrixes to activate it in.
 	 */
 	assignMixToMatrixes(mix: number, active: boolean, matrixes: readonly number[]): void {
-		this.#assignSourceToSinks(mix, 'mix', active, matrixes, 'matrix', 'mix-matrix')
+		this.#assignSourceToSinks(mix, active, matrixes, ['mix', 'matrix'])
 	}
 
 	/**
@@ -566,7 +543,7 @@ export class Mixer {
 	 *   The matrixes to activate it in.
 	 */
 	assignGroupToMatrixes(group: number, active: boolean, matrixes: readonly number[]): void {
-		this.#assignSourceToSinks(group, 'group', active, matrixes, 'matrix', 'group-matrix')
+		this.#assignSourceToSinks(group, active, matrixes, ['group', 'matrix'])
 	}
 
 	/** Send a MIDI command to set the given level NRPN to the given level. */

@@ -1,4 +1,4 @@
-import type { InputOutputType } from '../model.js'
+import type { InputOutputType, Model } from '../model.js'
 import type { Param } from './param.js'
 
 type SourceToSinkInfo = {
@@ -29,6 +29,8 @@ type SourceToSinkInfo = {
 	 */
 	readonly panBalance?: Param
 }
+
+type SourceSinkNRPN = keyof Required<SourceToSinkInfo>
 
 type SourceToSinkType = {
 	readonly [source in InputOutputType]?: {
@@ -117,3 +119,135 @@ export const SourceToSinkParameterBase = {
 		},
 	},
 } as const satisfies SourceToSinkType
+
+type SourceToSinkParameterBaseType = typeof SourceToSinkParameterBase
+
+type SourceSinkForSourceToSinkForNRPN<
+	Source extends InputOutputType,
+	Sink extends InputOutputType,
+	NRPN extends SourceSinkNRPN,
+> = Source extends keyof SourceToSinkParameterBaseType
+	? Sink extends keyof SourceToSinkParameterBaseType[Source]
+		? SourceToSinkParameterBaseType[Source][Sink] extends { [nrpnType in NRPN]: Param }
+			? [Source, Sink]
+			: never
+		: never
+	: never
+
+/** All `[Source, Sink]` pairs that support all of the specified NRPN types. */
+export type SourceSinkForNRPN<NRPN extends SourceSinkNRPN> = SourceSinkForSourceToSinkForNRPN<
+	InputOutputType,
+	InputOutputType,
+	NRPN
+>
+
+type SourceForSourceToMixAndLRForNRPN<
+	Source extends InputOutputType,
+	NRPN extends SourceSinkNRPN,
+> = Source extends keyof SourceToSinkParameterBaseType
+	? SourceToSinkParameterBaseType[Source] extends { [sink in 'mix' | 'lr']: { [nrpnType in NRPN]: Param } }
+		? Source
+		: never
+	: never
+
+/** All `Source` that support all the specified NRPNs in both mixes and LR. */
+export type SourceForSourceInMixAndLRForNRPN<NRPN extends SourceSinkNRPN> = SourceForSourceToMixAndLRForNRPN<
+	InputOutputType,
+	NRPN
+>
+
+type SinkHasNRPN<Source extends InputOutputType, Sink extends InputOutputType, NRPN extends SourceSinkNRPN> = [
+	Source,
+] extends [keyof SourceToSinkParameterBaseType]
+	? Sink extends keyof SourceToSinkParameterBaseType[Source]
+		? SourceToSinkParameterBaseType[Source][Sink] extends { [nrpnType in NRPN]: Param }
+			? Sink
+			: never
+		: never
+	: never
+
+/**
+ * All `Sink` where mixes and LR both support all the specified NRPNs in `Sink`.
+ * @allowunused because there's no mix-in-matrix assignment action yet
+ */
+export type SinkForMixAndLRInSinkForNRPN<NRPN extends SourceSinkNRPN> = SinkHasNRPN<'mix', InputOutputType, NRPN> &
+	SinkHasNRPN<'lr', InputOutputType, NRPN>
+
+/**
+ * A class that can be used to calculate a specific kind of NRPN for a
+ * source-to-sink relationship.
+ */
+class NRPNCalculator<NRPN extends SourceSinkNRPN> {
+	readonly #inputOutputCounts
+	readonly #sourceSink: SourceSinkForNRPN<NRPN>
+	readonly #base: Param
+
+	/**
+	 * Construct a calculator for NRPNs of type identified by `nrpnType` for
+	 * some `sourceType` in some `sinkType` for the given mixer model.
+	 *
+	 * @param model
+	 *   The mixer model for which NRPNs are computed.
+	 * @param sourceType
+	 *   The source type, e.g. `'inputChannel'`.
+	 * @param sinkType
+	 *   The sink type, e.g. `'mix'`.
+	 * @param nrpnType
+	 *   The type of NRPNs to compute, e.g. `'assign'`.
+	 */
+	constructor(model: Model, nrpnType: NRPN, sourceSink: SourceSinkForNRPN<NRPN>) {
+		this.#inputOutputCounts = model.inputOutputCounts
+		this.#sourceSink = sourceSink
+
+		const [sourceType, sinkType] = this.#sourceSink
+
+		// TypeScript doesn't preserve awareness of the validity of the property
+		// walk described by `sourceSink[0]` (source type), `sourceSink[1]`
+		// (sink type), and `nrpnType` after `SourceSinkNRPNMatches` has done
+		// its thing.  Do enough casting to make the property access sequence
+		// type-check.
+		const sinks = SourceToSinkParameterBase[sourceType] as Required<Required<SourceToSinkType>[InputOutputType]>
+		const info = sinks[sinkType] as Required<SourceToSinkInfo>
+		this.#base = info[nrpnType]
+	}
+
+	/**
+	 * Calculate the NRPN for the desired source and sink.
+	 *
+	 * @param source
+	 *   The zero-indexed source within the source type specified at
+	 *   construction.
+	 * @param sink
+	 *   The zero-indexed sink within the source type specified at construction.
+	 * @returns
+	 *   The computed NRPN.
+	 */
+	calculate(source: number, sink: number): Param {
+		const [sourceType, sinkType] = this.#sourceSink
+
+		const inputOutputCounts = this.#inputOutputCounts
+		if (inputOutputCounts[sourceType] <= source) {
+			throw new Error(`${sourceType}=${source} is invalid`)
+		}
+
+		const sinkCount = inputOutputCounts[sinkType]
+		if (sinkCount <= sink) {
+			throw new Error(`${sinkType}=${sink} is invalid`)
+		}
+
+		const base = this.#base
+
+		const val = base.LSB + sinkCount * source + sink
+		return { MSB: base.MSB + ((val >> 7) & 0xf), LSB: val & 0x7f }
+	}
+}
+
+/**
+ * A class that can be used to calculate NRPNs controlling assignment of some
+ * type of source to some type of sink.
+ */
+export class AssignNRPNCalculator extends NRPNCalculator<'assign'> {
+	constructor(model: Model, sourceSink: SourceSinkForNRPN<'assign'>) {
+		super(model, 'assign', sourceSink)
+	}
+}
