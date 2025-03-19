@@ -818,37 +818,15 @@ export class Mixer {
 	}
 
 	/**
-	 * Set the pan/balance of `source` in the sink `sink` of type `sinkType`.
+	 * Set the pan/balance of a source-to-sink parameter (or sink used as
+	 * output) identified by its NRPN.
 	 *
-	 * @param source
-	 *   A source, e.g. a value in the range `[0, 12)` if `source` is a group
-	 *   and the mixer supports 12 groups.  It must be in the valid range for
-	 *   the type its caller intends: this function won't (and can't) do any
-	 *   range-checking.
+	 * @param nrpn
+	 *   The NRPN of the desired pan/balance parameter.
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param sink
-	 *   The numbered sink in which `source`'s pan/balance level will be
-	 *   adjusted, e.g. `2` for Aux 3.
-	 * @param sinkType
-	 *   The type of `sink`.
-	 * @param base
-	 *   The base MSB/LSB for the desired source-to-sink pan/balance settings.
 	 */
-	#setPanBalance(
-		source: number,
-		panBalance: PanBalanceChoice,
-		sink: number,
-		sinkType: InputOutputType,
-		base: Param,
-	): void {
-		const sinkCount = this.model.inputOutputCounts[sinkType]
-		if (sinkCount <= sink) {
-			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
-		}
-
-		const { MSB, LSB } = computeParameters(source, sink, sinkCount, base)
-
+	#setPanBalance({ MSB, LSB }: Param, panBalance: PanBalanceChoice): void {
 		const midi = this.midi
 
 		let modifyPanBalanceCommand
@@ -906,9 +884,16 @@ export class Mixer {
 		const { mix: mixBase, lr: lrBase } = PanBalanceInMixOrLRBase[sourceType]
 
 		if (mixOrLR === LR) {
-			this.#setPanBalance(source, panBalance, 0, 'lr', lrBase)
+			const nrpn = computeParameters(source, 0, 1, lrBase)
+			this.#setPanBalance(nrpn, panBalance)
 		} else {
-			this.#setPanBalance(source, panBalance, mixOrLR, 'mix', mixBase)
+			const mixCount = this.model.inputOutputCounts.mix
+			if (mixCount <= mixOrLR) {
+				throw new Error(`Attempting to assign to nonexistent mix ${mixOrLR}`)
+			}
+
+			const nrpn = computeParameters(source, mixOrLR, mixCount, mixBase)
+			this.#setPanBalance(nrpn, panBalance)
 		}
 	}
 
@@ -944,9 +929,15 @@ export class Mixer {
 			throw new Error(`Attempting to set pan/balance for out-of-range ${sourceType} ${source}`)
 		}
 
-		const params = PanBalanceInSinkBase[paramsType]
+		const base = PanBalanceInSinkBase[paramsType]
 
-		this.#setPanBalance(source, panBalance, sink, sinkType, params)
+		const sinkCount = this.model.inputOutputCounts[sinkType]
+		if (sinkCount <= sink) {
+			throw new Error(`Attempting to assign to nonexistent ${sinkType} ${sink}`)
+		}
+
+		const nrpn = computeParameters(source, sink, sinkCount, base)
+		this.#setPanBalance(nrpn, panBalance)
 	}
 
 	/**
@@ -1189,11 +1180,8 @@ export class Mixer {
 		panBalance: PanBalanceChoice,
 	): void {
 		const calc = new OutputBalanceNRPNCalculator(this.model, sinkType)
-
-		// XXX Use 0 to get the base here until #setPanBalance can be changed to
-		//     take the actual NRPN.
-		const base = calc.calculate(0)
-		this.#setPanBalance(sink, panBalance, 0, 'lr', base)
+		const nrpn = calc.calculate(sink)
+		this.#setPanBalance(nrpn, panBalance)
 	}
 
 	/**
