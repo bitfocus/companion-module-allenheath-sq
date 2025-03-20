@@ -5,8 +5,7 @@ import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 import type { sqInstance } from './instance.js'
-import { SourceToSinkParameterBase } from './mixer/nrpn/source-to-sink.js'
-import { computeEitherParameters } from './mixer/parameters.js'
+import { LevelNRPNCalculator } from './mixer/nrpn/source-to-sink.js'
 
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
@@ -188,15 +187,11 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	}
 
 	// Input -> Mix
+	const mixCalc = new LevelNRPNCalculator(model, ['inputChannel', 'mix'])
+	const lrCalc = new LevelNRPNCalculator(model, ['inputChannel', 'lr'])
 	model.forEachInputChannel((channel, channelLabel) => {
 		model.forEachMixAndLR((mix, mixLabel) => {
-			const { MSB, LSB } = computeEitherParameters(
-				channel,
-				mix,
-				model.inputOutputCounts.mix,
-				SourceToSinkParameterBase.inputChannel.mix.level,
-				SourceToSinkParameterBase.inputChannel.lr.level,
-			)
+			const { MSB, LSB } = mix === LR ? lrCalc.calculate(channel, 0) : mixCalc.calculate(channel, mix)
 
 			createtMuteLevel(
 				`Mt+dB CH-${mixLabel}`,

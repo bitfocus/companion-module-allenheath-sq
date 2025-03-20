@@ -51,7 +51,7 @@ type SourceToSinkType = {
  * one as you move rightward across a row, then down to start of the next row to
  * move rightward again.
  */
-export const SourceToSinkParameterBase = {
+const SourceToSinkParameterBase = {
 	inputChannel: {
 		group: {
 			assign: { MSB: 0x66, LSB: 0x74 },
