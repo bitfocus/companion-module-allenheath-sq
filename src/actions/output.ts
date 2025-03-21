@@ -10,6 +10,7 @@ import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
 import { getCommonCount } from '../mixer/models.js'
+import type { Param } from '../mixer/nrpn/param.js'
 import {
 	SinkLevelInOutputBase,
 	type SinkLevelInOutputType,
@@ -17,7 +18,6 @@ import {
 	SinkPanBalanceInOutputBase,
 	computeParameters,
 } from '../mixer/parameters.js'
-import type { Param } from '../mixer/relationships.js'
 import { getPanBalance, type PanBalanceChoice } from './pan-balance.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 

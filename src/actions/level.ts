@@ -5,6 +5,7 @@ import { getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
+import type { Param } from '../mixer/nrpn/param.js'
 import {
 	computeParameters,
 	LevelInMixOrLRBase,
@@ -14,7 +15,6 @@ import {
 	type LRLevelInSinkType,
 	MixOrLRLevelInSinkBase,
 } from '../mixer/parameters.js'
-import type { Param } from '../mixer/relationships.js'
 import { toInputOutput } from './to-source-or-sink.js'
 
 /**

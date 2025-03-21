@@ -1,5 +1,5 @@
 import { type InputOutputType, LR } from './model.js'
-import type { Param } from './relationships.js'
+import type { Param } from './nrpn/param.js'
 
 /**
  * Compute the MSB/LSB for a `source`-to-LR relationship.

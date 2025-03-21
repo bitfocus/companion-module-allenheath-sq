@@ -4,6 +4,7 @@ import type { SQInstanceInterface as sqInstance } from '../instance-interface.js
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../midi/session.js'
 import { type InputOutputType, LR, Model } from './model.js'
+import type { Param } from './nrpn/param.js'
 import { panBalanceLevelToVCVF } from './pan-balance.js'
 import {
 	AssignToMixOrLRBase,
@@ -23,7 +24,6 @@ import {
 	SinkLevelInOutputBase,
 	type SinkLevelInOutputType,
 } from './parameters.js'
-import type { Param } from './relationships.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
