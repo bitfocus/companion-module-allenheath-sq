@@ -1,6 +1,7 @@
 import type { CompanionVariableDefinition } from '@companion-module/base'
-import type { SQInstanceInterface as sqInstance } from './instance-interface.js'
 import type { Model } from './mixer/model.js'
+import { OutputLevelNRPNCalculator } from './mixer/nrpn/output.js'
+import { LevelNRPNCalculator } from './mixer/nrpn/source-to-sink.js'
 
 /**
  * The variable ID for the variable containing the last recalled scene
@@ -14,7 +15,7 @@ export const CurrentSceneId = 'currentScene'
  */
 export const SceneRecalledTriggerId = 'sceneRecalledTrigger'
 
-export function getVariables(instance: sqInstance, model: Model): CompanionVariableDefinition[] {
+export function getVariables(model: Model): CompanionVariableDefinition[] {
 	const variables: CompanionVariableDefinition[] = [
 		{
 			name: 'Scene - Scene Recalled',
@@ -26,126 +27,191 @@ export function getVariables(instance: sqInstance, model: Model): CompanionVaria
 		},
 	]
 
+	const inputToMix = new LevelNRPNCalculator(model, ['inputChannel', 'mix'])
+	const inputToLR = new LevelNRPNCalculator(model, ['inputChannel', 'lr'])
+	const inputToFXSend = new LevelNRPNCalculator(model, ['inputChannel', 'fxSend'])
 	model.forEachInputChannel((channel, channelLabel, channelDesc) => {
-		model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {
-			const rsp = instance.getLevel(channel, mix, model.inputOutputCounts.mix, [0x40, 0x40], [0, 0x44])
+		model.forEachLR((_lr, _lrLabel, lrDesc) => {
+			const { MSB, LSB } = inputToLR.calculate(channel, 0)
+
+			variables.push({
+				name: `${channelLabel} -> ${lrDesc} Level`,
+				variableId: `level_${MSB}.${LSB}`,
+			})
+		})
+
+		model.forEachMix((mix, _mixLabel, mixDesc) => {
+			const { MSB, LSB } = inputToMix.calculate(channel, mix)
 
 			variables.push({
 				name: `${channelLabel} -> ${mixDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
+
 		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
-			const rsp = instance.getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
+			const { MSB, LSB } = inputToFXSend.calculate(channel, fxs)
 
 			variables.push({
 				name: `${channelDesc} -> ${fxsDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
 	})
 
+	const groupToMix = new LevelNRPNCalculator(model, ['group', 'mix'])
+	const groupToLR = new LevelNRPNCalculator(model, ['group', 'lr'])
+	const groupToFXSend = new LevelNRPNCalculator(model, ['group', 'fxSend'])
+	const groupToMatrix = new LevelNRPNCalculator(model, ['group', 'matrix'])
 	model.forEachGroup((group, _groupLabel, groupDesc) => {
-		model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {
-			const rsp = instance.getLevel(group, mix, model.inputOutputCounts.mix, [0x40, 0x45], [0x30, 0x04])
+		model.forEachLR((_lr, _lrLabel, lrDesc) => {
+			const { MSB, LSB } = groupToLR.calculate(group, 0)
+
+			variables.push({
+				name: `${groupDesc} -> ${lrDesc} Level`,
+				variableId: `level_${MSB}.${LSB}`,
+			})
+		})
+
+		model.forEachMix((mix, _mixLabel, mixDesc) => {
+			const { MSB, LSB } = groupToMix.calculate(group, mix)
 
 			variables.push({
 				name: `${groupDesc} -> ${mixDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
 		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
-			const rsp = instance.getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
+			const { MSB, LSB } = groupToFXSend.calculate(group, fxs)
 
 			variables.push({
 				name: `${groupDesc} -> ${fxsDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
 		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
-			const rsp = instance.getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
+			const { MSB, LSB } = groupToMatrix.calculate(group, matrix)
 
 			variables.push({
 				name: `${groupDesc} -> ${matrixDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
 	})
 
+	const fxReturnToMix = new LevelNRPNCalculator(model, ['fxReturn', 'mix'])
+	const fxReturnToLR = new LevelNRPNCalculator(model, ['fxReturn', 'lr'])
+	const fxReturnToGroup = new LevelNRPNCalculator(model, ['fxReturn', 'group'])
+	const fxReturnToFxSend = new LevelNRPNCalculator(model, ['fxReturn', 'fxSend'])
 	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
-		model.forEachMixAndLR((mix, _mixLabel, mixDesc) => {
-			const rsp = instance.getLevel(fxr, mix, model.inputOutputCounts.mix, [0x40, 0x46], [0x3c, 0x14])
+		model.forEachLR((_lr, _lrLabel, lrDesc) => {
+			const { MSB, LSB } = fxReturnToLR.calculate(fxr, 0)
+
+			variables.push({
+				name: `${fxrDesc} -> ${lrDesc} Level`,
+				variableId: `level_${MSB}.${LSB}`,
+			})
+		})
+
+		model.forEachMix((mix, _mixLabel, mixDesc) => {
+			const { MSB, LSB } = fxReturnToMix.calculate(fxr, mix)
 
 			variables.push({
 				name: `${fxrDesc} -> ${mixDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
 		model.forEachGroup((group, _groupLabel, groupDesc) => {
-			const rsp = instance.getLevel(fxr, group, model.inputOutputCounts.group, [0, 0x4b], [0, 0x34])
+			const { MSB, LSB } = fxReturnToGroup.calculate(fxr, group)
 
 			variables.push({
 				name: `${fxrDesc} -> ${groupDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
 		model.forEachFxSend((fxs, _fxsLabel, fxsDesc) => {
-			const rsp = instance.getLevel(fxr, fxs, model.inputOutputCounts.fxSend, [0, 0x4e], [0, 0x04])
+			const { MSB, LSB } = fxReturnToFxSend.calculate(fxr, fxs)
 
 			variables.push({
 				name: `${fxrDesc} -> ${fxsDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
 	})
 
-	model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
-		const rsp = instance.getLevel(0, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x24])
+	const lrToMatrix = new LevelNRPNCalculator(model, ['lr', 'matrix'])
+	model.forEachLR((_lr, _lrLabel, lrDesc) => {
+		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
+			const { MSB, LSB } = lrToMatrix.calculate(0, matrix)
 
-		variables.push({
-			name: `LR -> ${matrixDesc} Level`,
-			variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+			variables.push({
+				name: `${lrDesc} -> ${matrixDesc} Level`,
+				variableId: `level_${MSB}.${LSB}`,
+			})
 		})
 	})
 
+	const mixToMatrix = new LevelNRPNCalculator(model, ['mix', 'matrix'])
 	model.forEachMix((mix, _mixLabel, mixDesc) => {
 		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
-			const rsp = instance.getLevel(mix, matrix, model.inputOutputCounts.matrix, [0x4e, 0x4e], [0x24, 0x27])
+			const { MSB, LSB } = mixToMatrix.calculate(mix, matrix)
 
 			variables.push({
 				name: `${mixDesc} -> ${matrixDesc} Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
 	})
 
 	{
-		const tmp = []
-		tmp.push({ label: `LR`, id: 0 })
-		model.forEachMix((mix, _mixLabel, mixDesc) => {
-			tmp.push({ label: mixDesc, id: mix + 1 })
-		})
-		model.forEachFxSend((fxs, fxsLabel) => {
-			tmp.push({ label: fxsLabel, id: fxs + 1 + model.inputOutputCounts.mix })
-		})
-		model.forEachMatrix((matrix, matrixLabel) => {
-			tmp.push({ label: matrixLabel, id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend })
-		})
-		for (let j = 0; j < tmp.length; j++) {
-			const rsp = instance.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
+		const lrOutput = new OutputLevelNRPNCalculator(model, 'lr')
+		model.forEachLR((_lr, _lrLabel, lrDesc) => {
+			const { MSB, LSB } = lrOutput.calculate(0)
 
 			variables.push({
-				name: `${tmp[j].label} Output Level`,
-				variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+				name: `${lrDesc} Output Level`,
+				variableId: `level_${MSB}.${LSB}`,
 			})
-		}
+		})
+
+		const mixOutput = new OutputLevelNRPNCalculator(model, 'mix')
+		model.forEachMix((mix, _mixLabel, mixDesc) => {
+			const { MSB, LSB } = mixOutput.calculate(mix)
+
+			variables.push({
+				name: `${mixDesc} Output Level`,
+				variableId: `level_${MSB}.${LSB}`,
+			})
+		})
+
+		const fxSendOutput = new OutputLevelNRPNCalculator(model, 'fxSend')
+		model.forEachFxSend((fxs, fxsLabel) => {
+			const { MSB, LSB } = fxSendOutput.calculate(fxs)
+
+			variables.push({
+				name: `${fxsLabel} Output Level`,
+				variableId: `level_${MSB}.${LSB}`,
+			})
+		})
+
+		const matrixOutput = new OutputLevelNRPNCalculator(model, 'matrix')
+		model.forEachMatrix((matrix, matrixLabel) => {
+			const { MSB, LSB } = matrixOutput.calculate(matrix)
+
+			variables.push({
+				name: `${matrixLabel} Output Level`,
+				variableId: `level_${MSB}.${LSB}`,
+			})
+		})
 	}
+
+	const dcaOutput = new OutputLevelNRPNCalculator(model, 'dca')
 	model.forEachDCA((dca, dcaLabel) => {
-		const rsp = instance.getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
+		const { MSB, LSB } = dcaOutput.calculate(dca)
 
 		variables.push({
 			name: `${dcaLabel} Output Level`,
-			variableId: `level_${rsp['channel'][0]}.${rsp['channel'][1]}`,
+			variableId: `level_${MSB}.${LSB}`,
 		})
 	})
 

@@ -102,7 +102,7 @@ export class sqInstance extends InstanceBase {
 	 * @param {import('./mixer/model.js').Model} model
 	 */
 	initVariableDefinitions(model) {
-		this.setVariableDefinitions(getVariables(this, model))
+		this.setVariableDefinitions(getVariables(model))
 
 		this.setVariableValues({
 			[SceneRecalledTriggerId]: 0,
