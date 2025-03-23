@@ -21,7 +21,10 @@ function createMixes(model: Model): DropdownChoice[] {
 
 function createMixesAndLR(model: Model): DropdownChoice[] {
 	const mixesAndLR: DropdownChoice[] = []
-	model.forEachMixAndLR((id, label) => {
+	model.forEachLR((id, label) => {
+		mixesAndLR.push({ label, id })
+	})
+	model.forEachMix((id, label) => {
 		mixesAndLR.push({ label, id })
 	})
 	return mixesAndLR

@@ -113,8 +113,15 @@ export class Model {
 		})
 	}
 
-	forEachMixAndLR(f: ForEachFunctor): void {
+	forEachLR(f: (n: typeof LR, label: string, desc: string) => void): void {
+		// Note: `LR === 99` rather than `0` to `N` as is the case for all the
+		// other functors.  (This can be regularized to `0` when LR's internal
+		// handling is decoupled from the encoding of LR as 99 in actions.)
 		f(LR, 'LR', 'LR')
+	}
+
+	forEachMixAndLR(f: ForEachFunctor): void {
+		this.forEachLR(f)
 		this.forEachMix(f)
 	}
 
