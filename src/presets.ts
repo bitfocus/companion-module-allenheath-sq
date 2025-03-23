@@ -5,7 +5,7 @@ import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 import type { sqInstance } from './instance.js'
-import type { Param } from './mixer/nrpn/param.js'
+import type { LevelParam } from './mixer/nrpn/param.js'
 import { LevelNRPNCalculator } from './mixer/nrpn/source-to-sink.js'
 
 const White = combineRgb(255, 255, 255)
@@ -151,7 +151,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 
 	/* MUTE + FADER LEVEL */
 	const muteWithFaderLevel = (
-		{ MSB, LSB }: Param,
+		{ MSB, LSB }: LevelParam,
 		ch: number,
 		channelLabel: string,
 		mix: number | 'lr',

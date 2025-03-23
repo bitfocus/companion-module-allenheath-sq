@@ -6,7 +6,7 @@ import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../mi
 import { type InputOutputType, LR, Model } from './model.js'
 import { calculateMuteNRPN } from './nrpn/mute.js'
 import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './nrpn/output.js'
-import type { Param } from './nrpn/param.js'
+import type { BalanceParam } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
@@ -820,7 +820,7 @@ export class Mixer {
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
-	#setPanBalance({ MSB, LSB }: Param, panBalance: PanBalanceChoice): void {
+	#setPanBalance({ MSB, LSB }: BalanceParam, panBalance: PanBalanceChoice): void {
 		const midi = this.midi
 
 		let modifyPanBalanceCommand

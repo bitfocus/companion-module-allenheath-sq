@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { BalanceNRPNCalculator, type SourceSinkForNRPN } from './source-to-sink.js'
 import { type InputOutputType, Model } from '../model.js'
-import type { Param } from './param.js'
+import type { UnbrandedParam } from './param.js'
 
 describe('BalanceNRPNCalculator', () => {
 	const model = new Model('SQ5')
 
-	type BalanceOK = { type: 'ok'; result: Param }
+	type BalanceOK = { type: 'ok'; result: UnbrandedParam }
 	type BalanceError = { type: 'error'; match: RegExp | string }
 	type BalanceBehavior = BalanceOK | BalanceError
 

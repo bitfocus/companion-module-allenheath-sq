@@ -1,5 +1,5 @@
 import { LR } from './model.js'
-import type { Param } from './nrpn/param.js'
+import type { UnbrandedParam } from './nrpn/param.js'
 
 /**
  * Compute the MSB/LSB for a `source`-to-LR relationship.
@@ -21,7 +21,7 @@ import type { Param } from './nrpn/param.js'
  *   [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).)
  */
 
-function computeLRParameters(source: number, base: Param): Param {
+function computeLRParameters(source: number, base: UnbrandedParam): UnbrandedParam {
 	if (source === LR) {
 		throw new Error('LR-to-LR must be specially handled')
 	}
@@ -53,7 +53,7 @@ function computeLRParameters(source: number, base: Param): Param {
  *   [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).)
  */
 
-function computeParameters(source: number, sink: number, sinkCount: number, base: Param): Param {
+function computeParameters(source: number, sink: number, sinkCount: number, base: UnbrandedParam): UnbrandedParam {
 	if (source === LR) {
 		throw new Error('LR source must be manually converted to 0 with parameter base appropriately adjusted')
 	}
@@ -69,8 +69,8 @@ export function computeEitherParameters(
 	source: number,
 	sink: number,
 	sinkCount: number,
-	base: Param,
-	lrBase: Param,
-): Param {
+	base: UnbrandedParam,
+	lrBase: UnbrandedParam,
+): UnbrandedParam {
 	return sink === LR ? computeLRParameters(source, lrBase) : computeParameters(source, sink, sinkCount, base)
 }

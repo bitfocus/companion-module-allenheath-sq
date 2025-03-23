@@ -1,15 +1,15 @@
 import type { InputOutputType, Model } from '../model.js'
-import type { Param } from './param.js'
+import type { NRPNType, ToKnownParam, UnbrandedParam } from './param.js'
 
 type OutputInfo = {
 	/** The base MSB/LSB for adjusting output level. */
-	readonly level: Param
+	readonly level: UnbrandedParam
 
 	/**
 	 * The base MSB/LSB for adjusting output balance.  Only stereo
 	 * outputs define this; mono outputs omit it.
 	 */
-	readonly panBalance?: Param
+	readonly panBalance?: UnbrandedParam
 }
 
 /**
@@ -17,6 +17,8 @@ type OutputInfo = {
  * output.
  */
 type OutputNRPN = keyof Required<OutputInfo>
+
+type OutputParametersType = Partial<Readonly<Record<InputOutputType, Readonly<OutputInfo>>>>
 
 /**
  * Base parameter MSB/LSB values for mixer sinks set as mixer outputs.  Note
@@ -26,7 +28,7 @@ type OutputNRPN = keyof Required<OutputInfo>
  * These values are the pairs in the columns of the relevant tables in the
  * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
  */
-const OutputParameterBase = {
+const OutputParameterBaseRaw = {
 	lr: {
 		level: { MSB: 0x4f, LSB: 0x00 },
 		panBalance: { MSB: 0x5f, LSB: 0x00 },
@@ -49,7 +51,23 @@ const OutputParameterBase = {
 	dca: {
 		level: { MSB: 0x4f, LSB: 0x20 },
 	},
-} as const satisfies Partial<Readonly<Record<InputOutputType, Readonly<OutputInfo>>>>
+} as const satisfies OutputParametersType
+
+type ApplyOutputBranding<T extends OutputParametersType> = {
+	[Sink in keyof T]: T[Sink] extends OutputInfo
+		? {
+				[NRPN in keyof T[Sink]]: T[Sink][NRPN] extends UnbrandedParam
+					? NRPN extends NRPNType
+						? ToKnownParam<NRPN>
+						: never
+					: never
+			}
+		: T[Sink] extends undefined
+			? Sink | undefined
+			: never
+}
+
+const OutputParameterBase = OutputParameterBaseRaw as ApplyOutputBranding<typeof OutputParameterBaseRaw>
 
 type OutputParameterBaseType = typeof OutputParameterBase
 
@@ -82,7 +100,7 @@ class OutputNRPNCalculator<NRPN extends OutputNRPN> {
 		this.#base = info[nrpnType]
 	}
 
-	calculate(sink: number): Param {
+	calculate(sink: number): ToKnownParam<NRPN> {
 		if (this.#inputOutputCounts[this.#sinkType] <= sink) {
 			throw new Error(`${this.#sinkType}=${sink} is invalid`)
 		}
@@ -90,7 +108,7 @@ class OutputNRPNCalculator<NRPN extends OutputNRPN> {
 		const { MSB, LSB } = this.#base
 
 		const val = LSB + sink
-		return { MSB: MSB + ((val >> 7) & 0xf), LSB: val & 0x7f }
+		return { MSB: MSB + ((val >> 7) & 0xf), LSB: val & 0x7f } as ToKnownParam<NRPN>
 	}
 }
 

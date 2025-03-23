@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { LevelNRPNCalculator, type SourceSinkForNRPN } from './source-to-sink.js'
 import { type InputOutputType, Model } from '../model.js'
-import type { Param } from './param.js'
+import type { UnbrandedParam } from './param.js'
 
 describe('LevelNRPNCalculator', () => {
 	const model = new Model('SQ5')
 
-	type LevelOK = { type: 'ok'; result: Param }
+	type LevelOK = { type: 'ok'; result: UnbrandedParam }
 	type LevelError = { type: 'error'; match: RegExp | string }
 	type LevelBehavior = LevelOK | LevelError
 

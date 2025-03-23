@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
 import { calculateMuteNRPN } from './mute.js'
-import type { Param } from './param.js'
+import type { UnbrandedParam } from './param.js'
 
 describe('calculateMuteNRPN', () => {
 	const model = new Model('SQ5')
 
-	type InputOutputBehavior = { type: 'ok'; result: Param } | { type: 'error'; match: RegExp | string }
+	type InputOutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
 
 	type InputOutputTests = {
 		[n: number]: InputOutputBehavior

@@ -5,7 +5,7 @@ import { getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
-import type { Param } from '../mixer/nrpn/param.js'
+import type { LevelParam } from '../mixer/nrpn/param.js'
 import {
 	LevelNRPNCalculator,
 	type SinkForMixAndLRInSinkForNRPN,
@@ -36,7 +36,7 @@ type LevelType = {
 	source: number
 	sink: number
 	sourceSinkType: [InputOutputType, InputOutputType]
-	param: Param
+	param: LevelParam
 }
 
 type LevelSourceSinkPairs =

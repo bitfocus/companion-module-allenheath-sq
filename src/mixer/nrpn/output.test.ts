@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
 import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './output.js'
-import type { Param } from './param.js'
+import type { UnbrandedParam } from './param.js'
 
 describe('calculateOutputNRPN', () => {
 	const model = new Model('SQ5')
 
-	type OutputBehavior = { type: 'ok'; result: Param } | { type: 'error'; match: RegExp | string }
+	type OutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
 
 	type OutputTest = [number, OutputBehavior][]
 

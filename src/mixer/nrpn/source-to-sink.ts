@@ -1,12 +1,12 @@
 import type { InputOutputType, Model } from '../model.js'
-import type { Param } from './param.js'
+import type { Param, ToKnownParam, UnbrandedParam } from './param.js'
 
 type SourceToSinkInfo = {
 	/**
 	 * Base parameter MSB/LSB values for controlling the assignment status of
 	 * some source in some sink.
 	 */
-	readonly assign?: Param
+	readonly assign?: UnbrandedParam
 
 	/**
 	 * Base parameter MSB/LSB values for controlling the level of some source in
@@ -17,7 +17,7 @@ type SourceToSinkInfo = {
 	 * Meanwhile input channel levels can't be set in groups, so this property
 	 * would be absent for that relationship.
 	 */
-	readonly level?: Param
+	readonly level?: UnbrandedParam
 
 	/**
 	 * Base parameter MSB/LSB values for controlling the pan/balance of some
@@ -27,15 +27,17 @@ type SourceToSinkInfo = {
 	 * in LR so will define this property.  But input channels can't be panned
 	 * in groups, so that relationship doesn't define this property.
 	 */
-	readonly panBalance?: Param
+	readonly panBalance?: UnbrandedParam
 }
 
 type SourceSinkNRPN = keyof Required<SourceToSinkInfo>
 
+type SinkInfo = {
+	readonly [sink in InputOutputType]?: SourceToSinkInfo
+}
+
 type SourceToSinkType = {
-	readonly [source in InputOutputType]?: {
-		readonly [sink in InputOutputType]?: SourceToSinkInfo
-	}
+	readonly [source in InputOutputType]?: SinkInfo
 }
 
 /**
@@ -51,7 +53,7 @@ type SourceToSinkType = {
  * one as you move rightward across a row, then down to start of the next row to
  * move rightward again.
  */
-const SourceToSinkParameterBase = {
+const SourceToSinkParameterBaseRaw = {
 	inputChannel: {
 		group: {
 			assign: { MSB: 0x66, LSB: 0x74 },
@@ -129,6 +131,24 @@ const SourceToSinkParameterBase = {
 	},
 } as const satisfies SourceToSinkType
 
+type ApplySourceToSinkBranding<T extends SourceToSinkType> = {
+	[Source in keyof T]: T[Source] extends SinkInfo
+		? {
+				[Sink in keyof T[Source]]: T[Source][Sink] extends SourceToSinkInfo
+					? {
+							[NRPN in keyof T[Source][Sink]]: T[Source][Sink][NRPN] extends UnbrandedParam ? Param : never
+						}
+					: never
+			}
+		: T[Source] extends undefined
+			? SinkInfo | undefined
+			: never
+}
+
+const SourceToSinkParameterBase = SourceToSinkParameterBaseRaw as ApplySourceToSinkBranding<
+	typeof SourceToSinkParameterBaseRaw
+>
+
 type SourceToSinkParameterBaseType = typeof SourceToSinkParameterBase
 
 type SourceSinkForSourceToSinkForNRPN<
@@ -188,7 +208,7 @@ export type SinkForMixAndLRInSinkForNRPN<NRPN extends SourceSinkNRPN> = SinkHasN
 class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 	readonly #inputOutputCounts
 	readonly #sourceSink: SourceSinkForNRPN<NRPN>
-	readonly #base: Param
+	readonly #base: UnbrandedParam
 
 	/**
 	 * Construct a calculator for NRPNs of type identified by `nrpnType` for
@@ -214,7 +234,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 		// (sink type), and `nrpnType` after `SourceSinkNRPNMatches` has done
 		// its thing.  Do enough casting to make the property access sequence
 		// type-check.
-		const sinks = SourceToSinkParameterBase[sourceType] as Required<Required<SourceToSinkType>[InputOutputType]>
+		const sinks = SourceToSinkParameterBase[sourceType] as SourceToSinkType[InputOutputType] as SinkInfo
 		const info = sinks[sinkType] as Required<SourceToSinkInfo>
 		this.#base = info[nrpnType]
 	}
@@ -230,7 +250,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 	 * @returns
 	 *   The computed NRPN.
 	 */
-	calculate(source: number, sink: number): Param {
+	calculate(source: number, sink: number): ToKnownParam<NRPN> {
 		const [sourceType, sinkType] = this.#sourceSink
 
 		const inputOutputCounts = this.#inputOutputCounts
@@ -246,7 +266,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 		const base = this.#base
 
 		const val = base.LSB + sinkCount * source + sink
-		return { MSB: base.MSB + ((val >> 7) & 0xf), LSB: val & 0x7f }
+		return { MSB: base.MSB + ((val >> 7) & 0xf), LSB: val & 0x7f } as ToKnownParam<NRPN>
 	}
 }
 

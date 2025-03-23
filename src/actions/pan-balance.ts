@@ -9,7 +9,7 @@ import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { LR, type Model } from '../mixer/model.js'
-import type { Param } from '../mixer/nrpn/param.js'
+import type { BalanceParam } from '../mixer/nrpn/param.js'
 import {
 	BalanceNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,
@@ -124,7 +124,7 @@ function panSourceToMixOrLRLearnSubPrelude(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
-): Param | undefined {
+): BalanceParam | undefined {
 	const sourceSink = panSourceToMixOrLR(instance, model, options, sourceType)
 	if (sourceSink === null) {
 		return undefined
@@ -142,7 +142,7 @@ function panSourceToSinkLearnSubPrelude(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
-): Param | undefined {
+): BalanceParam | undefined {
 	const sourceSinkNums = panSourceToSink(instance, model, options, sourceSink)
 	if (sourceSinkNums === null) {
 		return undefined
@@ -291,7 +291,7 @@ function panMixOrLRToMatrixLearnSubPrelude(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-): Param | null {
+): BalanceParam | null {
 	const sourceSink = panMixOrLRToMatrix(instance, model, options)
 	if (sourceSink === null) {
 		return null

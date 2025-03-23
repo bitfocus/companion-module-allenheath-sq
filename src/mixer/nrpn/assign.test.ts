@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { AssignNRPNCalculator, type SourceSinkForNRPN } from './source-to-sink.js'
 import { type InputOutputType, Model } from '../model.js'
-import type { Param } from './param.js'
+import type { UnbrandedParam } from './param.js'
 
 describe('AssignNRPNCalculator', () => {
 	const model = new Model('SQ5')
 
-	type AssignOK = { type: 'ok'; result: Param }
+	type AssignOK = { type: 'ok'; result: UnbrandedParam }
 	type AssignError = { type: 'error'; match: RegExp | string }
 	type AssignBehavior = AssignOK | AssignError
 

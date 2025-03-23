@@ -1,7 +1,7 @@
 import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
-import type { Param } from '../mixer/nrpn/param.js'
+import type { LevelParam } from '../mixer/nrpn/param.js'
 import { repr } from '../utils/pretty.js'
 
 /** Compute the set of level options for level-setting actions. */
@@ -56,7 +56,7 @@ const MsPerSecond = 1000
 export function getFadeParameters(
 	instance: sqInstance,
 	options: CompanionOptionValues,
-	{ MSB, LSB }: Param,
+	{ MSB, LSB }: LevelParam,
 ): FadeParameters | null {
 	// Presets that incidentally invoke this function didn't always specify a
 	// fade time, so treat a missing fade as zero to support them.
