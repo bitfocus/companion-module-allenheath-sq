@@ -5,6 +5,7 @@ import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 import type { sqInstance } from './instance.js'
+import type { Param } from './mixer/nrpn/param.js'
 import { LevelNRPNCalculator } from './mixer/nrpn/source-to-sink.js'
 
 const White = combineRgb(255, 255, 255)
@@ -149,14 +150,22 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	})
 
 	/* MUTE + FADER LEVEL */
-	const createtMuteLevel = (cat: string, lab: string, typ: MuteType, ch: number, mix: number): void => {
-		const mixId = mix === LR ? 'lr' : `mix${mix}`
+	const muteWithFaderLevel = (
+		{ MSB, LSB }: Param,
+		ch: number,
+		channelLabel: string,
+		mix: number | 'lr',
+		mixLabel: string,
+	): void => {
+		const label = `${channelLabel}\\n${mixLabel}\\n$(${instance.label}:level_${MSB}.${LSB}) dB`
+
+		const mixId = mix === 'lr' ? 'lr' : `mix${mix}`
 		presets[`preset_mute_input${ch}_${mixId}`] = {
 			type: 'button',
-			category: cat,
-			name: lab,
+			category: `Mt+dB CH-${mixLabel}`,
+			name: label,
 			style: {
-				text: lab,
+				text: label,
 				size: 'auto',
 				color: White,
 				bgcolor: Black,
@@ -165,7 +174,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 				{
 					down: [
 						{
-							actionId: MuteActionId[typ],
+							actionId: MuteActionId.MuteInputChannel,
 							options: {
 								strip: ch,
 								mute: 0,
@@ -177,7 +186,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 			],
 			feedbacks: [
 				{
-					feedbackId: MuteFeedbackId[typ],
+					feedbackId: MuteFeedbackId.MuteInputChannel,
 					options: {
 						channel: ch,
 					},
@@ -191,15 +200,9 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	const lrCalc = new LevelNRPNCalculator(model, ['inputChannel', 'lr'])
 	model.forEachInputChannel((channel, channelLabel) => {
 		model.forEachMixAndLR((mix, mixLabel) => {
-			const { MSB, LSB } = mix === LR ? lrCalc.calculate(channel, 0) : mixCalc.calculate(channel, mix)
+			const nrpn = mix === LR ? lrCalc.calculate(channel, 0) : mixCalc.calculate(channel, mix)
 
-			createtMuteLevel(
-				`Mt+dB CH-${mixLabel}`,
-				`${channelLabel}\\n${mixLabel}\\n$(${instance.label}:level_${MSB}.${LSB}) dB`,
-				'MuteInputChannel',
-				channel,
-				mix,
-			)
+			muteWithFaderLevel(nrpn, channel, channelLabel, mix === LR ? 'lr' : mix, mixLabel)
 		})
 	})
 	/**/
