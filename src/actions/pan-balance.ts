@@ -357,7 +357,7 @@ export function panBalanceActions(
 			},
 		},
 		[PanBalanceActionId.FXReturnPanBalanceInGroup]: {
-			name: 'Fader FX return level to group',
+			name: 'Pan/Bal FX return level to group',
 			options: [
 				{
 					type: 'dropdown',
