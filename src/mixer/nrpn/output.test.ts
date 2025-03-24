@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { Model } from '../model.js'
+import { type InputOutputType, Model } from '../model.js'
 import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './output.js'
 import type { Param } from './param.js'
 
@@ -58,10 +58,16 @@ describe('calculateOutputNRPN', () => {
 		],
 	])
 
-	test('output level NRPN calculations', () => {
+	function* allLevelTests(): Generator<{
+		sinkType: InputOutputType
+		calc: OutputLevelNRPNCalculator
+		n: number
+		behavior: OutputBehavior
+	}> {
 		for (const [sinkType, sinkTests] of outputLevelTests) {
 			const calc = new OutputLevelNRPNCalculator(model, sinkType)
 			for (const [n, behavior] of sinkTests) {
+				yield { sinkType, calc, n, behavior }
 				switch (behavior.type) {
 					case 'ok':
 						expect(calc.calculate(n)).toEqual(behavior.result)
@@ -74,7 +80,23 @@ describe('calculateOutputNRPN', () => {
 				}
 			}
 		}
-	})
+	}
+
+	test.each([...allLevelTests()])(
+		'new OutputLevelNRPNCalculator(model, $sinkType).calculate($n)',
+		({ calc, n, behavior }) => {
+			switch (behavior.type) {
+				case 'ok':
+					expect(calc.calculate(n)).toEqual(behavior.result)
+					break
+				case 'error':
+					expect(() => calc.calculate(n)).toThrow(behavior.match)
+					break
+				default:
+					expect('missing').toBe('case')
+			}
+		},
+	)
 
 	const outputPanBalanceTests = new Map<SinkAsOutputForNRPN<'panBalance'>, OutputTest>([
 		[
@@ -104,21 +126,33 @@ describe('calculateOutputNRPN', () => {
 		],
 	])
 
-	test('output pan/balance NRPN calculations', () => {
+	function* allBalanceTests(): Generator<{
+		sinkType: InputOutputType
+		calc: OutputBalanceNRPNCalculator
+		n: number
+		behavior: OutputBehavior
+	}> {
 		for (const [sinkType, sinkTests] of outputPanBalanceTests) {
 			const calc = new OutputBalanceNRPNCalculator(model, sinkType)
 			for (const [n, behavior] of sinkTests) {
-				switch (behavior.type) {
-					case 'ok':
-						expect(calc.calculate(n)).toEqual(behavior.result)
-						break
-					case 'error':
-						expect(() => calc.calculate(n)).toThrow(behavior.match)
-						break
-					default:
-						expect('missing').toBe('case')
-				}
+				yield { sinkType, calc, n, behavior }
 			}
 		}
-	})
+	}
+
+	test.each([...allBalanceTests()])(
+		'new OutputBalanceNRPNCalculator(model, $sinkType).calculate($n)',
+		({ calc, n, behavior }) => {
+			switch (behavior.type) {
+				case 'ok':
+					expect(calc.calculate(n)).toEqual(behavior.result)
+					break
+				case 'error':
+					expect(() => calc.calculate(n)).toThrow(behavior.match)
+					break
+				default:
+					expect('missing').toBe('case')
+			}
+		},
+	)
 })

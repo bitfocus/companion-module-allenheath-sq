@@ -73,23 +73,31 @@ describe('calculateMuteNRPN', () => {
 		},
 	}
 
-	test('mute NRPN calculations', () => {
+	function* allMuteTests(): Generator<{
+		type: InputOutputType
+		n: number
+		behavior: InputOutputBehavior
+	}> {
 		for (const key in allInputsOutputs) {
 			const type = key as InputOutputType
 			const tests = allInputsOutputs[type]
 			for (const [num, behavior] of Object.entries(tests)) {
 				const n = Number(num)
-				switch (behavior.type) {
-					case 'ok':
-						expect(calculateMuteNRPN(model, type, n)).toEqual(behavior.result)
-						break
-					case 'error':
-						expect(() => calculateMuteNRPN(model, type, n)).toThrow(behavior.match)
-						break
-					default:
-						expect('missing').toBe('case')
-				}
+				yield { type, n, behavior }
 			}
+		}
+	}
+
+	test.each([...allMuteTests()])('calculateMuteNRPN(model, $type, $n)', ({ type, n, behavior }) => {
+		switch (behavior.type) {
+			case 'ok':
+				expect(calculateMuteNRPN(model, type, n)).toEqual(behavior.result)
+				break
+			case 'error':
+				expect(() => calculateMuteNRPN(model, type, n)).toThrow(behavior.match)
+				break
+			default:
+				expect('missing').toBe('case')
 		}
 	})
 })
