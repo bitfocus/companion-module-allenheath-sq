@@ -90,8 +90,6 @@ const SourceToSinkParameterBaseRaw = {
 		},
 		group: {
 			assign: { MSB: 0x6b, LSB: 0x34 },
-			level: { MSB: 0x4b, LSB: 0x34 },
-			panBalance: { MSB: 0x5b, LSB: 0x34 },
 		},
 	},
 	group: {

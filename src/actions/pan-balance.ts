@@ -439,34 +439,14 @@ export function panBalanceActions(
 			name: 'Pan/Bal FX return level to group',
 			options: [
 				{
-					type: 'dropdown',
-					label: 'FX return',
-					id: 'input',
-					default: 0,
-					choices: choices.fxReturns,
-					minChoicesForSearch: 0,
+					type: 'static-text',
+					id: 'invalid',
+					label: 'Invalid operation!',
+					value: 'FX returns can only be assigned to groups, not have their pan/balance set in them.',
 				},
-				{
-					type: 'dropdown',
-					label: 'Group',
-					id: 'assign',
-					default: 0,
-					choices: choices.groups,
-					minChoicesForSearch: 0,
-				},
-				panLevelOption,
-				ShowVarOption,
 			],
-			learn: panSourceToSinkLearn(instance, model, ['fxReturn', 'group']),
-			subscribe: panSourceToSinkSubscribe(instance, mixer, model, ['fxReturn', 'group']),
-			callback: async ({ options }) => {
-				const sourceSinkBalance = panSourceToSinkCallbackPrelude(instance, model, options, ['fxReturn', 'group'])
-				if (sourceSinkBalance === null) {
-					return
-				}
-				const [fxReturn, group, panBalance] = sourceSinkBalance
-
-				mixer.setFXReturnPanBalanceInGroup(fxReturn, panBalance, group)
+			callback: async () => {
+				instance.log('warn', 'The "Pan/Bal FX return level to group" operation is invalid.  Don\'t use this action!')
 			},
 		},
 		[PanBalanceActionId.MixOrLRPanBalanceInMatrix]: {
