@@ -268,38 +268,14 @@ export function levelActions(
 			name: 'Fader FX return level to group',
 			options: [
 				{
-					type: 'dropdown',
-					label: 'FX return',
-					id: 'input',
-					default: 0,
-					choices: choices.fxReturns,
-					minChoicesForSearch: 0,
+					type: 'static-text',
+					id: 'invalid',
+					label: 'Invalid operation!',
+					value: 'FX returns can only be assigned to groups, not have their levels set in them.',
 				},
-				{
-					type: 'dropdown',
-					label: 'Group',
-					id: 'assign',
-					default: 0,
-					choices: choices.groups,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
 			],
-			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['fxReturn', 'group'])
-				if (levelType === null) {
-					return
-				}
-				const { source: fxReturn, sink: group, param } = levelType
-
-				const fade = getFadeParameters(instance, options, param)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeFXReturnLevelInGroup(fxReturn, group, start, end, fadeTimeMs)
+			callback: async () => {
+				instance.log('warn', 'The "Fader FX return level to group" operation is invalid.  Don\'t use this action!')
 			},
 		},
 		[LevelActionId.InputChannelLevelInFXSend]: {

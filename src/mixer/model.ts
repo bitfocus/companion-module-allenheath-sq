@@ -362,7 +362,6 @@ export class Model {
 				fxSend: null,
 				mix: null,
 				lr: null,
-				group: null,
 			},
 			group: {
 				fxSend: null,
@@ -385,7 +384,6 @@ export class Model {
 			fxReturn: {
 				mix: null,
 				lr: null,
-				group: null,
 			},
 			group: {
 				mix: null,

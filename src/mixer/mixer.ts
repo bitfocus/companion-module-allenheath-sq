@@ -750,14 +750,6 @@ export class Mixer {
 	}
 
 	/**
-	 * Fade the level of the given FX return in the given group from `start` to
-	 * `end` over `fadeTimeMs` milliseconds.
-	 */
-	fadeFXReturnLevelInGroup(fxReturn: number, group: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(fxReturn, group, ['fxReturn', 'group'], start, end, fadeTimeMs)
-	}
-
-	/**
 	 * Fade the level of the given input channel in the given FX send from
 	 * `start` to `end` over `fadeTimeMs` milliseconds.
 	 */
@@ -951,20 +943,6 @@ export class Mixer {
 	 */
 	setFXReturnPanBalanceInMixOrLR(fxReturn: number, panBalance: PanBalanceChoice, mixOrLR: number): void {
 		this.#setPanBalanceInMixOrLR(fxReturn, 'fxReturn', panBalance, mixOrLR)
-	}
-
-	/**
-	 * Set the pan/balance of an FX return within a group.
-	 *
-	 * @param fxReturn
-	 *   An FX return, e.g. `1` for FX return 2.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param group
-	 *   A group, e.g. `2` for group 3.
-	 */
-	setFXReturnPanBalanceInGroup(fxReturn: number, panBalance: PanBalanceChoice, group: number): void {
-		this.#setPanBalanceInSink(fxReturn, panBalance, group, ['fxReturn', 'group'])
 	}
 
 	/**

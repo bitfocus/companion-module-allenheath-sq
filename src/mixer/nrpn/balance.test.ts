@@ -70,18 +70,6 @@ describe('BalanceNRPNCalculator', () => {
 				[0, 1, { type: 'error', match: 'lr=1 is invalid' }],
 				[8, 1, { type: 'error', match: 'fxReturn=8 is invalid' }],
 			],
-			// XXX not in latest MIDI doc, doesn't appear to be controllable on
-			//     SQ-5, remove?
-			group: [
-				[0, 0, { type: 'ok', result: { MSB: 0x5b, LSB: 0x34 } }],
-				[0, 11, { type: 'ok', result: { MSB: 0x5b, LSB: 0x3f } }],
-				[2, 3, { type: 'ok', result: { MSB: 0x5b, LSB: 0x4f } }],
-				[6, 1, { type: 'ok', result: { MSB: 0x5b, LSB: 0x7d } }],
-				[4, 7, { type: 'ok', result: { MSB: 0x5b, LSB: 0x6b } }],
-				[8, 0, { type: 'error', match: 'fxReturn=8 is invalid' }],
-				[0, 12, { type: 'error', match: 'group=12 is invalid' }],
-				[8, 12, { type: 'error', match: 'fxReturn=8 is invalid' }],
-			],
 		},
 		group: {
 			mix: [

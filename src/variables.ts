@@ -101,7 +101,6 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 
 	const fxReturnToMix = LevelNRPNCalculator.get(model, ['fxReturn', 'mix'])
 	const fxReturnToLR = LevelNRPNCalculator.get(model, ['fxReturn', 'lr'])
-	const fxReturnToGroup = LevelNRPNCalculator.get(model, ['fxReturn', 'group'])
 	const fxReturnToFxSend = LevelNRPNCalculator.get(model, ['fxReturn', 'fxSend'])
 	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 		model.forEachLR((_lr, _lrLabel, lrDesc) => {
@@ -118,14 +117,6 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 
 			variables.push({
 				name: `${fxrDesc} -> ${mixDesc} Level`,
-				variableId: `level_${MSB}.${LSB}`,
-			})
-		})
-		model.forEachGroup((group, _groupLabel, groupDesc) => {
-			const { MSB, LSB } = fxReturnToGroup.calculate(fxr, group)
-
-			variables.push({
-				name: `${fxrDesc} -> ${groupDesc} Level`,
 				variableId: `level_${MSB}.${LSB}`,
 			})
 		})
