@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'vitest'
 import { type PanBalance, panBalanceLevelToVCVF } from './pan-balance.js'
 
 describe('pan/balance choices to VC/VF', () => {

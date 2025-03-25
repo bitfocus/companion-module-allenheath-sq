@@ -1,6 +1,6 @@
 {
 	"extends": "./tsconfig.build.json",
-	"include": ["src/**/*.js", "src/**/*.ts", "eslint.config.mjs", "jest.config.ts", "knip.config.ts"],
+	"include": ["src/**/*.js", "src/**/*.ts", "eslint.config.mjs", "knip.config.ts", "vitest.config.ts"],
 	"exclude": ["node_modules/**"],
 	"compilerOptions": {}
 }

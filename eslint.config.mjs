@@ -41,11 +41,12 @@ const customConfig = [
 
 	permitLimitedUnpublishedImports(
 		['src/**/*spec.ts', 'src/**/*test.ts', 'src/**/__tests__/*', 'src/**/__mocks__/*'],
-		['@jest/globals'],
+		['vitest'],
 	),
 	permitLimitedUnpublishedImports(['eslint.config.mjs'], ['@companion-module/tools']),
 	permitLimitedUnpublishedImports(['jest.config.ts'], ['ts-jest']),
 	permitLimitedUnpublishedImports(['knip.config.ts'], ['knip']),
+	permitLimitedUnpublishedImports(['vitest.config.ts'], ['vitest']),
 ]
 
 export default customConfig

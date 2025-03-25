@@ -1,4 +1,4 @@
-import { describe, test } from '@jest/globals'
+import { describe, test } from 'vitest'
 import { TestMidiTokenizing } from './midi-tokenizing.js'
 import { SysExStart, SysExEnd, SysRTTimingClock, SysCommonSongPosMessage, SysCommonSongPosition } from '../../bytes.js'
 import {

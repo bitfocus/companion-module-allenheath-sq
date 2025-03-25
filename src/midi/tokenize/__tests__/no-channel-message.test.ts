@@ -1,4 +1,4 @@
-import { describe, test } from '@jest/globals'
+import { describe, test } from 'vitest'
 import { TestMidiTokenizing } from './midi-tokenizing.js'
 import { SysCommonMultiByte, SysExMessage } from '../../bytes.js'
 import { ExpectNextMessageNotReady, MixerWriteMidiBytes } from './interactions.js'
