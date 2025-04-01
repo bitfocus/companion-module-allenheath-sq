@@ -23,54 +23,54 @@ export default {
 
 		var buff = []
 
-		model.forEachInputChannel((channel) => {
+		model.forEach('inputChannel', (channel) => {
 			model.forEachMixAndLR((mix) => {
 				const rsp = self.getLevel(channel, mix, model.inputOutputCounts.mix, [0x40, 0x40], [0, 0x44])
 				buff.push(rsp.commands[0])
 			})
-			model.forEachFxSend((fxs) => {
+			model.forEach('fxSend', (fxs) => {
 				const rsp = self.getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
 				buff.push(rsp.commands[0])
 			})
 		})
 
-		model.forEachGroup((group) => {
+		model.forEach('group', (group) => {
 			model.forEachMixAndLR((mix) => {
 				const rsp = self.getLevel(group, mix, model.inputOutputCounts.mix, [0x40, 0x45], [0x30, 0x04])
 				buff.push(rsp.commands[0])
 			})
-			model.forEachFxSend((fxs) => {
+			model.forEach('fxSend', (fxs) => {
 				const rsp = self.getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
 				buff.push(rsp.commands[0])
 			})
-			model.forEachMatrix((matrix) => {
+			model.forEach('matrix', (matrix) => {
 				const rsp = self.getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
 				buff.push(rsp.commands[0])
 			})
 		})
 
-		model.forEachFxReturn((fxr) => {
+		model.forEach('fxReturn', (fxr) => {
 			model.forEachMixAndLR((mix) => {
 				const rsp = self.getLevel(fxr, mix, model.inputOutputCounts.mix, [0x40, 0x46], [0x3c, 0x14])
 				buff.push(rsp.commands[0])
 			})
-			model.forEachGroup((group) => {
+			model.forEach('group', (group) => {
 				const rsp = self.getLevel(fxr, group, model.inputOutputCounts.group, [0, 0x4b], [0, 0x34])
 				buff.push(rsp.commands[0])
 			})
-			model.forEachFxSend((fxs) => {
+			model.forEach('fxSend', (fxs) => {
 				const rsp = self.getLevel(fxr, fxs, model.inputOutputCounts.fxSend, [0, 0x4e], [0, 0x04])
 				buff.push(rsp.commands[0])
 			})
 		})
 
-		model.forEachMatrix((matrix) => {
+		model.forEach('matrix', (matrix) => {
 			const rsp = self.getLevel(0, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x24])
 			buff.push(rsp.commands[0])
 		})
 
-		model.forEachMix((mix) => {
-			model.forEachMatrix((matrix) => {
+		model.forEach('mix', (mix) => {
+			model.forEach('matrix', (matrix) => {
 				const rsp = self.getLevel(mix, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x27])
 				buff.push(rsp.commands[0])
 			})
@@ -79,13 +79,13 @@ export default {
 		{
 			const tmp = []
 			tmp.push({ label: `LR`, id: 0 })
-			model.forEachMix((mix, mixLabel) => {
+			model.forEach('mix', (mix, mixLabel) => {
 				tmp.push({ label: mixLabel, id: mix + 1 })
 			})
-			model.forEachFxSend((fxs, fxsLabel) => {
+			model.forEach('fxSend', (fxs, fxsLabel) => {
 				tmp.push({ label: fxsLabel, id: fxs + 1 + model.inputOutputCounts.mix })
 			})
-			model.forEachMatrix((matrix, matrixLabel) => {
+			model.forEach('matrix', (matrix, matrixLabel) => {
 				tmp.push({ label: matrixLabel, id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend })
 			})
 			for (let j = 0; j < tmp.length; j++) {
@@ -94,7 +94,7 @@ export default {
 			}
 		}
 
-		model.forEachDCA((dca) => {
+		model.forEach('dca', (dca) => {
 			const rsp = self.getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
 			buff.push(rsp.commands[0])
 		})

@@ -176,37 +176,6 @@ export class Model {
 		this.forEach('mix', f)
 	}
 
-	forEachInputChannel(f: ForEachFunctor): void {
-		this.forEach('inputChannel', f)
-	}
-	forEachMix(f: ForEachFunctor): void {
-		this.forEach('mix', f)
-	}
-	forEachGroup(f: ForEachFunctor): void {
-		this.forEach('group', f)
-	}
-	forEachFxReturn(f: ForEachFunctor): void {
-		this.forEach('fxReturn', f)
-	}
-	forEachFxSend(f: ForEachFunctor): void {
-		this.forEach('fxSend', f)
-	}
-	forEachMatrix(f: ForEachFunctor): void {
-		this.forEach('matrix', f)
-	}
-	forEachDCA(f: ForEachFunctor): void {
-		this.forEach('dca', f)
-	}
-	forEachMuteGroup(f: ForEachFunctor): void {
-		this.forEach('muteGroup', f)
-	}
-	forEachLR(f: ForEachFunctor): void {
-		this.forEach('lr', f)
-	}
-	forEachSoftKey(f: ForEachFunctor): void {
-		this.forEach('softKey', f)
-	}
-
 	#outputCalculators: OutputCalculatorCache = {
 		level: {
 			lr: null,

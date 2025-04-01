@@ -5,7 +5,7 @@ import { createPanLevels } from './actions/pan-balance.js'
 
 function createInputChannels(model: Model): DropdownChoice[] {
 	const inputChannels: DropdownChoice[] = []
-	model.forEachInputChannel((channel, channelLabel) => {
+	model.forEach('inputChannel', (channel, channelLabel) => {
 		inputChannels.push({ label: channelLabel, id: channel })
 	})
 	return inputChannels
@@ -13,7 +13,7 @@ function createInputChannels(model: Model): DropdownChoice[] {
 
 function createMixes(model: Model): DropdownChoice[] {
 	const mixes: DropdownChoice[] = []
-	model.forEachMix((id, label) => {
+	model.forEach('mix', (id, label) => {
 		mixes.push({ label, id })
 	})
 	return mixes
@@ -21,10 +21,10 @@ function createMixes(model: Model): DropdownChoice[] {
 
 function createMixesAndLR(model: Model): DropdownChoice[] {
 	const mixesAndLR: DropdownChoice[] = []
-	model.forEachLR((id, label) => {
+	model.forEach('lr', (id, label) => {
 		mixesAndLR.push({ label, id })
 	})
-	model.forEachMix((id, label) => {
+	model.forEach('mix', (id, label) => {
 		mixesAndLR.push({ label, id })
 	})
 	return mixesAndLR
@@ -32,7 +32,7 @@ function createMixesAndLR(model: Model): DropdownChoice[] {
 
 function createGroups(model: Model): DropdownChoice[] {
 	const groups: DropdownChoice[] = []
-	model.forEachGroup((group, groupLabel) => {
+	model.forEach('group', (group, groupLabel) => {
 		groups.push({ label: groupLabel, id: group })
 	})
 	return groups
@@ -40,7 +40,7 @@ function createGroups(model: Model): DropdownChoice[] {
 
 function createMatrixes(model: Model): DropdownChoice[] {
 	const matrixes: DropdownChoice[] = []
-	model.forEachMatrix((matrix, matrixLabel) => {
+	model.forEach('matrix', (matrix, matrixLabel) => {
 		matrixes.push({ label: matrixLabel, id: matrix })
 	})
 	return matrixes
@@ -48,7 +48,7 @@ function createMatrixes(model: Model): DropdownChoice[] {
 
 function createFXReturns(model: Model): DropdownChoice[] {
 	const fxReturns: DropdownChoice[] = []
-	model.forEachFxReturn((fxr, fxrLabel) => {
+	model.forEach('fxReturn', (fxr, fxrLabel) => {
 		fxReturns.push({ label: fxrLabel, id: fxr })
 	})
 	return fxReturns
@@ -56,7 +56,7 @@ function createFXReturns(model: Model): DropdownChoice[] {
 
 function createFXSends(model: Model): DropdownChoice[] {
 	const fxSends: DropdownChoice[] = []
-	model.forEachFxSend((fxs, fxsLabel) => {
+	model.forEach('fxSend', (fxs, fxsLabel) => {
 		fxSends.push({ label: fxsLabel, id: fxs })
 	})
 	return fxSends
@@ -64,7 +64,7 @@ function createFXSends(model: Model): DropdownChoice[] {
 
 function createDCAs(model: Model): DropdownChoice[] {
 	const dcas: DropdownChoice[] = []
-	model.forEachDCA((dca, dcaLabel) => {
+	model.forEach('dca', (dca, dcaLabel) => {
 		dcas.push({ label: dcaLabel, id: dca })
 	})
 	return dcas
@@ -72,7 +72,7 @@ function createDCAs(model: Model): DropdownChoice[] {
 
 function createMuteGroups(model: Model): DropdownChoice[] {
 	const muteGroups: DropdownChoice[] = []
-	model.forEachMuteGroup((muteGroup, muteGroupLabel) => {
+	model.forEach('muteGroup', (muteGroup, muteGroupLabel) => {
 		muteGroups.push({ label: muteGroupLabel, id: muteGroup })
 	})
 	return muteGroups
@@ -80,7 +80,7 @@ function createMuteGroups(model: Model): DropdownChoice[] {
 
 function createSoftKeys(model: Model): DropdownChoice[] {
 	const softKeys: DropdownChoice[] = []
-	model.forEachSoftKey((softKey, softKeyLabel) => {
+	model.forEach('softKey', (softKey, softKeyLabel) => {
 		softKeys.push({ label: softKeyLabel, id: softKey })
 	})
 	return softKeys
@@ -90,19 +90,19 @@ function createAllFaders(model: Model): DropdownChoice[] {
 	// All fader mix choices
 	const allFaders: DropdownChoice[] = []
 	allFaders.push({ label: `LR`, id: 0 })
-	model.forEachMix((mix, mixLabel) => {
+	model.forEach('mix', (mix, mixLabel) => {
 		allFaders.push({ label: mixLabel, id: mix + 1 })
 	})
-	model.forEachFxSend((fxs, fxsLabel) => {
+	model.forEach('fxSend', (fxs, fxsLabel) => {
 		allFaders.push({ label: fxsLabel, id: fxs + 1 + model.inputOutputCounts.mix })
 	})
-	model.forEachMatrix((matrix, matrixLabel) => {
+	model.forEach('matrix', (matrix, matrixLabel) => {
 		allFaders.push({
 			label: matrixLabel,
 			id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend,
 		})
 	})
-	model.forEachDCA((dca, dcaLabel) => {
+	model.forEach('dca', (dca, dcaLabel) => {
 		allFaders.push({
 			label: dcaLabel,
 			id: dca + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend + model.inputOutputCounts.matrix + 12,
@@ -115,10 +115,10 @@ function createAllFaders(model: Model): DropdownChoice[] {
 function createPanBalanceOutputFaders(model: Model): DropdownChoice[] {
 	const allFaders: DropdownChoice[] = []
 	allFaders.push({ label: `LR`, id: 0 })
-	model.forEachMix((mix, mixLabel) => {
+	model.forEach('mix', (mix, mixLabel) => {
 		allFaders.push({ label: mixLabel, id: 1 + mix })
 	})
-	model.forEachMatrix((matrix, matrixLabel) => {
+	model.forEach('matrix', (matrix, matrixLabel) => {
 		allFaders.push({ label: matrixLabel, id: 0x11 + matrix })
 	})
 

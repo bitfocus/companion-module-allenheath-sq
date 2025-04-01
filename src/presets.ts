@@ -72,7 +72,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	createtMute('Mute MuteGroup', 'MuteGroup', 'MuteMuteGroup', model.inputOutputCounts.muteGroup)
 
 	/* TALKBACK*/
-	model.forEachMix((mix, mixLabel, mixDesc) => {
+	model.forEach('mix', (mix, mixLabel, mixDesc) => {
 		presets[`preset_talkback_mix${mix}`] = {
 			type: 'button',
 			category: 'Talkback',
@@ -198,7 +198,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	// Input -> Mix
 	const mixCalc = LevelNRPNCalculator.get(model, ['inputChannel', 'mix'])
 	const lrCalc = LevelNRPNCalculator.get(model, ['inputChannel', 'lr'])
-	model.forEachInputChannel((channel, channelLabel) => {
+	model.forEach('inputChannel', (channel, channelLabel) => {
 		model.forEachMixAndLR((mix, mixLabel) => {
 			const nrpn = mix === LR ? lrCalc.calculate(channel, 0) : mixCalc.calculate(channel, mix)
 
