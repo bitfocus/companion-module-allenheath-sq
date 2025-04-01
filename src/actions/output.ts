@@ -92,16 +92,16 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 	// // All fader mix choices
 	// const allFaders: DropdownChoice[] = []
 	// allFaders.push({ label: `LR`, id: 0 })
-	// model.forEachMix((mix, mixLabel) => {
+	// model.forEach('mix', (mix, mixLabel) => {
 	//      allFaders.push({ label: mixLabel, id: mix + 1 })
 	// })
-	// model.forEachFxSend((fxs, fxsLabel) => {
+	// model.forEach('fxSend', (fxs, fxsLabel) => {
 	//      allFaders.push({ label: fxsLabel, id: fxs + 1 + model.count.mix })
 	// })
-	// model.forEachMatrix((matrix, matrixLabel) => {
+	// model.forEach('matrix', (matrix, matrixLabel) => {
 	//      allFaders.push({ label: matrixLabel, id: matrix + 1 + model.count.mix + model.count.fxSend })
 	// })
-	// model.forEachDCA((dca, dcaLabel) => {
+	// model.forEach('dca', (dca, dcaLabel) => {
 	//      allFaders.push({
 	//              label: dcaLabel,
 	//              id: dca + 1 + model.count.mix + model.count.fxSend + model.count.matrix + 12,
@@ -199,10 +199,10 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 	//
 	// const allFaders: DropdownChoice[] = []
 	// allFaders.push({ label: `LR`, id: 0 })
-	// model.forEachMix((mix, mixLabel) => {
+	// model.forEach('mix', (mix, mixLabel) => {
 	//      allFaders.push({ label: mixLabel, id: 1 + mix })
 	// })
-	// model.forEachMatrix((matrix, matrixLabel) => {
+	// model.forEach('matrix', (matrix, matrixLabel) => {
 	//      allFaders.push({ label: matrixLabel, id: 0x11 + matrix })
 	// })
 	//
