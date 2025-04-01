@@ -15,11 +15,8 @@ import {
 
 type ForEachFunctor = (n: number, label: string, desc: string) => void
 
-/**
- * A record of the count of the number of instances of every kind of mixer input
- * and output.
- */
-type InputOutputCounts = {
+/** A record of the count of inputs, outputs, and soft keys on an SQ mixer. */
+type MixerCounts = {
 	inputChannel: number
 	mix: number
 	group: number
@@ -33,9 +30,17 @@ type InputOutputCounts = {
 	// NRPN for source-to-LR mappings is unrelated to the base for source-to-mix
 	// mappings.   We therefore treat LR as a separate single-element category.
 	lr: 1
+
+	softKey: number
 }
 
-export type InputOutputType = keyof InputOutputCounts
+/** The type of all inputs and outputs on an SQ mixer. */
+export type InputOutputType = Exclude<keyof MixerCounts, 'softKey'>
+
+type LabelDesc = {
+	readonly pairs: (readonly [string, string])[]
+	readonly generate: (i: number) => readonly [string, string]
+}
 
 /**
  * The value of the LR mix, in any interface that accepts either a mix (0
@@ -52,7 +57,7 @@ let sourceSinkCalculatorCache: (model: Model) => SourceToSinkCalculatorCache
 
 export class Model {
 	/** Counts of all inputs/outputs for this mixer model. */
-	readonly inputOutputCounts: InputOutputCounts
+	readonly inputOutputCounts: MixerCounts
 
 	/** The number of softkeys on the mixer. */
 	softKeys: number
@@ -76,7 +81,10 @@ export class Model {
 			matrix: sqModel.mtxCount,
 			dca: sqModel.dcaCount,
 			muteGroup: sqModel.muteGroupCount,
+
 			lr: 1,
+
+			softKey: sqModel.softKeyCount,
 		}
 
 		this.softKeys = sqModel.softKeyCount
@@ -84,226 +92,119 @@ export class Model {
 		this.scenes = sqModel.sceneCount
 	}
 
-	#channelLabel(channel: number): string {
-		return `CH ${channel + 1}`
+	readonly #labelsDescs: Record<InputOutputType | 'softKey', LabelDesc> = {
+		inputChannel: {
+			pairs: [],
+			generate(channel: number) {
+				const label = `CH ${channel + 1}`
+				return [label, label]
+			},
+		},
+		mix: {
+			pairs: [],
+			generate: (mix) => [`AUX ${mix + 1}`, `Aux ${mix + 1}`],
+		},
+		group: {
+			pairs: [],
+			generate: (group: number) => [`GROUP ${group + 1}`, `Group ${group + 1}`],
+		},
+		fxReturn: {
+			pairs: [],
+			generate: (fxr: number) => [`FX RETURN ${fxr + 1}`, `FX Return ${fxr + 1}`],
+		},
+		fxSend: {
+			pairs: [],
+			generate: (fxs: number) => [`FX SEND ${fxs + 1}`, `FX Send ${fxs + 1}`],
+		},
+		matrix: {
+			pairs: [],
+			generate: (matrix: number) => [`MATRIX ${matrix + 1}`, `Matrix ${matrix + 1}`],
+		},
+		dca: {
+			pairs: [],
+			generate: (dca: number) => {
+				const label = `DCA ${dca + 1}`
+				return [label, label]
+			},
+		},
+		muteGroup: {
+			pairs: [],
+			generate: (muteGroup: number) => {
+				const label = `MuteGroup ${muteGroup + 1}`
+				return [label, label]
+			},
+		},
+		lr: {
+			pairs: [],
+			generate: (_lr: number) => {
+				// Note: `_lr === 0` here but `LR === 99`.
+				return ['LR', 'LR']
+			},
+		},
+
+		softKey: {
+			pairs: [],
+			generate: (key: number) => [`SOFTKEY ${key + 1}`, `SoftKey ${key + 1}`],
+		},
 	}
 
-	readonly #channelLabels: string[] = []
+	forEach(type: InputOutputType | 'softKey', f: ForEachFunctor): void {
+		if (type === 'lr') {
+			// Note: `LR === 99` rather than `0` to `N` as is the case for all
+			// the other functors.  (This can be regularized to `0` when LR's
+			// internal handling is decoupled from the encoding of LR as 99 in
+			// actions, but for right now it requires a special case.)
+			f(LR, 'LR', 'LR')
+			return
+		}
 
-	forEachInputChannel(f: ForEachFunctor): void {
-		const channelLabels = this.#channelLabels
-		if (channelLabels.length === 0) {
-			for (let channel = 0; channel < this.inputOutputCounts.inputChannel; channel++) {
-				const label = this.#channelLabel(channel)
-				channelLabels.push(label)
+		const labelDescs = this.#labelsDescs[type]
+		const pairs = labelDescs.pairs
+		if (pairs.length === 0) {
+			for (let i = 0, count = this.inputOutputCounts[type]; i < count; i++) {
+				pairs.push(labelDescs.generate(i))
 			}
 		}
 
-		channelLabels.forEach((label, channel) => {
-			f(channel, label, label)
+		pairs.forEach(([label, desc], i) => {
+			f(i, label, desc)
 		})
-	}
-
-	#mixLabel(mix: number): string {
-		return `AUX ${mix + 1}`
-	}
-
-	#mixDesc(mix: number): string {
-		return `Aux ${mix + 1}`
-	}
-
-	readonly #mixLabels: [string, string][] = []
-
-	forEachMix(f: ForEachFunctor): void {
-		const mixLabels = this.#mixLabels
-		if (mixLabels.length === 0) {
-			for (let mix = 0; mix < this.inputOutputCounts.mix; mix++) {
-				const label = this.#mixLabel(mix)
-				const desc = this.#mixDesc(mix)
-				mixLabels.push([label, desc])
-			}
-		}
-
-		mixLabels.forEach(([label, desc], mix) => {
-			f(mix, label, desc)
-		})
-	}
-
-	forEachLR(f: (n: typeof LR, label: string, desc: string) => void): void {
-		// Note: `LR === 99` rather than `0` to `N` as is the case for all the
-		// other functors.  (This can be regularized to `0` when LR's internal
-		// handling is decoupled from the encoding of LR as 99 in actions.)
-		f(LR, 'LR', 'LR')
 	}
 
 	forEachMixAndLR(f: ForEachFunctor): void {
-		this.forEachLR(f)
-		this.forEachMix(f)
+		this.forEach('lr', f)
+		this.forEach('mix', f)
 	}
 
-	#groupLabel(group: number): string {
-		return `GROUP ${group + 1}`
+	forEachInputChannel(f: ForEachFunctor): void {
+		this.forEach('inputChannel', f)
 	}
-
-	#groupDesc(group: number): string {
-		return `Group ${group + 1}`
+	forEachMix(f: ForEachFunctor): void {
+		this.forEach('mix', f)
 	}
-
-	readonly #groupLabels: [string, string][] = []
-
 	forEachGroup(f: ForEachFunctor): void {
-		const groupLabels = this.#groupLabels
-		if (groupLabels.length === 0) {
-			for (let group = 0; group < this.inputOutputCounts.group; group++) {
-				const label = this.#groupLabel(group)
-				const desc = this.#groupDesc(group)
-				groupLabels.push([label, desc])
-			}
-		}
-
-		groupLabels.forEach(([label, desc], group) => {
-			f(group, label, desc)
-		})
+		this.forEach('group', f)
 	}
-
-	#fxReturnLabel(fxr: number): string {
-		return `FX RETURN ${fxr + 1}`
-	}
-
-	#fxReturnDesc(fxr: number): string {
-		return `FX Return ${fxr + 1}`
-	}
-
-	readonly #fxReturnLabels: [string, string][] = []
-
 	forEachFxReturn(f: ForEachFunctor): void {
-		const fxReturnLabels = this.#fxReturnLabels
-		if (fxReturnLabels.length === 0) {
-			for (let fxr = 0; fxr < this.inputOutputCounts.fxReturn; fxr++) {
-				const label = this.#fxReturnLabel(fxr)
-				const desc = this.#fxReturnDesc(fxr)
-				fxReturnLabels.push([label, desc])
-			}
-		}
-
-		fxReturnLabels.forEach(([label, desc], fxr) => {
-			f(fxr, label, desc)
-		})
+		this.forEach('fxReturn', f)
 	}
-
-	#fxSendLabel(fxs: number): string {
-		return `FX SEND ${fxs + 1}`
-	}
-
-	#fxSendDesc(fxs: number): string {
-		return `FX Send ${fxs + 1}`
-	}
-
-	readonly #fxSendLabels: [string, string][] = []
-
 	forEachFxSend(f: ForEachFunctor): void {
-		const fxSendLabels = this.#fxSendLabels
-		if (fxSendLabels.length === 0) {
-			for (let fxs = 0; fxs < this.inputOutputCounts.fxSend; fxs++) {
-				const label = this.#fxSendLabel(fxs)
-				const desc = this.#fxSendDesc(fxs)
-				fxSendLabels.push([label, desc])
-			}
-		}
-
-		fxSendLabels.forEach(([label, desc], fxs) => {
-			f(fxs, label, desc)
-		})
+		this.forEach('fxSend', f)
 	}
-
-	#matrixLabel(matrix: number): string {
-		return `MATRIX ${matrix + 1}`
-	}
-
-	#matrixDesc(matrix: number): string {
-		return `Matrix ${matrix + 1}`
-	}
-
-	readonly #matrixLabels: [string, string][] = []
-
 	forEachMatrix(f: ForEachFunctor): void {
-		const matrixLabels = this.#matrixLabels
-		if (matrixLabels.length === 0) {
-			for (let matrix = 0; matrix < this.inputOutputCounts.matrix; matrix++) {
-				const label = this.#matrixLabel(matrix)
-				const desc = this.#matrixDesc(matrix)
-				matrixLabels.push([label, desc])
-			}
-		}
-
-		matrixLabels.forEach(([label, desc], matrix) => {
-			f(matrix, label, desc)
-		})
+		this.forEach('matrix', f)
 	}
-
-	#muteGroupLabel(muteGroup: number): string {
-		return `MuteGroup ${muteGroup + 1}`
-	}
-
-	readonly #muteGroupLabels: string[] = []
-
-	forEachMuteGroup(f: ForEachFunctor): void {
-		const muteGroupLabels = this.#muteGroupLabels
-		if (muteGroupLabels.length === 0) {
-			for (let muteGroup = 0; muteGroup < this.inputOutputCounts.muteGroup; muteGroup++) {
-				const label = this.#muteGroupLabel(muteGroup)
-				muteGroupLabels.push(label)
-			}
-		}
-
-		muteGroupLabels.forEach((label, muteGroup) => {
-			f(muteGroup, label, label)
-		})
-	}
-
-	#softKeyLabel(key: number): string {
-		return `SOFTKEY ${key + 1}`
-	}
-
-	#softKeyDesc(key: number): string {
-		return `SoftKey ${key + 1}`
-	}
-
-	readonly #softKeyLabels: [string, string][] = []
-
-	forEachSoftKey(f: ForEachFunctor): void {
-		const softKeyLabels = this.#softKeyLabels
-		if (softKeyLabels.length === 0) {
-			for (let softKey = 0; softKey < this.softKeys; softKey++) {
-				const label = this.#softKeyLabel(softKey)
-				const desc = this.#softKeyDesc(softKey)
-				softKeyLabels.push([label, desc])
-			}
-		}
-
-		softKeyLabels.forEach(([label, desc], softKey) => {
-			f(softKey, label, desc)
-		})
-	}
-
-	#dcaLabel(dca: number): string {
-		return `DCA ${dca + 1}`
-	}
-
-	readonly #dcaLabels: string[] = []
-
 	forEachDCA(f: ForEachFunctor): void {
-		const dcaLabels = this.#dcaLabels
-		if (dcaLabels.length === 0) {
-			for (let dca = 0; dca < this.inputOutputCounts.dca; dca++) {
-				const label = this.#dcaLabel(dca)
-				dcaLabels.push(label)
-			}
-		}
-
-		dcaLabels.forEach((label, dca) => {
-			f(dca, label, label)
-		})
+		this.forEach('dca', f)
+	}
+	forEachMuteGroup(f: ForEachFunctor): void {
+		this.forEach('muteGroup', f)
+	}
+	forEachLR(f: ForEachFunctor): void {
+		this.forEach('lr', f)
+	}
+	forEachSoftKey(f: ForEachFunctor): void {
+		this.forEach('softKey', f)
 	}
 
 	#outputCalculators: OutputCalculatorCache = {
