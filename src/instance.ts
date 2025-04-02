@@ -11,7 +11,6 @@ import { OutputActionId } from './actions/output.js'
 import { Choices } from './choices.js'
 import { GetConfigFields, type SQInstanceConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
-import type { NRPNIncDecMessage } from './midi/session.js'
 import { Mixer, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import type { Model } from './mixer/model.js'
 import { computeEitherParameters } from './mixer/parameters.js'
@@ -153,30 +152,29 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 
 	// DEPRECATED BELOW HERE
 
-	getLevel(
-		ch: number,
-		mx: number,
-		ct: number,
-		oMB: readonly [number, number],
-		oLB: readonly [number, number],
-	): {
-		readonly commands: readonly [NRPNIncDecMessage]
-		readonly channel: [number, number]
-	} {
-		const { MSB, LSB } = computeEitherParameters(ch, mx, ct, { MSB: oMB[1], LSB: oLB[1] }, { MSB: oMB[0], LSB: oLB[0] })
-
+	deprecatedGetRemoteLevel(): void {
 		// XXX Assert non-null to get it working for now.
 		const mixer = this.mixer!
 
-		return {
-			commands: [mixer.getNRPNValue(MSB, LSB)],
-			channel: [MSB, LSB],
+		const getLevel = (
+			ch: number,
+			mx: number,
+			ct: number,
+			oMB: readonly [number, number],
+			oLB: readonly [number, number],
+		) => {
+			const { MSB, LSB } = computeEitherParameters(
+				ch,
+				mx,
+				ct,
+				{ MSB: oMB[1], LSB: oLB[1] },
+				{ MSB: oMB[0], LSB: oLB[0] },
+			)
+
+			return {
+				commands: [mixer.getNRPNValue(MSB, LSB)],
+			}
 		}
-	}
-
-	getRemoteLevel(): void {
-		// XXX Assert non-null to get it working for now.
-		const mixer = this.mixer!
 
 		const model = mixer.model
 
@@ -184,53 +182,53 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 
 		model.forEach('inputChannel', (channel) => {
 			model.forEachMixAndLR((mix) => {
-				const rsp = this.getLevel(channel, mix, model.inputOutputCounts.mix, [0x40, 0x40], [0, 0x44])
+				const rsp = getLevel(channel, mix, model.inputOutputCounts.mix, [0x40, 0x40], [0, 0x44])
 				buff.push(rsp.commands[0])
 			})
 			model.forEach('fxSend', (fxs) => {
-				const rsp = this.getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
+				const rsp = getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
 				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEach('group', (group) => {
 			model.forEachMixAndLR((mix) => {
-				const rsp = this.getLevel(group, mix, model.inputOutputCounts.mix, [0x40, 0x45], [0x30, 0x04])
+				const rsp = getLevel(group, mix, model.inputOutputCounts.mix, [0x40, 0x45], [0x30, 0x04])
 				buff.push(rsp.commands[0])
 			})
 			model.forEach('fxSend', (fxs) => {
-				const rsp = this.getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
+				const rsp = getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
 				buff.push(rsp.commands[0])
 			})
 			model.forEach('matrix', (matrix) => {
-				const rsp = this.getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
+				const rsp = getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
 				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEach('fxReturn', (fxr) => {
 			model.forEachMixAndLR((mix) => {
-				const rsp = this.getLevel(fxr, mix, model.inputOutputCounts.mix, [0x40, 0x46], [0x3c, 0x14])
+				const rsp = getLevel(fxr, mix, model.inputOutputCounts.mix, [0x40, 0x46], [0x3c, 0x14])
 				buff.push(rsp.commands[0])
 			})
 			model.forEach('group', (group) => {
-				const rsp = this.getLevel(fxr, group, model.inputOutputCounts.group, [0, 0x4b], [0, 0x34])
+				const rsp = getLevel(fxr, group, model.inputOutputCounts.group, [0, 0x4b], [0, 0x34])
 				buff.push(rsp.commands[0])
 			})
 			model.forEach('fxSend', (fxs) => {
-				const rsp = this.getLevel(fxr, fxs, model.inputOutputCounts.fxSend, [0, 0x4e], [0, 0x04])
+				const rsp = getLevel(fxr, fxs, model.inputOutputCounts.fxSend, [0, 0x4e], [0, 0x04])
 				buff.push(rsp.commands[0])
 			})
 		})
 
 		model.forEach('matrix', (matrix) => {
-			const rsp = this.getLevel(0, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x24])
+			const rsp = getLevel(0, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x24])
 			buff.push(rsp.commands[0])
 		})
 
 		model.forEach('mix', (mix) => {
 			model.forEach('matrix', (matrix) => {
-				const rsp = this.getLevel(mix, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x27])
+				const rsp = getLevel(mix, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x27])
 				buff.push(rsp.commands[0])
 			})
 		})
@@ -248,13 +246,13 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 				tmp.push({ label: matrixLabel, id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend })
 			})
 			for (let j = 0; j < tmp.length; j++) {
-				const rsp = this.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
+				const rsp = getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
 				buff.push(rsp.commands[0])
 			}
 		}
 
 		model.forEach('dca', (dca) => {
-			const rsp = this.getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
+			const rsp = getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
 			buff.push(rsp.commands[0])
 		})
 

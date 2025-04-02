@@ -120,11 +120,11 @@ export class MidiSession {
 
 			this.#retrieveMuteStatuses()
 			sleep(300)
-			instance.getRemoteLevel()
+			instance.deprecatedGetRemoteLevel()
 
 			if (retrieveStatus === RetrieveStatusAtStartup.Fully) {
 				setTimeout(() => {
-					instance.getRemoteLevel()
+					instance.deprecatedGetRemoteLevel()
 				}, 4000)
 			}
 		})
