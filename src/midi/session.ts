@@ -1,6 +1,6 @@
 import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import { CallbackInfo, type CallbackInfoType } from '../callback.js'
-import type { SQInstanceInterface as sqInstance } from '../instance-interface.js'
+import type { sqInstance } from '../instance.js'
 import { type Mixer, RetrieveStatusAtStartup } from '../mixer/mixer.js'
 import { vcvfToReadablePanBalance } from '../mixer/pan-balance.js'
 import { ChannelParser } from './parse/channel-parser.js'

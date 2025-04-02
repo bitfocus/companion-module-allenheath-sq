@@ -1,16 +1,19 @@
+// @ts-check
+
 // Allen & Heath SQ Series
 
 import { InstanceBase, InstanceStatus } from '@companion-module/base'
 import { getActions } from './actions/actions.js'
+import { OutputActionId } from './actions/output.js'
 import { Choices } from './choices.js'
 import { GetConfigFields } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
-import { Mixer } from './mixer/mixer.js'
+import { Mixer, RetrieveStatusAtStartup } from './mixer/mixer.js'
+import { computeEitherParameters } from './mixer/parameters.js'
 import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
 import { getPresets } from './presets.js'
+import { sleep } from './utils/sleep.js'
 import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
-
-import api from './api.js'
 
 /**
  * @extends InstanceBase<import('./config.js').SQInstanceConfig>
@@ -30,20 +33,6 @@ export class sqInstance extends InstanceBase {
 	 */
 	#lastLabel = null
 
-	/**
-	 * Construct an `sqInstance`.
-	 *
-	 * @param {ConstructorParameters<typeof InstanceBase<import('./config.js').SQInstanceConfig>>[0]} internal
-	 */
-	constructor(internal) {
-		super(internal)
-
-		// Assign the methods from the listed files to this class
-		Object.assign(this, {
-			...api,
-		})
-	}
-
 	async destroy() {
 		if (this.mixer !== null) {
 			this.mixer.stop(InstanceStatus.Disconnected)
@@ -51,10 +40,16 @@ export class sqInstance extends InstanceBase {
 		}
 	}
 
-	async init(config) {
+	/**
+	 * @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['init']}
+	 */
+	async init(config, _isFirstInit) {
 		this.configUpdated(config)
 	}
 
+	/**
+	 * @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['getConfigFields']}
+	 */
 	getConfigFields() {
 		return GetConfigFields()
 	}
@@ -114,6 +109,9 @@ export class sqInstance extends InstanceBase {
 		})
 	}
 
+	/**
+	 * @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['configUpdated']}
+	 */
 	async configUpdated(config) {
 		const oldOptions = this.options
 
@@ -130,7 +128,7 @@ export class sqInstance extends InstanceBase {
 				// presets, so if the label changes, we must redefine presets
 				// even if we don't have to restart the connection.
 				this.#lastLabel = label
-				this.setPresetDefinitions(getPresets(this, this.mixer.model))
+				this.setPresetDefinitions(getPresets(this, /** @type {Mixer} */ (this.mixer).model))
 			}
 			return
 		}
@@ -160,5 +158,158 @@ export class sqInstance extends InstanceBase {
 		} else {
 			mixer.start(host)
 		}
+	}
+
+	// DEPRECATED BELOW HERE
+
+	/**
+	 *
+	 * @param {number} ch
+	 * @param {number} mx
+	 * @param {number} ct
+	 * @param {readonly [number, number]} oMB
+	 * @param {readonly [number, number]} oLB
+	 * @returns {{ readonly commands: readonly [import('./midi/session.js').NRPNIncDecMessage], readonly channel: [number, number] }}
+	 */
+	getLevel(ch, mx, ct, oMB, oLB) {
+		const { MSB, LSB } = computeEitherParameters(ch, mx, ct, { MSB: oMB[1], LSB: oLB[1] }, { MSB: oMB[0], LSB: oLB[0] })
+
+		const mixer = /** @type {import('./mixer/mixer.js').Mixer} */ (this.mixer)
+
+		return {
+			commands: [mixer.getNRPNValue(MSB, LSB)],
+			channel: [MSB, LSB],
+		}
+	}
+
+	getRemoteLevel() {
+		var self = this
+
+		// Cast to get it working for now.
+		const mixer = /** @type {Mixer} */ (self.mixer)
+
+		const model = mixer.model
+
+		var buff = []
+
+		model.forEach('inputChannel', (channel) => {
+			model.forEachMixAndLR((mix) => {
+				const rsp = self.getLevel(channel, mix, model.inputOutputCounts.mix, [0x40, 0x40], [0, 0x44])
+				buff.push(rsp.commands[0])
+			})
+			model.forEach('fxSend', (fxs) => {
+				const rsp = self.getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
+				buff.push(rsp.commands[0])
+			})
+		})
+
+		model.forEach('group', (group) => {
+			model.forEachMixAndLR((mix) => {
+				const rsp = self.getLevel(group, mix, model.inputOutputCounts.mix, [0x40, 0x45], [0x30, 0x04])
+				buff.push(rsp.commands[0])
+			})
+			model.forEach('fxSend', (fxs) => {
+				const rsp = self.getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
+				buff.push(rsp.commands[0])
+			})
+			model.forEach('matrix', (matrix) => {
+				const rsp = self.getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
+				buff.push(rsp.commands[0])
+			})
+		})
+
+		model.forEach('fxReturn', (fxr) => {
+			model.forEachMixAndLR((mix) => {
+				const rsp = self.getLevel(fxr, mix, model.inputOutputCounts.mix, [0x40, 0x46], [0x3c, 0x14])
+				buff.push(rsp.commands[0])
+			})
+			model.forEach('group', (group) => {
+				const rsp = self.getLevel(fxr, group, model.inputOutputCounts.group, [0, 0x4b], [0, 0x34])
+				buff.push(rsp.commands[0])
+			})
+			model.forEach('fxSend', (fxs) => {
+				const rsp = self.getLevel(fxr, fxs, model.inputOutputCounts.fxSend, [0, 0x4e], [0, 0x04])
+				buff.push(rsp.commands[0])
+			})
+		})
+
+		model.forEach('matrix', (matrix) => {
+			const rsp = self.getLevel(0, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x24])
+			buff.push(rsp.commands[0])
+		})
+
+		model.forEach('mix', (mix) => {
+			model.forEach('matrix', (matrix) => {
+				const rsp = self.getLevel(mix, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x27])
+				buff.push(rsp.commands[0])
+			})
+		})
+
+		{
+			const tmp = []
+			tmp.push({ label: `LR`, id: 0 })
+			model.forEach('mix', (mix, mixLabel) => {
+				tmp.push({ label: mixLabel, id: mix + 1 })
+			})
+			model.forEach('fxSend', (fxs, fxsLabel) => {
+				tmp.push({ label: fxsLabel, id: fxs + 1 + model.inputOutputCounts.mix })
+			})
+			model.forEach('matrix', (matrix, matrixLabel) => {
+				tmp.push({ label: matrixLabel, id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend })
+			})
+			for (let j = 0; j < tmp.length; j++) {
+				const rsp = self.getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
+				buff.push(rsp.commands[0])
+			}
+		}
+
+		model.forEach('dca', (dca) => {
+			const rsp = self.getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
+			buff.push(rsp.commands[0])
+		})
+
+		const delayStatusRetrieval = self.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
+
+		if (buff.length > 0 && mixer.midi.socket !== null) {
+			let ctr = 0
+			for (let i = 0; i < buff.length; i++) {
+				mixer.midi.send(buff[i])
+				ctr++
+				if (delayStatusRetrieval) {
+					if (ctr === 20) {
+						ctr = 0
+						sleep(300)
+					}
+				}
+			}
+		}
+
+		self.subscribeActions('chpan_to_mix')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		self.subscribeActions('grppan_to_mix')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		self.subscribeActions('fxrpan_to_mix')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		self.subscribeActions('fxrpan_to_grp')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		self.subscribeActions('mixpan_to_mtx')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		self.subscribeActions('grppan_to_mtx')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		self.subscribeActions(OutputActionId.LRPanBalanceOutput)
+		self.subscribeActions(OutputActionId.MixPanBalanceOutput)
+		self.subscribeActions(OutputActionId.MatrixPanBalanceOutput)
 	}
 }
