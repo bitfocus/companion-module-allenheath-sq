@@ -1,56 +1,53 @@
-// @ts-check
-
 // Allen & Heath SQ Series
 
-import { InstanceBase, InstanceStatus } from '@companion-module/base'
+import {
+	type CompanionVariableValue,
+	InstanceBase,
+	InstanceStatus,
+	type SomeCompanionConfigField,
+} from '@companion-module/base'
 import { getActions } from './actions/actions.js'
 import { OutputActionId } from './actions/output.js'
 import { Choices } from './choices.js'
-import { GetConfigFields } from './config.js'
+import { GetConfigFields, type SQInstanceConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
+import type { NRPNIncDecMessage } from './midi/session.js'
 import { Mixer, RetrieveStatusAtStartup } from './mixer/mixer.js'
+import type { Model } from './mixer/model.js'
 import { computeEitherParameters } from './mixer/parameters.js'
 import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
 import { getPresets } from './presets.js'
 import { sleep } from './utils/sleep.js'
 import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
 
-/**
- * @extends InstanceBase<import('./config.js').SQInstanceConfig>
- */
-export class sqInstance extends InstanceBase {
+/** An SQ mixer connection instance. */
+export class sqInstance extends InstanceBase<SQInstanceConfig> {
 	/** Options dictating the behavior of this instance. */
 	options = noConnectionOptions()
 
-	/** @type {Mixer | null} */
-	mixer = null
+	/**
+	 * The mixer being manipulated by this instance if one has been identified.
+	 */
+	mixer: Mixer | null = null
 
 	/**
 	 * The last label specified for this instance, or `null` if there wasn't a
 	 * last label.
-	 *
-	 * @type {string | null}
 	 */
-	#lastLabel = null
+	#lastLabel: string | null = null
 
-	async destroy() {
+	override async destroy(): Promise<void> {
 		if (this.mixer !== null) {
 			this.mixer.stop(InstanceStatus.Disconnected)
 			this.mixer = null
 		}
 	}
 
-	/**
-	 * @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['init']}
-	 */
-	async init(config, _isFirstInit) {
-		this.configUpdated(config)
+	override async init(config: SQInstanceConfig, _isFirstInit: boolean): Promise<void> {
+		void this.configUpdated(config)
 	}
 
-	/**
-	 * @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['getConfigFields']}
-	 */
-	getConfigFields() {
+	override getConfigFields(): SomeCompanionConfigField[] {
 		return GetConfigFields()
 	}
 
@@ -58,15 +55,15 @@ export class sqInstance extends InstanceBase {
 	 * Set the value of a variable that doesn't exist when this instance is
 	 * initialized, but only is brought into existence if/when it is needed.
 	 *
-	 * @param {import('@companion-module/base').CompanionVariableDefinition['variableId']} variableId
+	 * @param variableId
 	 *   The id of the variable, i.e. the part that appears to right of the
 	 *   colon in `$(SQ:ident)`.
-	 * @param {import('@companion-module/base').CompanionVariableDefinition['name']} _name
+	 * @param _name
 	 *   A user-exposed description of the variable.
-	 * @param {import('@companion-module/base').CompanionVariableValue} variableValue
+	 * @param variableValue
 	 *   The value of the variable.
 	 */
-	setExtraVariable(variableId, _name, variableValue) {
+	setExtraVariable(variableId: string, _name: string, variableValue: CompanionVariableValue): void {
 		// The name of this potentially newly-defined variable is currently not
 		// used.  If we wanted to, we could redefine the entire variable set
 		// (with this new variable included), to expose this new variable in
@@ -91,12 +88,8 @@ export class sqInstance extends InstanceBase {
 		}
 	}
 
-	/**
-	 * Set variable definitions for this instance.
-	 *
-	 * @param {import('./mixer/model.js').Model} model
-	 */
-	initVariableDefinitions(model) {
+	/** Set variable definitions for this instance. */
+	initVariableDefinitions(model: Model): void {
 		this.setVariableDefinitions(getVariables(model))
 
 		this.setVariableValues({
@@ -109,10 +102,7 @@ export class sqInstance extends InstanceBase {
 		})
 	}
 
-	/**
-	 * @type {import('@companion-module/base').InstanceBase<import('./config.js').SQInstanceConfig>['configUpdated']}
-	 */
-	async configUpdated(config) {
+	override async configUpdated(config: SQInstanceConfig): Promise<void> {
 		const oldOptions = this.options
 
 		const newOptions = optionsFromConfig(config)
@@ -128,7 +118,8 @@ export class sqInstance extends InstanceBase {
 				// presets, so if the label changes, we must redefine presets
 				// even if we don't have to restart the connection.
 				this.#lastLabel = label
-				this.setPresetDefinitions(getPresets(this, /** @type {Mixer} */ (this.mixer).model))
+				// XXX This assertion is actually wrong...
+				this.setPresetDefinitions(getPresets(this, this.mixer!.model))
 			}
 			return
 		}
@@ -162,19 +153,20 @@ export class sqInstance extends InstanceBase {
 
 	// DEPRECATED BELOW HERE
 
-	/**
-	 *
-	 * @param {number} ch
-	 * @param {number} mx
-	 * @param {number} ct
-	 * @param {readonly [number, number]} oMB
-	 * @param {readonly [number, number]} oLB
-	 * @returns {{ readonly commands: readonly [import('./midi/session.js').NRPNIncDecMessage], readonly channel: [number, number] }}
-	 */
-	getLevel(ch, mx, ct, oMB, oLB) {
+	getLevel(
+		ch: number,
+		mx: number,
+		ct: number,
+		oMB: readonly [number, number],
+		oLB: readonly [number, number],
+	): {
+		readonly commands: readonly [NRPNIncDecMessage]
+		readonly channel: [number, number]
+	} {
 		const { MSB, LSB } = computeEitherParameters(ch, mx, ct, { MSB: oMB[1], LSB: oLB[1] }, { MSB: oMB[0], LSB: oLB[0] })
 
-		const mixer = /** @type {import('./mixer/mixer.js').Mixer} */ (this.mixer)
+		// XXX Assert non-null to get it working for now.
+		const mixer = this.mixer!
 
 		return {
 			commands: [mixer.getNRPNValue(MSB, LSB)],
@@ -182,13 +174,13 @@ export class sqInstance extends InstanceBase {
 		}
 	}
 
-	getRemoteLevel() {
-		// Cast to get it working for now.
-		const mixer = /** @type {Mixer} */ (this.mixer)
+	getRemoteLevel(): void {
+		// XXX Assert non-null to get it working for now.
+		const mixer = this.mixer!
 
 		const model = mixer.model
 
-		var buff = []
+		const buff = []
 
 		model.forEach('inputChannel', (channel) => {
 			model.forEachMixAndLR((mix) => {
