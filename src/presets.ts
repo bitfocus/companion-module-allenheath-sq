@@ -199,10 +199,15 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	const mixCalc = LevelNRPNCalculator.get(model, ['inputChannel', 'mix'])
 	const lrCalc = LevelNRPNCalculator.get(model, ['inputChannel', 'lr'])
 	model.forEach('inputChannel', (channel, channelLabel) => {
-		model.forEachMixAndLR((mix, mixLabel) => {
-			const nrpn = mix === LR ? lrCalc.calculate(channel, 0) : mixCalc.calculate(channel, mix)
+		model.forEach('lr', (_lr, lrLabel) => {
+			const nrpn = lrCalc.calculate(channel, 0)
+			muteWithFaderLevel(nrpn, channel, channelLabel, 'lr', lrLabel)
+		})
 
-			muteWithFaderLevel(nrpn, channel, channelLabel, mix === LR ? 'lr' : mix, mixLabel)
+		model.forEach('mix', (mix, mixLabel) => {
+			const nrpn = mixCalc.calculate(channel, mix)
+
+			muteWithFaderLevel(nrpn, channel, channelLabel, mix, mixLabel)
 		})
 	})
 	/**/
