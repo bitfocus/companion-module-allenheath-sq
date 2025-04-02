@@ -6,11 +6,6 @@ import { generateEslintConfig } from '@companion-module/tools/eslint/config.mjs'
 const baseConfig = await generateEslintConfig({
 	enableJest: true,
 	enableTypescript: true,
-	ignores: [
-		// Legacy JS files are being refactored out of existence, so skip them.
-		'src/api.js',
-		'src/instance.js',
-	],
 })
 
 /**
