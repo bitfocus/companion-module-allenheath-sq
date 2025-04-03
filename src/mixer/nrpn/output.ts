@@ -18,7 +18,14 @@ type OutputInfo = {
  */
 type OutputNRPN = keyof Required<OutputInfo>
 
-/** Base parameter MSB/LSB values for mixer sinks set as mixer outputs. */
+/**
+ * Base parameter MSB/LSB values for mixer sinks set as mixer outputs.  Note
+ * that LR is considered to be a special category, distinct from mixes, that
+ * consists of only the single LR mix.
+ *
+ * These values are the pairs in the columns of the relevant tables in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ */
 const OutputParameterBase = {
 	lr: {
 		level: { MSB: 0x4f, LSB: 0x00 },

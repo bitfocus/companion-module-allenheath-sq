@@ -1,17 +1,14 @@
 import type { InputOutputType, Model } from '../model.js'
 import type { Param } from './param.js'
 
-// Pairs of 7-bit MSB/LSB throughout the rest of this file are the pairs in the
-// top of relevant sections of tables in the SQ MIDI Protocol document:
-//
-// https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf
-//
-// The general idea is that a base MSB/LSB identifies the top left of a
-// rectangular area of a table, and then proceeding left to right, then top to
-// bottom, each MSB/LSB taken as a concatenated 14-bit MSB:LSB number increases
-// by one.
-
-/** Base parameter MSB/LSB values for mute state of sources/sinks. */
+/**
+ * Base parameter MSB/LSB values for mute state of sources/sinks.  Note that LR
+ * is considered to be a special category, distinct from mixes, that consists of
+ * only the single LR mix.
+ *
+ * These values are the pairs in the columns of the relevant tables in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ */
 const MuteParameterBase = {
 	inputChannel: { MSB: 0x00, LSB: 0x00 },
 	lr: { MSB: 0x00, LSB: 0x44 },

@@ -40,7 +40,16 @@ type SourceToSinkType = {
 
 /**
  * Base parameter MSB/LSB values corresponding to all mixer source-sink
- * relationships.
+ * relationships.  (Note that the `'mix'` category is mixes only and never
+ * includes the LR mix.)
+ *
+ * These values are the pairs at top left of the relevant table sections in the
+ * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+ * Note that when the table has mixes/LR as either source or sink, this may not
+ * be top left of the entire table but only of a subset of it.  This is fine so
+ * long as the math works out such that the combined 14-bit MSB:LSB increases by
+ * one as you move rightward across a row, then down to start of the next row to
+ * move rightward again.
  */
 export const SourceToSinkParameterBase = {
 	inputChannel: {
