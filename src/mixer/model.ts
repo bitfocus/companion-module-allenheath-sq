@@ -171,11 +171,6 @@ export class Model {
 		})
 	}
 
-	forEachMixAndLR(f: ForEachFunctor): void {
-		this.forEach('lr', f)
-		this.forEach('mix', f)
-	}
-
 	#outputCalculators: OutputCalculatorCache = {
 		level: {
 			lr: null,

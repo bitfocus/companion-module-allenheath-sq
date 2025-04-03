@@ -13,6 +13,8 @@ import { GetConfigFields, type SQInstanceConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
 import { Mixer, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import type { Model } from './mixer/model.js'
+import type { LevelParam } from './mixer/nrpn/param.js'
+import { forEachSourceSinkLevel } from './mixer/nrpn/source-to-sink.js'
 import { computeEitherParameters } from './mixer/parameters.js'
 import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
 import { getPresets } from './presets.js'
@@ -181,57 +183,8 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 
 		const buff = []
 
-		model.forEach('inputChannel', (channel) => {
-			model.forEachMixAndLR((mix) => {
-				const rsp = getLevel(channel, mix, model.inputOutputCounts.mix, [0x40, 0x40], [0, 0x44])
-				buff.push(rsp.commands[0])
-			})
-			model.forEach('fxSend', (fxs) => {
-				const rsp = getLevel(channel, fxs, model.inputOutputCounts.fxSend, [0, 0x4c], [0, 0x14])
-				buff.push(rsp.commands[0])
-			})
-		})
-
-		model.forEach('group', (group) => {
-			model.forEachMixAndLR((mix) => {
-				const rsp = getLevel(group, mix, model.inputOutputCounts.mix, [0x40, 0x45], [0x30, 0x04])
-				buff.push(rsp.commands[0])
-			})
-			model.forEach('fxSend', (fxs) => {
-				const rsp = getLevel(group, fxs, model.inputOutputCounts.fxSend, [0, 0x4d], [0, 0x54])
-				buff.push(rsp.commands[0])
-			})
-			model.forEach('matrix', (matrix) => {
-				const rsp = getLevel(group, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x4b])
-				buff.push(rsp.commands[0])
-			})
-		})
-
-		model.forEach('fxReturn', (fxr) => {
-			model.forEachMixAndLR((mix) => {
-				const rsp = getLevel(fxr, mix, model.inputOutputCounts.mix, [0x40, 0x46], [0x3c, 0x14])
-				buff.push(rsp.commands[0])
-			})
-			model.forEach('group', (group) => {
-				const rsp = getLevel(fxr, group, model.inputOutputCounts.group, [0, 0x4b], [0, 0x34])
-				buff.push(rsp.commands[0])
-			})
-			model.forEach('fxSend', (fxs) => {
-				const rsp = getLevel(fxr, fxs, model.inputOutputCounts.fxSend, [0, 0x4e], [0, 0x04])
-				buff.push(rsp.commands[0])
-			})
-		})
-
-		model.forEach('matrix', (matrix) => {
-			const rsp = getLevel(0, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x24])
-			buff.push(rsp.commands[0])
-		})
-
-		model.forEach('mix', (mix) => {
-			model.forEach('matrix', (matrix) => {
-				const rsp = getLevel(mix, matrix, model.inputOutputCounts.matrix, [0, 0x4e], [0, 0x27])
-				buff.push(rsp.commands[0])
-			})
+		forEachSourceSinkLevel(model, ({ MSB, LSB }: LevelParam) => {
+			buff.push(mixer.getNRPNValue(MSB, LSB))
 		})
 
 		{

@@ -1,5 +1,5 @@
 import { getSourceSinkCalculator, type InputOutputType, type Model } from '../model.js'
-import type { Param, ToKnownParam, UnbrandedParam } from './param.js'
+import type { LevelParam, Param, ToKnownParam, UnbrandedParam } from './param.js'
 
 type SourceToSinkInfo = {
 	/**
@@ -200,6 +200,29 @@ export type SinkForMixAndLRInSinkForNRPN<NRPN extends SourceSinkNRPN> = SinkHasN
 	SinkHasNRPN<'lr', InputOutputType, NRPN>
 
 /**
+ * Get the base NRPN of the given type for the given source/sink.
+ *
+ * @param sourceSink
+ *   The source/sink whose base NRPN is to be returned.
+ * @param nrpnType
+ *   The desired type of NRPN.
+ * @returns
+ *   The base NRPN.
+ */
+function getSourceSinkNRPNBase<NRPN extends SourceSinkNRPN>(
+	[sourceType, sinkType]: SourceSinkForNRPN<NRPN>,
+	nrpnType: NRPN,
+): ToKnownParam<NRPN> {
+	// TypeScript doesn't preserve awareness of the validity of the property
+	// walk described by `sourceType`, `sinkType`, and `nrpnType` after
+	// `SourceSinkNRPNMatches` has done its thing.  Do enough casting to make
+	// the property access sequence type-check.
+	const sinks = SourceToSinkParameterBase[sourceType] as SourceToSinkType[InputOutputType] as SinkInfo
+	const info = sinks[sinkType] as Required<SourceToSinkInfo>
+	return info[nrpnType] as ToKnownParam<NRPN>
+}
+
+/**
  * A class that can be used to calculate a specific kind of NRPN for a
  * source-to-sink relationship.
  */
@@ -225,16 +248,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 		this.#inputOutputCounts = model.inputOutputCounts
 		this.#sourceSink = sourceSink
 
-		const [sourceType, sinkType] = this.#sourceSink
-
-		// TypeScript doesn't preserve awareness of the validity of the property
-		// walk described by `sourceSink[0]` (source type), `sourceSink[1]`
-		// (sink type), and `nrpnType` after `SourceSinkNRPNMatches` has done
-		// its thing.  Do enough casting to make the property access sequence
-		// type-check.
-		const sinks = SourceToSinkParameterBase[sourceType] as SourceToSinkType[InputOutputType] as SinkInfo
-		const info = sinks[sinkType] as Required<SourceToSinkInfo>
-		this.#base = info[nrpnType] as ToKnownParam<NRPN>
+		this.#base = getSourceSinkNRPNBase(sourceSink, nrpnType)
 	}
 
 	/**
@@ -334,4 +348,49 @@ export type SourceToSinkCalculatorCache = {
 	readonly assign: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'assign'>
 	readonly level: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'level'>
 	readonly panBalance: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'panBalance'>
+}
+
+/**
+ * The functor type passed to `forEachSourceSinkLevel`.  Each invocation will be
+ * for a source-sink level relationship.  The functor will be invoked with the
+ * NRPN pair, a readable description of the source, and a readable description
+ * of the sink.
+ */
+type SourceSinkLevelFunctor = ({ MSB, LSB }: LevelParam, sourceDesc: string, sinkDesc: string) => void
+
+/**
+ * For each source-sink relationship with adjustable level, invoke the given
+ * function.
+ *
+ * @param model
+ *   The SQ mixer model.
+ * @param f
+ *   The function to invoke.  For each source-sink category of level, this
+ *   function is called once for each possible source crossed with each possible
+ *   sink.  For example, given that there's an inputChannel-mix category and
+ *   supposing a mixer model with four input channels and six mixes, the
+ *   function will be invoked 4×6 for all possible level NRPNs.
+ */
+export function forEachSourceSinkLevel(model: Model, f: SourceSinkLevelFunctor): void {
+	for (const [sourceType, sinks] of Object.entries(SourceToSinkParameterBase)) {
+		for (const sinkType of Object.entries(sinks).flatMap(([sinkType, params]) => {
+			return 'level' in params ? sinkType : []
+		})) {
+			const sourceSink = [sourceType, sinkType] as SourceSinkForNRPN<'level'>
+
+			const calc = LevelNRPNCalculator.get(model, sourceSink)
+			model.forEach(sourceSink[0], (source, _sourceLabel, sourceDesc) => {
+				model.forEach(sourceSink[1], (sink, _sinkLabel, sinkDesc) => {
+					const nrpn = calc.calculate(
+						// XXX Eliminate these checks when
+						//     `Model.forEach('lr', ...)` stops using 99 for the
+						//     number for LR.
+						sourceSink[0] === 'lr' ? 0 : source,
+						sourceSink[1] === 'lr' ? 0 : sink,
+					)
+					f(nrpn, sourceDesc, sinkDesc)
+				})
+			})
+		}
+	}
 }
