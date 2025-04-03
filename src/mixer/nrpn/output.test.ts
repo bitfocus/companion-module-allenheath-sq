@@ -1,7 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
-import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './output.js'
-import type { UnbrandedParam } from './param.js'
+import {
+	forEachOutputLevel,
+	OutputBalanceNRPNCalculator,
+	OutputLevelNRPNCalculator,
+	type SinkAsOutputForNRPN,
+} from './output.js'
+import type { LevelParam, UnbrandedParam } from './param.js'
 
 type OutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
 
@@ -185,4 +190,57 @@ describe('OutputBalanceNRPNCalculator', () => {
 			}
 		},
 	)
+})
+
+describe('forEachOutputLevel', () => {
+	const model = new Model('SQ5')
+
+	const results: [LevelParam, string][] = []
+	forEachOutputLevel(model, (nrpn, sinkDesc) => {
+		results.push([nrpn, sinkDesc])
+	})
+
+	test('some levels gotten', () => {
+		expect(results.length).greaterThan(0)
+	})
+
+	test('lr', () => {
+		expect(
+			results.findIndex(([{ MSB, LSB }, sinkDesc]) => {
+				return MSB === 0x4f && LSB === 0x00 && sinkDesc === 'LR'
+			}),
+		).greaterThanOrEqual(0)
+	})
+
+	test('mix 7', () => {
+		expect(
+			results.findIndex(([{ MSB, LSB }, sinkDesc]) => {
+				return MSB === 0x4f && LSB === 0x07 && sinkDesc === 'Aux 7'
+			}),
+		).greaterThanOrEqual(0)
+	})
+
+	test('fxSend 3', () => {
+		expect(
+			results.findIndex(([{ MSB, LSB }, sinkDesc]) => {
+				return MSB === 0x4f && LSB === 0x0f && sinkDesc === 'FX Send 3'
+			}),
+		).greaterThanOrEqual(0)
+	})
+
+	test('matrix 2', () => {
+		expect(
+			results.findIndex(([{ MSB, LSB }, sinkDesc]) => {
+				return MSB === 0x4f && LSB === 0x12 && sinkDesc === 'Matrix 2'
+			}),
+		).greaterThanOrEqual(0)
+	})
+
+	test('dca 6', () => {
+		expect(
+			results.findIndex(([{ MSB, LSB }, sinkDesc]) => {
+				return MSB === 0x4f && LSB === 0x25 && sinkDesc === 'DCA 6'
+			}),
+		).greaterThanOrEqual(0)
+	})
 })

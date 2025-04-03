@@ -11,11 +11,12 @@ import { OutputActionId } from './actions/output.js'
 import { Choices } from './choices.js'
 import { GetConfigFields, type SQInstanceConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
+import type { NRPNIncDecMessage } from './midi/session.js'
 import { Mixer, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import type { Model } from './mixer/model.js'
+import { forEachOutputLevel } from './mixer/nrpn/output.js'
 import type { LevelParam } from './mixer/nrpn/param.js'
 import { forEachSourceSinkLevel } from './mixer/nrpn/source-to-sink.js'
-import { computeEitherParameters } from './mixer/parameters.js'
 import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
 import { getPresets } from './presets.js'
 import { sleep } from './utils/sleep.js'
@@ -159,56 +160,14 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 		// XXX Assert non-null to get it working for now.
 		const mixer = this.mixer!
 
-		const getLevel = (
-			ch: number,
-			mx: number,
-			ct: number,
-			oMB: readonly [number, number],
-			oLB: readonly [number, number],
-		) => {
-			const { MSB, LSB } = computeEitherParameters(
-				ch,
-				mx,
-				ct,
-				{ MSB: oMB[1], LSB: oLB[1] },
-				{ MSB: oMB[0], LSB: oLB[0] },
-			)
-
-			return {
-				commands: [mixer.getNRPNValue(MSB, LSB)],
-			}
-		}
-
 		const model = mixer.model
 
-		const buff = []
+		const buff: NRPNIncDecMessage[] = []
 
-		forEachSourceSinkLevel(model, ({ MSB, LSB }: LevelParam) => {
-			buff.push(mixer.getNRPNValue(MSB, LSB))
-		})
+		const getLevel = ({ MSB, LSB }: LevelParam) => buff.push(mixer.getNRPNValue(MSB, LSB))
 
-		{
-			const tmp = []
-			tmp.push({ label: `LR`, id: 0 })
-			model.forEach('mix', (mix, mixLabel) => {
-				tmp.push({ label: mixLabel, id: mix + 1 })
-			})
-			model.forEach('fxSend', (fxs, fxsLabel) => {
-				tmp.push({ label: fxsLabel, id: fxs + 1 + model.inputOutputCounts.mix })
-			})
-			model.forEach('matrix', (matrix, matrixLabel) => {
-				tmp.push({ label: matrixLabel, id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend })
-			})
-			for (let j = 0; j < tmp.length; j++) {
-				const rsp = getLevel(tmp[j].id, 99, 0, [0x4f, 0], [0, 0])
-				buff.push(rsp.commands[0])
-			}
-		}
-
-		model.forEach('dca', (dca) => {
-			const rsp = getLevel(dca, 99, 0, [0x4f, 0], [0x20, 0])
-			buff.push(rsp.commands[0])
-		})
+		forEachSourceSinkLevel(model, getLevel)
+		forEachOutputLevel(model, getLevel)
 
 		const delayStatusRetrieval = this.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
 

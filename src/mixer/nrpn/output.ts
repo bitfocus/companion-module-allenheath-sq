@@ -1,5 +1,5 @@
 import { getOutputCalculator, type InputOutputType, type Model } from '../model.js'
-import type { NRPNType, ToKnownParam, UnbrandedParam } from './param.js'
+import type { LevelParam, NRPNType, ToKnownParam, UnbrandedParam } from './param.js'
 
 type OutputInfo = {
 	/** The base MSB/LSB for adjusting output level. */
@@ -145,4 +145,38 @@ export type SinkToCalculator<NRPN extends OutputNRPN> = Record<
 
 export type OutputCalculatorCache = {
 	readonly [NRPN in OutputNRPN]: SinkToCalculator<NRPN>
+}
+
+/**
+ * The functor type passed to `forEachOutputLevel`.  Each invocation will be
+ * for a particular output level, e.g. a mix, or LR, or an FX send, etc.  The
+ * functor will be invoked with the NRPN pair for the level and a readable
+ * description of the particular output.
+ */
+type OutputLevelFunctor = ({ MSB, LSB }: LevelParam, outputDesc: string) => void
+
+/**
+ * For each sink usable as output with adjustable level, invoke the given
+ * function.
+ *
+ * @param model
+ *   The SQ mixer model.
+ * @param f
+ *   The function to invoke.  For each category of output with a level, this
+ *   function is called once for each output within that category.  For example,
+ *   given that there's a mix category of output and supposing a mixer model
+ *   with twelve mixes, the function is invoked 12 times for their possible
+ *   level NRPNs.
+ */
+export function forEachOutputLevel(model: Model, f: OutputLevelFunctor): void {
+	for (const sinkType of Object.entries(OutputParameterBase).flatMap(([sinkType, params]) => {
+		return 'level' in params ? sinkType : []
+	})) {
+		const outputType = sinkType as SinkAsOutputForNRPN<'level'>
+
+		const calc = new OutputLevelNRPNCalculator(model, outputType)
+		model.forEach(outputType, (output, _outputLabel, outputDesc) => {
+			f(calc.calculate(output), outputDesc)
+		})
+	}
 }
