@@ -1,4 +1,4 @@
-import type { InputOutputType, Model } from '../model.js'
+import { getSourceSinkCalculator, type InputOutputType, type Model } from '../model.js'
 import type { Param, ToKnownParam, UnbrandedParam } from './param.js'
 
 type SourceToSinkInfo = {
@@ -30,7 +30,7 @@ type SourceToSinkInfo = {
 	readonly panBalance?: UnbrandedParam
 }
 
-type SourceSinkNRPN = keyof Required<SourceToSinkInfo>
+export type SourceSinkNRPN = keyof Required<SourceToSinkInfo>
 
 type SinkInfo = {
 	readonly [sink in InputOutputType]?: SourceToSinkInfo
@@ -208,7 +208,7 @@ export type SinkForMixAndLRInSinkForNRPN<NRPN extends SourceSinkNRPN> = SinkHasN
 class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 	readonly #inputOutputCounts
 	readonly #sourceSink: SourceSinkForNRPN<NRPN>
-	readonly #base: UnbrandedParam
+	readonly #base: ToKnownParam<NRPN>
 
 	/**
 	 * Construct a calculator for NRPNs of type identified by `nrpnType` for
@@ -236,7 +236,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 		// type-check.
 		const sinks = SourceToSinkParameterBase[sourceType] as SourceToSinkType[InputOutputType] as SinkInfo
 		const info = sinks[sinkType] as Required<SourceToSinkInfo>
-		this.#base = info[nrpnType]
+		this.#base = info[nrpnType] as ToKnownParam<NRPN>
 	}
 
 	/**
@@ -278,6 +278,10 @@ export class AssignNRPNCalculator extends NRPNCalculator<'assign'> {
 	constructor(model: Model, sourceSink: SourceSinkForNRPN<'assign'>) {
 		super(model, 'assign', sourceSink)
 	}
+
+	static get(model: Model, sourceSink: SourceSinkForNRPN<'assign'>): AssignNRPNCalculator {
+		return getSourceSinkCalculator(model, 'assign', sourceSink, AssignNRPNCalculator)
+	}
 }
 
 /**
@@ -287,6 +291,10 @@ export class AssignNRPNCalculator extends NRPNCalculator<'assign'> {
 export class LevelNRPNCalculator extends NRPNCalculator<'level'> {
 	constructor(model: Model, sourceSink: SourceSinkForNRPN<'level'>) {
 		super(model, 'level', sourceSink)
+	}
+
+	static get(model: Model, sourceSink: SourceSinkForNRPN<'level'>): LevelNRPNCalculator {
+		return getSourceSinkCalculator(model, 'level', sourceSink, LevelNRPNCalculator)
 	}
 }
 
@@ -298,4 +306,34 @@ export class BalanceNRPNCalculator extends NRPNCalculator<'panBalance'> {
 	constructor(model: Model, sourceSink: SourceSinkForNRPN<'panBalance'>) {
 		super(model, 'panBalance', sourceSink)
 	}
+
+	static get(model: Model, sourceSink: SourceSinkForNRPN<'panBalance'>): BalanceNRPNCalculator {
+		return getSourceSinkCalculator(model, 'panBalance', sourceSink, BalanceNRPNCalculator)
+	}
+}
+
+export type SourceSinkCalculatorForNRPN<NRPN extends SourceSinkNRPN> = NRPN extends SourceSinkNRPN
+	? [NRPN] extends ['assign']
+		? typeof AssignNRPNCalculator
+		: [NRPN] extends ['level']
+			? typeof LevelNRPNCalculator
+			: [NRPN] extends ['panBalance']
+				? typeof BalanceNRPNCalculator
+				: never
+	: never
+
+type SourceToSinkCalculatorCacheForNRPN<T extends SourceToSinkType, NRPN extends SourceSinkNRPN> = {
+	[Source in keyof T]: T[Source] extends SinkInfo
+		? {
+				-readonly [Sink in keyof T[Source] as NRPN extends keyof T[Source][Sink] ? Sink : never]: InstanceType<
+					SourceSinkCalculatorForNRPN<NRPN>
+				> | null
+			}
+		: never
+}
+
+export type SourceToSinkCalculatorCache = {
+	readonly assign: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'assign'>
+	readonly level: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'level'>
+	readonly panBalance: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'panBalance'>
 }

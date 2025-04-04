@@ -166,6 +166,21 @@ describe('LevelNRPNCalculator', () => {
 		},
 	} satisfies GenerateAllLevelTests<SourceSinkForNRPN<'level'>>
 
+	function* levelSourceSinks(): Generator<{ sourceSink: SourceSinkForNRPN<'level'> }> {
+		for (const [sourceType, sinkTests] of Object.entries(tests)) {
+			for (const sinkType of Object.keys(sinkTests)) {
+				yield { sourceSink: [sourceType, sinkType] as SourceSinkForNRPN<'level'> }
+			}
+		}
+	}
+
+	test.each([...levelSourceSinks()])(
+		'LevelNRPNCalculator.get(model, [$sourceSink.0, $sourceSink.1]) === LevelNRPNCalculator.get(model, [$sourceSink.0, $sourceSink.1])',
+		({ sourceSink }) => {
+			expect(LevelNRPNCalculator.get(model, sourceSink)).toBe(LevelNRPNCalculator.get(model, sourceSink))
+		},
+	)
+
 	function* sourceSinkTests(): Generator<{
 		calc: LevelNRPNCalculator
 		sourceSink: SourceSinkForNRPN<'level'>
@@ -185,7 +200,7 @@ describe('LevelNRPNCalculator', () => {
 	}
 
 	test.each([...sourceSinkTests()])(
-		"new LevelNRPNCalculator(model, ['$sourceSink.0', '$sourceSink.1']).calculate($source, $sink)",
+		'new LevelNRPNCalculator(model, [$sourceSink.0, $sourceSink.1]).calculate($source, $sink)',
 		({ calc, source, sink, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':
