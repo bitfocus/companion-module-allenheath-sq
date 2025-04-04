@@ -133,8 +133,8 @@ function panSourceToMixOrLRLearnSubPrelude(
 	const [source, mixOrLR] = sourceSink
 
 	return mixOrLR === LR
-		? new BalanceNRPNCalculator(model, ['inputChannel', 'lr']).calculate(source, 0)
-		: new BalanceNRPNCalculator(model, ['inputChannel', 'mix']).calculate(source, mixOrLR)
+		? BalanceNRPNCalculator.get(model, ['inputChannel', 'lr']).calculate(source, 0)
+		: BalanceNRPNCalculator.get(model, ['inputChannel', 'mix']).calculate(source, mixOrLR)
 }
 
 function panSourceToSinkLearnSubPrelude(
@@ -150,7 +150,7 @@ function panSourceToSinkLearnSubPrelude(
 
 	const [source, sink] = sourceSinkNums
 
-	return new BalanceNRPNCalculator(model, sourceSink).calculate(source, sink)
+	return BalanceNRPNCalculator.get(model, sourceSink).calculate(source, sink)
 }
 
 function panSourceToMixOrLRLearn(
@@ -299,8 +299,8 @@ function panMixOrLRToMatrixLearnSubPrelude(
 	const [mixOrLR, matrix] = sourceSink
 
 	return mixOrLR === LR
-		? new BalanceNRPNCalculator(model, ['lr', 'matrix']).calculate(0, matrix)
-		: new BalanceNRPNCalculator(model, ['mix', 'matrix']).calculate(mixOrLR, matrix)
+		? BalanceNRPNCalculator.get(model, ['lr', 'matrix']).calculate(0, matrix)
+		: BalanceNRPNCalculator.get(model, ['mix', 'matrix']).calculate(mixOrLR, matrix)
 }
 /**
  * Generate action definitions for adjusting the pan/balance of mixer sources

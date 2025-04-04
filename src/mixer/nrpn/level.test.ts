@@ -191,7 +191,7 @@ describe('LevelNRPNCalculator', () => {
 		for (const [sourceType, sinkTests] of Object.entries(tests)) {
 			for (const [sinkType, tests] of Object.entries(sinkTests)) {
 				const sourceSink = [sourceType, sinkType] as SourceSinkForNRPN<'level'>
-				const calc = new LevelNRPNCalculator(model, sourceSink)
+				const calc = LevelNRPNCalculator.get(model, sourceSink)
 				for (const [source, sink, behavior] of tests as LevelTests) {
 					yield { calc, sourceSink, source, sink, behavior }
 				}
@@ -200,7 +200,7 @@ describe('LevelNRPNCalculator', () => {
 	}
 
 	test.each([...sourceSinkTests()])(
-		'new LevelNRPNCalculator(model, [$sourceSink.0, $sourceSink.1]).calculate($source, $sink)',
+		'LevelNRPNCalculator.get(model, [$sourceSink.0, $sourceSink.1]).calculate($source, $sink)',
 		({ calc, source, sink, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':

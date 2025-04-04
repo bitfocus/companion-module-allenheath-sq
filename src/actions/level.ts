@@ -85,7 +85,7 @@ function getLevelType(
 	}
 	const [sourceSinkType, [source, sink]] = levelSourceSink
 
-	const nrpn = new LevelNRPNCalculator(model, sourceSinkType)
+	const nrpn = LevelNRPNCalculator.get(model, sourceSinkType)
 
 	return {
 		source,

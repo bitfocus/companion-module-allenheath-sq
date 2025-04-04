@@ -27,9 +27,9 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 		},
 	]
 
-	const inputToMix = new LevelNRPNCalculator(model, ['inputChannel', 'mix'])
-	const inputToLR = new LevelNRPNCalculator(model, ['inputChannel', 'lr'])
-	const inputToFXSend = new LevelNRPNCalculator(model, ['inputChannel', 'fxSend'])
+	const inputToMix = LevelNRPNCalculator.get(model, ['inputChannel', 'mix'])
+	const inputToLR = LevelNRPNCalculator.get(model, ['inputChannel', 'lr'])
+	const inputToFXSend = LevelNRPNCalculator.get(model, ['inputChannel', 'fxSend'])
 	model.forEachInputChannel((channel, channelLabel, channelDesc) => {
 		model.forEachLR((_lr, _lrLabel, lrDesc) => {
 			const { MSB, LSB } = inputToLR.calculate(channel, 0)
@@ -59,10 +59,10 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 		})
 	})
 
-	const groupToMix = new LevelNRPNCalculator(model, ['group', 'mix'])
-	const groupToLR = new LevelNRPNCalculator(model, ['group', 'lr'])
-	const groupToFXSend = new LevelNRPNCalculator(model, ['group', 'fxSend'])
-	const groupToMatrix = new LevelNRPNCalculator(model, ['group', 'matrix'])
+	const groupToMix = LevelNRPNCalculator.get(model, ['group', 'mix'])
+	const groupToLR = LevelNRPNCalculator.get(model, ['group', 'lr'])
+	const groupToFXSend = LevelNRPNCalculator.get(model, ['group', 'fxSend'])
+	const groupToMatrix = LevelNRPNCalculator.get(model, ['group', 'matrix'])
 	model.forEachGroup((group, _groupLabel, groupDesc) => {
 		model.forEachLR((_lr, _lrLabel, lrDesc) => {
 			const { MSB, LSB } = groupToLR.calculate(group, 0)
@@ -99,10 +99,10 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 		})
 	})
 
-	const fxReturnToMix = new LevelNRPNCalculator(model, ['fxReturn', 'mix'])
-	const fxReturnToLR = new LevelNRPNCalculator(model, ['fxReturn', 'lr'])
-	const fxReturnToGroup = new LevelNRPNCalculator(model, ['fxReturn', 'group'])
-	const fxReturnToFxSend = new LevelNRPNCalculator(model, ['fxReturn', 'fxSend'])
+	const fxReturnToMix = LevelNRPNCalculator.get(model, ['fxReturn', 'mix'])
+	const fxReturnToLR = LevelNRPNCalculator.get(model, ['fxReturn', 'lr'])
+	const fxReturnToGroup = LevelNRPNCalculator.get(model, ['fxReturn', 'group'])
+	const fxReturnToFxSend = LevelNRPNCalculator.get(model, ['fxReturn', 'fxSend'])
 	model.forEachFxReturn((fxr, _fxrLabel, fxrDesc) => {
 		model.forEachLR((_lr, _lrLabel, lrDesc) => {
 			const { MSB, LSB } = fxReturnToLR.calculate(fxr, 0)
@@ -139,7 +139,7 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 		})
 	})
 
-	const lrToMatrix = new LevelNRPNCalculator(model, ['lr', 'matrix'])
+	const lrToMatrix = LevelNRPNCalculator.get(model, ['lr', 'matrix'])
 	model.forEachLR((_lr, _lrLabel, lrDesc) => {
 		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
 			const { MSB, LSB } = lrToMatrix.calculate(0, matrix)
@@ -151,7 +151,7 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 		})
 	})
 
-	const mixToMatrix = new LevelNRPNCalculator(model, ['mix', 'matrix'])
+	const mixToMatrix = LevelNRPNCalculator.get(model, ['mix', 'matrix'])
 	model.forEachMix((mix, _mixLabel, mixDesc) => {
 		model.forEachMatrix((matrix, _matrixLabel, matrixDesc) => {
 			const { MSB, LSB } = mixToMatrix.calculate(mix, matrix)
@@ -164,7 +164,7 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 	})
 
 	{
-		const lrOutput = new OutputLevelNRPNCalculator(model, 'lr')
+		const lrOutput = OutputLevelNRPNCalculator.get(model, 'lr')
 		model.forEachLR((_lr, _lrLabel, lrDesc) => {
 			const { MSB, LSB } = lrOutput.calculate(0)
 
@@ -174,7 +174,7 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 			})
 		})
 
-		const mixOutput = new OutputLevelNRPNCalculator(model, 'mix')
+		const mixOutput = OutputLevelNRPNCalculator.get(model, 'mix')
 		model.forEachMix((mix, _mixLabel, mixDesc) => {
 			const { MSB, LSB } = mixOutput.calculate(mix)
 
@@ -184,7 +184,7 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 			})
 		})
 
-		const fxSendOutput = new OutputLevelNRPNCalculator(model, 'fxSend')
+		const fxSendOutput = OutputLevelNRPNCalculator.get(model, 'fxSend')
 		model.forEachFxSend((fxs, fxsLabel) => {
 			const { MSB, LSB } = fxSendOutput.calculate(fxs)
 
@@ -194,7 +194,7 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 			})
 		})
 
-		const matrixOutput = new OutputLevelNRPNCalculator(model, 'matrix')
+		const matrixOutput = OutputLevelNRPNCalculator.get(model, 'matrix')
 		model.forEachMatrix((matrix, matrixLabel) => {
 			const { MSB, LSB } = matrixOutput.calculate(matrix)
 
@@ -205,7 +205,7 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 		})
 	}
 
-	const dcaOutput = new OutputLevelNRPNCalculator(model, 'dca')
+	const dcaOutput = OutputLevelNRPNCalculator.get(model, 'dca')
 	model.forEachDCA((dca, dcaLabel) => {
 		const { MSB, LSB } = dcaOutput.calculate(dca)
 
