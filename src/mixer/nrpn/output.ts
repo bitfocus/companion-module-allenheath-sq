@@ -1,4 +1,4 @@
-import type { InputOutputType, Model } from '../model.js'
+import { getOutputCalculator, type InputOutputType, type Model } from '../model.js'
 import type { NRPNType, ToKnownParam, UnbrandedParam } from './param.js'
 
 type OutputInfo = {
@@ -16,7 +16,7 @@ type OutputInfo = {
  * The type of all NRPNs that apply to at least one mixer sink being used as an
  * output.
  */
-type OutputNRPN = keyof Required<OutputInfo>
+export type OutputNRPN = keyof Required<OutputInfo>
 
 type OutputParametersType = Partial<Readonly<Record<InputOutputType, Readonly<OutputInfo>>>>
 
@@ -116,10 +116,33 @@ export class OutputLevelNRPNCalculator extends OutputNRPNCalculator<'level'> {
 	constructor(model: Model, sinkType: SinkAsOutputForNRPN<'level'>) {
 		super(model, 'level', sinkType)
 	}
+
+	static get(model: Model, sinkType: SinkAsOutputForNRPN<'level'>): OutputLevelNRPNCalculator {
+		return getOutputCalculator(model, 'level', sinkType, OutputLevelNRPNCalculator)
+	}
 }
 
 export class OutputBalanceNRPNCalculator extends OutputNRPNCalculator<'panBalance'> {
 	constructor(model: Model, sinkType: SinkAsOutputForNRPN<'panBalance'>) {
 		super(model, 'panBalance', sinkType)
 	}
+
+	static get(model: Model, sinkType: SinkAsOutputForNRPN<'panBalance'>): OutputBalanceNRPNCalculator {
+		return getOutputCalculator(model, 'panBalance', sinkType, OutputBalanceNRPNCalculator)
+	}
+}
+
+export type OutputCalculatorForNRPN<NRPN extends OutputNRPN> = NRPN extends 'level'
+	? typeof OutputLevelNRPNCalculator
+	: NRPN extends 'panBalance'
+		? typeof OutputBalanceNRPNCalculator
+		: never
+
+export type SinkToCalculator<NRPN extends OutputNRPN> = Record<
+	SinkAsOutputForNRPN<NRPN>,
+	InstanceType<OutputCalculatorForNRPN<NRPN>> | null
+>
+
+export type OutputCalculatorCache = {
+	readonly [NRPN in OutputNRPN]: SinkToCalculator<NRPN>
 }

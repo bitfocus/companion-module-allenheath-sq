@@ -173,6 +173,21 @@ describe('AssignNRPNCalculator', () => {
 		},
 	} satisfies GenerateAllAssignTests<SourceSinkForNRPN<'assign'>>
 
+	function* assignSourceSinks(): Generator<{ sourceSink: SourceSinkForNRPN<'assign'> }> {
+		for (const [sourceType, sinkTests] of Object.entries(tests)) {
+			for (const sinkType of Object.keys(sinkTests)) {
+				yield { sourceSink: [sourceType, sinkType] as SourceSinkForNRPN<'assign'> }
+			}
+		}
+	}
+
+	test.each([...assignSourceSinks()])(
+		'AssignNRPNCalculator.get(model, [$sourceSink.0, $sourceSink.1]) === AssignNRPNCalculator.get(model, [$sourceSink.0, $sourceSink.1])',
+		({ sourceSink }) => {
+			expect(AssignNRPNCalculator.get(model, sourceSink)).toBe(AssignNRPNCalculator.get(model, sourceSink))
+		},
+	)
+
 	function* sourceSinkTests(): Generator<{
 		calc: AssignNRPNCalculator
 		sourceSink: SourceSinkForNRPN<'assign'>
@@ -192,7 +207,7 @@ describe('AssignNRPNCalculator', () => {
 	}
 
 	test.each([...sourceSinkTests()])(
-		"new AssignNRPNCalculator(model, ['$sourceSink.0', '$sourceSink.1']).calculate($source, $sink)",
+		'new AssignNRPNCalculator(model, [$sourceSink.0, $sourceSink.1]).calculate($source, $sink)',
 		({ calc, source, sink, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':

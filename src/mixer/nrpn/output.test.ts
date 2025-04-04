@@ -58,6 +58,19 @@ describe('calculateOutputNRPN', () => {
 		],
 	])
 
+	function* outputLevelSinks(): Generator<{ sink: SinkAsOutputForNRPN<'level'> }> {
+		for (const [sinkType] of outputLevelTests) {
+			yield { sink: sinkType }
+		}
+	}
+
+	test.each([...outputLevelSinks()])(
+		'OutputLevelNRPNCalculator.get(model, $sink) === OutputLevelNRPNCalculator.get(model, $sink)',
+		({ sink }) => {
+			expect(OutputLevelNRPNCalculator.get(model, sink)).toBe(OutputLevelNRPNCalculator.get(model, sink))
+		},
+	)
+
 	function* allLevelTests(): Generator<{
 		sinkType: InputOutputType
 		calc: OutputLevelNRPNCalculator
@@ -125,6 +138,19 @@ describe('calculateOutputNRPN', () => {
 			],
 		],
 	])
+
+	function* outputBalanceSinks(): Generator<{ sink: SinkAsOutputForNRPN<'panBalance'> }> {
+		for (const [sinkType] of outputPanBalanceTests) {
+			yield { sink: sinkType }
+		}
+	}
+
+	test.each([...outputBalanceSinks()])(
+		'OutputBalanceNRPNCalculator.get(model, $sink) === OutputBalanceNRPNCalculator.get(model, $sink)',
+		({ sink }) => {
+			expect(OutputBalanceNRPNCalculator.get(model, sink)).toBe(OutputBalanceNRPNCalculator.get(model, sink))
+		},
+	)
 
 	function* allBalanceTests(): Generator<{
 		sinkType: InputOutputType

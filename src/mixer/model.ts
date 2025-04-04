@@ -1,4 +1,17 @@
 import { type ModelId, SQModels } from './models.js'
+import {
+	type OutputCalculatorCache,
+	type OutputCalculatorForNRPN,
+	type OutputNRPN,
+	type SinkAsOutputForNRPN,
+	type SinkToCalculator,
+} from './nrpn/output.js'
+import {
+	type SourceSinkCalculatorForNRPN,
+	type SourceSinkNRPN,
+	type SourceSinkForNRPN,
+	type SourceToSinkCalculatorCache,
+} from './nrpn/source-to-sink.js'
 
 type ForEachFunctor = (n: number, label: string, desc: string) => void
 
@@ -33,6 +46,9 @@ export type InputOutputType = keyof InputOutputCounts
  * and that probably needs to change before this can be changed to e.g. `'lr'`.)
  */
 export const LR = 99
+
+let outputCalculatorCache: (model: Model) => OutputCalculatorCache
+let sourceSinkCalculatorCache: (model: Model) => SourceToSinkCalculatorCache
 
 export class Model {
 	/** Counts of all inputs/outputs for this mixer model. */
@@ -289,4 +305,138 @@ export class Model {
 			f(dca, label, label)
 		})
 	}
+
+	#outputCalculators: OutputCalculatorCache = {
+		level: {
+			lr: null,
+			mix: null,
+			matrix: null,
+			fxSend: null,
+			dca: null,
+		},
+		panBalance: {
+			lr: null,
+			mix: null,
+			matrix: null,
+		},
+	}
+
+	static {
+		outputCalculatorCache = (model: Model) => model.#outputCalculators
+	}
+
+	#sourceSinkCalculators: SourceToSinkCalculatorCache = {
+		assign: {
+			inputChannel: {
+				group: null,
+				fxSend: null,
+				mix: null,
+				lr: null,
+			},
+			fxReturn: {
+				fxSend: null,
+				mix: null,
+				lr: null,
+				group: null,
+			},
+			group: {
+				fxSend: null,
+				mix: null,
+				lr: null,
+				matrix: null,
+			},
+			lr: {
+				matrix: null,
+			},
+			mix: {
+				matrix: null,
+			},
+		},
+		level: {
+			inputChannel: {
+				fxSend: null,
+				mix: null,
+				lr: null,
+			},
+			fxReturn: {
+				fxSend: null,
+				mix: null,
+				lr: null,
+				group: null,
+			},
+			group: {
+				fxSend: null,
+				mix: null,
+				lr: null,
+				matrix: null,
+			},
+			lr: {
+				matrix: null,
+			},
+			mix: {
+				matrix: null,
+			},
+		},
+		panBalance: {
+			inputChannel: {
+				mix: null,
+				lr: null,
+			},
+			fxReturn: {
+				mix: null,
+				lr: null,
+				group: null,
+			},
+			group: {
+				mix: null,
+				lr: null,
+				matrix: null,
+			},
+			lr: {
+				matrix: null,
+			},
+			mix: {
+				matrix: null,
+			},
+		},
+	}
+
+	static {
+		sourceSinkCalculatorCache = (model: Model) => model.#sourceSinkCalculators
+	}
+}
+
+export function getOutputCalculator<NRPN extends OutputNRPN>(
+	model: Model,
+	nrpnType: NRPN,
+	sinkType: SinkAsOutputForNRPN<NRPN>,
+	Calculator: OutputCalculatorForNRPN<NRPN>,
+): InstanceType<OutputCalculatorForNRPN<NRPN>> {
+	const cache = outputCalculatorCache(model)
+	const calcs = cache[nrpnType] as SinkToCalculator<NRPN>
+	let calc = calcs[sinkType]
+	if (calc === null) {
+		calc = calcs[sinkType] = new Calculator(model, sinkType as any) as any
+	}
+	return calc!
+}
+
+export function getSourceSinkCalculator<NRPN extends SourceSinkNRPN>(
+	model: Model,
+	nrpnType: NRPN,
+	sourceSink: SourceSinkForNRPN<NRPN>,
+	Calculator: SourceSinkCalculatorForNRPN<NRPN>,
+): InstanceType<SourceSinkCalculatorForNRPN<NRPN>> {
+	const cache = sourceSinkCalculatorCache(model)
+	const calcs = cache[nrpnType] as Record<
+		InputOutputType,
+		Record<InputOutputType, InstanceType<SourceSinkCalculatorForNRPN<NRPN>> | null>
+	>
+	const [sourceType, sinkType] = sourceSink
+	const sinks = calcs[sourceType]
+	let calc = sinks[sinkType]
+	if (calc === null) {
+		calc = sinks[sinkType] = new Calculator(model, sourceSink as any) as any
+	}
+	return calc!
 }

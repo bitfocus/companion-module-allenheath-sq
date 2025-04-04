@@ -136,6 +136,21 @@ describe('BalanceNRPNCalculator', () => {
 		},
 	} satisfies GenerateAllBalanceTests<SourceSinkForNRPN<'panBalance'>>
 
+	function* balanceSourceSinks(): Generator<{ sourceSink: SourceSinkForNRPN<'panBalance'> }> {
+		for (const [sourceType, sinkTests] of Object.entries(tests)) {
+			for (const sinkType of Object.keys(sinkTests)) {
+				yield { sourceSink: [sourceType, sinkType] as SourceSinkForNRPN<'panBalance'> }
+			}
+		}
+	}
+
+	test.each([...balanceSourceSinks()])(
+		'BalanceNRPNCalculator.get(model, [$sourceSink.0, $sourceSink.1]) === BalanceNRPNCalculator.get(model, [$sourceSink.0, $sourceSink.1])',
+		({ sourceSink }) => {
+			expect(BalanceNRPNCalculator.get(model, sourceSink)).toBe(BalanceNRPNCalculator.get(model, sourceSink))
+		},
+	)
+
 	function* sourceSinkTests(): Generator<{
 		calc: BalanceNRPNCalculator
 		sourceSink: SourceSinkForNRPN<'assign'>
@@ -155,7 +170,7 @@ describe('BalanceNRPNCalculator', () => {
 	}
 
 	test.each([...sourceSinkTests()])(
-		"new BalanceNRPNCalculator(model, ['$sourceSink.0', '$sourceSink.1']).calculate($source, $sink)",
+		'new BalanceNRPNCalculator(model, [$sourceSink.0, $sourceSink.1]).calculate($source, $sink)',
 		({ calc, source, sink, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':
