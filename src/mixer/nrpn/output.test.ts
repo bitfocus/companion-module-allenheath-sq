@@ -78,7 +78,7 @@ describe('calculateOutputNRPN', () => {
 		behavior: OutputBehavior
 	}> {
 		for (const [sinkType, sinkTests] of outputLevelTests) {
-			const calc = new OutputLevelNRPNCalculator(model, sinkType)
+			const calc = OutputLevelNRPNCalculator.get(model, sinkType)
 			for (const [n, behavior] of sinkTests) {
 				yield { sinkType, calc, n, behavior }
 				switch (behavior.type) {
@@ -96,7 +96,7 @@ describe('calculateOutputNRPN', () => {
 	}
 
 	test.each([...allLevelTests()])(
-		'new OutputLevelNRPNCalculator(model, $sinkType).calculate($n)',
+		'OutputLevelNRPNCalculator.get(model, $sinkType).calculate($n)',
 		({ calc, n, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':
@@ -159,7 +159,7 @@ describe('calculateOutputNRPN', () => {
 		behavior: OutputBehavior
 	}> {
 		for (const [sinkType, sinkTests] of outputPanBalanceTests) {
-			const calc = new OutputBalanceNRPNCalculator(model, sinkType)
+			const calc = OutputBalanceNRPNCalculator.get(model, sinkType)
 			for (const [n, behavior] of sinkTests) {
 				yield { sinkType, calc, n, behavior }
 			}
@@ -167,7 +167,7 @@ describe('calculateOutputNRPN', () => {
 	}
 
 	test.each([...allBalanceTests()])(
-		'new OutputBalanceNRPNCalculator(model, $sinkType).calculate($n)',
+		'OutputBalanceNRPNCalculator.get(model, $sinkType).calculate($n)',
 		({ calc, n, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':

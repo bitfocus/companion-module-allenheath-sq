@@ -326,8 +326,8 @@ export class Mixer {
 		active: boolean,
 		mixes: readonly number[],
 	): void {
-		const mixNrpn = new AssignNRPNCalculator(this.model, [sourceType, 'mix'])
-		const lrNrpn = new AssignNRPNCalculator(this.model, [sourceType, 'lr'])
+		const mixNrpn = AssignNRPNCalculator.get(this.model, [sourceType, 'mix'])
+		const lrNrpn = AssignNRPNCalculator.get(this.model, [sourceType, 'lr'])
 
 		const commands = mixes.map((mixOrLR) => {
 			return mixOrLR === LR
@@ -364,7 +364,7 @@ export class Mixer {
 		sinks: readonly number[],
 		sourceSink: SourceSinkForNRPN<'assign'>,
 	): void {
-		const nrpn = new AssignNRPNCalculator(this.model, sourceSink)
+		const nrpn = AssignNRPNCalculator.get(this.model, sourceSink)
 
 		const commands = sinks.map((sink) => {
 			return this.#assignToSink(source, active, sink, nrpn)
@@ -697,7 +697,7 @@ export class Mixer {
 		end: Level,
 		fadeTimeMs: number,
 	): void {
-		const { MSB, LSB } = new LevelNRPNCalculator(this.model, sourceSink).calculate(source, sink)
+		const { MSB, LSB } = LevelNRPNCalculator.get(this.model, sourceSink).calculate(source, sink)
 		this.#fadeToLevel(MSB, LSB, start, end, fadeTimeMs)
 	}
 
@@ -871,11 +871,11 @@ export class Mixer {
 		mixOrLR: number,
 	): void {
 		if (mixOrLR === LR) {
-			const calc = new BalanceNRPNCalculator(this.model, [sourceType, 'lr'])
+			const calc = BalanceNRPNCalculator.get(this.model, [sourceType, 'lr'])
 			const nrpn = calc.calculate(source, 0)
 			this.#setPanBalance(nrpn, panBalance)
 		} else {
-			const calc = new BalanceNRPNCalculator(this.model, [sourceType, 'mix'])
+			const calc = BalanceNRPNCalculator.get(this.model, [sourceType, 'mix'])
 			const nrpn = calc.calculate(source, mixOrLR)
 			this.#setPanBalance(nrpn, panBalance)
 		}
@@ -906,7 +906,7 @@ export class Mixer {
 		sink: number,
 		sourceSink: SourceSinkForNRPN<'panBalance'>,
 	) {
-		const calc = new BalanceNRPNCalculator(this.model, sourceSink)
+		const calc = BalanceNRPNCalculator.get(this.model, sourceSink)
 		const nrpn = calc.calculate(source, sink)
 		this.#setPanBalance(nrpn, panBalance)
 	}
@@ -1033,7 +1033,7 @@ export class Mixer {
 		end: Level,
 		fadeTimeMs: number,
 	): void {
-		const calc = new OutputLevelNRPNCalculator(this.model, sinkType)
+		const calc = OutputLevelNRPNCalculator.get(this.model, sinkType)
 		const { MSB, LSB } = calc.calculate(sink)
 		this.#fadeToLevel(MSB, LSB, start, end, fadeTimeMs)
 	}
@@ -1150,7 +1150,7 @@ export class Mixer {
 		sinkType: SinkAsOutputForNRPN<'panBalance'>,
 		panBalance: PanBalanceChoice,
 	): void {
-		const calc = new OutputBalanceNRPNCalculator(this.model, sinkType)
+		const calc = OutputBalanceNRPNCalculator.get(this.model, sinkType)
 		const nrpn = calc.calculate(sink)
 		this.#setPanBalance(nrpn, panBalance)
 	}

@@ -279,7 +279,7 @@ function getLevelType(
 		return null
 	}
 
-	const param = new OutputLevelNRPNCalculator(model, sinkType).calculate(sink)
+	const param = OutputLevelNRPNCalculator.get(model, sinkType).calculate(sink)
 	return { sink, param }
 }
 
@@ -356,7 +356,7 @@ export function outputActions(
 				fadingOption,
 			],
 			callback: async ({ options }) => {
-				const param = new OutputLevelNRPNCalculator(model, 'lr').calculate(0)
+				const param = OutputLevelNRPNCalculator.get(model, 'lr').calculate(0)
 				const fade = getFadeParameters(instance, options, param)
 				if (fade === null) {
 					return
@@ -499,7 +499,7 @@ export function outputActions(
 				ShowVar,
 			],
 			learn: async ({ options }) => {
-				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'lr').calculate(0)
+				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(0)
 
 				return {
 					...options,
@@ -507,7 +507,7 @@ export function outputActions(
 				}
 			},
 			subscribe: async (_action) => {
-				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'lr').calculate(0)
+				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(0)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -542,7 +542,7 @@ export function outputActions(
 					return
 				}
 
-				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'mix').calculate(mix)
+				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'mix').calculate(mix)
 
 				return {
 					...options,
@@ -555,7 +555,7 @@ export function outputActions(
 					return
 				}
 
-				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'mix').calculate(mix)
+				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'mix').calculate(mix)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
@@ -591,7 +591,7 @@ export function outputActions(
 					return
 				}
 
-				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'matrix').calculate(matrix)
+				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'matrix').calculate(matrix)
 
 				return {
 					...options,
@@ -604,7 +604,7 @@ export function outputActions(
 					return
 				}
 
-				const { MSB, LSB } = new OutputBalanceNRPNCalculator(model, 'matrix').calculate(matrix)
+				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'matrix').calculate(matrix)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])

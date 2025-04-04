@@ -198,7 +198,7 @@ describe('AssignNRPNCalculator', () => {
 		for (const [sourceType, sinkTests] of Object.entries(tests)) {
 			for (const [sinkType, tests] of Object.entries(sinkTests)) {
 				const sourceSink = [sourceType, sinkType] as SourceSinkForNRPN<'assign'>
-				const calc = new AssignNRPNCalculator(model, sourceSink)
+				const calc = AssignNRPNCalculator.get(model, sourceSink)
 				for (const [source, sink, behavior] of tests as AssignTests) {
 					yield { calc, sourceSink, source, sink, behavior }
 				}
@@ -207,7 +207,7 @@ describe('AssignNRPNCalculator', () => {
 	}
 
 	test.each([...sourceSinkTests()])(
-		'new AssignNRPNCalculator(model, [$sourceSink.0, $sourceSink.1]).calculate($source, $sink)',
+		'AssignNRPNCalculator.get(model, [$sourceSink.0, $sourceSink.1]).calculate($source, $sink)',
 		({ calc, source, sink, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':

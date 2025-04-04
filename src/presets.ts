@@ -196,8 +196,8 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 	}
 
 	// Input -> Mix
-	const mixCalc = new LevelNRPNCalculator(model, ['inputChannel', 'mix'])
-	const lrCalc = new LevelNRPNCalculator(model, ['inputChannel', 'lr'])
+	const mixCalc = LevelNRPNCalculator.get(model, ['inputChannel', 'mix'])
+	const lrCalc = LevelNRPNCalculator.get(model, ['inputChannel', 'lr'])
 	model.forEachInputChannel((channel, channelLabel) => {
 		model.forEachMixAndLR((mix, mixLabel) => {
 			const nrpn = mix === LR ? lrCalc.calculate(channel, 0) : mixCalc.calculate(channel, mix)
