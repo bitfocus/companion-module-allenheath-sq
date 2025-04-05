@@ -1,8 +1,11 @@
-import { type CompanionVariableValue, InstanceStatus } from '@companion-module/base'
+import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@companion-module/base'
 import type { PanBalanceChoice } from '../actions/pan-balance.js'
+import { type CallbackInfoType, CallbackInfo } from '../callback.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
-import { MidiSession, type NRPNDataMessage, type NRPNIncDecMessage } from '../midi/session.js'
+import { ChannelParser } from '../midi/parse/channel-parser.js'
+import { parseMidi } from '../midi/parse/parse-midi.js'
+import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
 import { type InputOutputType, LR, Model } from './model.js'
 import { calculateMuteNRPN } from './nrpn/mute.js'
 import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './nrpn/output.js'
@@ -14,7 +17,10 @@ import {
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
 } from './nrpn/source-to-sink.js'
-import { panBalanceLevelToVCVF } from './pan-balance.js'
+import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
+import { prettyByte, prettyBytes } from '../utils/pretty.js'
+import { sleep, asyncSleep } from '../utils/sleep.js'
+import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -71,6 +77,9 @@ export enum MuteOperation {
 	Off = 2,
 }
 
+/** The port number used for MIDI-over-TCP connections to SQ mixers. */
+const SQMidiPort = 51325
+
 // Level fading in this module historically performed fade steps every 50ms --
 // maybe because humans (at least visually; I'm not sure if this applies in the
 // audio realm) perceive a cause-effect duration of a tenth of a second as
@@ -80,6 +89,21 @@ const FadeStepDurationMs = 50
 // If two fade steps would be performed closer than this duration to each other,
 // eliminate the first step and do it all in the second step.
 const FadeStepCoalesceMs = 5
+
+/**
+ * The type of the array of bytes making up a MIDI NRPN data message, consisting
+ * of two MIDI Control Change messages specifying NRPN MSB/LSB and two MIDI
+ * Control Change messages specifying MSB/LSB of a data value.
+ */
+type NRPNDataMessage = [number, 0x63, number, number, 0x62, number, number, 0x06, number, number, 0x26, number]
+
+/**
+ * The type of the array of bytes making up a MIDI NRPN increment/decrement
+ * message, consisting of two MIDI Control Change messages specifying NRPN
+ * MSB/LSB and one MIDI Control Change message specifying increment or decrement
+ * with one unconstrained 7-bit value.
+ */
+export type NRPNIncDecMessage = [number, 0x63, number, number, 0x62, number, number, 0x60 | 0x61, number]
 
 /**
  * An abstract representation of an SQ mixer.
@@ -93,10 +117,8 @@ export class Mixer {
 	 */
 	model: Model
 
-	/**
-	 * The MIDI transport used to interact with the mixer.
-	 */
-	midi: MidiSession
+	/** The TCP socket used to interact with the mixer. */
+	socket: TCPHelper | null = null
 
 	/**
 	 * A store of current mute status for mixer inputs/outputs.  Keys have the
@@ -126,52 +148,184 @@ export class Mixer {
 	 */
 	currentScene = 0
 
+	/**
+	 * Send the given bytes to the mixer.
+	 */
+	send(data: readonly number[]): void {
+		const socket = this.socket
+		if (socket !== null && socket.isConnected) {
+			const instance = this.#instance
+			if (instance.options.verbose) {
+				instance.log('debug', `SEND: ${prettyBytes(data)} to ${instance.options.host}`)
+			}
+
+			// XXX This needs to be handled better.
+			void socket.send(Buffer.from(data))
+		}
+	}
+
+	// new send command
+	async sendCommands(commands: readonly (readonly number[])[]): Promise<void> {
+		for (let i = 0; i < commands.length; i++) {
+			this.send(commands[i])
+			await asyncSleep(200)
+		}
+	}
+
 	/** Create a mixer for the given instance. */
 	constructor(instance: sqInstance) {
 		this.#instance = instance
 		this.model = new Model(instance.options.model)
-		this.midi = new MidiSession(this, instance)
-	}
-
-	/** Start operating the SQ mixer, using options from the instance. */
-	start(host: string): void {
-		this.midi.start(host, this.#instance.options.retrieveStatusAtStartup)
 	}
 
 	/** Stop this mixer connection. */
 	stop(status = InstanceStatus.Disconnected): void {
-		this.midi.stop(status)
+		this.#instance.updateStatus(status)
+		if (this.socket !== null) {
+			this.socket.destroy()
+			this.socket = null
+		}
+	}
+
+	/**
+	 * Issue MIDI commands to the mixer to retrieve the current mute states of
+	 * all inputs and outputs.
+	 */
+	#retrieveMuteStatuses(): void {
+		for (const key in CallbackInfo.mute) {
+			const mblb = key.toString().split(':')
+			this.send(this.getNRPNValue(Number(mblb[0]), Number(mblb[1])))
+		}
+	}
+
+	/** Start operating the SQ mixer, using options from the instance. */
+	start(host: string): void {
+		this.stop(InstanceStatus.Connecting)
+
+		const retrieveStatus = this.#instance.options.retrieveStatusAtStartup
+
+		const socket = new TCPHelper(host, SQMidiPort)
+		this.socket = socket
+
+		const instance = this.#instance
+
+		socket.on('error', (err) => {
+			instance.log('error', `Error: ${err}`)
+			this.stop(InstanceStatus.ConnectionFailure)
+		})
+
+		this.#processMixerReplies(socket).then(
+			() => {
+				instance.log('info', 'All mixer replies received, disconnecting')
+				this.stop(InstanceStatus.Disconnected)
+			},
+			(reason: any) => {
+				instance.log('error', `Error processing replies: ${reason}`)
+				this.stop(InstanceStatus.ConnectionFailure)
+			},
+		)
+
+		socket.once('connect', () => {
+			instance.log('info', `Connected to ${host}:${SQMidiPort}`)
+			instance.updateStatus(InstanceStatus.Ok)
+
+			if (retrieveStatus === RetrieveStatusAtStartup.None) {
+				return
+			}
+
+			this.#retrieveMuteStatuses()
+			sleep(300)
+			instance.deprecatedGetRemoteLevel()
+
+			if (retrieveStatus === RetrieveStatusAtStartup.Fully) {
+				setTimeout(() => {
+					instance.deprecatedGetRemoteLevel()
+				}, 4000)
+			}
+		})
+	}
+
+	/** Read and process mixer reply messages from `socket`. */
+	async #processMixerReplies(socket: TCPHelper) {
+		const instance = this.#instance
+
+		const verboseLog = (msg: string) => {
+			if (instance.options.verbose) {
+				instance.log('debug', msg)
+			}
+		}
+
+		const tokenizer = new MidiTokenizer(socket, verboseLog)
+
+		const mixerChannelParser = new ChannelParser(verboseLog)
+		mixerChannelParser.on('scene', (newScene: number) => {
+			verboseLog(`Scene recalled: ${newScene}`)
+
+			this.currentScene = newScene
+
+			const instance = this.#instance
+			const sceneRecalledTrigger = Number(instance.getVariableValue(SceneRecalledTriggerId)!)
+			instance.setVariableValues({
+				[SceneRecalledTriggerId]: sceneRecalledTrigger + 1,
+
+				// The currentScene variable is 1-indexed, consistent with how
+				// the current scene is displayed to users in mixer UI.
+				[CurrentSceneId]: newScene + 1,
+			})
+		})
+		mixerChannelParser.on('mute', (msb: number, lsb: number, vf: number) => {
+			verboseLog(`Mute received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VF=${prettyByte(vf)}`)
+
+			this.fdbState[`mute_${msb}.${lsb}`] = vf === 0x01
+
+			const CI: CallbackInfoType = CallbackInfo
+			instance.checkFeedbacks(CI.mute[`${msb}:${lsb}`][0])
+		})
+		mixerChannelParser.on('fader_level', (msb: number, lsb: number, vc: number, vf: number) => {
+			verboseLog(
+				`Fader received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
+			)
+
+			const levelKey = `level_${msb}.${lsb}` as const
+
+			let ost = false
+			const res = instance.getVariableValue(levelKey)
+			if (res !== undefined) {
+				this.lastValue[levelKey] = res
+				ost = true
+			}
+
+			const level = levelFromNRPNData(vc, vf, this.#instance.options.faderLaw)
+			instance.setVariableValues({
+				[levelKey]: level,
+			})
+
+			if (!ost) {
+				this.lastValue[levelKey] = level
+			}
+		})
+		mixerChannelParser.on('pan_level', (msb: number, lsb: number, vc: number, vf: number) => {
+			verboseLog(
+				`Pan received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
+			)
+
+			// It would be nice to mention the source-sink relationship the NRPN
+			// refers to, but we haven't defined a way to work backwards from
+			// MSB/LSB to semantic meaning.  A name that includes MSB/LSB (in
+			// hex as in the SQ MIDI Protocol document) is minimally viable.
+			const name = `Pan/Balance MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}`
+
+			const variableId = `pan_${msb}.${lsb}`
+			const variableValue = vcvfToReadablePanBalance(vc, vf)
+			instance.setExtraVariable(variableId, name, variableValue)
+		})
+
+		return parseMidi(instance.options.midiChannel, verboseLog, tokenizer, mixerChannelParser)
 	}
 
 	/** Compute a mixer "get" command to retrieve the value of an NRPN. */
 	getNRPNValue(msb: number, lsb: number): NRPNIncDecMessage {
-		return this.midi.nrpnIncrement(msb, lsb, 0x7f)
-	}
-
-	/**
-	 * Convert a fader level to a `[VC, VF]` data byte pair approximately
-	 * equivalent to it under the mixer's current fader law.
-	 *
-	 * @param level
-	 *   The fader level to convert.
-	 */
-	nrpnDataFromLevel(level: Level): [number, number] {
-		return nrpnDataFromLevel(level, this.#instance.options.faderLaw)
-	}
-
-	/**
-	 * Convert a `VC`/`VF` data byte pair from a fader level message to a
-	 * `Level` value consistent with the mixer's active fader law.
-	 *
-	 * @param vc
-	 *   The `VC` byte from the NRPN data message, in range `[0x00, 0x7f)`.
-	 * @param vf
-	 *   The `VF` byte from the NRPN data message, in range `[0x00, 0x7f)`.
-	 * @returns
-	 *   The approximate encoded `Level`.
-	 */
-	levelFromNRPNData(vc: number, vf: number): Level {
-		return levelFromNRPNData(vc, vf, this.#instance.options.faderLaw)
+		return this.#nrpnIncrement(msb, lsb, 0x7f)
 	}
 
 	/**
@@ -188,9 +342,15 @@ export class Mixer {
 			throw new Error(`Attempting to set out-of-bounds scene ${scene}`)
 		}
 
-		const midi = this.midi
+		const midiChannel = this.#instance.options.midiChannel
+		const BN = 0xb0 | midiChannel
+		const CN = 0xc0 | midiChannel
+		const sceneUpper = (scene >> 7) & 0x0f
+		const sceneLower = scene & 0x7f
+
+		const sceneCommand = [BN, 0, sceneUpper, CN, sceneLower]
 		// XXX handle better
-		void midi.sendCommands([midi.sceneChange(scene)])
+		void this.sendCommands([sceneCommand])
 	}
 
 	/**
@@ -229,12 +389,10 @@ export class Mixer {
 			fdbState[key] = !fdbState[key]
 		}
 
-		const midi = this.midi
-
 		this.#instance.checkFeedbacks()
-		const commands = [midi.nrpnData(MSB, LSB, 0, Number(fdbState[key]))]
+		const commands = [this.#nrpnData(MSB, LSB, 0, Number(fdbState[key]))]
 		// XXX
-		void midi.sendCommands(commands)
+		void this.sendCommands(commands)
 	}
 
 	/** Act upon the mute status of the given input channel. */
@@ -301,7 +459,7 @@ export class Mixer {
 	 */
 	#assignToSink(source: number, active: boolean, sink: number, nrpn: AssignNRPNCalculator): NRPNDataMessage {
 		const { MSB, LSB } = nrpn.calculate(source, sink)
-		return this.midi.nrpnData(MSB, LSB, 0, active ? 1 : 0)
+		return this.#nrpnData(MSB, LSB, 0, active ? 1 : 0)
 	}
 
 	/**
@@ -336,7 +494,7 @@ export class Mixer {
 		})
 
 		// XXX
-		void this.midi.sendCommands(commands)
+		void this.sendCommands(commands)
 	}
 
 	/**
@@ -371,7 +529,7 @@ export class Mixer {
 		})
 
 		// XXX
-		void this.midi.sendCommands(commands)
+		void this.sendCommands(commands)
 	}
 
 	/**
@@ -539,10 +697,8 @@ export class Mixer {
 
 	/** Send a MIDI command to set the given level NRPN to the given level. */
 	#setLevelImmediately(msb: number, lsb: number, level: Level): void {
-		const midi = this.midi
-
-		const [VC, VF] = this.nrpnDataFromLevel(level)
-		midi.send(midi.nrpnData(msb, lsb, VC, VF))
+		const [VC, VF] = nrpnDataFromLevel(level, this.#instance.options.faderLaw)
+		this.send(this.#nrpnData(msb, lsb, VC, VF))
 
 		// XXX Is this really needed?  Won't the mixer's reply indicating the
 		//     updated level do this for us, just more slowly?  Or is jumping
@@ -813,28 +969,26 @@ export class Mixer {
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
 	#setPanBalance({ MSB, LSB }: BalanceParam, panBalance: PanBalanceChoice): void {
-		const midi = this.midi
-
 		let modifyPanBalanceCommand
 		switch (panBalance) {
 			// Step Right
 			case 998:
-				modifyPanBalanceCommand = midi.nrpnIncrement(MSB, LSB, 0)
+				modifyPanBalanceCommand = this.#nrpnIncrement(MSB, LSB, 0)
 				break
 			// Step Left
 			case 999:
-				modifyPanBalanceCommand = midi.nrpnDecrement(MSB, LSB, 0)
+				modifyPanBalanceCommand = this.#nrpnDecrement(MSB, LSB, 0)
 				break
 			// 'L100', 'L95', ..., 'L5', CTR', 'R5', ..., 'R95', 'R100'
 			default: {
 				const [VC, VF] = panBalanceLevelToVCVF(panBalance)
 
-				modifyPanBalanceCommand = midi.nrpnData(MSB, LSB, VC, VF)
+				modifyPanBalanceCommand = this.#nrpnData(MSB, LSB, VC, VF)
 			}
 		}
 
 		// XXX
-		void midi.sendCommands([
+		void this.sendCommands([
 			modifyPanBalanceCommand,
 			// Query the new pan/balance value to update its variable.
 			// XXX check later -- possibly only stepping left/right need this
@@ -1170,10 +1324,9 @@ export class Mixer {
 			throw new Error(`Attempting to press invalid softkey ${softKey}`)
 		}
 
-		const midi = this.midi
 		const command = [0x90 | this.#instance.options.midiChannel, 0x30 + softKey, 0x7f]
 		// XXX
-		void midi.sendCommands([command])
+		void this.sendCommands([command])
 	}
 
 	/** Release a previously-pressed softkey. */
@@ -1182,9 +1335,51 @@ export class Mixer {
 			throw new Error(`Attempting to release invalid softkey ${softKey}`)
 		}
 
-		const midi = this.midi
 		const command = [0x80 | this.#instance.options.midiChannel, 0x30 + softKey, 0x00]
 		// XXX
-		void midi.sendCommands([command])
+		void this.sendCommands([command])
+	}
+
+	/**
+	 * Return an NRPN data entry sequence:
+	 *
+	 *     BN 63 msb    // NRPN MSB
+	 *     BN 62 lsb    // NRPN LSB
+	 *     BN 06 vc     // Data entry MSB
+	 *     BN 26 vf     // Data entry LSB
+	 *
+	 * where `N` is the session MIDI channel.
+	 */
+	#nrpnData(msb: number, lsb: number, vc: number, vf: number): NRPNDataMessage {
+		const BN = 0xb0 | this.#instance.options.midiChannel
+		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x06, vc, BN, 0x26, vf]
+	}
+
+	/**
+	 * Return an NRPN increment sequence:
+	 *
+	 *     BN 63 msb    // NRPN MSB
+	 *     BN 62 lsb    // NRPN LSB
+	 *     BN 60 val    // Increment
+	 *
+	 * where `N` is the session MIDI channel.
+	 */
+	#nrpnIncrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
+		const BN = 0xb0 | this.#instance.options.midiChannel
+		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x60, val]
+	}
+
+	/**
+	 * Return an NRPN decrement sequence:
+	 *
+	 *     BN 63 msb    // NRPN MSB
+	 *     BN 62 lsb    // NRPN LSB
+	 *     BN 61 val    // Increment
+	 *
+	 * where `N` is the session MIDI channel.
+	 */
+	#nrpnDecrement(msb: number, lsb: number, val: number): NRPNIncDecMessage {
+		const BN = 0xb0 | this.#instance.options.midiChannel
+		return [BN, 0x63, msb, BN, 0x62, lsb, BN, 0x61, val]
 	}
 }

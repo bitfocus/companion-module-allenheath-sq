@@ -208,7 +208,7 @@ function panSourceToMixOrLRSubscribe(
 		const { MSB, LSB } = param
 
 		// Send a "get" so the pan/balance variable is defined.
-		void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
+		void mixer.sendCommands([mixer.getNRPNValue(MSB, LSB)])
 	}
 }
 
@@ -227,7 +227,7 @@ function panSourceToSinkSubscribe(
 		const { MSB, LSB } = param
 
 		// Send a "get" so the pan/balance variable is defined.
-		void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
+		void mixer.sendCommands([mixer.getNRPNValue(MSB, LSB)])
 	}
 }
 
@@ -491,7 +491,7 @@ export function panBalanceActions(
 				const { MSB, LSB } = nrpn
 
 				// Send a "get" so the pan/balance variable is defined.
-				void mixer.midi.sendCommands([mixer.getNRPNValue(MSB, LSB)])
+				void mixer.sendCommands([mixer.getNRPNValue(MSB, LSB)])
 			},
 			callback: async ({ options }) => {
 				const sourceSink = panMixOrLRToMatrix(instance, model, options)

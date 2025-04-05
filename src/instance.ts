@@ -11,8 +11,7 @@ import { OutputActionId } from './actions/output.js'
 import { Choices } from './choices.js'
 import { GetConfigFields, type SQInstanceConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
-import type { NRPNIncDecMessage } from './midi/session.js'
-import { Mixer, RetrieveStatusAtStartup } from './mixer/mixer.js'
+import { Mixer, type NRPNIncDecMessage, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import type { Model } from './mixer/model.js'
 import { forEachOutputLevel } from './mixer/nrpn/output.js'
 import type { LevelParam } from './mixer/nrpn/param.js'
@@ -171,10 +170,10 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 
 		const delayStatusRetrieval = this.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
 
-		if (buff.length > 0 && mixer.midi.socket !== null) {
+		if (buff.length > 0 && mixer.socket !== null) {
 			let ctr = 0
 			for (let i = 0; i < buff.length; i++) {
-				mixer.midi.send(buff[i])
+				mixer.send(buff[i])
 				ctr++
 				if (delayStatusRetrieval) {
 					if (ctr === 20) {
