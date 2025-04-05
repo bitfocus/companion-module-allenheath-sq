@@ -381,13 +381,7 @@ export function forEachSourceSinkLevel(model: Model, f: SourceSinkLevelFunctor):
 			const calc = LevelNRPNCalculator.get(model, sourceSink)
 			model.forEach(sourceSink[0], (source, _sourceLabel, sourceDesc) => {
 				model.forEach(sourceSink[1], (sink, _sinkLabel, sinkDesc) => {
-					const nrpn = calc.calculate(
-						// XXX Eliminate these checks when
-						//     `Model.forEach('lr', ...)` stops using 99 for the
-						//     number for LR.
-						sourceSink[0] === 'lr' ? 0 : source,
-						sourceSink[1] === 'lr' ? 0 : sink,
-					)
+					const nrpn = calc.calculate(source, sink)
 					f(nrpn, sourceDesc, sinkDesc)
 				})
 			})

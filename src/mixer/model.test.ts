@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { Model } from './model.js'
+import { LR, Model } from './model.js'
 
 describe('Model.forEach', () => {
 	const model = new Model('SQ5')
@@ -19,14 +19,21 @@ describe('Model.forEach', () => {
 		])
 	})
 
-	// Test lr specially because it uses the old 99 number encoding...for now.
+	// Test lr specially because it used to return not 0 for its one element,
+	// but `LR`, i.e. 99.
 	test('lr', () => {
+		// LR is presently 99.  Detect if/when it is changed to something like
+		// 'lr' (to allow mix-or-LR to clearly separate LR from mix at the type
+		// level, rather than conflate them both into `number`) so that the
+		// comment above can be adjusted.
+		expect(LR).toBe(99)
+
 		const results: [number, string, string][] = []
 
 		model.forEach('lr', (n, label, desc) => {
 			results.push([n, label, desc])
 		})
 
-		expect(results).toEqual([[99, 'LR', 'LR']])
+		expect(results).toEqual([[0, 'LR', 'LR']])
 	})
 })

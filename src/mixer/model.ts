@@ -149,15 +149,6 @@ export class Model {
 	}
 
 	forEach(type: InputOutputType | 'softKey', f: ForEachFunctor): void {
-		if (type === 'lr') {
-			// Note: `LR === 99` rather than `0` to `N` as is the case for all
-			// the other functors.  (This can be regularized to `0` when LR's
-			// internal handling is decoupled from the encoding of LR as 99 in
-			// actions, but for right now it requires a special case.)
-			f(LR, 'LR', 'LR')
-			return
-		}
-
 		const labelDescs = this.#labelsDescs[type]
 		const pairs = labelDescs.pairs
 		if (pairs.length === 0) {

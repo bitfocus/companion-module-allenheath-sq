@@ -1,5 +1,5 @@
 import type { DropdownChoice } from '@companion-module/base'
-import type { Model } from './mixer/model.js'
+import { LR, type Model } from './mixer/model.js'
 import { createLevels } from './actions/fading.js'
 import { createPanLevels } from './actions/pan-balance.js'
 
@@ -21,9 +21,7 @@ function createMixes(model: Model): DropdownChoice[] {
 
 function createMixesAndLR(model: Model): DropdownChoice[] {
 	const mixesAndLR: DropdownChoice[] = []
-	model.forEach('lr', (id, label) => {
-		mixesAndLR.push({ label, id })
-	})
+	mixesAndLR.push({ label: 'LR', id: LR })
 	model.forEach('mix', (id, label) => {
 		mixesAndLR.push({ label, id })
 	})

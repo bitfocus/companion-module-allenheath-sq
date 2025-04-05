@@ -41,8 +41,8 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 
 	{
 		const lrOutput = OutputLevelNRPNCalculator.get(model, 'lr')
-		model.forEach('lr', (_lr, _lrLabel, lrDesc) => {
-			const { MSB, LSB } = lrOutput.calculate(0)
+		model.forEach('lr', (lr, _lrLabel, lrDesc) => {
+			const { MSB, LSB } = lrOutput.calculate(lr)
 
 			variables.push({
 				name: `${lrDesc} Output Level`,
