@@ -3,12 +3,12 @@ import { type InputOutputType, Model } from '../model.js'
 import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './output.js'
 import type { UnbrandedParam } from './param.js'
 
-describe('calculateOutputNRPN', () => {
+type OutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
+
+type OutputTest = [number, OutputBehavior][]
+
+describe('OutputLevelNRPNCalculator', () => {
 	const model = new Model('SQ5')
-
-	type OutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
-
-	type OutputTest = [number, OutputBehavior][]
 
 	const outputLevelTests = new Map<SinkAsOutputForNRPN<'level'>, OutputTest>([
 		[
@@ -110,6 +110,10 @@ describe('calculateOutputNRPN', () => {
 			}
 		},
 	)
+})
+
+describe('OutputBalanceNRPNCalculator', () => {
+	const model = new Model('SQ5')
 
 	const outputPanBalanceTests = new Map<SinkAsOutputForNRPN<'panBalance'>, OutputTest>([
 		[
