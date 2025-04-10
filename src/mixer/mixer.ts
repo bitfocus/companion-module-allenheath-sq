@@ -1,5 +1,5 @@
 import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@companion-module/base'
-import type { PanBalanceChoice } from '../actions/pan-balance.js'
+import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
@@ -281,27 +281,23 @@ export class Mixer {
 			}
 		}
 
-		instance.subscribeActions('chpan_to_mix')
+		instance.subscribeActions(PanBalanceActionId.InputChannelPanBalanceInMixOrLR)
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		instance.subscribeActions('grppan_to_mix')
+		instance.subscribeActions(PanBalanceActionId.GroupPanBalanceInMixOrLR)
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		instance.subscribeActions('fxrpan_to_mix')
+		instance.subscribeActions(PanBalanceActionId.FXReturnPanBalanceInMixOrLR)
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		instance.subscribeActions('fxrpan_to_grp')
+		instance.subscribeActions(PanBalanceActionId.MixOrLRPanBalanceInMatrix)
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		instance.subscribeActions('mixpan_to_mtx')
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions('grppan_to_mtx')
+		instance.subscribeActions(PanBalanceActionId.GroupPanBalanceInMatrix)
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
