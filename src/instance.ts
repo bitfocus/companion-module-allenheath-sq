@@ -156,6 +156,9 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 	// DEPRECATED BELOW HERE
 
 	deprecatedGetRemoteLevel(): void {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const instance = this
+
 		// XXX Assert non-null to get it working for now.
 		const mixer = this.mixer!
 
@@ -168,7 +171,7 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 		forEachSourceSinkLevel(model, getLevel)
 		forEachOutputLevel(model, getLevel)
 
-		const delayStatusRetrieval = this.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
+		const delayStatusRetrieval = instance.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
 
 		if (buff.length > 0 && mixer.socket !== null) {
 			let ctr = 0
@@ -184,32 +187,32 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 			}
 		}
 
-		this.subscribeActions('chpan_to_mix')
+		instance.subscribeActions('chpan_to_mix')
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		this.subscribeActions('grppan_to_mix')
+		instance.subscribeActions('grppan_to_mix')
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		this.subscribeActions('fxrpan_to_mix')
+		instance.subscribeActions('fxrpan_to_mix')
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		this.subscribeActions('fxrpan_to_grp')
+		instance.subscribeActions('fxrpan_to_grp')
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		this.subscribeActions('mixpan_to_mtx')
+		instance.subscribeActions('mixpan_to_mtx')
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		this.subscribeActions('grppan_to_mtx')
+		instance.subscribeActions('grppan_to_mtx')
 		if (delayStatusRetrieval) {
 			sleep(300)
 		}
-		this.subscribeActions(OutputActionId.LRPanBalanceOutput)
-		this.subscribeActions(OutputActionId.MixPanBalanceOutput)
-		this.subscribeActions(OutputActionId.MatrixPanBalanceOutput)
+		instance.subscribeActions(OutputActionId.LRPanBalanceOutput)
+		instance.subscribeActions(OutputActionId.MixPanBalanceOutput)
+		instance.subscribeActions(OutputActionId.MatrixPanBalanceOutput)
 	}
 }
