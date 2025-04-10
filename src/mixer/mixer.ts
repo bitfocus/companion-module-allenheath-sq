@@ -271,26 +271,14 @@ export class Mixer {
 			}
 		}
 
-		instance.subscribeActions(PanBalanceActionId.InputChannelPanBalanceInMixOrLR)
-		if (delayStatusRetrieval) {
-			sleep(300)
+		for (const name of Object.keys(PanBalanceActionId)) {
+			const enumName = name as keyof typeof PanBalanceActionId
+			instance.subscribeActions(PanBalanceActionId[enumName])
+			if (delayStatusRetrieval) {
+				sleep(300)
+			}
 		}
-		instance.subscribeActions(PanBalanceActionId.GroupPanBalanceInMixOrLR)
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions(PanBalanceActionId.FXReturnPanBalanceInMixOrLR)
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions(PanBalanceActionId.MixOrLRPanBalanceInMatrix)
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions(PanBalanceActionId.GroupPanBalanceInMatrix)
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
+
 		instance.subscribeActions(OutputActionId.LRPanBalanceOutput)
 		instance.subscribeActions(OutputActionId.MixPanBalanceOutput)
 		instance.subscribeActions(OutputActionId.MatrixPanBalanceOutput)
