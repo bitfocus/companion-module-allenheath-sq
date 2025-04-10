@@ -234,35 +234,33 @@ export class Mixer {
 			})
 
 			sleep(300)
-			this.getRemoteLevel(instance)
+			this.#getRemoteLevel()
 
 			if (retrieveStatus === RetrieveStatusAtStartup.Fully) {
 				setTimeout(() => {
-					this.getRemoteLevel(instance)
+					this.#getRemoteLevel()
 				}, 4000)
 			}
 		})
 	}
 
-	getRemoteLevel(instance: sqInstance): void {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const mixer = this
-
-		const model = mixer.model
+	#getRemoteLevel(): void {
+		const model = this.model
+		const instance = this.#instance
 
 		const buff: NRPNIncDecMessage[] = []
 
-		const getLevel = ({ MSB, LSB }: LevelParam) => buff.push(mixer.getNRPNValue(MSB, LSB))
+		const getLevel = ({ MSB, LSB }: LevelParam) => buff.push(this.getNRPNValue(MSB, LSB))
 
 		forEachSourceSinkLevel(model, getLevel)
 		forEachOutputLevel(model, getLevel)
 
 		const delayStatusRetrieval = instance.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
 
-		if (buff.length > 0 && mixer.socket !== null) {
+		if (buff.length > 0 && this.socket !== null) {
 			let ctr = 0
 			for (let i = 0; i < buff.length; i++) {
-				mixer.send(buff[i])
+				this.send(buff[i])
 				ctr++
 				if (delayStatusRetrieval) {
 					if (ctr === 20) {
