@@ -7,7 +7,7 @@ import { ChannelParser } from '../midi/parse/channel-parser.js'
 import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
 import { type InputOutputType, LR, Model } from './model.js'
-import { calculateMuteNRPN } from './nrpn/mute.js'
+import { calculateMuteNRPN, forEachMute } from './nrpn/mute.js'
 import {
 	forEachOutputLevel,
 	OutputBalanceNRPNCalculator,
@@ -194,17 +194,6 @@ export class Mixer {
 		}
 	}
 
-	/**
-	 * Issue MIDI commands to the mixer to retrieve the current mute states of
-	 * all inputs and outputs.
-	 */
-	#retrieveMuteStatuses(): void {
-		for (const key in CallbackInfo.mute) {
-			const mblb = key.toString().split(':')
-			this.send(this.getNRPNValue(Number(mblb[0]), Number(mblb[1])))
-		}
-	}
-
 	/** Start operating the SQ mixer, using options from the instance. */
 	start(host: string): void {
 		this.stop(InstanceStatus.Connecting)
@@ -240,7 +229,10 @@ export class Mixer {
 				return
 			}
 
-			this.#retrieveMuteStatuses()
+			forEachMute(this.model, ({ MSB, LSB }) => {
+				this.send(this.getNRPNValue(MSB, LSB))
+			})
+
 			sleep(300)
 			this.getRemoteLevel(instance)
 

@@ -29,6 +29,11 @@ type ApplyMuteBranding<T extends MuteParameterBaseRaw> = {
 
 const MuteParameterBase = MuteParameterBaseRaw as ApplyMuteBranding<typeof MuteParameterBaseRaw>
 
+function toMuteParam({ MSB, LSB }: MuteParam, n: number): MuteParam {
+	const val = LSB + n
+	return { MSB: MSB + ((val >> 7) & 0xf), LSB: val & 0x7f } as MuteParam
+}
+
 /**
  * Calculate the NRPN for the mute state of the numbered input/output of the
  * given type.
@@ -48,8 +53,16 @@ export function calculateMuteNRPN(model: Model, inputOutputType: InputOutputType
 		throw new Error(`${inputOutputType}=${n} is invalid`)
 	}
 
-	const { MSB, LSB } = MuteParameterBase[inputOutputType]
+	return toMuteParam(MuteParameterBase[inputOutputType], n)
+}
 
-	const val = LSB + n
-	return { MSB: MSB + ((val >> 7) & 0xf), LSB: val & 0x7f } as MuteParam
+type ForEachMuteFunctor = ({ MSB, LSB }: MuteParam) => void
+
+export function forEachMute(model: Model, f: ForEachMuteFunctor): void {
+	for (const [type, nrpn] of Object.entries(MuteParameterBase)) {
+		const muteType = type as InputOutputType
+		model.forEach(muteType, (n: number) => {
+			f(toMuteParam(nrpn, n))
+		})
+	}
 }
