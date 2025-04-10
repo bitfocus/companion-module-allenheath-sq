@@ -7,18 +7,13 @@ import {
 	type SomeCompanionConfigField,
 } from '@companion-module/base'
 import { getActions } from './actions/actions.js'
-import { OutputActionId } from './actions/output.js'
 import { Choices } from './choices.js'
 import { GetConfigFields, type SQInstanceConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
-import { Mixer, type NRPNIncDecMessage, RetrieveStatusAtStartup } from './mixer/mixer.js'
+import { Mixer } from './mixer/mixer.js'
 import type { Model } from './mixer/model.js'
-import { forEachOutputLevel } from './mixer/nrpn/output.js'
-import type { LevelParam } from './mixer/nrpn/param.js'
-import { forEachSourceSinkLevel } from './mixer/nrpn/source-to-sink.js'
 import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
 import { getPresets } from './presets.js'
-import { sleep } from './utils/sleep.js'
 import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
 
 /** An SQ mixer connection instance. */
@@ -151,68 +146,5 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 		} else {
 			mixer.start(host)
 		}
-	}
-
-	// DEPRECATED BELOW HERE
-
-	deprecatedGetRemoteLevel(): void {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const instance = this
-
-		// XXX Assert non-null to get it working for now.
-		const mixer = this.mixer!
-
-		const model = mixer.model
-
-		const buff: NRPNIncDecMessage[] = []
-
-		const getLevel = ({ MSB, LSB }: LevelParam) => buff.push(mixer.getNRPNValue(MSB, LSB))
-
-		forEachSourceSinkLevel(model, getLevel)
-		forEachOutputLevel(model, getLevel)
-
-		const delayStatusRetrieval = instance.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
-
-		if (buff.length > 0 && mixer.socket !== null) {
-			let ctr = 0
-			for (let i = 0; i < buff.length; i++) {
-				mixer.send(buff[i])
-				ctr++
-				if (delayStatusRetrieval) {
-					if (ctr === 20) {
-						ctr = 0
-						sleep(300)
-					}
-				}
-			}
-		}
-
-		instance.subscribeActions('chpan_to_mix')
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions('grppan_to_mix')
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions('fxrpan_to_mix')
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions('fxrpan_to_grp')
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions('mixpan_to_mtx')
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions('grppan_to_mtx')
-		if (delayStatusRetrieval) {
-			sleep(300)
-		}
-		instance.subscribeActions(OutputActionId.LRPanBalanceOutput)
-		instance.subscribeActions(OutputActionId.MixPanBalanceOutput)
-		instance.subscribeActions(OutputActionId.MatrixPanBalanceOutput)
 	}
 }

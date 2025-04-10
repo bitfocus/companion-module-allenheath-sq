@@ -8,11 +8,17 @@ import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
 import { type InputOutputType, LR, Model } from './model.js'
 import { calculateMuteNRPN } from './nrpn/mute.js'
-import { OutputBalanceNRPNCalculator, OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from './nrpn/output.js'
-import type { BalanceParam } from './nrpn/param.js'
+import {
+	forEachOutputLevel,
+	OutputBalanceNRPNCalculator,
+	OutputLevelNRPNCalculator,
+	type SinkAsOutputForNRPN,
+} from './nrpn/output.js'
+import type { BalanceParam, LevelParam } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
+	forEachSourceSinkLevel,
 	LevelNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
@@ -21,6 +27,7 @@ import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.j
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
 import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
+import { OutputActionId } from '../actions/output.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -103,7 +110,7 @@ type NRPNDataMessage = [number, 0x63, number, number, 0x62, number, number, 0x06
  * MSB/LSB and one MIDI Control Change message specifying increment or decrement
  * with one unconstrained 7-bit value.
  */
-export type NRPNIncDecMessage = [number, 0x63, number, number, 0x62, number, number, 0x60 | 0x61, number]
+type NRPNIncDecMessage = [number, 0x63, number, number, 0x62, number, number, 0x60 | 0x61, number]
 
 /**
  * An abstract representation of an SQ mixer.
@@ -235,14 +242,72 @@ export class Mixer {
 
 			this.#retrieveMuteStatuses()
 			sleep(300)
-			instance.deprecatedGetRemoteLevel()
+			this.getRemoteLevel(instance)
 
 			if (retrieveStatus === RetrieveStatusAtStartup.Fully) {
 				setTimeout(() => {
-					instance.deprecatedGetRemoteLevel()
+					this.getRemoteLevel(instance)
 				}, 4000)
 			}
 		})
+	}
+
+	getRemoteLevel(instance: sqInstance): void {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const mixer = this
+
+		const model = mixer.model
+
+		const buff: NRPNIncDecMessage[] = []
+
+		const getLevel = ({ MSB, LSB }: LevelParam) => buff.push(mixer.getNRPNValue(MSB, LSB))
+
+		forEachSourceSinkLevel(model, getLevel)
+		forEachOutputLevel(model, getLevel)
+
+		const delayStatusRetrieval = instance.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
+
+		if (buff.length > 0 && mixer.socket !== null) {
+			let ctr = 0
+			for (let i = 0; i < buff.length; i++) {
+				mixer.send(buff[i])
+				ctr++
+				if (delayStatusRetrieval) {
+					if (ctr === 20) {
+						ctr = 0
+						sleep(300)
+					}
+				}
+			}
+		}
+
+		instance.subscribeActions('chpan_to_mix')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		instance.subscribeActions('grppan_to_mix')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		instance.subscribeActions('fxrpan_to_mix')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		instance.subscribeActions('fxrpan_to_grp')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		instance.subscribeActions('mixpan_to_mtx')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		instance.subscribeActions('grppan_to_mtx')
+		if (delayStatusRetrieval) {
+			sleep(300)
+		}
+		instance.subscribeActions(OutputActionId.LRPanBalanceOutput)
+		instance.subscribeActions(OutputActionId.MixPanBalanceOutput)
+		instance.subscribeActions(OutputActionId.MatrixPanBalanceOutput)
 	}
 
 	/** Read and process mixer reply messages from `socket`. */
