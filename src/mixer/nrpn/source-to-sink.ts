@@ -1,5 +1,5 @@
 import { getSourceSinkCalculator, type InputOutputType, type Model } from '../model.js'
-import type { LevelParam, Param, ToKnownParam, UnbrandedParam } from './param.js'
+import { calculateParam, type LevelParam, type NRPNType, type Param, type UnbrandedParam } from './param.js'
 
 type SourceToSinkInfo = {
 	/**
@@ -134,7 +134,11 @@ type ApplySourceToSinkBranding<T extends SourceToSinkType> = {
 		? {
 				[Sink in keyof T[Source]]: T[Source][Sink] extends SourceToSinkInfo
 					? {
-							[NRPN in keyof T[Source][Sink]]: T[Source][Sink][NRPN] extends UnbrandedParam ? Param : never
+							[NRPN in keyof T[Source][Sink]]: T[Source][Sink][NRPN] extends UnbrandedParam
+								? NRPN extends NRPNType
+									? Param<NRPN>
+									: never
+								: never
 						}
 					: never
 			}
@@ -155,7 +159,7 @@ type SourceSinkForSourceToSinkForNRPN<
 	NRPN extends SourceSinkNRPN,
 > = Source extends keyof SourceToSinkParameterBaseType
 	? Sink extends keyof SourceToSinkParameterBaseType[Source]
-		? SourceToSinkParameterBaseType[Source][Sink] extends { [nrpnType in NRPN]: Param }
+		? SourceToSinkParameterBaseType[Source][Sink] extends { [nrpnType in NRPN]: Param<nrpnType> }
 			? [Source, Sink]
 			: never
 		: never
@@ -172,7 +176,7 @@ type SourceForSourceToMixAndLRForNRPN<
 	Source extends InputOutputType,
 	NRPN extends SourceSinkNRPN,
 > = Source extends keyof SourceToSinkParameterBaseType
-	? SourceToSinkParameterBaseType[Source] extends { [sink in 'mix' | 'lr']: { [nrpnType in NRPN]: Param } }
+	? SourceToSinkParameterBaseType[Source] extends { [sink in 'mix' | 'lr']: { [nrpnType in NRPN]: Param<nrpnType> } }
 		? Source
 		: never
 	: never
@@ -187,7 +191,7 @@ type SinkHasNRPN<Source extends InputOutputType, Sink extends InputOutputType, N
 	Source,
 ] extends [keyof SourceToSinkParameterBaseType]
 	? Sink extends keyof SourceToSinkParameterBaseType[Source]
-		? SourceToSinkParameterBaseType[Source][Sink] extends { [nrpnType in NRPN]: Param }
+		? SourceToSinkParameterBaseType[Source][Sink] extends { [nrpnType in NRPN]: Param<nrpnType> }
 			? Sink
 			: never
 		: never
@@ -212,14 +216,14 @@ export type SinkForMixAndLRInSinkForNRPN<NRPN extends SourceSinkNRPN> = SinkHasN
 function getSourceSinkNRPNBase<NRPN extends SourceSinkNRPN>(
 	[sourceType, sinkType]: SourceSinkForNRPN<NRPN>,
 	nrpnType: NRPN,
-): ToKnownParam<NRPN> {
+): Param<NRPN> {
 	// TypeScript doesn't preserve awareness of the validity of the property
 	// walk described by `sourceType`, `sinkType`, and `nrpnType` after
 	// `SourceSinkNRPNMatches` has done its thing.  Do enough casting to make
 	// the property access sequence type-check.
 	const sinks = SourceToSinkParameterBase[sourceType] as SourceToSinkType[InputOutputType] as SinkInfo
 	const info = sinks[sinkType] as Required<SourceToSinkInfo>
-	return info[nrpnType] as ToKnownParam<NRPN>
+	return info[nrpnType] as Param<NRPN>
 }
 
 /**
@@ -229,7 +233,7 @@ function getSourceSinkNRPNBase<NRPN extends SourceSinkNRPN>(
 class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 	readonly #inputOutputCounts
 	readonly #sourceSink: SourceSinkForNRPN<NRPN>
-	readonly #base: ToKnownParam<NRPN>
+	readonly #base: Param<NRPN>
 
 	/**
 	 * Construct a calculator for NRPNs of type identified by `nrpnType` for
@@ -262,7 +266,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 	 * @returns
 	 *   The computed NRPN.
 	 */
-	calculate(source: number, sink: number): ToKnownParam<NRPN> {
+	calculate(source: number, sink: number): Param<NRPN> {
 		const [sourceType, sinkType] = this.#sourceSink
 
 		const inputOutputCounts = this.#inputOutputCounts
@@ -275,10 +279,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 			throw new Error(`${sinkType}=${sink} is invalid`)
 		}
 
-		const base = this.#base
-
-		const val = base.LSB + sinkCount * source + sink
-		return { MSB: base.MSB + ((val >> 7) & 0xf), LSB: val & 0x7f } as ToKnownParam<NRPN>
+		return calculateParam(this.#base, sinkCount * source + sink)
 	}
 }
 

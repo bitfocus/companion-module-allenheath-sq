@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
-import { calculateMuteNRPN } from './mute.js'
+import { calculateMuteParam } from './mute.js'
 import type { UnbrandedParam } from './param.js'
 
 describe('calculateMuteNRPN', () => {
@@ -91,10 +91,10 @@ describe('calculateMuteNRPN', () => {
 	test.each([...allMuteTests()])('calculateMuteNRPN(model, $type, $n)', ({ type, n, behavior }) => {
 		switch (behavior.type) {
 			case 'ok':
-				expect(calculateMuteNRPN(model, type, n)).toEqual(behavior.result)
+				expect(calculateMuteParam(model, type, n)).toEqual(behavior.result)
 				break
 			case 'error':
-				expect(() => calculateMuteNRPN(model, type, n)).toThrow(behavior.match)
+				expect(() => calculateMuteParam(model, type, n)).toThrow(behavior.match)
 				break
 			default:
 				expect('missing').toBe('case')

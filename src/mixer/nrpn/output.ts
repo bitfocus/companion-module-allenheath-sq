@@ -1,5 +1,5 @@
 import { getOutputCalculator, type InputOutputType, type Model } from '../model.js'
-import type { LevelParam, NRPNType, ToKnownParam, UnbrandedParam } from './param.js'
+import { calculateParam, type LevelParam, type NRPNType, type Param, type UnbrandedParam } from './param.js'
 
 type OutputInfo = {
 	/** The base MSB/LSB for adjusting output level. */
@@ -58,7 +58,7 @@ type ApplyOutputBranding<T extends OutputParametersType> = {
 		? {
 				[NRPN in keyof T[Sink]]: T[Sink][NRPN] extends UnbrandedParam
 					? NRPN extends NRPNType
-						? ToKnownParam<NRPN>
+						? Param<NRPN>
 						: never
 					: never
 			}
@@ -86,7 +86,7 @@ export type SinkAsOutputForNRPN<NRPN extends OutputNRPN> = OutputSinkMatchesNRPN
 class OutputNRPNCalculator<NRPN extends OutputNRPN> {
 	readonly #inputOutputCounts
 	readonly #sinkType: SinkAsOutputForNRPN<NRPN>
-	readonly #base: ToKnownParam<NRPN>
+	readonly #base: Param<NRPN>
 
 	constructor(model: Model, nrpnType: NRPN, sinkType: SinkAsOutputForNRPN<NRPN>) {
 		this.#inputOutputCounts = model.inputOutputCounts
@@ -97,18 +97,15 @@ class OutputNRPNCalculator<NRPN extends OutputNRPN> {
 		// `OutputSinkMatchesNRPN` does its thing.  Do enough casting to make
 		// the property access sequence type-check.
 		const info = OutputParameterBase[sinkType] as Required<OutputInfo>
-		this.#base = info[nrpnType] as ToKnownParam<NRPN>
+		this.#base = info[nrpnType] as Param<NRPN>
 	}
 
-	calculate(sink: number): ToKnownParam<NRPN> {
+	calculate(sink: number): Param<NRPN> {
 		if (this.#inputOutputCounts[this.#sinkType] <= sink) {
 			throw new Error(`${this.#sinkType}=${sink} is invalid`)
 		}
 
-		const { MSB, LSB } = this.#base
-
-		const val = LSB + sink
-		return { MSB: MSB + ((val >> 7) & 0xf), LSB: val & 0x7f } as ToKnownParam<NRPN>
+		return calculateParam(this.#base, sink)
 	}
 }
 
