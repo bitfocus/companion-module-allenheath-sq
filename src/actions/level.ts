@@ -10,7 +10,7 @@ import type { sqInstance } from '../instance.js'
 import { LR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
-import type { LevelParam } from '../mixer/nrpn/level.js'
+import type { NRPN } from '../mixer/nrpn/param.js'
 import {
 	LevelNRPNCalculator,
 	type SinkForMixAndLRInSinkForNRPN,
@@ -90,7 +90,7 @@ type LevelType = {
 	source: number
 	sink: number
 	sourceSinkType: SourceSinkForNRPN<'level'>
-	param: LevelParam
+	nrpn: NRPN<'level'>
 }
 
 type SourceToMixOrLR = [SourceForSourceInMixAndLRForNRPN<'level'>, 'mix-or-lr']
@@ -162,13 +162,13 @@ function getLevelType(
 		sourceSinkType = srcSnkType
 	}
 
-	const nrpn = LevelNRPNCalculator.get(model, sourceSinkType)
+	const calc = LevelNRPNCalculator.get(model, sourceSinkType)
 
 	return {
 		source,
 		sink,
 		sourceSinkType,
-		param: nrpn.calculate(source, sink),
+		nrpn: calc.calculate(source, sink),
 	}
 }
 
@@ -243,10 +243,10 @@ export function levelActions(
 					source: inputChannel,
 					sink: mix,
 					sourceSinkType: { 1: sinkType },
-					param,
+					nrpn,
 				} = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -271,10 +271,10 @@ export function levelActions(
 					source: group,
 					sink: mix,
 					sourceSinkType: { 1: sinkType },
-					param,
+					nrpn,
 				} = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -303,10 +303,10 @@ export function levelActions(
 					source: fxReturn,
 					sink: mix,
 					sourceSinkType: { 1: sinkType },
-					param,
+					nrpn,
 				} = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -345,9 +345,9 @@ export function levelActions(
 				if (levelType === null) {
 					return
 				}
-				const { source: inputChannel, sink: fxSend, param } = levelType
+				const { source: inputChannel, sink: fxSend, nrpn } = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -364,9 +364,9 @@ export function levelActions(
 				if (levelType === null) {
 					return
 				}
-				const { source: group, sink: fxSend, param } = levelType
+				const { source: group, sink: fxSend, nrpn } = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -387,9 +387,9 @@ export function levelActions(
 				if (levelType === null) {
 					return
 				}
-				const { source: fxReturn, sink: fxSend, param } = levelType
+				const { source: fxReturn, sink: fxSend, nrpn } = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -410,10 +410,10 @@ export function levelActions(
 					source: mix,
 					sourceSinkType: [sourceType],
 					sink: matrix,
-					param,
+					nrpn,
 				} = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -434,9 +434,9 @@ export function levelActions(
 				if (levelType === null) {
 					return
 				}
-				const { source: group, sink: matrix, param } = levelType
+				const { source: group, sink: matrix, nrpn } = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}

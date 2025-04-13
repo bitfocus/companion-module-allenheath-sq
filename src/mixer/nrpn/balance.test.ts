@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
-import { BalanceNRPNCalculator, type SourceSinkForNRPN } from './source-to-sink.js'
 import { type InputOutputType, Model } from '../model.js'
-import type { UnbrandedParam } from './param.js'
+import { splitNRPN, type UnbrandedParam } from './param.js'
+import { BalanceNRPNCalculator, type SourceSinkForNRPN } from './source-to-sink.js'
 
 describe('BalanceNRPNCalculator', () => {
 	const model = new Model('SQ5')
@@ -162,7 +162,7 @@ describe('BalanceNRPNCalculator', () => {
 		({ calc, source, sink, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':
-					expect(calc.calculate(source, sink)).toEqual(behavior.result)
+					expect(splitNRPN(calc.calculate(source, sink))).toEqual(behavior.result)
 					break
 				case 'error':
 					expect(() => calc.calculate(source, sink)).toThrow(behavior.match)

@@ -8,16 +8,14 @@ import { ChannelParser } from '../midi/parse/channel-parser.js'
 import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
 import { type InputOutputType, Model } from './model.js'
-import type { LevelParam } from './nrpn/level.js'
-import { calculateMuteParam, forEachMute, type MuteParam } from './nrpn/mute.js'
+import { calculateMuteNRPN, forEachMute } from './nrpn/mute.js'
 import {
 	forEachOutputLevel,
 	OutputBalanceNRPNCalculator,
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from './nrpn/output.js'
-import type { BalanceParam } from './nrpn/pan-balance.js'
-import { type NRPNType, type Param, prettyParam } from './nrpn/param.js'
+import { type NRPN, type NRPNType, prettyNRPN, splitNRPN } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
@@ -233,8 +231,8 @@ export class Mixer {
 				return
 			}
 
-			forEachMute(this.model, (param: MuteParam) => {
-				this.send(this.getNRPNValue(param))
+			forEachMute(this.model, (nrpn: NRPN<'mute'>) => {
+				this.send(this.getNRPNValue(nrpn))
 			})
 
 			sleep(300)
@@ -254,7 +252,7 @@ export class Mixer {
 
 		const buff: NRPNIncDecMessage[] = []
 
-		const getLevel = (param: LevelParam) => buff.push(this.getNRPNValue(param))
+		const getLevel = (nrpn: NRPN<'level'>) => buff.push(this.getNRPNValue(nrpn))
 
 		forEachSourceSinkLevel(model, getLevel)
 		forEachOutputLevel(model, getLevel)
@@ -324,18 +322,20 @@ export class Mixer {
 				[CurrentSceneId]: newScene + 1,
 			})
 		})
-		mixerChannelParser.on('mute', (param: MuteParam, vf: number) => {
-			verboseLog(`Mute received: ${prettyParam(param)}, VF=${prettyByte(vf)}`)
+		mixerChannelParser.on('mute', (nrpn: NRPN<'mute'>, vf: number) => {
+			verboseLog(`Mute received: ${prettyNRPN(nrpn)}, VF=${prettyByte(vf)}`)
 
-			this.fdbState[`mute_${param.MSB}.${param.LSB}`] = vf === 0x01
+			const { MSB, LSB } = splitNRPN(nrpn)
+			this.fdbState[`mute_${MSB}.${LSB}`] = vf === 0x01
 
 			const CI: CallbackInfoType = CallbackInfo
-			instance.checkFeedbacks(CI.mute[`${param.MSB}:${param.LSB}`][0])
+			instance.checkFeedbacks(CI.mute[`${MSB}:${LSB}`][0])
 		})
-		mixerChannelParser.on('fader_level', (param: LevelParam, vc: number, vf: number) => {
-			verboseLog(`Fader received: ${prettyParam(param)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`)
+		mixerChannelParser.on('fader_level', (nrpn: NRPN<'level'>, vc: number, vf: number) => {
+			verboseLog(`Fader received: ${prettyNRPN(nrpn)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`)
 
-			const levelKey = `level_${param.MSB}.${param.LSB}` as const
+			const { MSB, LSB } = splitNRPN(nrpn)
+			const levelKey = `level_${MSB}.${LSB}` as const
 
 			let ost = false
 			const res = instance.getVariableValue(levelKey)
@@ -353,16 +353,18 @@ export class Mixer {
 				this.lastValue[levelKey] = level
 			}
 		})
-		mixerChannelParser.on('pan_level', (param: BalanceParam, vc: number, vf: number) => {
-			verboseLog(`Pan received: ${prettyParam(param)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`)
+		mixerChannelParser.on('pan_level', (nrpn: NRPN<'panBalance'>, vc: number, vf: number) => {
+			const printedNRPN = prettyNRPN(nrpn)
+			verboseLog(`Pan received: ${printedNRPN}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`)
 
 			// It would be nice to mention the source-sink relationship the NRPN
 			// refers to, but we haven't defined a way to work backwards from
 			// MSB/LSB to semantic meaning.  A name that includes MSB/LSB (in
 			// hex as in the SQ MIDI Protocol document) is minimally viable.
-			const name = `Pan/Balance ${prettyParam(param)}`
+			const name = `Pan/Balance ${printedNRPN}`
 
-			const variableId = `pan_${param.MSB}.${param.LSB}`
+			const { MSB, LSB } = splitNRPN(nrpn)
+			const variableId = `pan_${MSB}.${LSB}`
 			const variableValue = vcvfToReadablePanBalance(vc, vf)
 			instance.setExtraVariable(variableId, name, variableValue)
 		})
@@ -371,8 +373,8 @@ export class Mixer {
 	}
 
 	/** Compute a mixer "get" command to retrieve the value of an NRPN. */
-	getNRPNValue<T extends NRPNType>(param: Param<T>): NRPNIncDecMessage {
-		return this.#nrpnIncrement(param, 0x7f)
+	getNRPNValue<T extends NRPNType>(nrpn: NRPN<T>): NRPNIncDecMessage {
+		return this.#nrpnIncrement(nrpn, 0x7f)
 	}
 
 	/**
@@ -426,9 +428,10 @@ export class Mixer {
 
 	/** Perform the supplied mute operation upon the strip of the given type. */
 	#mute(strip: number, type: InputOutputType, op: MuteOperation): void {
-		const param = calculateMuteParam(this.model, type, strip)
-		const key = `mute_${param.MSB}.${param.LSB}` as const
+		const nrpn = calculateMuteNRPN(this.model, type, strip)
+		const { MSB, LSB } = splitNRPN(nrpn)
 
+		const key = `mute_${MSB}.${LSB}` as const
 		const fdbState = this.fdbState
 		if (op !== MuteOperation.Toggle) {
 			fdbState[key] = op === MuteOperation.On
@@ -437,7 +440,7 @@ export class Mixer {
 		}
 
 		this.#instance.checkFeedbacks()
-		const commands = [this.#nrpnData(param, 0, Number(fdbState[key]))]
+		const commands = [this.#nrpnData(nrpn, 0, Number(fdbState[key]))]
 		// XXX
 		void this.sendCommands(commands)
 	}
@@ -500,13 +503,13 @@ export class Mixer {
 	 *   The number of the sink to assign, relative to all sinks of that type,
 	 *   counting from zero.  (For example, if there are 12 total groups and the
 	 *   sink is a group, this will be in range `[0, 12)`).
-	 * @param nrpn
+	 * @param calc
 	 *   A calculator of the assign NRPN dictated by `source`, `sink`, and their
 	 *   types.
 	 */
-	#assignToSink(source: number, active: boolean, sink: number, nrpn: AssignNRPNCalculator): NRPNDataMessage {
-		const param = nrpn.calculate(source, sink)
-		return this.#nrpnData(param, 0, active ? 1 : 0)
+	#assignToSink(source: number, active: boolean, sink: number, calc: AssignNRPNCalculator): NRPNDataMessage {
+		const nrpn = calc.calculate(source, sink)
+		return this.#nrpnData(nrpn, 0, active ? 1 : 0)
 	}
 
 	/**
@@ -743,16 +746,17 @@ export class Mixer {
 	}
 
 	/** Send a MIDI command to set the given level NRPN to the given level. */
-	#setLevel(param: LevelParam, level: Level): void {
+	#setLevel(nrpn: NRPN<'level'>, level: Level): void {
 		const [VC, VF] = nrpnDataFromLevel(level, this.#instance.options.faderLaw)
-		this.send(this.#nrpnData(param, VC, VF))
+		this.send(this.#nrpnData(nrpn, VC, VF))
 
 		// XXX Is this really needed?  Won't the mixer's reply indicating the
 		//     updated level do this for us, just more slowly?  Or is jumping
 		//     the gun intentional, so that the sent level can be immediately
 		//     presumed by "what's the current level" queries?
+		const { MSB, LSB } = splitNRPN(nrpn)
 		this.#instance.setVariableValues({
-			[`level_${param.MSB}.${param.LSB}`]: level,
+			[`level_${MSB}.${LSB}`]: level,
 		})
 	}
 
@@ -761,7 +765,7 @@ export class Mixer {
 	 * level `end` over `fadeTimeMs` milliseconds.  (If `fadeTimeMs === 0`, this
 	 * decays into an immediate set to the `end` level.)
 	 *
-	 * @param param
+	 * @nrpn nrpn
 	 *   The level NRPN to fade.
 	 * @param start
 	 *   The presumed level before fading starts.
@@ -770,7 +774,7 @@ export class Mixer {
 	 * @param fadeTimeMs
 	 *   The length of time, in milliseconds, that the fading should take.
 	 */
-	#fadeToLevel(param: LevelParam, start: Level, end: Level, fadeTimeMs: number): void {
+	#fadeToLevel(nrpn: NRPN<'level'>, start: Level, end: Level, fadeTimeMs: number): void {
 		if (start === end) {
 			// *In principle* this function is only called to fade from the
 			// actual current level to the desired end level.  But at least the
@@ -816,12 +820,12 @@ export class Mixer {
 
 		if (fadeTimeMs <= FadeStepCoalesceMs) {
 			if (fadeTimeMs === 0) {
-				this.#setLevel(param, end)
+				this.#setLevel(nrpn, end)
 			} else {
 				// If the entire duration is short enough to coalesce, only
 				// do the end set.
 				setTimeout(() => {
-					this.#setLevel(param, end)
+					this.#setLevel(nrpn, end)
 				}, fadeTimeMs)
 			}
 			return
@@ -835,7 +839,7 @@ export class Mixer {
 		const step = () => {
 			// Be defensive and use >=.  This is floating point math, after all.
 			if (elapsedMs >= fadeTimeMs) {
-				this.#setLevel(param, end)
+				this.#setLevel(nrpn, end)
 				return
 			}
 
@@ -851,7 +855,7 @@ export class Mixer {
 			const numericLevel =
 				numericStart + Math.floor(totalLevelChange * ((elapsedMs + nextStepDeltaMs / 2) / fadeTimeMs))
 			const level: Level = numericLevel <= -90 ? '-inf' : 10 <= numericLevel ? 10 : numericLevel
-			this.#setLevel(param, level)
+			this.#setLevel(nrpn, level)
 
 			// Wait and take the next step.
 			setTimeout(() => {
@@ -902,8 +906,8 @@ export class Mixer {
 		end: Level,
 		fadeTimeMs: number,
 	): void {
-		const param = LevelNRPNCalculator.get(this.model, sourceSink).calculate(source, sink)
-		this.#fadeToLevel(param, start, end, fadeTimeMs)
+		const nrpn = LevelNRPNCalculator.get(this.model, sourceSink).calculate(source, sink)
+		this.#fadeToLevel(nrpn, start, end, fadeTimeMs)
 	}
 
 	/**
@@ -1017,22 +1021,22 @@ export class Mixer {
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
-	#setPanBalance(param: BalanceParam, panBalance: PanBalanceChoice): void {
+	#setPanBalance(nrpn: NRPN<'panBalance'>, panBalance: PanBalanceChoice): void {
 		let modifyPanBalanceCommand
 		switch (panBalance) {
 			// Step Right
 			case 998:
-				modifyPanBalanceCommand = this.#nrpnIncrement(param, 0)
+				modifyPanBalanceCommand = this.#nrpnIncrement(nrpn, 0)
 				break
 			// Step Left
 			case 999:
-				modifyPanBalanceCommand = this.#nrpnDecrement(param, 0)
+				modifyPanBalanceCommand = this.#nrpnDecrement(nrpn, 0)
 				break
 			// 'L100', 'L95', ..., 'L5', CTR', 'R5', ..., 'R95', 'R100'
 			default: {
 				const [VC, VF] = panBalanceLevelToVCVF(panBalance)
 
-				modifyPanBalanceCommand = this.#nrpnData(param, VC, VF)
+				modifyPanBalanceCommand = this.#nrpnData(nrpn, VC, VF)
 			}
 		}
 
@@ -1041,7 +1045,7 @@ export class Mixer {
 			modifyPanBalanceCommand,
 			// Query the new pan/balance value to update its variable.
 			// XXX check later -- possibly only stepping left/right need this
-			this.getNRPNValue(param),
+			this.getNRPNValue(nrpn),
 		])
 	}
 
@@ -1399,7 +1403,8 @@ export class Mixer {
 	 *
 	 * where `N` is the session MIDI channel.
 	 */
-	#nrpnData<T extends NRPNType>({ MSB, LSB }: Param<T>, vc: number, vf: number): NRPNDataMessage {
+	#nrpnData<T extends NRPNType>(nrpn: NRPN<T>, vc: number, vf: number): NRPNDataMessage {
+		const { MSB, LSB } = splitNRPN(nrpn)
 		const BN = 0xb0 | this.#instance.options.midiChannel
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x06, vc, BN, 0x26, vf]
 	}
@@ -1413,7 +1418,8 @@ export class Mixer {
 	 *
 	 * where `N` is the session MIDI channel.
 	 */
-	#nrpnIncrement<T extends NRPNType>({ MSB, LSB }: Param<T>, val: number): NRPNIncDecMessage {
+	#nrpnIncrement<T extends NRPNType>(nrpn: NRPN<T>, val: number): NRPNIncDecMessage {
+		const { MSB, LSB } = splitNRPN(nrpn)
 		const BN = 0xb0 | this.#instance.options.midiChannel
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x60, val]
 	}
@@ -1427,7 +1433,8 @@ export class Mixer {
 	 *
 	 * where `N` is the session MIDI channel.
 	 */
-	#nrpnDecrement<T extends NRPNType>({ MSB, LSB }: Param<T>, val: number): NRPNIncDecMessage {
+	#nrpnDecrement<T extends NRPNType>(nrpn: NRPN<T>, val: number): NRPNIncDecMessage {
+		const { MSB, LSB } = splitNRPN(nrpn)
 		const BN = 0xb0 | this.#instance.options.midiChannel
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x61, val]
 	}

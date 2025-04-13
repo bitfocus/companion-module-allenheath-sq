@@ -1,6 +1,5 @@
-import type { LevelParam } from './level.js'
 import { getOutputCalculator, type InputOutputType, type Model } from '../model.js'
-import { calculateParam, type NRPNType, type Param, type UnbrandedParam } from './param.js'
+import { calculateNRPN, type NRPN, toNRPN, type NRPNType, type Param, type UnbrandedParam } from './param.js'
 
 type OutputInfo = {
 	/** The base MSB/LSB for adjusting output level. */
@@ -84,12 +83,12 @@ type OutputSinkMatchesNRPN<
 /** Enumerate all `Sink` usable as output supporting the given NRPN. */
 export type SinkAsOutputForNRPN<NRPN extends OutputNRPN> = OutputSinkMatchesNRPN<keyof OutputParameterBaseType, NRPN>[0]
 
-class OutputNRPNCalculator<NRPN extends OutputNRPN> {
+class OutputNRPNCalculator<T extends OutputNRPN> {
 	readonly #inputOutputCounts
-	readonly #sinkType: SinkAsOutputForNRPN<NRPN>
-	readonly #base: Param<NRPN>
+	readonly #sinkType: SinkAsOutputForNRPN<T>
+	readonly #base: Param<T>
 
-	constructor(model: Model, nrpnType: NRPN, sinkType: SinkAsOutputForNRPN<NRPN>) {
+	constructor(model: Model, nrpnType: T, sinkType: SinkAsOutputForNRPN<T>) {
 		this.#inputOutputCounts = model.inputOutputCounts
 		this.#sinkType = sinkType
 
@@ -98,15 +97,15 @@ class OutputNRPNCalculator<NRPN extends OutputNRPN> {
 		// `OutputSinkMatchesNRPN` does its thing.  Do enough casting to make
 		// the property access sequence type-check.
 		const info = OutputParameterBase[sinkType] as Required<OutputInfo>
-		this.#base = info[nrpnType] as Param<NRPN>
+		this.#base = info[nrpnType] as Param<T>
 	}
 
-	calculate(sink: number): Param<NRPN> {
+	calculate(sink: number): NRPN<T> {
 		if (this.#inputOutputCounts[this.#sinkType] <= sink) {
 			throw new Error(`${this.#sinkType}=${sink} is invalid`)
 		}
 
-		return calculateParam(this.#base, sink)
+		return calculateNRPN(toNRPN(this.#base), sink)
 	}
 }
 
@@ -151,7 +150,7 @@ export type OutputCalculatorCache = {
  * functor will be invoked with the NRPN pair for the level and a readable
  * description of the particular output.
  */
-type OutputLevelFunctor = ({ MSB, LSB }: LevelParam, outputDesc: string) => void
+type OutputLevelFunctor = (nrpn: NRPN<'level'>, outputDesc: string) => void
 
 /**
  * For each sink usable as output with adjustable level, invoke the given

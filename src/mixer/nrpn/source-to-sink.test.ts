@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest'
-import type { LevelParam } from './level.js'
 import { Model } from '../model.js'
+import { type Param, splitNRPN } from './param.js'
 import { forEachSourceSinkLevel } from './source-to-sink.js'
 
 describe('forEachSourceToSinkLevel', () => {
 	const model = new Model('SQ5')
 
-	const results: [LevelParam, string, string][] = []
+	const results: [Param<'level'>, string, string][] = []
 	forEachSourceSinkLevel(model, (nrpn, sourceDesc, sinkDesc) => {
-		results.push([nrpn, sourceDesc, sinkDesc])
+		results.push([splitNRPN(nrpn), sourceDesc, sinkDesc])
 	})
 
 	test('some levels gotten', () => {

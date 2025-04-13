@@ -1,3 +1,5 @@
+import { makeNRPN } from '../../../mixer/nrpn/param.js'
+
 type ReceiveChannel = {
 	readonly type: 'receive-channel-message'
 	readonly message: readonly number[]
@@ -100,7 +102,7 @@ export function ExpectMuteMessage(msb: number, lsb: number, vf: number): ExpectM
 	if (!(vf === 0 || vf === 1)) {
 		throw new Error(`vf=${vf} in a mixer mute command must be 0 or 1`)
 	}
-	return { type: 'expect-mute', args: [msb, lsb, vf] }
+	return { type: 'expect-mute', args: [makeNRPN(msb, lsb), vf] }
 }
 
 /**
@@ -116,7 +118,7 @@ export function ExpectMuteMessage(msb: number, lsb: number, vf: number): ExpectM
  *   The velocity (fine) byte in the message.
  */
 export function ExpectFaderLevelMessage(msb: number, lsb: number, vc: number, vf: number): ExpectFaderLevel {
-	return { type: 'expect-fader-level', args: [msb, lsb, vc, vf] }
+	return { type: 'expect-fader-level', args: [makeNRPN(msb, lsb), vc, vf] }
 }
 
 /**
@@ -132,5 +134,5 @@ export function ExpectFaderLevelMessage(msb: number, lsb: number, vc: number, vf
  *   The velocity (fine) byte in the message.
  */
 export function ExpectPanLevelMessage(msb: number, lsb: number, vc: number, vf: number): ExpectPanLevel {
-	return { type: 'expect-pan-level', args: [msb, lsb, vc, vf] }
+	return { type: 'expect-pan-level', args: [makeNRPN(msb, lsb), vc, vf] }
 }

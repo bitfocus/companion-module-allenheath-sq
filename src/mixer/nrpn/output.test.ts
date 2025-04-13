@@ -1,5 +1,4 @@
 import { describe, expect, test } from 'vitest'
-import type { LevelParam } from './level.js'
 import { type InputOutputType, Model } from '../model.js'
 import {
 	forEachOutputLevel,
@@ -7,7 +6,7 @@ import {
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from './output.js'
-import type { UnbrandedParam } from './param.js'
+import { type Param, splitNRPN, type UnbrandedParam } from './param.js'
 
 type OutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
 
@@ -89,7 +88,7 @@ describe('OutputLevelNRPNCalculator', () => {
 				yield { sinkType, calc, n, behavior }
 				switch (behavior.type) {
 					case 'ok':
-						expect(calc.calculate(n)).toEqual(behavior.result)
+						expect(splitNRPN(calc.calculate(n))).toEqual(behavior.result)
 						break
 					case 'error':
 						expect(() => calc.calculate(n)).toThrow(behavior.match)
@@ -106,7 +105,7 @@ describe('OutputLevelNRPNCalculator', () => {
 		({ calc, n, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':
-					expect(calc.calculate(n)).toEqual(behavior.result)
+					expect(splitNRPN(calc.calculate(n))).toEqual(behavior.result)
 					break
 				case 'error':
 					expect(() => calc.calculate(n)).toThrow(behavior.match)
@@ -181,7 +180,7 @@ describe('OutputBalanceNRPNCalculator', () => {
 		({ calc, n, behavior }) => {
 			switch (behavior.type) {
 				case 'ok':
-					expect(calc.calculate(n)).toEqual(behavior.result)
+					expect(splitNRPN(calc.calculate(n))).toEqual(behavior.result)
 					break
 				case 'error':
 					expect(() => calc.calculate(n)).toThrow(behavior.match)
@@ -196,9 +195,9 @@ describe('OutputBalanceNRPNCalculator', () => {
 describe('forEachOutputLevel', () => {
 	const model = new Model('SQ5')
 
-	const results: [LevelParam, string][] = []
+	const results: [Param<'level'>, string][] = []
 	forEachOutputLevel(model, (nrpn, sinkDesc) => {
-		results.push([nrpn, sinkDesc])
+		results.push([splitNRPN(nrpn), sinkDesc])
 	})
 
 	test('some levels gotten', () => {

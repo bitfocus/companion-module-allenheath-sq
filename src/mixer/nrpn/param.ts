@@ -3,20 +3,24 @@ import { prettyByte } from '../../utils/pretty.js'
 
 export type NRPNType = 'mute' | 'assign' | 'panBalance' | 'level'
 
-/** A MIDI NRPN of a specific type as its 7-bit MSB and LSB. */
+/** A 14-bit NRPN of specific type. */
+export type NRPN<T extends NRPNType> = Branded<number, `${T}-nrpn`>
+
+/** A MIDI NRPN decomposed into 7-bit MSB and LSB. */
 export type Param<T extends NRPNType> = T extends NRPNType
 	? { MSB: Branded<number, `${T}-msb`>; LSB: Branded<number, `${T}-lsb`> }
 	: never
 
 /**
- * An untyped MIDI NRPN.  (This is generally only used to specify an NRPN in a
- * literal; `Param<T>` is used to overlay typing information upon MSB/LSB
- * parameters as actually used.)
+ * An untyped MIDI NRPN decomposed into 7-bit MSB and LSB.  (This is generally
+ * only used to specify an NRPN in a literal; `Param<T>` is used to overlay
+  typing information upon NRPN MSB/LSB as actually used.)
  */
 export type UnbrandedParam = { MSB: number; LSB: number }
 
-export function makeParam<T extends NRPNType>(MSB: number, LSB: number): Param<T> {
-	return { MSB, LSB } as Param<T>
+/** Compute an NRPN of the given type from a 7-bit MSB/LSB. */
+export function makeNRPN<T extends NRPNType>(MSB: number, LSB: number): NRPN<T> {
+	return ((MSB << 7) + LSB) as NRPN<T>
 }
 
 /**
@@ -25,13 +29,23 @@ export function makeParam<T extends NRPNType>(MSB: number, LSB: number): Param<T
  */
 export type AssignParam = Param<'assign'>
 
-export function calculateParam<T extends NRPNType>(base: Param<T>, offset: number): Param<T> {
-	const val = base.LSB + offset
-	const LSB = val & 0b0111_1111
-	const MSB = base.MSB + ((val >> 7) & 0xf)
-	return { MSB, LSB } as Param<T>
+/** Compute the NRPN at the given offset from another NRPN. */
+export function calculateNRPN<T extends NRPNType>(nrpn: NRPN<T>, offset: number): NRPN<T> {
+	return (nrpn + offset) as NRPN<T>
 }
 
-export function prettyParam<T extends NRPNType>({ MSB, LSB }: Param<T>): string {
+/** Split `nrpn` into its 7-bit halves. */
+export function splitNRPN<T extends NRPNType>(nrpn: NRPN<T>): Param<T> {
+	return { MSB: (nrpn >> 7) & 0b0111_1111, LSB: nrpn & 0b0111_1111 } as Param<T>
+}
+
+/** Convert a 7-bit MSB/LSB pair into a 14-bit NRPN. */
+export function toNRPN<T extends NRPNType>({ MSB, LSB }: Param<T>): NRPN<T> {
+	return makeNRPN(MSB, LSB)
+}
+
+/** Pretty-print an NRPN into its 7-bit MSB/LSB decomposition. */
+export function prettyNRPN<T extends NRPNType>(nrpn: NRPN<T>): string {
+	const { MSB, LSB } = splitNRPN(nrpn)
 	return `MSB=${prettyByte(MSB)}, LSB=${prettyByte(LSB)}`
 }

@@ -1,7 +1,4 @@
-import type { LevelParam } from '../../mixer/nrpn/level.js'
-import type { MuteParam } from '../../mixer/nrpn/mute.js'
-import type { BalanceParam } from '../../mixer/nrpn/pan-balance.js'
-import { makeParam } from '../../mixer/nrpn/param.js'
+import { makeNRPN, type NRPN } from '../../mixer/nrpn/param.js'
 import { manyPrettyBytes, prettyByte, prettyBytes } from '../../utils/pretty.js'
 import EventEmitter from 'eventemitter3'
 
@@ -19,19 +16,19 @@ export interface MixerMessageEvents {
 	 * The input/output identified by MSB/LSB was muted (`vf=1`) or unmuted
 	 * (`vf=0`).
 	 */
-	mute: [param: MuteParam, vf: number]
+	mute: [nrpn: NRPN<'mute'>, vf: number]
 
 	/**
 	 * The signal level identified by MSB/LSB was set to the level specified by
 	 * `vc`/`vf` with respect to the active fader law.
 	 */
-	fader_level: [param: LevelParam, vc: number, vf: number]
+	fader_level: [nrpn: NRPN<'level'>, vc: number, vf: number]
 
 	/**
 	 * The pan/balance of a signal in a mix identified by MSB/LSB was set to the
 	 * level specified by `vc`/`vf`.
 	 */
-	pan_level: [param: BalanceParam, vc: number, vf: number]
+	pan_level: [nrpn: NRPN<'panBalance'>, vc: number, vf: number]
 }
 
 /**
@@ -140,18 +137,18 @@ export class ChannelParser extends EventEmitter<MixerMessageEvents> {
 						// Mute
 						if (msb === 0x00 || msb === 0x02 || msb === 0x04) {
 							if (vc === 0x00 && vf < 0x02) {
-								this.emit('mute', makeParam(msb, lsb), vf)
+								this.emit('mute', makeNRPN(msb, lsb), vf)
 							} else {
 								verboseLog(`Malformed mute message, ignoring: ${manyPrettyBytes(first, second, third, fourth)}`)
 							}
 						}
 						// Fader level
 						else if (0x40 <= msb && msb <= 0x4f) {
-							this.emit('fader_level', makeParam(msb, lsb), vc, vf)
+							this.emit('fader_level', makeNRPN(msb, lsb), vc, vf)
 						}
 						// Pan Level
 						else if (0x50 <= msb && msb <= 0x5f) {
-							this.emit('pan_level', makeParam(msb, lsb), vc, vf)
+							this.emit('pan_level', makeNRPN(msb, lsb), vc, vf)
 						} else {
 							verboseLog(
 								`Unhandled MSB/LSB ${prettyByte(msb)}/${prettyByte(lsb)} in NRPN data message ${manyPrettyBytes(first, second, third, fourth)}`,

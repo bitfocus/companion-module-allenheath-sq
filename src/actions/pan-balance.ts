@@ -11,7 +11,7 @@ import type { sqInstance } from '../instance.js'
 import { LR, type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
-import type { BalanceParam } from '../mixer/nrpn/pan-balance.js'
+import { type NRPN, splitNRPN } from '../mixer/nrpn/param.js'
 import {
 	BalanceNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,
@@ -155,7 +155,7 @@ function getBalanceSourceToMixOrLRParam(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
-): BalanceParam | undefined {
+): NRPN<'panBalance'> | undefined {
 	const sourceSink = getBalanceSourceToMixOrLRNumbers(instance, model, options, sourceType)
 	if (sourceSink === null) {
 		return undefined
@@ -173,7 +173,7 @@ function getBalanceSourceToSinkParam(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
-): BalanceParam | undefined {
+): NRPN<'panBalance'> | undefined {
 	const sourceSinkNums = getBalanceSourceToSinkNumbers(instance, model, options, sourceSink)
 	if (sourceSinkNums === null) {
 		return undefined
@@ -190,12 +190,12 @@ function panSourceToMixOrLRLearn(
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 ): NonNullable<CompanionActionDefinition['learn']> {
 	return ({ options }): CompanionOptionValues | undefined => {
-		const param = getBalanceSourceToMixOrLRParam(instance, model, options, sourceType)
-		if (param === undefined) {
+		const nrpn = getBalanceSourceToMixOrLRParam(instance, model, options, sourceType)
+		if (nrpn === undefined) {
 			return
 		}
 
-		const { MSB, LSB } = param
+		const { MSB, LSB } = splitNRPN(nrpn)
 
 		return {
 			...options,
@@ -210,12 +210,12 @@ function panSourceToSinkLearn(
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
 ): NonNullable<CompanionActionDefinition['learn']> {
 	return ({ options }): CompanionOptionValues | undefined => {
-		const param = getBalanceSourceToSinkParam(instance, model, options, sourceSink)
-		if (param === undefined) {
+		const nrpn = getBalanceSourceToSinkParam(instance, model, options, sourceSink)
+		if (nrpn === undefined) {
 			return
 		}
 
-		const { MSB, LSB } = param
+		const { MSB, LSB } = splitNRPN(nrpn)
 
 		return {
 			...options,
@@ -231,13 +231,13 @@ function panSourceToMixOrLRSubscribe(
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 ): NonNullable<CompanionActionDefinition['subscribe']> {
 	return async ({ options }) => {
-		const param = getBalanceSourceToMixOrLRParam(instance, model, options, sourceType)
-		if (param === undefined) {
+		const nrpn = getBalanceSourceToMixOrLRParam(instance, model, options, sourceType)
+		if (nrpn === undefined) {
 			return
 		}
 
 		// Send a "get" so the pan/balance variable is defined.
-		void mixer.sendCommands([mixer.getNRPNValue(param)])
+		void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
 	}
 }
 
@@ -248,13 +248,13 @@ function panSourceToSinkSubscribe(
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
 ): NonNullable<CompanionActionDefinition['subscribe']> {
 	return async ({ options }) => {
-		const param = getBalanceSourceToSinkParam(instance, model, options, sourceSink)
-		if (param === undefined) {
+		const nrpn = getBalanceSourceToSinkParam(instance, model, options, sourceSink)
+		if (nrpn === undefined) {
 			return
 		}
 
 		// Send a "get" so the pan/balance variable is defined.
-		void mixer.sendCommands([mixer.getNRPNValue(param)])
+		void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
 	}
 }
 
@@ -318,7 +318,7 @@ function getMixOrLRToMatrixParam(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-): BalanceParam | null {
+): NRPN<'panBalance'> | null {
 	const sourceSink = panMixOrLRToMatrix(instance, model, options)
 	if (sourceSink === null) {
 		return null
@@ -463,11 +463,11 @@ export function panBalanceActions(
 				ShowVarOption,
 			],
 			learn: ({ options }, _context): CompanionOptionValues | undefined => {
-				const param = getMixOrLRToMatrixParam(instance, model, options)
-				if (param === null) {
+				const nrpn = getMixOrLRToMatrixParam(instance, model, options)
+				if (nrpn === null) {
 					return undefined
 				}
-				const { MSB, LSB } = param
+				const { MSB, LSB } = splitNRPN(nrpn)
 
 				return {
 					...options,

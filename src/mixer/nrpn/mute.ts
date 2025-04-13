@@ -1,8 +1,5 @@
 import type { InputOutputType, Model } from '../model.js'
-import { calculateParam, type Param, type UnbrandedParam } from './param.js'
-
-/** The MSB/LSB 7-bit pair for the mute status of a mixer input/output. */
-export type MuteParam = Param<'mute'>
+import { calculateNRPN, toNRPN, type NRPN, type Param, type UnbrandedParam } from './param.js'
 
 type MuteParameterBaseRaw = Readonly<Record<InputOutputType, Readonly<UnbrandedParam>>>
 
@@ -27,7 +24,7 @@ const MuteParameterBaseRaw = {
 } as const satisfies MuteParameterBaseRaw
 
 type ApplyMuteBranding<T extends MuteParameterBaseRaw> = {
-	[NRPN in keyof T]: T[NRPN] extends UnbrandedParam ? MuteParam : never
+	[NRPN in keyof T]: T[NRPN] extends UnbrandedParam ? Param<'mute'> : never
 }
 
 const MuteParameterBase = MuteParameterBaseRaw as ApplyMuteBranding<typeof MuteParameterBaseRaw>
@@ -46,21 +43,21 @@ const MuteParameterBase = MuteParameterBaseRaw as ApplyMuteBranding<typeof MuteP
  * @returns
  *   The NRPN for the identified input/output.
  */
-export function calculateMuteParam(model: Model, inputOutputType: InputOutputType, n: number): MuteParam {
+export function calculateMuteNRPN(model: Model, inputOutputType: InputOutputType, n: number): NRPN<'mute'> {
 	if (model.inputOutputCounts[inputOutputType] <= n) {
 		throw new Error(`${inputOutputType}=${n} is invalid`)
 	}
 
-	return calculateParam(MuteParameterBase[inputOutputType], n)
+	return calculateNRPN(toNRPN(MuteParameterBase[inputOutputType]), n)
 }
 
-type ForEachMuteFunctor = (param: MuteParam) => void
+type ForEachMuteFunctor = (nrpn: NRPN<'mute'>) => void
 
 export function forEachMute(model: Model, f: ForEachMuteFunctor): void {
 	for (const [type, base] of Object.entries(MuteParameterBase)) {
 		const muteType = type as InputOutputType
 		model.forEach(muteType, (n: number) => {
-			return f(calculateParam(base, n))
+			return f(calculateNRPN(toNRPN(base), n))
 		})
 	}
 }

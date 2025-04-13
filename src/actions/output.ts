@@ -15,7 +15,7 @@ import {
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from '../mixer/nrpn/output.js'
-import type { LevelParam } from '../mixer/nrpn/level.js'
+import { type NRPN, splitNRPN } from '../mixer/nrpn/param.js'
 import { getPanBalance, type PanBalanceChoice } from './pan-balance.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 
@@ -277,7 +277,7 @@ function getFader(
 
 type FadeLevelInfo = {
 	sink: number
-	param: LevelParam
+	nrpn: NRPN<'level'>
 }
 
 function getLevelType(
@@ -291,8 +291,8 @@ function getLevelType(
 		return null
 	}
 
-	const param = OutputLevelNRPNCalculator.get(model, sinkType).calculate(sink)
-	return { sink, param }
+	const nrpn = OutputLevelNRPNCalculator.get(model, sinkType).calculate(sink)
+	return { sink, nrpn }
 }
 
 type PanBalanceInfo = {
@@ -368,8 +368,8 @@ export function outputLevelActions(
 				fadingOption,
 			],
 			callback: async ({ options }) => {
-				const param = OutputLevelNRPNCalculator.get(model, 'lr').calculate(0)
-				const fade = getFadeParameters(instance, options, param)
+				const nrpn = OutputLevelNRPNCalculator.get(model, 'lr').calculate(0)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -387,9 +387,9 @@ export function outputLevelActions(
 				if (levelType === null) {
 					return
 				}
-				const { sink: mix, param } = levelType
+				const { sink: mix, nrpn } = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -407,9 +407,9 @@ export function outputLevelActions(
 				if (levelType === null) {
 					return
 				}
-				const { sink: fxSend, param } = levelType
+				const { sink: fxSend, nrpn } = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -427,9 +427,9 @@ export function outputLevelActions(
 				if (levelType === null) {
 					return
 				}
-				const { sink: matrix, param } = levelType
+				const { sink: matrix, nrpn } = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -447,9 +447,9 @@ export function outputLevelActions(
 				if (levelType === null) {
 					return
 				}
-				const { sink: dca, param } = levelType
+				const { sink: dca, nrpn } = levelType
 
-				const fade = getFadeParameters(instance, options, param)
+				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return
 				}
@@ -500,7 +500,7 @@ export function outputPanBalanceActions(
 				ShowVar,
 			],
 			learn: async ({ options }) => {
-				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(0)
+				const { MSB, LSB } = splitNRPN(OutputBalanceNRPNCalculator.get(model, 'lr').calculate(0))
 
 				return {
 					...options,
@@ -508,10 +508,10 @@ export function outputPanBalanceActions(
 				}
 			},
 			subscribe: async (_action) => {
-				const param = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(0)
+				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(0)
 
 				// Send a "get" so the pan/balance variable is defined.
-				void mixer.sendCommands([mixer.getNRPNValue(param)])
+				void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
 			},
 			callback: async ({ options }) => {
 				const panBalanceChoice = getPanBalance(instance, options)
@@ -531,7 +531,7 @@ export function outputPanBalanceActions(
 					return
 				}
 
-				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'mix').calculate(mix)
+				const { MSB, LSB } = splitNRPN(OutputBalanceNRPNCalculator.get(model, 'mix').calculate(mix))
 
 				return {
 					...options,
@@ -544,10 +544,10 @@ export function outputPanBalanceActions(
 					return
 				}
 
-				const param = OutputBalanceNRPNCalculator.get(model, 'mix').calculate(mix)
+				const nrpn = OutputBalanceNRPNCalculator.get(model, 'mix').calculate(mix)
 
 				// Send a "get" so the pan/balance variable is defined.
-				void mixer.sendCommands([mixer.getNRPNValue(param)])
+				void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
 			},
 			callback: async ({ options }) => {
 				const panBalance = getPanBalanceType(instance, model, options, 'mix')
@@ -569,7 +569,7 @@ export function outputPanBalanceActions(
 					return
 				}
 
-				const { MSB, LSB } = OutputBalanceNRPNCalculator.get(model, 'matrix').calculate(matrix)
+				const { MSB, LSB } = splitNRPN(OutputBalanceNRPNCalculator.get(model, 'matrix').calculate(matrix))
 
 				return {
 					...options,
@@ -582,10 +582,10 @@ export function outputPanBalanceActions(
 					return
 				}
 
-				const param = OutputBalanceNRPNCalculator.get(model, 'matrix').calculate(matrix)
+				const nrpn = OutputBalanceNRPNCalculator.get(model, 'matrix').calculate(matrix)
 
 				// Send a "get" so the pan/balance variable is defined.
-				void mixer.sendCommands([mixer.getNRPNValue(param)])
+				void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
 			},
 			callback: async ({ options }) => {
 				const panBalance = getPanBalanceType(instance, model, options, 'matrix')

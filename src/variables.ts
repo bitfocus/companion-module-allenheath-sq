@@ -1,7 +1,7 @@
 import type { CompanionVariableDefinition } from '@companion-module/base'
 import type { Model } from './mixer/model.js'
-import type { LevelParam } from './mixer/nrpn/level.js'
 import { forEachOutputLevel } from './mixer/nrpn/output.js'
+import { type NRPN, splitNRPN } from './mixer/nrpn/param.js'
 import { forEachSourceSinkLevel } from './mixer/nrpn/source-to-sink.js'
 
 /**
@@ -28,19 +28,20 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 		},
 	]
 
-	const addVariable = ({ MSB, LSB }: LevelParam, desc: string) => {
+	const addVariable = (nrpn: NRPN<'level'>, desc: string) => {
+		const { MSB, LSB } = splitNRPN(nrpn)
 		variables.push({
 			name: desc,
 			variableId: `level_${MSB}.${LSB}`,
 		})
 	}
 
-	forEachSourceSinkLevel(model, (param, sourceDesc, sinkDesc) => {
-		addVariable(param, `${sourceDesc} -> ${sinkDesc} Level`)
+	forEachSourceSinkLevel(model, (nrpn, sourceDesc, sinkDesc) => {
+		addVariable(nrpn, `${sourceDesc} -> ${sinkDesc} Level`)
 	})
 
-	forEachOutputLevel(model, (param, outputDesc) => {
-		addVariable(param, `${outputDesc} Output Level`)
+	forEachOutputLevel(model, (nrpn, outputDesc) => {
+		addVariable(nrpn, `${outputDesc} Output Level`)
 	})
 
 	//mute input, LR, aux, group, matrix, dca, fx return, fx send, mute group

@@ -1,6 +1,5 @@
-import type { LevelParam } from './level.js'
 import { getSourceSinkCalculator, type InputOutputType, type Model } from '../model.js'
-import { calculateParam, type NRPNType, type Param, type UnbrandedParam } from './param.js'
+import { calculateNRPN, type NRPN, toNRPN, type NRPNType, type Param, type UnbrandedParam } from './param.js'
 
 type SourceToSinkInfo = {
 	/**
@@ -231,10 +230,10 @@ function getSourceSinkNRPNBase<NRPN extends SourceSinkNRPN>(
  * A class that can be used to calculate a specific kind of NRPN for a
  * source-to-sink relationship.
  */
-class NRPNCalculator<NRPN extends SourceSinkNRPN> {
+class NRPNCalculator<T extends SourceSinkNRPN> {
 	readonly #inputOutputCounts
-	readonly #sourceSink: SourceSinkForNRPN<NRPN>
-	readonly #base: Param<NRPN>
+	readonly #sourceSink: SourceSinkForNRPN<T>
+	readonly #base: Param<T>
 
 	/**
 	 * Construct a calculator for NRPNs of type identified by `nrpnType` for
@@ -249,7 +248,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 	 * @param nrpnType
 	 *   The type of NRPNs to compute, e.g. `'assign'`.
 	 */
-	constructor(model: Model, nrpnType: NRPN, sourceSink: SourceSinkForNRPN<NRPN>) {
+	constructor(model: Model, nrpnType: T, sourceSink: SourceSinkForNRPN<T>) {
 		this.#inputOutputCounts = model.inputOutputCounts
 		this.#sourceSink = sourceSink
 
@@ -267,7 +266,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 	 * @returns
 	 *   The computed NRPN.
 	 */
-	calculate(source: number, sink: number): Param<NRPN> {
+	calculate(source: number, sink: number): NRPN<T> {
 		const [sourceType, sinkType] = this.#sourceSink
 
 		const inputOutputCounts = this.#inputOutputCounts
@@ -280,7 +279,7 @@ class NRPNCalculator<NRPN extends SourceSinkNRPN> {
 			throw new Error(`${sinkType}=${sink} is invalid`)
 		}
 
-		return calculateParam(this.#base, sinkCount * source + sink)
+		return calculateNRPN(toNRPN(this.#base), sinkCount * source + sink)
 	}
 }
 
@@ -358,7 +357,7 @@ export type SourceToSinkCalculatorCache = {
  * NRPN pair, a readable description of the source, and a readable description
  * of the sink.
  */
-type SourceSinkLevelFunctor = ({ MSB, LSB }: LevelParam, sourceDesc: string, sinkDesc: string) => void
+type SourceSinkLevelFunctor = (nrpn: NRPN<'level'>, sourceDesc: string, sinkDesc: string) => void
 
 /**
  * For each source-sink relationship with adjustable level, invoke the given

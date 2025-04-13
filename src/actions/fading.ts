@@ -1,7 +1,7 @@
 import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
-import type { LevelParam } from '../mixer/nrpn/level.js'
+import { type NRPN, splitNRPN } from '../mixer/nrpn/param.js'
 import { repr } from '../utils/pretty.js'
 
 /** Compute the set of level options for level-setting actions. */
@@ -46,17 +46,15 @@ const MsPerSecond = 1000
  *   The instance in use.
  * @param options
  *   Options specified for the action.
- * @param MSB
- *   The MSB of the NRPN.
- * @param LSB
- *   The LSB of the NRPN.
+ * @param nrpn
+ *   The NRPN.
  * @returns
  *   Information about the requested fade.
  */
 export function getFadeParameters(
 	instance: sqInstance,
 	options: CompanionOptionValues,
-	{ MSB, LSB }: LevelParam,
+	nrpn: NRPN<'level'>,
 ): FadeParameters | null {
 	// Presets that incidentally invoke this function didn't always specify a
 	// fade time, so treat a missing fade as zero to support them.
@@ -72,6 +70,7 @@ export function getFadeParameters(
 	//     variable.
 	let start: Level
 	{
+		const { MSB, LSB } = splitNRPN(nrpn)
 		const levelValue = instance.getVariableValue(`level_${MSB}.${LSB}`)
 		switch (typeof levelValue) {
 			case 'string':
