@@ -5,7 +5,7 @@ import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 import type { sqInstance } from './instance.js'
-import type { LevelParam } from './mixer/nrpn/param.js'
+import type { LevelParam } from './mixer/nrpn/level.js'
 import { LevelNRPNCalculator } from './mixer/nrpn/source-to-sink.js'
 
 const White = combineRgb(255, 255, 255)

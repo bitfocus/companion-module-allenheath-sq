@@ -7,6 +7,7 @@ import { ChannelParser } from '../midi/parse/channel-parser.js'
 import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
 import { type InputOutputType, LR, Model } from './model.js'
+import type { LevelParam } from './nrpn/level.js'
 import { calculateMuteParam, forEachMute, type MuteParam } from './nrpn/mute.js'
 import {
 	forEachOutputLevel,
@@ -14,7 +15,7 @@ import {
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from './nrpn/output.js'
-import { type BalanceParam, type LevelParam, type NRPNType, type Param, prettyParam } from './nrpn/param.js'
+import { type BalanceParam, type NRPNType, type Param, prettyParam } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
@@ -329,12 +330,10 @@ export class Mixer {
 			const CI: CallbackInfoType = CallbackInfo
 			instance.checkFeedbacks(CI.mute[`${param.MSB}:${param.LSB}`][0])
 		})
-		mixerChannelParser.on('fader_level', (msb: number, lsb: number, vc: number, vf: number) => {
-			verboseLog(
-				`Fader received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
-			)
+		mixerChannelParser.on('fader_level', (param: LevelParam, vc: number, vf: number) => {
+			verboseLog(`Fader received: ${prettyParam(param)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`)
 
-			const levelKey = `level_${msb}.${lsb}` as const
+			const levelKey = `level_${param.MSB}.${param.LSB}` as const
 
 			let ost = false
 			const res = instance.getVariableValue(levelKey)

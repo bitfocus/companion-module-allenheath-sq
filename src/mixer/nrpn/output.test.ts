@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import type { LevelParam } from './level.js'
 import { type InputOutputType, Model } from '../model.js'
 import {
 	forEachOutputLevel,
@@ -6,7 +7,7 @@ import {
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from './output.js'
-import type { LevelParam, UnbrandedParam } from './param.js'
+import type { UnbrandedParam } from './param.js'
 
 type OutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
 

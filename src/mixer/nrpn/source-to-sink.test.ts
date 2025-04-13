@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
+import type { LevelParam } from './level.js'
 import { Model } from '../model.js'
-import type { LevelParam } from './param.js'
 import { forEachSourceSinkLevel } from './source-to-sink.js'
 
 describe('forEachSourceToSinkLevel', () => {

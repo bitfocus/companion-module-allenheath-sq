@@ -15,7 +15,7 @@ import {
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from '../mixer/nrpn/output.js'
-import type { LevelParam } from '../mixer/nrpn/param.js'
+import type { LevelParam } from '../mixer/nrpn/level.js'
 import { getPanBalance, type PanBalanceChoice } from './pan-balance.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 

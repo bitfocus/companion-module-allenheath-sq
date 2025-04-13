@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
 import type { ExpectInteraction, Interaction, ReceiveInteraction } from './interactions.js'
+import type { LevelParam } from '../../../mixer/nrpn/level.js'
 import type { MuteParam } from '../../../mixer/nrpn/mute.js'
 import { parseMidi } from '../parse-midi.js'
 import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenizer.js'
@@ -29,6 +30,10 @@ class MuteReceived extends MixerCommandBase {
 
 class FaderLevelReceived extends MixerCommandBase {
 	readonly type = 'fader-level-received'
+
+	constructor({ MSB, LSB }: LevelParam, vc: number, vf: number) {
+		super(MSB, LSB, vc, vf)
+	}
 }
 
 class PanLevelReceived extends MixerCommandBase {

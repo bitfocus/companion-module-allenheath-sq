@@ -1,3 +1,4 @@
+import type { LevelParam } from '../../mixer/nrpn/level.js'
 import type { MuteParam } from '../../mixer/nrpn/mute.js'
 import { makeParam } from '../../mixer/nrpn/param.js'
 import { manyPrettyBytes, prettyByte, prettyBytes } from '../../utils/pretty.js'
@@ -23,7 +24,7 @@ export interface MixerMessageEvents {
 	 * The signal level identified by MSB/LSB was set to the level specified by
 	 * `vc`/`vf` with respect to the active fader law.
 	 */
-	fader_level: [msb: number, lsb: number, vc: number, vf: number]
+	fader_level: [param: LevelParam, vc: number, vf: number]
 
 	/**
 	 * The pan/balance of a signal in a mix identified by MSB/LSB was set to the
@@ -145,7 +146,7 @@ export class ChannelParser extends EventEmitter<MixerMessageEvents> {
 						}
 						// Fader level
 						else if (0x40 <= msb && msb <= 0x4f) {
-							this.emit('fader_level', msb, lsb, vc, vf)
+							this.emit('fader_level', makeParam(msb, lsb), vc, vf)
 						}
 						// Pan Level
 						else if (0x50 <= msb && msb <= 0x5f) {

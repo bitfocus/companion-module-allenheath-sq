@@ -1,5 +1,6 @@
+import type { LevelParam } from './level.js'
 import { getSourceSinkCalculator, type InputOutputType, type Model } from '../model.js'
-import { calculateParam, type LevelParam, type NRPNType, type Param, type UnbrandedParam } from './param.js'
+import { calculateParam, type NRPNType, type Param, type UnbrandedParam } from './param.js'
 
 type SourceToSinkInfo = {
 	/**
