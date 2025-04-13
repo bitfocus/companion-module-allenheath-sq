@@ -9,7 +9,7 @@ import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { LR, type Model } from '../mixer/model.js'
-import type { BalanceParam } from '../mixer/nrpn/param.js'
+import type { BalanceParam } from '../mixer/nrpn/pan-balance.js'
 import {
 	BalanceNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,

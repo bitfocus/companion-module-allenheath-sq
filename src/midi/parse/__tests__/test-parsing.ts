@@ -3,6 +3,7 @@ import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
 import type { ExpectInteraction, Interaction, ReceiveInteraction } from './interactions.js'
 import type { LevelParam } from '../../../mixer/nrpn/level.js'
 import type { MuteParam } from '../../../mixer/nrpn/mute.js'
+import type { BalanceParam } from '../../../mixer/nrpn/pan-balance.js'
 import { parseMidi } from '../parse-midi.js'
 import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenizer.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
@@ -38,6 +39,10 @@ class FaderLevelReceived extends MixerCommandBase {
 
 class PanLevelReceived extends MixerCommandBase {
 	readonly type = 'pan-level-received'
+
+	constructor({ MSB, LSB }: BalanceParam, vc: number, vf: number) {
+		super(MSB, LSB, vc, vf)
+	}
 }
 
 type MixerCommand = SceneReceived | MuteReceived | FaderLevelReceived | PanLevelReceived

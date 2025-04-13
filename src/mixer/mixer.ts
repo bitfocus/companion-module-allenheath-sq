@@ -15,7 +15,8 @@ import {
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from './nrpn/output.js'
-import { type BalanceParam, type NRPNType, type Param, prettyParam } from './nrpn/param.js'
+import type { BalanceParam } from './nrpn/pan-balance.js'
+import { type NRPNType, type Param, prettyParam } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
@@ -351,18 +352,16 @@ export class Mixer {
 				this.lastValue[levelKey] = level
 			}
 		})
-		mixerChannelParser.on('pan_level', (msb: number, lsb: number, vc: number, vf: number) => {
-			verboseLog(
-				`Pan received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`,
-			)
+		mixerChannelParser.on('pan_level', (param: BalanceParam, vc: number, vf: number) => {
+			verboseLog(`Pan received: ${prettyParam(param)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`)
 
 			// It would be nice to mention the source-sink relationship the NRPN
 			// refers to, but we haven't defined a way to work backwards from
 			// MSB/LSB to semantic meaning.  A name that includes MSB/LSB (in
 			// hex as in the SQ MIDI Protocol document) is minimally viable.
-			const name = `Pan/Balance MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}`
+			const name = `Pan/Balance ${prettyParam(param)}`
 
-			const variableId = `pan_${msb}.${lsb}`
+			const variableId = `pan_${param.MSB}.${param.LSB}`
 			const variableValue = vcvfToReadablePanBalance(vc, vf)
 			instance.setExtraVariable(variableId, name, variableValue)
 		})

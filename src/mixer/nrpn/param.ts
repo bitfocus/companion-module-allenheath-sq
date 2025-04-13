@@ -25,12 +25,6 @@ export function makeParam<T extends NRPNType>(MSB: number, LSB: number): Param<T
  */
 export type AssignParam = Param<'assign'>
 
-/**
- * An NRPN for the pan/balance of a mixer source in a sink or a sink used as a
- * mixer output.
- */
-export type BalanceParam = Param<'panBalance'>
-
 export function calculateParam<T extends NRPNType>(base: Param<T>, offset: number): Param<T> {
 	const val = base.LSB + offset
 	const LSB = val & 0b0111_1111
