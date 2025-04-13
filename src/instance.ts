@@ -107,23 +107,24 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 		const newOptions = optionsFromConfig(config)
 		this.options = newOptions
 
-		if (canUpdateOptionsWithoutRestarting(oldOptions, newOptions)) {
-			const label = this.label
-			if (label !== this.#lastLabel) {
-				// The instance label might be altered just before
-				// `configUpdated` is called.  The instance label is used in the
-				// "Learn" operation for some actions -- and it'll always be
-				// up-to-date in these uses.  But it's also hardcoded in some
-				// presets, so if the label changes, we must redefine presets
-				// even if we don't have to restart the connection.
-				this.#lastLabel = label
-				// XXX This assertion is actually wrong...
-				this.setPresetDefinitions(getPresets(this, this.mixer!.model))
+		if (this.mixer !== null) {
+			if (canUpdateOptionsWithoutRestarting(oldOptions, newOptions)) {
+				const label = this.label
+				if (label !== this.#lastLabel) {
+					// The instance label might be altered just before
+					// `configUpdated` is called.  The instance label is used in the
+					// "Learn" operation for some actions -- and it'll always be
+					// up-to-date in these uses.  But it's also hardcoded in some
+					// presets, so if the label changes, we must redefine presets
+					// even if we don't have to restart the connection.
+					this.#lastLabel = label
+					this.setPresetDefinitions(getPresets(this, this.mixer.model))
+				}
+				return
 			}
-			return
-		}
 
-		this.mixer?.stop(InstanceStatus.Disconnected)
+			this.mixer.stop(InstanceStatus.Disconnected)
+		}
 
 		const mixer = new Mixer(this)
 		this.mixer = mixer
