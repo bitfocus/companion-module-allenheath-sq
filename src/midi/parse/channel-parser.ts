@@ -1,3 +1,5 @@
+import type { MuteParam } from '../../mixer/nrpn/mute.js'
+import { makeParam } from '../../mixer/nrpn/param.js'
 import { manyPrettyBytes, prettyByte, prettyBytes } from '../../utils/pretty.js'
 import EventEmitter from 'eventemitter3'
 
@@ -15,7 +17,7 @@ export interface MixerMessageEvents {
 	 * The input/output identified by MSB/LSB was muted (`vf=1`) or unmuted
 	 * (`vf=0`).
 	 */
-	mute: [msb: number, lsb: number, vf: number]
+	mute: [param: MuteParam, vf: number]
 
 	/**
 	 * The signal level identified by MSB/LSB was set to the level specified by
@@ -136,7 +138,7 @@ export class ChannelParser extends EventEmitter<MixerMessageEvents> {
 						// Mute
 						if (msb === 0x00 || msb === 0x02 || msb === 0x04) {
 							if (vc === 0x00 && vf < 0x02) {
-								this.emit('mute', msb, lsb, vf)
+								this.emit('mute', makeParam(msb, lsb), vf)
 							} else {
 								verboseLog(`Malformed mute message, ignoring: ${manyPrettyBytes(first, second, third, fourth)}`)
 							}

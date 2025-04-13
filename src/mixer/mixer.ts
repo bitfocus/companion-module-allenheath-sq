@@ -14,7 +14,7 @@ import {
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from './nrpn/output.js'
-import type { BalanceParam, LevelParam, NRPNType, Param } from './nrpn/param.js'
+import { type BalanceParam, type LevelParam, type NRPNType, type Param, prettyParam } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
@@ -321,13 +321,13 @@ export class Mixer {
 				[CurrentSceneId]: newScene + 1,
 			})
 		})
-		mixerChannelParser.on('mute', (msb: number, lsb: number, vf: number) => {
-			verboseLog(`Mute received: MSB=${prettyByte(msb)}, LSB=${prettyByte(lsb)}, VF=${prettyByte(vf)}`)
+		mixerChannelParser.on('mute', (param: MuteParam, vf: number) => {
+			verboseLog(`Mute received: ${prettyParam(param)}, VF=${prettyByte(vf)}`)
 
-			this.fdbState[`mute_${msb}.${lsb}`] = vf === 0x01
+			this.fdbState[`mute_${param.MSB}.${param.LSB}`] = vf === 0x01
 
 			const CI: CallbackInfoType = CallbackInfo
-			instance.checkFeedbacks(CI.mute[`${msb}:${lsb}`][0])
+			instance.checkFeedbacks(CI.mute[`${param.MSB}:${param.LSB}`][0])
 		})
 		mixerChannelParser.on('fader_level', (msb: number, lsb: number, vc: number, vf: number) => {
 			verboseLog(

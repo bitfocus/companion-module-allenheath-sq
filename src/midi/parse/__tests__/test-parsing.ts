@@ -1,7 +1,8 @@
 import EventEmitter from 'eventemitter3'
 import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
+import type { ExpectInteraction, Interaction, ReceiveInteraction } from './interactions.js'
+import type { MuteParam } from '../../../mixer/nrpn/mute.js'
 import { parseMidi } from '../parse-midi.js'
-import { type ExpectInteraction, type Interaction, type ReceiveInteraction } from './interactions.js'
 import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenizer.js'
 import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
 import { prettyBytes, repr } from '../../../utils/pretty.js'
@@ -20,6 +21,10 @@ class SceneReceived extends MixerCommandBase {
 
 class MuteReceived extends MixerCommandBase {
 	readonly type = 'mute-received'
+
+	constructor({ MSB, LSB }: MuteParam, vf: number) {
+		super(MSB, LSB, vf)
+	}
 }
 
 class FaderLevelReceived extends MixerCommandBase {

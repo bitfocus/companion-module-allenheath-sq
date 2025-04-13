@@ -1,4 +1,5 @@
 import type { Branded } from '../../utils/brand.js'
+import { prettyByte } from '../../utils/pretty.js'
 
 export type NRPNType = 'mute' | 'assign' | 'panBalance' | 'level'
 
@@ -13,6 +14,10 @@ export type Param<T extends NRPNType> = T extends NRPNType
  * parameters as actually used.)
  */
 export type UnbrandedParam = { MSB: number; LSB: number }
+
+export function makeParam<T extends NRPNType>(MSB: number, LSB: number): Param<T> {
+	return { MSB, LSB } as Param<T>
+}
 
 /**
  * An NRPN for the assign state of a mixer source in a sink.
@@ -37,4 +42,8 @@ export function calculateParam<T extends NRPNType>(base: Param<T>, offset: numbe
 	const LSB = val & 0b0111_1111
 	const MSB = base.MSB + ((val >> 7) & 0xf)
 	return { MSB, LSB } as Param<T>
+}
+
+export function prettyParam<T extends NRPNType>({ MSB, LSB }: Param<T>): string {
+	return `MSB=${prettyByte(MSB)}, LSB=${prettyByte(LSB)}`
 }
