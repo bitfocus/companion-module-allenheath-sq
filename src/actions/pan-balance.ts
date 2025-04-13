@@ -81,7 +81,7 @@ export function getPanBalance(instance: sqInstance, options: CompanionOptionValu
 	return null
 }
 
-function panSourceToMixOrLR(
+function getBalanceSourceToMixOrLRNumbers(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
@@ -100,7 +100,7 @@ function panSourceToMixOrLR(
 	return [source, mixOrLR]
 }
 
-function panSourceToSink(
+function getBalanceSourceToSinkNumbers(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
@@ -119,13 +119,13 @@ function panSourceToSink(
 	return [source, sink]
 }
 
-function panSourceToMixOrLRLearnSubPrelude(
+function getBalanceSourceToMixOrLRParam(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 ): BalanceParam | undefined {
-	const sourceSink = panSourceToMixOrLR(instance, model, options, sourceType)
+	const sourceSink = getBalanceSourceToMixOrLRNumbers(instance, model, options, sourceType)
 	if (sourceSink === null) {
 		return undefined
 	}
@@ -137,13 +137,13 @@ function panSourceToMixOrLRLearnSubPrelude(
 		: BalanceNRPNCalculator.get(model, ['inputChannel', 'mix']).calculate(source, mixOrLR)
 }
 
-function panSourceToSinkLearnSubPrelude(
+function getBalanceSourceToSinkParam(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
 ): BalanceParam | undefined {
-	const sourceSinkNums = panSourceToSink(instance, model, options, sourceSink)
+	const sourceSinkNums = getBalanceSourceToSinkNumbers(instance, model, options, sourceSink)
 	if (sourceSinkNums === null) {
 		return undefined
 	}
@@ -159,7 +159,7 @@ function panSourceToMixOrLRLearn(
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 ): NonNullable<CompanionActionDefinition['learn']> {
 	return ({ options }): CompanionOptionValues | undefined => {
-		const param = panSourceToMixOrLRLearnSubPrelude(instance, model, options, sourceType)
+		const param = getBalanceSourceToMixOrLRParam(instance, model, options, sourceType)
 		if (param === undefined) {
 			return
 		}
@@ -179,7 +179,7 @@ function panSourceToSinkLearn(
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
 ): NonNullable<CompanionActionDefinition['learn']> {
 	return ({ options }): CompanionOptionValues | undefined => {
-		const param = panSourceToSinkLearnSubPrelude(instance, model, options, sourceSink)
+		const param = getBalanceSourceToSinkParam(instance, model, options, sourceSink)
 		if (param === undefined) {
 			return
 		}
@@ -200,7 +200,7 @@ function panSourceToMixOrLRSubscribe(
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 ): NonNullable<CompanionActionDefinition['subscribe']> {
 	return async ({ options }) => {
-		const param = panSourceToMixOrLRLearnSubPrelude(instance, model, options, sourceType)
+		const param = getBalanceSourceToMixOrLRParam(instance, model, options, sourceType)
 		if (param === undefined) {
 			return
 		}
@@ -219,7 +219,7 @@ function panSourceToSinkSubscribe(
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
 ): NonNullable<CompanionActionDefinition['subscribe']> {
 	return async ({ options }) => {
-		const param = panSourceToSinkLearnSubPrelude(instance, model, options, sourceSink)
+		const param = getBalanceSourceToSinkParam(instance, model, options, sourceSink)
 		if (param === undefined) {
 			return
 		}
@@ -237,7 +237,7 @@ function panSourceToMixOrLRCallbackPrelude(
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 ): [number, number, PanBalanceChoice] | null {
-	const sourceSink = panSourceToMixOrLR(instance, model, options, sourceType)
+	const sourceSink = getBalanceSourceToMixOrLRNumbers(instance, model, options, sourceType)
 	if (sourceSink === null) {
 		return null
 	}
@@ -256,7 +256,7 @@ function panSourceToSinkCallbackPrelude(
 	options: CompanionOptionValues,
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
 ): [number, number, PanBalanceChoice] | null {
-	const sourceSinkNums = panSourceToSink(instance, model, options, sourceSink)
+	const sourceSinkNums = getBalanceSourceToSinkNumbers(instance, model, options, sourceSink)
 	if (sourceSinkNums === null) {
 		return null
 	}
