@@ -24,6 +24,7 @@ import {
 	type SourceSinkForNRPN,
 } from './nrpn/source-to-sink.js'
 import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
+import { enumValues } from '../utils/enumerate-enum.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
 import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
@@ -271,17 +272,29 @@ export class Mixer {
 			}
 		}
 
-		for (const name of Object.keys(PanBalanceActionId)) {
-			const enumName = name as keyof typeof PanBalanceActionId
-			instance.subscribeActions(PanBalanceActionId[enumName])
+		// Pan/balance level variables aren't defined by default, only after the
+		// mixer sends pan/balance messages to the module.  Trigger pan/balance
+		// action `subscribe` callbacks to get all mixer pan/balance levels
+		// known to be in use now.
+		//
+		// (This isn't *all* pan/balance levels in use, because pan/balance
+		// variables might be used without their corresponding actions.  But the
+		// Companion module API doesn't tell us about them.)
+		for (const actionId of enumValues(PanBalanceActionId)) {
+			instance.subscribeActions(actionId)
 			if (delayStatusRetrieval) {
 				sleep(300)
 			}
 		}
 
-		instance.subscribeActions(OutputActionId.LRPanBalanceOutput)
-		instance.subscribeActions(OutputActionId.MixPanBalanceOutput)
-		instance.subscribeActions(OutputActionId.MatrixPanBalanceOutput)
+		// Also ensure output pan/balances are queried and variables created.
+		for (const actionId of [
+			OutputActionId.LRPanBalanceOutput,
+			OutputActionId.MixPanBalanceOutput,
+			OutputActionId.MatrixPanBalanceOutput,
+		]) {
+			instance.subscribeActions(actionId)
+		}
 	}
 
 	/** Read and process mixer reply messages from `socket`. */
