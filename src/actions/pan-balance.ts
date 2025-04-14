@@ -283,7 +283,7 @@ function panMixOrLRToMatrix(
 	return [mixOrLR, matrix]
 }
 
-function panMixOrLRToMatrixLearnSubPrelude(
+function getMixOrLRToMatrixParam(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
@@ -468,11 +468,11 @@ export function panBalanceActions(
 				ShowVarOption,
 			],
 			learn: ({ options }, _context): CompanionOptionValues | undefined => {
-				const nrpn = panMixOrLRToMatrixLearnSubPrelude(instance, model, options)
-				if (nrpn === null) {
+				const param = getMixOrLRToMatrixParam(instance, model, options)
+				if (param === null) {
 					return undefined
 				}
-				const { MSB, LSB } = nrpn
+				const { MSB, LSB } = param
 
 				return {
 					...options,
@@ -480,7 +480,7 @@ export function panBalanceActions(
 				}
 			},
 			subscribe: async ({ options }) => {
-				const param = panMixOrLRToMatrixLearnSubPrelude(instance, model, options)
+				const param = getMixOrLRToMatrixParam(instance, model, options)
 				if (param === null) {
 					return undefined
 				}
