@@ -28,7 +28,7 @@ import { enumValues } from '../utils/enumerate-enum.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
 import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
-import { OutputActionId } from '../actions/output.js'
+import { OutputPanBalanceActionId } from '../actions/output.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
@@ -288,11 +288,7 @@ export class Mixer {
 		}
 
 		// Also ensure output pan/balances are queried and variables created.
-		for (const actionId of [
-			OutputActionId.LRPanBalanceOutput,
-			OutputActionId.MixPanBalanceOutput,
-			OutputActionId.MatrixPanBalanceOutput,
-		]) {
+		for (const actionId of enumValues(OutputPanBalanceActionId)) {
 			instance.subscribeActions(actionId)
 		}
 	}

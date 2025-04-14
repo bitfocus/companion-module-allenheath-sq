@@ -6,7 +6,7 @@ import type { sqInstance } from '../instance.js'
 import { levelActions } from './level.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { muteActions } from './mute.js'
-import { outputActions } from './output.js'
+import { outputLevelActions, outputPanBalanceActions } from './output.js'
 import { panBalanceActions } from './pan-balance.js'
 import { sceneActions } from './scene.js'
 import { softKeyActions } from './softkey.js'
@@ -74,7 +74,8 @@ export function getActions(instance: sqInstance, mixer: Mixer, choices: Choices)
 		...assignActions(instance, mixer, choices),
 		...levelActions(instance, mixer, choices, LevelOption, FadingOption),
 		...panBalanceActions(instance, mixer, choices, PanLevelOption),
-		...outputActions(instance, mixer, choices, LevelOption, FadingOption, PanLevelOption),
+		...outputLevelActions(instance, mixer, choices, LevelOption, FadingOption),
+		...outputPanBalanceActions(instance, mixer, choices, PanLevelOption),
 		...sceneActions(instance, mixer),
 	}
 }

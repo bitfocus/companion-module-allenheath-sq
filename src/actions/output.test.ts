@@ -3,7 +3,8 @@ import { describe, expect, test } from 'vitest'
 import {
 	ObsoleteLevelToOutputId,
 	ObsoletePanToOutputId,
-	OutputActionId,
+	OutputLevelActionId,
+	OutputPanBalanceActionId,
 	tryConvertOldLevelToOutputActionToSinkSpecific,
 	tryConvertOldPanToOutputActionToSinkSpecific,
 } from './output.js'
@@ -35,7 +36,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(lrNeedsUpgrade)).toBe(true)
 
 		expect(lrNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(lrNeedsUpgrade.actionId).toBe(OutputActionId.LRLevelOutput)
+		expect(lrNeedsUpgrade.actionId).toBe(OutputLevelActionId.LRLevelOutput)
 		expect('input' in lrNeedsUpgrade.options).toBe(false)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(lrNeedsUpgrade)).toBe(false)
@@ -50,7 +51,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(true)
 
 		expect(mixNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(mixNeedsUpgrade.actionId).toBe(OutputActionId.MixLevelOutput)
+		expect(mixNeedsUpgrade.actionId).toBe(OutputLevelActionId.MixLevelOutput)
 		expect(mixNeedsUpgrade.options.input).toBe(0)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(false)
@@ -64,7 +65,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(true)
 
 		expect(mixNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(mixNeedsUpgrade.actionId).toBe(OutputActionId.MixLevelOutput)
+		expect(mixNeedsUpgrade.actionId).toBe(OutputLevelActionId.MixLevelOutput)
 		expect(mixNeedsUpgrade.options.input).toBe(11)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(false)
@@ -79,7 +80,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)).toBe(true)
 
 		expect(fxSendNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(fxSendNeedsUpgrade.actionId).toBe(OutputActionId.FXSendLevelOutput)
+		expect(fxSendNeedsUpgrade.actionId).toBe(OutputLevelActionId.FXSendLevelOutput)
 		expect(fxSendNeedsUpgrade.options.input).toBe(0)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)).toBe(false)
@@ -93,7 +94,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)).toBe(true)
 
 		expect(fxSendNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(fxSendNeedsUpgrade.actionId).toBe(OutputActionId.FXSendLevelOutput)
+		expect(fxSendNeedsUpgrade.actionId).toBe(OutputLevelActionId.FXSendLevelOutput)
 		expect(fxSendNeedsUpgrade.options.input).toBe(3)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(fxSendNeedsUpgrade)).toBe(false)
@@ -108,7 +109,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)).toBe(true)
 
 		expect(matrixSendNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(matrixSendNeedsUpgrade.actionId).toBe(OutputActionId.MatrixLevelOutput)
+		expect(matrixSendNeedsUpgrade.actionId).toBe(OutputLevelActionId.MatrixLevelOutput)
 		expect(matrixSendNeedsUpgrade.options.input).toBe(0)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)).toBe(false)
@@ -122,7 +123,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)).toBe(true)
 
 		expect(matrixSendNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(matrixSendNeedsUpgrade.actionId).toBe(OutputActionId.MatrixLevelOutput)
+		expect(matrixSendNeedsUpgrade.actionId).toBe(OutputLevelActionId.MatrixLevelOutput)
 		expect(matrixSendNeedsUpgrade.options.input).toBe(2)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(matrixSendNeedsUpgrade)).toBe(false)
@@ -160,7 +161,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)).toBe(true)
 
 		expect(dcaNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(dcaNeedsUpgrade.actionId).toBe(OutputActionId.DCALevelOutput)
+		expect(dcaNeedsUpgrade.actionId).toBe(OutputLevelActionId.DCALevelOutput)
 		expect(dcaNeedsUpgrade.options.input).toBe(0)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)).toBe(false)
@@ -174,7 +175,7 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)).toBe(true)
 
 		expect(dcaNeedsUpgrade.actionId).not.toBe(ObsoleteLevelToOutputId)
-		expect(dcaNeedsUpgrade.actionId).toBe(OutputActionId.DCALevelOutput)
+		expect(dcaNeedsUpgrade.actionId).toBe(OutputLevelActionId.DCALevelOutput)
 		expect(dcaNeedsUpgrade.options.input).toBe(7)
 
 		expect(tryConvertOldLevelToOutputActionToSinkSpecific(dcaNeedsUpgrade)).toBe(false)
@@ -217,7 +218,7 @@ describe('obsolete output action convert to sink-specific output pan/balance act
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(lrNeedsUpgrade)).toBe(true)
 
 		expect(lrNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
-		expect(lrNeedsUpgrade.actionId).toBe(OutputActionId.LRPanBalanceOutput)
+		expect(lrNeedsUpgrade.actionId).toBe(OutputPanBalanceActionId.LRPanBalanceOutput)
 		expect('input' in lrNeedsUpgrade.options).toBe(false)
 
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(lrNeedsUpgrade)).toBe(false)
@@ -232,7 +233,7 @@ describe('obsolete output action convert to sink-specific output pan/balance act
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(true)
 
 		expect(mixNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
-		expect(mixNeedsUpgrade.actionId).toBe(OutputActionId.MixPanBalanceOutput)
+		expect(mixNeedsUpgrade.actionId).toBe(OutputPanBalanceActionId.MixPanBalanceOutput)
 		expect(mixNeedsUpgrade.options.input).toBe(0)
 
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(false)
@@ -246,7 +247,7 @@ describe('obsolete output action convert to sink-specific output pan/balance act
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(true)
 
 		expect(mixNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
-		expect(mixNeedsUpgrade.actionId).toBe(OutputActionId.MixPanBalanceOutput)
+		expect(mixNeedsUpgrade.actionId).toBe(OutputPanBalanceActionId.MixPanBalanceOutput)
 		expect(mixNeedsUpgrade.options.input).toBe(11)
 
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(mixNeedsUpgrade)).toBe(false)
@@ -284,7 +285,7 @@ describe('obsolete output action convert to sink-specific output pan/balance act
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(matrixNeedsUpgrade)).toBe(true)
 
 		expect(matrixNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
-		expect(matrixNeedsUpgrade.actionId).toBe(OutputActionId.MatrixPanBalanceOutput)
+		expect(matrixNeedsUpgrade.actionId).toBe(OutputPanBalanceActionId.MatrixPanBalanceOutput)
 		expect(matrixNeedsUpgrade.options.input).toBe(0)
 
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(matrixNeedsUpgrade)).toBe(false)
@@ -298,7 +299,7 @@ describe('obsolete output action convert to sink-specific output pan/balance act
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(matrixNeedsUpgrade)).toBe(true)
 
 		expect(matrixNeedsUpgrade.actionId).not.toBe(ObsoletePanToOutputId)
-		expect(matrixNeedsUpgrade.actionId).toBe(OutputActionId.MatrixPanBalanceOutput)
+		expect(matrixNeedsUpgrade.actionId).toBe(OutputPanBalanceActionId.MatrixPanBalanceOutput)
 		expect(matrixNeedsUpgrade.options.input).toBe(2)
 
 		expect(tryConvertOldPanToOutputActionToSinkSpecific(matrixNeedsUpgrade)).toBe(false)

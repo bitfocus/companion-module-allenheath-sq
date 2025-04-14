@@ -19,13 +19,23 @@ import type { LevelParam } from '../mixer/nrpn/param.js'
 import { getPanBalance, type PanBalanceChoice } from './pan-balance.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 
-/** Action IDs for all actions affecting sinks used as direct mixer outputs. */
-export enum OutputActionId {
+/**
+ * Action IDs for all actions affecting the level of sinks when used as direct
+ * mixer outputs.
+ */
+export enum OutputLevelActionId {
 	LRLevelOutput = 'lr_level_output',
 	MixLevelOutput = 'mix_level_output',
 	FXSendLevelOutput = 'fxsend_level_output',
 	MatrixLevelOutput = 'matrix_level_output',
 	DCALevelOutput = 'dca_level_output',
+}
+
+/**
+ * Action IDs for all actions affecting the pan/balance of sinks when used as
+ * direct mixer outputs.
+ */
+export enum OutputPanBalanceActionId {
 	LRPanBalanceOutput = 'lr_panbalance_output',
 	MixPanBalanceOutput = 'mix_panbalance_output',
 	MatrixPanBalanceOutput = 'matrix_panbalance_output',
@@ -120,20 +130,20 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 		// The new action doesn't include an input property because there's only
 		// one LR.
 		delete options.input
-		action.actionId = OutputActionId.LRLevelOutput
+		action.actionId = OutputLevelActionId.LRLevelOutput
 		return true
 	} else if (input < 1 + mixCount) {
 		// Mix is [0x1, 0x1 + 12).
 		newInput = input - 1
-		newActionId = OutputActionId.MixLevelOutput
+		newActionId = OutputLevelActionId.MixLevelOutput
 	} else if (input < 1 + mixCount + fxsCount) {
 		// FX send is [0xd, 0xd + 4).
 		newInput = input - (1 + mixCount)
-		newActionId = OutputActionId.FXSendLevelOutput
+		newActionId = OutputLevelActionId.FXSendLevelOutput
 	} else if (input < 1 + mixCount + fxsCount + mtxCount) {
 		// Matrix is [0x11, 0x11 + 3).
 		newInput = input - (1 + mixCount + fxsCount)
-		newActionId = OutputActionId.MatrixLevelOutput
+		newActionId = OutputLevelActionId.MatrixLevelOutput
 	} else if (input < 1 + mixCount + fxsCount + mtxCount + 12) {
 		// This 12-element gap in the NRPN table doesn't encode anything.  Do
 		// nothing so an invalid option is retained as-is.
@@ -141,7 +151,7 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 	} else if (input < 1 + mixCount + fxsCount + mtxCount + 12 + dcaCount) {
 		// DCA is [0x20, 0x20 + 8).
 		newInput = input - (1 + mixCount + fxsCount + mtxCount + 12)
-		newActionId = OutputActionId.DCALevelOutput
+		newActionId = OutputLevelActionId.DCALevelOutput
 	} else {
 		// All other numbers are invalid encodings.  Do nothing so an invalid
 		// option is retained as-is.
@@ -219,19 +229,19 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 		// The new action doesn't include an input property because there's only
 		// one LR.
 		delete options.input
-		action.actionId = OutputActionId.LRPanBalanceOutput
+		action.actionId = OutputPanBalanceActionId.LRPanBalanceOutput
 		return true
 	} else if (input < 1 + mixCount) {
 		// Mix is [1, 1 + 12).
 		newInput = input - 1
-		newActionId = OutputActionId.MixPanBalanceOutput
+		newActionId = OutputPanBalanceActionId.MixPanBalanceOutput
 	} else if (input < 1 + mixCount + 4) {
 		// No valid inputs from [13, 17).  Again leave alone.
 		return false
 	} else if (input < 1 + mixCount + 4 + mtxCount) {
 		// Matrix is [17, 17 + 3).
 		newInput = input - (1 + mixCount + 4)
-		newActionId = OutputActionId.MatrixPanBalanceOutput
+		newActionId = OutputPanBalanceActionId.MatrixPanBalanceOutput
 	} else {
 		// All other numbers are invalid encodings.  Again do nothing.
 		return false
@@ -311,8 +321,8 @@ function getPanBalanceType(
 }
 
 /**
- * Generate action definitions for adjusting the levels or pan/balance of
- * various mixer sinks when they're assigned to mixer outputs.
+ * Generate action definitions for adjusting the levels of various mixer sinks
+ * when they're assigned to mixer outputs.
  *
  * @param instance
  *   The instance for which actions are being generated.
@@ -325,30 +335,20 @@ function getPanBalanceType(
  * @param fadingOption
  *   An action option specifying various fade times over which the set to level
  *   should take place.
- * @param panLevelOption
- *   An action option specifying pan amounts for the output.
  * @returns
  *   The set of all output-adjustment action definitions.
  */
-export function outputActions(
+export function outputLevelActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	choices: Choices,
 	levelOption: CompanionInputFieldDropdown,
 	fadingOption: CompanionInputFieldDropdown,
-	panLevelOption: CompanionInputFieldDropdown,
-): ActionDefinitions<OutputActionId> {
+): ActionDefinitions<OutputLevelActionId> {
 	const model = mixer.model
 
-	const ShowVar = {
-		type: 'textinput',
-		label: 'Instance variable containing pan/balance level (click Learn to refresh)',
-		id: 'showvar',
-		default: '',
-	} as const
-
 	return {
-		[OutputActionId.LRLevelOutput]: {
+		[OutputLevelActionId.LRLevelOutput]: {
 			name: 'LR fader level to output',
 			options: [
 				// There's only one LR, so don't include an input option.
@@ -367,7 +367,7 @@ export function outputActions(
 			},
 		},
 
-		[OutputActionId.MixLevelOutput]: {
+		[OutputLevelActionId.MixLevelOutput]: {
 			name: 'Mix fader level to output',
 			options: [
 				{
@@ -398,7 +398,7 @@ export function outputActions(
 			},
 		},
 
-		[OutputActionId.FXSendLevelOutput]: {
+		[OutputLevelActionId.FXSendLevelOutput]: {
 			name: 'FX Send fader level to output',
 			options: [
 				{
@@ -429,7 +429,7 @@ export function outputActions(
 			},
 		},
 
-		[OutputActionId.MatrixLevelOutput]: {
+		[OutputLevelActionId.MatrixLevelOutput]: {
 			name: 'Matrix fader level to output',
 			options: [
 				{
@@ -460,7 +460,7 @@ export function outputActions(
 			},
 		},
 
-		[OutputActionId.DCALevelOutput]: {
+		[OutputLevelActionId.DCALevelOutput]: {
 			name: 'DCA fader level to output',
 			options: [
 				{
@@ -490,8 +490,41 @@ export function outputActions(
 				mixer.fadeDCAOutputLevel(dca, start, end, fadeTimeMs)
 			},
 		},
+	}
+}
 
-		[OutputActionId.LRPanBalanceOutput]: {
+/**
+ * Generate action definitions for adjusting the pan/balance of various mixer
+ * sinks when they're assigned to mixer outputs.
+ *
+ * @param instance
+ *   The instance for which actions are being generated.
+ * @param mixer
+ *   The mixer object to use when executing the actions.
+ * @param choices
+ *   Option choices for use in the actions.
+ * @param panLevelOption
+ *   An action option specifying pan amounts for the output.
+ * @returns
+ *   The set of all output-adjustment action definitions.
+ */
+export function outputPanBalanceActions(
+	instance: sqInstance,
+	mixer: Mixer,
+	choices: Choices,
+	panLevelOption: CompanionInputFieldDropdown,
+): ActionDefinitions<OutputPanBalanceActionId> {
+	const model = mixer.model
+
+	const ShowVar = {
+		type: 'textinput',
+		label: 'Instance variable containing pan/balance level (click Learn to refresh)',
+		id: 'showvar',
+		default: '',
+	} as const
+
+	return {
+		[OutputPanBalanceActionId.LRPanBalanceOutput]: {
 			name: 'LR Pan/Bal to output',
 			options: [
 				// There's only one LR, so don't include a fader option.
@@ -521,8 +554,7 @@ export function outputActions(
 				mixer.setLROutputPanBalance(panBalanceChoice)
 			},
 		},
-
-		[OutputActionId.MixPanBalanceOutput]: {
+		[OutputPanBalanceActionId.MixPanBalanceOutput]: {
 			name: 'Mix Pan/Bal to output',
 			options: [
 				{
@@ -571,7 +603,7 @@ export function outputActions(
 			},
 		},
 
-		[OutputActionId.MatrixPanBalanceOutput]: {
+		[OutputPanBalanceActionId.MatrixPanBalanceOutput]: {
 			name: 'Matrix Pan/Bal to output',
 			options: [
 				{

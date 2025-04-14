@@ -2,7 +2,7 @@ import type { CompanionActionDefinition } from '@companion-module/base'
 import type { AssignActionId } from './assign.js'
 import type { LevelActionId } from './level.js'
 import type { MuteActionId } from './mute.js'
-import type { OutputActionId } from './output.js'
+import type { OutputLevelActionId, OutputPanBalanceActionId } from './output.js'
 import type { PanBalanceActionId } from './pan-balance.js'
 import type { SceneActionId } from './scene.js'
 import type { SoftKeyId } from './softkey.js'
@@ -23,4 +23,5 @@ export type ActionId =
 	| SoftKeyId
 	| LevelActionId
 	| PanBalanceActionId
-	| OutputActionId
+	| OutputLevelActionId
+	| OutputPanBalanceActionId
