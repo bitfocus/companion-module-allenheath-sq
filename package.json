@@ -54,5 +54,5 @@
 	"resolutions": {
 		"eslint-plugin-n": "17.15.1"
 	},
-	"packageManager": "yarn@4.7.0"
+	"packageManager": "yarn@4.9.1"
 }
