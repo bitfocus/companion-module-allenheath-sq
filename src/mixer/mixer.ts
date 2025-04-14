@@ -3,7 +3,7 @@ import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balanc
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
-import { LR } from './lr.js'
+import { LR, type MixOrLR } from './lr.js'
 import { ChannelParser } from '../midi/parse/channel-parser.js'
 import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
@@ -529,7 +529,7 @@ export class Mixer {
 		source: number,
 		sourceType: SourceForSourceInMixAndLRForNRPN<'assign'>,
 		active: boolean,
-		mixes: readonly number[],
+		mixes: readonly MixOrLR[],
 	): void {
 		const mixNrpn = AssignNRPNCalculator.get(this.model, [sourceType, 'mix'])
 		const lrNrpn = AssignNRPNCalculator.get(this.model, [sourceType, 'lr'])
@@ -590,7 +590,7 @@ export class Mixer {
 	 * @param mixes
 	 *   The mixes to activate it in, potentially including the LR mix.
 	 */
-	assignInputChannelToMixesAndLR(inputChannel: number, active: boolean, mixes: readonly number[]): void {
+	assignInputChannelToMixesAndLR(inputChannel: number, active: boolean, mixes: readonly MixOrLR[]): void {
 		this.#assignSourceToMixesAndLR(inputChannel, 'inputChannel', active, mixes)
 	}
 
@@ -620,7 +620,7 @@ export class Mixer {
 	 * @param mixes
 	 *   The mixes to activate it in, potentially including the LR mix.
 	 */
-	assignGroupToMixesAndLR(group: number, active: boolean, mixes: readonly number[]): void {
+	assignGroupToMixesAndLR(group: number, active: boolean, mixes: readonly MixOrLR[]): void {
 		this.#assignSourceToMixesAndLR(group, 'group', active, mixes)
 	}
 
@@ -635,7 +635,7 @@ export class Mixer {
 	 * @param mixes
 	 *   The mixes to activate it in, potentially including the LR mix.
 	 */
-	assignFXReturnToMixesAndLR(fxReturn: number, active: boolean, mixes: readonly number[]): void {
+	assignFXReturnToMixesAndLR(fxReturn: number, active: boolean, mixes: readonly MixOrLR[]): void {
 		this.#assignSourceToMixesAndLR(fxReturn, 'fxReturn', active, mixes)
 	}
 
@@ -1063,7 +1063,7 @@ export class Mixer {
 		source: number,
 		sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 		panBalance: PanBalanceChoice,
-		mixOrLR: number,
+		mixOrLR: MixOrLR,
 	): void {
 		if (mixOrLR === LR) {
 			const calc = BalanceNRPNCalculator.get(this.model, [sourceType, 'lr'])
@@ -1116,7 +1116,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
-	setInputChannelPanBalanceInMixOrLR(channel: number, pan: PanBalanceChoice, mixOrLR: number): void {
+	setInputChannelPanBalanceInMixOrLR(channel: number, pan: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(channel, 'inputChannel', pan, mixOrLR)
 	}
 
@@ -1130,7 +1130,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
-	setGroupPanBalanceInMixOrLR(group: number, panBalance: PanBalanceChoice, mixOrLR: number): void {
+	setGroupPanBalanceInMixOrLR(group: number, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(group, 'group', panBalance, mixOrLR)
 	}
 
@@ -1144,7 +1144,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
-	setFXReturnPanBalanceInMixOrLR(fxReturn: number, panBalance: PanBalanceChoice, mixOrLR: number): void {
+	setFXReturnPanBalanceInMixOrLR(fxReturn: number, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(fxReturn, 'fxReturn', panBalance, mixOrLR)
 	}
 

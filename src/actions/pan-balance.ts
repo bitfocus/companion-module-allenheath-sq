@@ -1,14 +1,15 @@
 import type {
 	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
+	CompanionMigrationAction,
 	CompanionOptionValues,
 	DropdownChoice,
 } from '@companion-module/base'
 import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
-import { LR } from '../mixer/lr.js'
-import { type Mixer } from '../mixer/mixer.js'
+import { LR, type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
+import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
 import type { BalanceParam } from '../mixer/nrpn/pan-balance.js'
 import {
@@ -35,6 +36,32 @@ export enum PanBalanceActionId {
 
 const PanBalanceSourceOptionId = 'input'
 const PanBalanceSinkOptionId = 'assign'
+
+/**
+ * The LR mix used to be identified using the number `99` in options.  This
+ * function attempts to upgrade pan/balance actions (*only* pan/balance actions:
+ * other action types are upgraded by similar functions in their action-defining
+ * files) that identify the LR mix in this fashion to use the constant string
+ * `'lr'`, i.e. `LR`.
+ *
+ * @param action
+ *   An action to potentially ugprade.
+ * @returns
+ *   True iff the action was a pan/balance action containing an identification
+ *   of the LR mix that was rewritten to use `'lr'`.
+ */
+export function tryUpgradePanBalanceMixOrLREncoding(action: CompanionMigrationAction): boolean {
+	switch (action.actionId) {
+		case PanBalanceActionId.InputChannelPanBalanceInMixOrLR as string:
+		case PanBalanceActionId.GroupPanBalanceInMixOrLR as string:
+		case PanBalanceActionId.FXReturnPanBalanceInMixOrLR as string:
+			return tryUpgradeMixOrLROptionEncoding(action, PanBalanceSinkOptionId)
+		case PanBalanceActionId.MixOrLRPanBalanceInMatrix as string:
+			return tryUpgradeMixOrLROptionEncoding(action, PanBalanceSourceOptionId)
+		default:
+			return false
+	}
+}
 
 /** Compute the set of pan/balance level options for pan/balance actions. */
 export function createPanLevels(): DropdownChoice[] {
@@ -90,7 +117,7 @@ function getBalanceSourceToMixOrLRNumbers(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
-): [number, number] | null {
+): [number, MixOrLR] | null {
 	const source = toSourceOrSink(instance, model, options[PanBalanceSourceOptionId], sourceType)
 	if (source === null) {
 		return null
@@ -236,7 +263,7 @@ function panSourceToMixOrLRCallbackPrelude(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
-): [number, number, PanBalanceChoice] | null {
+): [number, MixOrLR, PanBalanceChoice] | null {
 	const sourceSink = getBalanceSourceToMixOrLRNumbers(instance, model, options, sourceType)
 	if (sourceSink === null) {
 		return null
@@ -273,7 +300,7 @@ function panMixOrLRToMatrix(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-): [number, number] | null {
+): [MixOrLR, number] | null {
 	const mixOrLR = toMixOrLR(instance, model, options[PanBalanceSourceOptionId])
 	if (mixOrLR === null) {
 		return null

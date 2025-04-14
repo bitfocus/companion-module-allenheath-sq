@@ -16,6 +16,7 @@ import {
 	tryEnsureModelOptionInConfig,
 	tryRemoveUnnecessaryLabelInConfig,
 } from './config.js'
+import { tryUpdateAllLRMixEncodings } from './mixer/lr.js'
 
 function ActionUpdater(
 	tryUpdate: (action: CompanionMigrationAction) => boolean,
@@ -59,4 +60,5 @@ export const UpgradeScripts = [
 	// because there in fact *is* a way to get that label without requiring that
 	// users redundantly specify it.  So it goes.
 	ConfigUpdater(tryRemoveUnnecessaryLabelInConfig),
+	ActionUpdater(tryUpdateAllLRMixEncodings),
 ]

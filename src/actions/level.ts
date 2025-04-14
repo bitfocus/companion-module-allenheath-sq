@@ -1,9 +1,13 @@
-import type { CompanionInputFieldDropdown, CompanionOptionValues } from '@companion-module/base'
+import type {
+	CompanionInputFieldDropdown,
+	CompanionMigrationAction,
+	CompanionOptionValues,
+} from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import type { Choices } from '../choices.js'
 import { getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
-import { LR } from '../mixer/lr.js'
+import { LR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
 import type { LevelParam } from '../mixer/nrpn/level.js'
@@ -35,6 +39,32 @@ export enum LevelActionId {
 
 const LevelSetSourceOptionId = 'input'
 const LevelSetSinkOptionId = 'assign'
+
+/**
+ * The LR mix used to be identified using the number `99` in options.  This
+ * function attempts to upgrade assign actions (*only* level actions: other
+ * action types are upgraded by similar functions in their action-defining
+ * files) that identify the LR mix in this fashion to use the constant string
+ * `'lr'`, i.e. `LR`.
+ *
+ * @param action
+ *   An action to potentially ugprade.
+ * @returns
+ *   True iff the action was a level action containing an identification of the
+ *   LR mix that was rewritten to use `'lr'`.
+ */
+export function tryUpgradeLevelMixOrLREncoding(action: CompanionMigrationAction): boolean {
+	switch (action.actionId) {
+		case LevelActionId.InputChannelLevelInMixOrLR as string:
+		case LevelActionId.GroupLevelInMixOrLR as string:
+		case LevelActionId.FXReturnLevelInMixOrLR as string:
+			return tryUpgradeMixOrLRArrayEncoding(action, LevelSetSinkOptionId)
+		case LevelActionId.MixOrLRLevelInMatrix as string:
+			return tryUpgradeMixOrLROptionEncoding(action, LevelSetSourceOptionId)
+		default:
+			return false
+	}
+}
 
 type LevelType = {
 	source: number

@@ -1,6 +1,6 @@
 import type { CompanionOptionValues } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
-import { LR } from '../mixer/lr.js'
+import { LR, type MixOrLR } from '../mixer/lr.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 
 /** The type of an option value. */
@@ -50,9 +50,13 @@ export function toSourceOrSink(
  * @param optionValue
  *   The option value identifying a source of type `type`.
  */
-export function toMixOrLR(instance: sqInstance, model: Model, optionValue: OptionValue): number | null {
+export function toMixOrLR(instance: sqInstance, model: Model, optionValue: OptionValue): MixOrLR | null {
+	if (optionValue === LR) {
+		return LR
+	}
+
 	const n = Number(optionValue)
-	if (n < model.inputOutputCounts.mix || n === LR) {
+	if (n < model.inputOutputCounts.mix) {
 		return n
 	}
 

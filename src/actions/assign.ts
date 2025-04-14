@@ -1,12 +1,13 @@
 import type {
 	CompanionInputFieldDropdown,
 	CompanionInputFieldMultiDropdown,
+	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
-import { LR } from '../mixer/lr.js'
+import { LR, type MixOrLR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
@@ -29,6 +30,34 @@ export enum AssignActionId {
 }
 
 const AssignMixOrLRSinksOptionId = 'mixAssign'
+
+const AssignMixToMatrixSourceOptionId = 'inputMix'
+
+/**
+ * The LR mix used to be identified using the number `99` in options.  This
+ * function attempts to upgrade assign actions (*only* assign actions: other
+ * action types are upgraded by similar functions in their action-defining
+ * files) that identify the LR mix in this fashion to use the constant string
+ * `'lr'`, i.e. `LR`.
+ *
+ * @param action
+ *   An action to potentially ugprade.
+ * @returns
+ *   True iff the action was an assign action containing an identification of
+ *   the LR mix that was rewritten to use `'lr'`.
+ */
+export function tryUpgradeAssignMixOrLREncoding(action: CompanionMigrationAction): boolean {
+	switch (action.actionId) {
+		case AssignActionId.InputChannelToMix as string:
+		case AssignActionId.GroupToMix as string:
+		case AssignActionId.FXReturnToMix as string:
+			return tryUpgradeMixOrLRArrayEncoding(action, AssignMixOrLRSinksOptionId)
+		case AssignActionId.MixToMatrix as string:
+			return tryUpgradeMixOrLROptionEncoding(action, AssignMixToMatrixSourceOptionId)
+		default:
+			return false
+	}
+}
 
 /**
  * Convert the options value for a multidropdown field of numbered sinks into a
@@ -71,18 +100,22 @@ function assignOptionToSinks(assign: OptionValue, model: Model, sinkType: Exclud
  * @returns
  *   An array of sinks.
  */
-function getMixAndLRSinks(options: CompanionOptionValues, model: Model): number[] {
+function getMixAndLRSinks(options: CompanionOptionValues, model: Model): MixOrLR[] {
 	const mixAssign = options[AssignMixOrLRSinksOptionId]
 	if (!Array.isArray(mixAssign)) {
 		return []
 	}
 
 	const sinkCount = model.inputOutputCounts.mix
-	const sinks: number[] = []
+	const sinks: MixOrLR[] = []
 	for (const item of mixAssign) {
-		const sink = Number(item)
-		if (sink < sinkCount || sink === LR) {
-			sinks.push(sink)
+		if (item === LR) {
+			sinks.push(LR)
+		} else {
+			const sink = Number(item)
+			if (sink < sinkCount) {
+				sinks.push(sink)
+			}
 		}
 	}
 	return sinks
@@ -337,7 +370,15 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.MixToMatrix]: {
 			name: 'Assign mix to matrix',
 			options: [
-				...sourceSinkOptions('Mix', 'inputMix', 'mixesAndLR', 'Matrix', 'mtxAssign', 'matrixes', choices),
+				...sourceSinkOptions(
+					'Mix',
+					AssignMixToMatrixSourceOptionId,
+					'mixesAndLR',
+					'Matrix',
+					'mtxAssign',
+					'matrixes',
+					choices,
+				),
 				{
 					type: 'checkbox',
 					label: 'Active',

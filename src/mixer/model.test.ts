@@ -21,13 +21,11 @@ describe('Model.forEach', () => {
 	})
 
 	// Test lr specially because it used to return not 0 for its one element,
-	// but `LR`, i.e. 99.
+	// but 99 (which used to be the value of `LR`).
 	test('lr', () => {
-		// LR is presently 99.  Detect if/when it is changed to something like
-		// 'lr' (to allow mix-or-LR to clearly separate LR from mix at the type
-		// level, rather than conflate them both into `number`) so that the
-		// comment above can be adjusted.
-		expect(LR).toBe(99)
+		// Although `LR` is a constant string now, this shouldn't affect the
+		// enumeration of LR signals.
+		expect(LR).toBe('lr')
 
 		const results: [number, string, string][] = []
 
