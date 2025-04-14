@@ -37,6 +37,7 @@ New in v.2.1.0
 - Define pan/balance variables on-demand as pan/balance change messages are sent by the mixer
 - Restart module instances in response to configuration changes only if absolutely required
 - Add a `sceneRecalledTrigger` variable whose value changes every time a scene is recalled, suitable for use in triggers
+- Ensure output pan/balance variables are appropriately changed when an output pan/balance is changed in the mixer
 
 New in v.2.0.0 (not released)
 

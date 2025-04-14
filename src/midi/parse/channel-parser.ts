@@ -146,7 +146,7 @@ export class ChannelParser extends EventEmitter<MixerMessageEvents> {
 							this.emit('fader_level', msb, lsb, vc, vf)
 						}
 						// Pan Level
-						else if (0x50 <= msb && msb <= 0x5e) {
+						else if (0x50 <= msb && msb <= 0x5f) {
 							this.emit('pan_level', msb, lsb, vc, vf)
 						} else {
 							verboseLog(
