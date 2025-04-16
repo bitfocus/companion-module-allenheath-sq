@@ -121,6 +121,33 @@ function getLevelType(
 	}
 }
 
+function sourceSinkOptions(
+	sourceLabel: string,
+	sourceChoices: keyof Choices,
+	sinkLabel: string,
+	sinkChoices: keyof Choices,
+	choices: Choices,
+): [CompanionInputFieldDropdown, CompanionInputFieldDropdown] {
+	return [
+		{
+			type: 'dropdown',
+			label: sourceLabel,
+			id: LevelSetSourceOptionId,
+			default: 0,
+			choices: choices[sourceChoices],
+			minChoicesForSearch: 0,
+		},
+		{
+			type: 'dropdown',
+			label: sinkLabel,
+			id: LevelSetSinkOptionId,
+			default: 0,
+			choices: choices[sinkChoices],
+			minChoicesForSearch: 0,
+		},
+	]
+}
+
 /**
  * Generate action definitions for setting the levels of sources in sinks: input
  * channels in mixes, mixes in LR, and so on and so forth.
@@ -152,22 +179,7 @@ export function levelActions(
 		[LevelActionId.InputChannelLevelInMixOrLR]: {
 			name: 'Fader channel level to mix',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Input channel',
-					id: LevelSetSourceOptionId,
-					default: 0,
-					choices: choices.inputChannels,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'dropdown',
-					label: 'Mix',
-					id: LevelSetSinkOptionId,
-					default: 0,
-					choices: choices.mixesAndLR,
-					minChoicesForSearch: 0,
-				},
+				...sourceSinkOptions('Input channel', 'inputChannels', 'Mix', 'mixesAndLR', choices),
 				levelOption,
 				fadingOption,
 			],
@@ -198,26 +210,7 @@ export function levelActions(
 		},
 		[LevelActionId.GroupLevelInMixOrLR]: {
 			name: 'Fader group level to mix',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Group',
-					id: LevelSetSourceOptionId,
-					default: 0,
-					choices: choices.groups,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'dropdown',
-					label: 'Mix',
-					id: LevelSetSinkOptionId,
-					default: 0,
-					choices: choices.mixesAndLR,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
+			options: [...sourceSinkOptions('Group', 'groups', 'Mix', 'mixesAndLR', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['group', 'mix-or-lr'])
 				if (levelType === null) {
@@ -246,22 +239,7 @@ export function levelActions(
 		[LevelActionId.FXReturnLevelInMixOrLR]: {
 			name: 'Fader FX return level to mix',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'FX return',
-					id: LevelSetSourceOptionId,
-					default: 0,
-					choices: choices.fxReturns,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'dropdown',
-					label: 'Mix',
-					id: LevelSetSinkOptionId,
-					default: 0,
-					choices: choices.mixesAndLR,
-					minChoicesForSearch: 0,
-				},
+				...sourceSinkOptions('FX return', 'fxReturns', 'Mix', 'mixesAndLR', choices),
 				levelOption,
 				fadingOption,
 			],
@@ -307,22 +285,7 @@ export function levelActions(
 		[LevelActionId.InputChannelLevelInFXSend]: {
 			name: 'Fader channel level to FX send',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Input channel',
-					id: LevelSetSourceOptionId,
-					default: 0,
-					choices: choices.inputChannels,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'dropdown',
-					label: 'FX Send',
-					id: LevelSetSinkOptionId,
-					default: 0,
-					choices: choices.fxSends,
-					minChoicesForSearch: 0,
-				},
+				...sourceSinkOptions('Input channel', 'inputChannels', 'FX Send', 'fxSends', choices),
 				levelOption,
 				fadingOption,
 			],
@@ -344,26 +307,7 @@ export function levelActions(
 		},
 		[LevelActionId.GroupLevelInFXSend]: {
 			name: 'Fader group level to FX send',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Group',
-					id: LevelSetSourceOptionId,
-					default: 0,
-					choices: choices.groups,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'dropdown',
-					label: 'FX Send',
-					id: LevelSetSinkOptionId,
-					default: 0,
-					choices: choices.fxSends,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
+			options: [...sourceSinkOptions('Group', 'groups', 'FX Send', 'fxSends', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['group', 'fxSend'])
 				if (levelType === null) {
@@ -383,22 +327,7 @@ export function levelActions(
 		[LevelActionId.FXReturnLevelInFXSend]: {
 			name: 'Fader FX return level to FX send',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'FX return',
-					id: LevelSetSourceOptionId,
-					default: 0,
-					choices: choices.fxReturns,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'dropdown',
-					label: 'FX Send',
-					id: LevelSetSinkOptionId,
-					default: 0,
-					choices: choices.fxSends,
-					minChoicesForSearch: 0,
-				},
+				...sourceSinkOptions('FX return', 'fxReturns', 'FX Send', 'fxSends', choices),
 				levelOption,
 				fadingOption,
 			],
@@ -420,26 +349,7 @@ export function levelActions(
 		},
 		[LevelActionId.MixOrLRLevelInMatrix]: {
 			name: 'Fader mix level to matrix',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Mix',
-					id: LevelSetSourceOptionId,
-					default: 0,
-					choices: choices.mixesAndLR,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'dropdown',
-					label: 'Matrix',
-					id: LevelSetSinkOptionId,
-					default: 0,
-					choices: choices.matrixes,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
+			options: [...sourceSinkOptions('Mix', 'mixesAndLR', 'Matrix', 'matrixes', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['mix-or-lr', 'matrix'])
 				if (levelType === null) {
@@ -467,26 +377,7 @@ export function levelActions(
 		},
 		[LevelActionId.GroupLevelInMatrix]: {
 			name: 'Fader group level to matrix',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Group',
-					id: LevelSetSourceOptionId,
-					default: 0,
-					choices: choices.groups,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'dropdown',
-					label: 'Matrix',
-					id: LevelSetSinkOptionId,
-					default: 0,
-					choices: choices.matrixes,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
+			options: [...sourceSinkOptions('Group', 'groups', 'Matrix', 'matrixes', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['group', 'matrix'])
 				if (levelType === null) {
