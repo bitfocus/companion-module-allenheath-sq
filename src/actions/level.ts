@@ -32,6 +32,9 @@ export enum LevelActionId {
 	GroupLevelInMatrix = 'grplev_to_mtx',
 }
 
+const LevelSetSourceOptionId = 'input'
+const LevelSetSinkOptionId = 'assign'
+
 type LevelType = {
 	source: number
 	sink: number
@@ -69,12 +72,12 @@ function getLevelType(
 	let sourceSinkType: SourceSinkForNRPN<'level'>
 	let source, sink
 	if (srcSnkType[0] === 'mix-or-lr') {
-		const src = toMixOrLR(instance, model, options.input)
+		const src = toMixOrLR(instance, model, options[LevelSetSourceOptionId])
 		if (src === null) {
 			return null
 		}
 
-		sink = toSourceOrSink(instance, model, options.assign, srcSnkType[1])
+		sink = toSourceOrSink(instance, model, options[LevelSetSinkOptionId], srcSnkType[1])
 		if (sink === null) {
 			return null
 		}
@@ -82,12 +85,12 @@ function getLevelType(
 		sourceSinkType = [src === LR ? 'lr' : 'mix', srcSnkType[1]]
 		source = src === LR ? 0 : src
 	} else if (srcSnkType[1] === 'mix-or-lr') {
-		source = toSourceOrSink(instance, model, options.input, srcSnkType[0])
+		source = toSourceOrSink(instance, model, options[LevelSetSourceOptionId], srcSnkType[0])
 		if (source === null) {
 			return null
 		}
 
-		const snk = toMixOrLR(instance, model, options.assign)
+		const snk = toMixOrLR(instance, model, options[LevelSetSinkOptionId])
 		if (snk === null) {
 			return null
 		}
@@ -95,12 +98,12 @@ function getLevelType(
 		sourceSinkType = [srcSnkType[0], snk === LR ? 'lr' : 'mix']
 		sink = snk === LR ? 0 : snk
 	} else {
-		source = toSourceOrSink(instance, model, options.input, srcSnkType[0])
+		source = toSourceOrSink(instance, model, options[LevelSetSourceOptionId], srcSnkType[0])
 		if (source === null) {
 			return null
 		}
 
-		sink = toSourceOrSink(instance, model, options.assign, srcSnkType[1])
+		sink = toSourceOrSink(instance, model, options[LevelSetSinkOptionId], srcSnkType[1])
 		if (sink === null) {
 			return null
 		}
@@ -152,7 +155,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Input channel',
-					id: 'input',
+					id: LevelSetSourceOptionId,
 					default: 0,
 					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
@@ -160,7 +163,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Mix',
-					id: 'assign',
+					id: LevelSetSinkOptionId,
 					default: 0,
 					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
@@ -199,7 +202,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Group',
-					id: 'input',
+					id: LevelSetSourceOptionId,
 					default: 0,
 					choices: choices.groups,
 					minChoicesForSearch: 0,
@@ -207,7 +210,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Mix',
-					id: 'assign',
+					id: LevelSetSinkOptionId,
 					default: 0,
 					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
@@ -246,7 +249,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'FX return',
-					id: 'input',
+					id: LevelSetSourceOptionId,
 					default: 0,
 					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
@@ -254,7 +257,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Mix',
-					id: 'assign',
+					id: LevelSetSinkOptionId,
 					default: 0,
 					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
@@ -307,7 +310,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Input channel',
-					id: 'input',
+					id: LevelSetSourceOptionId,
 					default: 0,
 					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
@@ -315,7 +318,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'FX Send',
-					id: 'assign',
+					id: LevelSetSinkOptionId,
 					default: 0,
 					choices: choices.fxSends,
 					minChoicesForSearch: 0,
@@ -345,7 +348,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Group',
-					id: 'input',
+					id: LevelSetSourceOptionId,
 					default: 0,
 					choices: choices.groups,
 					minChoicesForSearch: 0,
@@ -353,7 +356,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'FX Send',
-					id: 'assign',
+					id: LevelSetSinkOptionId,
 					default: 0,
 					choices: choices.fxSends,
 					minChoicesForSearch: 0,
@@ -383,7 +386,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'FX return',
-					id: 'input',
+					id: LevelSetSourceOptionId,
 					default: 0,
 					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
@@ -391,7 +394,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'FX Send',
-					id: 'assign',
+					id: LevelSetSinkOptionId,
 					default: 0,
 					choices: choices.fxSends,
 					minChoicesForSearch: 0,
@@ -421,7 +424,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Mix',
-					id: 'input',
+					id: LevelSetSourceOptionId,
 					default: 0,
 					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
@@ -429,7 +432,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Matrix',
-					id: 'assign',
+					id: LevelSetSinkOptionId,
 					default: 0,
 					choices: choices.matrixes,
 					minChoicesForSearch: 0,
@@ -468,7 +471,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Group',
-					id: 'input',
+					id: LevelSetSourceOptionId,
 					default: 0,
 					choices: choices.groups,
 					minChoicesForSearch: 0,
@@ -476,7 +479,7 @@ export function levelActions(
 				{
 					type: 'dropdown',
 					label: 'Matrix',
-					id: 'assign',
+					id: LevelSetSinkOptionId,
 					default: 0,
 					choices: choices.matrixes,
 					minChoicesForSearch: 0,
