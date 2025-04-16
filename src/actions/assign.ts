@@ -1,4 +1,8 @@
-import type { CompanionInputFieldMultiDropdown, CompanionOptionValues } from '@companion-module/base'
+import type {
+	CompanionInputFieldDropdown,
+	CompanionInputFieldMultiDropdown,
+	CompanionOptionValues,
+} from '@companion-module/base'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
@@ -84,6 +88,34 @@ function getMixAndLRSinks(options: CompanionOptionValues, model: Model): number[
 	return sinks
 }
 
+function sourceSinkOptions(
+	sourceLabel: string,
+	sourceId: string,
+	sourceChoices: keyof Choices,
+	sinkLabel: string,
+	sinkId: string,
+	sinkChoices: keyof Choices,
+	choices: Choices,
+): [CompanionInputFieldDropdown, CompanionInputFieldMultiDropdown] {
+	return [
+		{
+			type: 'dropdown',
+			label: sourceLabel,
+			id: sourceId,
+			default: 0,
+			choices: choices[sourceChoices],
+			minChoicesForSearch: 0,
+		},
+		{
+			type: 'multidropdown',
+			label: sinkLabel,
+			id: sinkId,
+			default: [],
+			choices: choices[sinkChoices],
+		},
+	]
+}
+
 /**
  * Generate action definitions for assigning sources to mixes: input channel to
  * mix, group to mix/aux, input channel to FX send, output to matrix, and so
@@ -101,27 +133,19 @@ function getMixAndLRSinks(options: CompanionOptionValues, model: Model): number[
 export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<AssignActionId> {
 	const model = mixer.model
 
-	const MixOrLRSinksOption = {
-		type: 'multidropdown',
-		label: 'Mix',
-		id: AssignMixOrLRSinksOptionId,
-		default: [],
-		choices: choices.mixesAndLR,
-	} as const satisfies CompanionInputFieldMultiDropdown
-
 	return {
 		[AssignActionId.InputChannelToMix]: {
 			name: 'Assign channel to mix',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Input Channel',
-					id: 'inputChannel',
-					default: 0,
-					choices: choices.inputChannels,
-					minChoicesForSearch: 0,
-				},
-				MixOrLRSinksOption,
+				...sourceSinkOptions(
+					'Input Channel',
+					'inputChannel',
+					'inputChannels',
+					'Mix',
+					AssignMixOrLRSinksOptionId,
+					'mixesAndLR',
+					choices,
+				),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -143,21 +167,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.InputChannelToGroup]: {
 			name: 'Assign channel to group',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Input Channel',
-					id: 'inputChannel',
-					default: 0,
-					choices: choices.inputChannels,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'multidropdown',
-					label: 'Group',
-					id: 'grpAssign',
-					default: [],
-					choices: choices.groups,
-				},
+				...sourceSinkOptions('Input Channel', 'inputChannel', 'inputChannels', 'Group', 'grpAssign', 'groups', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -179,15 +189,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.GroupToMix]: {
 			name: 'Assign group to mix',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Group',
-					id: 'inputGrp',
-					default: 0,
-					choices: choices.groups,
-					minChoicesForSearch: 0,
-				},
-				MixOrLRSinksOption,
+				...sourceSinkOptions('Group', 'inputGrp', 'groups', 'Mix', AssignMixOrLRSinksOptionId, 'mixesAndLR', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -209,15 +211,15 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.FXReturnToMix]: {
 			name: 'Assign FX return to mix',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'FX Return',
-					id: 'inputFxr',
-					default: 0,
-					choices: choices.fxReturns,
-					minChoicesForSearch: 0,
-				},
-				MixOrLRSinksOption,
+				...sourceSinkOptions(
+					'FX Return',
+					'inputFxr',
+					'fxReturns',
+					'Mix',
+					AssignMixOrLRSinksOptionId,
+					'mixesAndLR',
+					choices,
+				),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -239,21 +241,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.FXReturnToGroup]: {
 			name: 'Assign FX Return to group',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'FX Return',
-					id: 'inputFxr',
-					default: 0,
-					choices: choices.fxReturns,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'multidropdown',
-					label: 'Group',
-					id: 'grpAssign',
-					default: [],
-					choices: choices.groups,
-				},
+				...sourceSinkOptions('FX Return', 'inputFxr', 'fxReturns', 'Group', 'grpAssign', 'groups', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -275,21 +263,15 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.InputChannelToFXSend]: {
 			name: 'Assign channel to FX Send',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Input Channel',
-					id: 'inputChannel',
-					default: 0,
-					choices: choices.inputChannels,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'multidropdown',
-					label: 'FX Send',
-					id: 'fxsAssign',
-					default: [],
-					choices: choices.fxSends,
-				},
+				...sourceSinkOptions(
+					'Input Channel',
+					'inputChannel',
+					'inputChannels',
+					'FX Send',
+					'fxsAssign',
+					'fxSends',
+					choices,
+				),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -311,21 +293,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.GroupToFXSend]: {
 			name: 'Assign group to FX send',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Group',
-					id: 'inputGrp',
-					default: 0,
-					choices: choices.groups,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'multidropdown',
-					label: 'FX Send',
-					id: 'fxsAssign',
-					default: [],
-					choices: choices.fxSends,
-				},
+				...sourceSinkOptions('Group', 'inputGrp', 'groups', 'FX Send', 'fxsAssign', 'fxSends', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -347,21 +315,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.FXReturnToFXSend]: {
 			name: 'Assign FX return to FX send',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'FX return',
-					id: 'inputFxr',
-					default: 0,
-					choices: choices.fxReturns,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'multidropdown',
-					label: 'FX Send',
-					id: 'fxsAssign',
-					default: [],
-					choices: choices.fxSends,
-				},
+				...sourceSinkOptions('FX return', 'inputFxr', 'fxReturns', 'FX Send', 'fxsAssign', 'fxSends', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -383,21 +337,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.MixToMatrix]: {
 			name: 'Assign mix to matrix',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Mix',
-					id: 'inputMix',
-					default: 0,
-					choices: choices.mixesAndLR,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'multidropdown',
-					label: 'Matrix',
-					id: 'mtxAssign',
-					default: [],
-					choices: choices.matrixes,
-				},
+				...sourceSinkOptions('Mix', 'inputMix', 'mixesAndLR', 'Matrix', 'mtxAssign', 'matrixes', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -424,21 +364,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.GroupToMatrix]: {
 			name: 'Assign group to matrix',
 			options: [
-				{
-					type: 'dropdown',
-					label: 'Group',
-					id: 'inputGrp',
-					default: 0,
-					choices: choices.groups,
-					minChoicesForSearch: 0,
-				},
-				{
-					type: 'multidropdown',
-					label: 'Matrix',
-					id: 'mtxAssign',
-					default: [],
-					choices: choices.matrixes,
-				},
+				...sourceSinkOptions('Group', 'inputGrp', 'groups', 'Matrix', 'mtxAssign', 'matrixes', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
