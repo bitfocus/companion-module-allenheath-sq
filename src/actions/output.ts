@@ -322,6 +322,16 @@ function getPanBalanceType(
 	}
 }
 
+function faderOption(faderChoice: keyof Choices, choices: Choices): CompanionInputFieldDropdown {
+	return {
+		type: 'dropdown',
+		label: 'Fader',
+		id: OutputFaderOptionId,
+		default: 0,
+		choices: choices[faderChoice],
+		minChoicesForSearch: 0,
+	}
+}
 /**
  * Generate action definitions for adjusting the levels of various mixer sinks
  * when they're assigned to mixer outputs.
@@ -371,18 +381,7 @@ export function outputLevelActions(
 
 		[OutputLevelActionId.MixLevelOutput]: {
 			name: 'Mix fader level to output',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Fader',
-					id: OutputFaderOptionId,
-					default: 0,
-					choices: choices.mixes,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
+			options: [faderOption('mixes', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, 'mix')
 				if (levelType === null) {
@@ -402,18 +401,7 @@ export function outputLevelActions(
 
 		[OutputLevelActionId.FXSendLevelOutput]: {
 			name: 'FX Send fader level to output',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Fader',
-					id: OutputFaderOptionId,
-					default: 0,
-					choices: choices.fxSends,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
+			options: [faderOption('fxSends', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, 'fxSend')
 				if (levelType === null) {
@@ -433,18 +421,7 @@ export function outputLevelActions(
 
 		[OutputLevelActionId.MatrixLevelOutput]: {
 			name: 'Matrix fader level to output',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Fader',
-					id: OutputFaderOptionId,
-					default: 0,
-					choices: choices.matrixes,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
+			options: [faderOption('matrixes', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, 'matrix')
 				if (levelType === null) {
@@ -464,18 +441,7 @@ export function outputLevelActions(
 
 		[OutputLevelActionId.DCALevelOutput]: {
 			name: 'DCA fader level to output',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Fader',
-					id: OutputFaderOptionId,
-					default: 0,
-					choices: choices.dcas,
-					minChoicesForSearch: 0,
-				},
-				levelOption,
-				fadingOption,
-			],
+			options: [faderOption('dcas', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, 'dca')
 				if (levelType === null) {
@@ -558,18 +524,7 @@ export function outputPanBalanceActions(
 		},
 		[OutputPanBalanceActionId.MixPanBalanceOutput]: {
 			name: 'Mix Pan/Bal to output',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Fader',
-					id: OutputFaderOptionId,
-					default: 0,
-					choices: choices.mixes,
-					minChoicesForSearch: 0,
-				},
-				panLevelOption,
-				ShowVar,
-			],
+			options: [faderOption('mixes', choices), panLevelOption, ShowVar],
 			learn: async ({ options }) => {
 				const mix = getFader(instance, model, options, 'mix')
 				if (mix === null) {
@@ -607,18 +562,7 @@ export function outputPanBalanceActions(
 
 		[OutputPanBalanceActionId.MatrixPanBalanceOutput]: {
 			name: 'Matrix Pan/Bal to output',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Fader',
-					id: OutputFaderOptionId,
-					default: 0,
-					choices: choices.matrixes,
-					minChoicesForSearch: 0,
-				},
-				panLevelOption,
-				ShowVar,
-			],
+			options: [faderOption('matrixes', choices), panLevelOption, ShowVar],
 			learn: async ({ options }) => {
 				const matrix = getFader(instance, model, options, 'matrix')
 				if (matrix === null) {
