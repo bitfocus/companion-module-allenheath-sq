@@ -4,7 +4,7 @@ import type { Choices } from '../choices.js'
 import { getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
-import type { InputOutputType, Model } from '../mixer/model.js'
+import { LR, type Model } from '../mixer/model.js'
 import type { LevelParam } from '../mixer/nrpn/level.js'
 import {
 	LevelNRPNCalculator,
@@ -12,7 +12,7 @@ import {
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
 } from '../mixer/nrpn/source-to-sink.js'
-import { toInputOutput } from './to-source-or-sink.js'
+import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 
 /**
  * Action IDs for all actions that alter the level of a mixer source in a mixer
@@ -35,55 +35,78 @@ export enum LevelActionId {
 type LevelType = {
 	source: number
 	sink: number
-	sourceSinkType: [InputOutputType, InputOutputType]
+	sourceSinkType: SourceSinkForNRPN<'level'>
 	param: LevelParam
 }
 
-type LevelSourceSinkPairs =
-	| SourceSinkForNRPN<'level'>
-	| readonly [SourceForSourceInMixAndLRForNRPN<'level'>, 'mix-or-lr']
-	| readonly ['mix-or-lr', SinkForMixAndLRInSinkForNRPN<'level'>]
-
-function toLevelSourceSink(
-	instance: sqInstance,
-	model: Model,
-	options: CompanionOptionValues,
-	srcSnkType: LevelSourceSinkPairs,
-): [SourceSinkForNRPN<'level'>, [number, number]] | null {
-	const [srcType, snkType] = srcSnkType
-	const src = toInputOutput(instance, model, options.input, srcType)
-	if (src === null) {
-		return null
-	}
-	const [source, sourceType] = src
-
-	const snk = toInputOutput(instance, model, options.assign, snkType)
-	if (snk === null) {
-		return null
-	}
-	const [sink, sinkType] = snk
-
-	const sourceSink =
-		snkType === 'mix-or-lr'
-			? [sourceType, sinkType === 'lr' ? 'lr' : 'mix']
-			: srcType === 'mix-or-lr'
-				? [sourceType === 'lr' ? 'lr' : 'mix', sinkType]
-				: srcSnkType
-
-	return [sourceSink as SourceSinkForNRPN<'level'>, [source, sink]]
-}
+type SourceToMixOrLR = [SourceForSourceInMixAndLRForNRPN<'level'>, 'mix-or-lr']
+type MixOrLRToSink = ['mix-or-lr', SinkForMixAndLRInSinkForNRPN<'level'>]
 
 function getLevelType(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-	srcSnkType: LevelSourceSinkPairs,
+	srcSnkType: SourceSinkForNRPN<'level'>,
+): LevelType | null
+function getLevelType(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	srcSnkType: SourceToMixOrLR,
+): LevelType | null
+function getLevelType(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	srcSnkType: MixOrLRToSink,
+): LevelType | null
+function getLevelType(
+	instance: sqInstance,
+	model: Model,
+	options: CompanionOptionValues,
+	srcSnkType: SourceSinkForNRPN<'level'> | SourceToMixOrLR | MixOrLRToSink,
 ): LevelType | null {
-	const levelSourceSink = toLevelSourceSink(instance, model, options, srcSnkType)
-	if (levelSourceSink === null) {
-		return null
+	let sourceSinkType: SourceSinkForNRPN<'level'>
+	let source, sink
+	if (srcSnkType[0] === 'mix-or-lr') {
+		const src = toMixOrLR(instance, model, options.input)
+		if (src === null) {
+			return null
+		}
+
+		sink = toSourceOrSink(instance, model, options.assign, srcSnkType[1])
+		if (sink === null) {
+			return null
+		}
+
+		sourceSinkType = [src === LR ? 'lr' : 'mix', srcSnkType[1]]
+		source = src === LR ? 0 : src
+	} else if (srcSnkType[1] === 'mix-or-lr') {
+		source = toSourceOrSink(instance, model, options.input, srcSnkType[0])
+		if (source === null) {
+			return null
+		}
+
+		const snk = toMixOrLR(instance, model, options.assign)
+		if (snk === null) {
+			return null
+		}
+
+		sourceSinkType = [srcSnkType[0], snk === LR ? 'lr' : 'mix']
+		sink = snk === LR ? 0 : snk
+	} else {
+		source = toSourceOrSink(instance, model, options.input, srcSnkType[0])
+		if (source === null) {
+			return null
+		}
+
+		sink = toSourceOrSink(instance, model, options.assign, srcSnkType[1])
+		if (sink === null) {
+			return null
+		}
+
+		sourceSinkType = srcSnkType
 	}
-	const [sourceSinkType, [source, sink]] = levelSourceSink
 
 	const nrpn = LevelNRPNCalculator.get(model, sourceSinkType)
 
