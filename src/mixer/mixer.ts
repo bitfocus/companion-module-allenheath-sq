@@ -3,10 +3,11 @@ import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balanc
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
+import { LR } from './lr.js'
 import { ChannelParser } from '../midi/parse/channel-parser.js'
 import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
-import { type InputOutputType, LR, Model } from './model.js'
+import { type InputOutputType, Model } from './model.js'
 import type { LevelParam } from './nrpn/level.js'
 import { calculateMuteParam, forEachMute, type MuteParam } from './nrpn/mute.js'
 import {

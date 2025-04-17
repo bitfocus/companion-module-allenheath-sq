@@ -1,10 +1,11 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import { LR, type Model } from './mixer/model.js'
 import { AssignActionId } from './actions/assign.js'
 import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
 import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 import type { sqInstance } from './instance.js'
+import { LR } from './mixer/lr.js'
+import type { Model } from './mixer/model.js'
 import type { LevelParam } from './mixer/nrpn/level.js'
 import { LevelNRPNCalculator } from './mixer/nrpn/source-to-sink.js'
 

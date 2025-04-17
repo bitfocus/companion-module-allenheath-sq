@@ -3,8 +3,9 @@ import type { ActionDefinitions } from './actionid.js'
 import type { Choices } from '../choices.js'
 import { getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
+import { LR } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
-import { LR, type Model } from '../mixer/model.js'
+import type { Model } from '../mixer/model.js'
 import type { LevelParam } from '../mixer/nrpn/level.js'
 import {
 	LevelNRPNCalculator,

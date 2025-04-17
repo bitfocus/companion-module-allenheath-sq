@@ -3,12 +3,12 @@ import type {
 	CompanionInputFieldMultiDropdown,
 	CompanionOptionValues,
 } from '@companion-module/base'
+import type { ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
-import { type Mixer } from '../mixer/mixer.js'
-import { LR } from '../mixer/model.js'
-import { type InputOutputType, type Model } from '../mixer/model.js'
-import { type ActionDefinitions } from './actionid.js'
+import { LR } from '../mixer/lr.js'
+import type { Mixer } from '../mixer/mixer.js'
+import type { InputOutputType, Model } from '../mixer/model.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 
 /**

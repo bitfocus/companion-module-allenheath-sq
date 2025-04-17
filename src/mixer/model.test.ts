@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
-import { LR, Model } from './model.js'
+import { LR } from './lr.js'
+import { Model } from './model.js'
 
 describe('Model.forEach', () => {
 	const model = new Model('SQ5')

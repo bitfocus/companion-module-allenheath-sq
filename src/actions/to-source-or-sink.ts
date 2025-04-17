@@ -1,6 +1,7 @@
 import type { CompanionOptionValues } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
-import { type InputOutputType, LR, type Model } from '../mixer/model.js'
+import { LR } from '../mixer/lr.js'
+import type { InputOutputType, Model } from '../mixer/model.js'
 
 /** The type of an option value. */
 export type OptionValue = CompanionOptionValues[keyof CompanionOptionValues]

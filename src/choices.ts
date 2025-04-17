@@ -1,7 +1,8 @@
 import type { DropdownChoice } from '@companion-module/base'
-import { LR, type Model } from './mixer/model.js'
 import { createLevels } from './actions/fading.js'
 import { createPanLevels } from './actions/pan-balance.js'
+import { LR } from './mixer/lr.js'
+import type { Model } from './mixer/model.js'
 
 function createInputChannels(model: Model): DropdownChoice[] {
 	const inputChannels: DropdownChoice[] = []
