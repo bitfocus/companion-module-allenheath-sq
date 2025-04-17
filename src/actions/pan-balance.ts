@@ -32,6 +32,9 @@ export enum PanBalanceActionId {
 	GroupPanBalanceInMatrix = 'grppan_to_mtx',
 }
 
+const PanBalanceSourceOptionId = 'input'
+const PanBalanceSinkOptionId = 'assign'
+
 /** Compute the set of pan/balance level options for pan/balance actions. */
 export function createPanLevels(): DropdownChoice[] {
 	const panLevels = []
@@ -87,12 +90,12 @@ function getBalanceSourceToMixOrLRNumbers(
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 ): [number, number] | null {
-	const source = toSourceOrSink(instance, model, options.input, sourceType)
+	const source = toSourceOrSink(instance, model, options[PanBalanceSourceOptionId], sourceType)
 	if (source === null) {
 		return null
 	}
 
-	const mixOrLR = toMixOrLR(instance, model, options.assign)
+	const mixOrLR = toMixOrLR(instance, model, options[PanBalanceSinkOptionId])
 	if (mixOrLR === null) {
 		return null
 	}
@@ -106,12 +109,12 @@ function getBalanceSourceToSinkNumbers(
 	options: CompanionOptionValues,
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
 ): [number, number] | null {
-	const source = toSourceOrSink(instance, model, options.input, sourceSink[0])
+	const source = toSourceOrSink(instance, model, options[PanBalanceSourceOptionId], sourceSink[0])
 	if (source === null) {
 		return null
 	}
 
-	const sink = toSourceOrSink(instance, model, options.assign, sourceSink[1])
+	const sink = toSourceOrSink(instance, model, options[PanBalanceSinkOptionId], sourceSink[1])
 	if (sink === null) {
 		return null
 	}
@@ -270,12 +273,12 @@ function panMixOrLRToMatrix(
 	model: Model,
 	options: CompanionOptionValues,
 ): [number, number] | null {
-	const mixOrLR = toMixOrLR(instance, model, options.input)
+	const mixOrLR = toMixOrLR(instance, model, options[PanBalanceSourceOptionId])
 	if (mixOrLR === null) {
 		return null
 	}
 
-	const matrix = toSourceOrSink(instance, model, options.assign, 'matrix')
+	const matrix = toSourceOrSink(instance, model, options[PanBalanceSinkOptionId], 'matrix')
 	if (matrix === null) {
 		return null
 	}
@@ -335,7 +338,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Input channel',
-					id: 'input',
+					id: PanBalanceSourceOptionId,
 					default: 0,
 					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
@@ -343,7 +346,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Mix',
-					id: 'assign',
+					id: PanBalanceSinkOptionId,
 					default: 0,
 					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
@@ -369,7 +372,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Group',
-					id: 'input',
+					id: PanBalanceSourceOptionId,
 					default: 0,
 					choices: choices.groups,
 					minChoicesForSearch: 0,
@@ -377,7 +380,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Mix',
-					id: 'assign',
+					id: PanBalanceSinkOptionId,
 					default: 0,
 					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
@@ -403,7 +406,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'FX return',
-					id: 'input',
+					id: PanBalanceSourceOptionId,
 					default: 0,
 					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
@@ -411,7 +414,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Mix',
-					id: 'assign',
+					id: PanBalanceSinkOptionId,
 					default: 0,
 					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
@@ -451,7 +454,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Mix',
-					id: 'input',
+					id: PanBalanceSourceOptionId,
 					default: 0,
 					choices: choices.mixesAndLR,
 					minChoicesForSearch: 0,
@@ -459,7 +462,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Matrix',
-					id: 'assign',
+					id: PanBalanceSinkOptionId,
 					default: 0,
 					choices: choices.matrixes,
 					minChoicesForSearch: 0,
@@ -513,7 +516,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Group',
-					id: 'input',
+					id: PanBalanceSourceOptionId,
 					default: 0,
 					choices: choices.groups,
 					minChoicesForSearch: 0,
@@ -521,7 +524,7 @@ export function panBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Matrix',
-					id: 'assign',
+					id: PanBalanceSinkOptionId,
 					default: 0,
 					choices: choices.matrixes,
 					minChoicesForSearch: 0,
