@@ -54,6 +54,8 @@ export const ObsoleteLevelToOutputId = 'level_to_output'
  */
 export const ObsoletePanToOutputId = 'pan_to_output'
 
+const OutputFaderOptionId = 'input'
+
 /**
  * Adjusting the level of various mixer sinks that can be assigned to physical
  * mixer outputs used to be done in one "Fader level to output" action.  One of
@@ -89,7 +91,7 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 	//      {
 	//              type: 'dropdown',
 	//              label: 'Fader',
-	//              id: 'input',
+	//              id: OutputFaderOptionId,
 	//              default: 0,
 	//              choices: choices.allFaders,
 	//              minChoicesForSearch: 0,
@@ -119,7 +121,7 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 	// })
 	// return allFaders
 	const options = action.options
-	const input = Number(options.input)
+	const input = Number(options[OutputFaderOptionId])
 	let newInput, newActionId
 	if (input < 0) {
 		// No valid inputs below zero.  Do nothing so an invalid option is
@@ -129,7 +131,7 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 		// LR is 0.
 		// The new action doesn't include an input property because there's only
 		// one LR.
-		delete options.input
+		delete options[OutputFaderOptionId]
 		action.actionId = OutputLevelActionId.LRLevelOutput
 		return true
 	} else if (input < 1 + mixCount) {
@@ -158,7 +160,7 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 		return false
 	}
 
-	options.input = newInput
+	options[OutputFaderOptionId] = newInput
 	action.actionId = newActionId
 	return true
 }
@@ -197,7 +199,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 	//      {
 	//              type: 'dropdown',
 	//              label: 'Fader',
-	//              id: 'input',
+	//              id: OutputFaderOptionId,
 	//              default: 0,
 	//              choices: choices.panBalanceFaders,
 	//              minChoicesForSearch: 0,
@@ -218,7 +220,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 	//
 	// return allFaders
 	const { options } = action
-	const input = Number(options.input)
+	const input = Number(options[OutputFaderOptionId])
 	let newInput, newActionId
 	if (input < 0) {
 		// No valid inputs below zero.  Leave the action un-mutated in invalid
@@ -228,7 +230,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 		// LR is 0.
 		// The new action doesn't include an input property because there's only
 		// one LR.
-		delete options.input
+		delete options[OutputFaderOptionId]
 		action.actionId = OutputPanBalanceActionId.LRPanBalanceOutput
 		return true
 	} else if (input < 1 + mixCount) {
@@ -247,7 +249,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 		return false
 	}
 
-	options.input = newInput
+	options[OutputFaderOptionId] = newInput
 	action.actionId = newActionId
 	return true
 }
@@ -270,7 +272,7 @@ function getFader(
 	options: CompanionOptionValues,
 	type: InputOutputType,
 ): number | null {
-	return toSourceOrSink(instance, model, options.input, type)
+	return toSourceOrSink(instance, model, options[OutputFaderOptionId], type)
 }
 
 type FadeLevelInfo = {
@@ -284,7 +286,7 @@ function getLevelType(
 	options: CompanionOptionValues,
 	sinkType: SinkAsOutputForNRPN<'level'>,
 ): FadeLevelInfo | null {
-	const sink = toSourceOrSink(instance, model, options.input, sinkType)
+	const sink = toSourceOrSink(instance, model, options[OutputFaderOptionId], sinkType)
 	if (sink === null) {
 		return null
 	}
@@ -373,7 +375,7 @@ export function outputLevelActions(
 				{
 					type: 'dropdown',
 					label: 'Fader',
-					id: 'input',
+					id: OutputFaderOptionId,
 					default: 0,
 					choices: choices.mixes,
 					minChoicesForSearch: 0,
@@ -404,7 +406,7 @@ export function outputLevelActions(
 				{
 					type: 'dropdown',
 					label: 'Fader',
-					id: 'input',
+					id: OutputFaderOptionId,
 					default: 0,
 					choices: choices.fxSends,
 					minChoicesForSearch: 0,
@@ -435,7 +437,7 @@ export function outputLevelActions(
 				{
 					type: 'dropdown',
 					label: 'Fader',
-					id: 'input',
+					id: OutputFaderOptionId,
 					default: 0,
 					choices: choices.matrixes,
 					minChoicesForSearch: 0,
@@ -466,7 +468,7 @@ export function outputLevelActions(
 				{
 					type: 'dropdown',
 					label: 'Fader',
-					id: 'input',
+					id: OutputFaderOptionId,
 					default: 0,
 					choices: choices.dcas,
 					minChoicesForSearch: 0,
@@ -560,7 +562,7 @@ export function outputPanBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Fader',
-					id: 'input',
+					id: OutputFaderOptionId,
 					default: 0,
 					choices: choices.mixes,
 					minChoicesForSearch: 0,
@@ -609,7 +611,7 @@ export function outputPanBalanceActions(
 				{
 					type: 'dropdown',
 					label: 'Fader',
-					id: 'input',
+					id: OutputFaderOptionId,
 					default: 0,
 					choices: choices.matrixes,
 					minChoicesForSearch: 0,
