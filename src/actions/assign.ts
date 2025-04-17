@@ -1,3 +1,4 @@
+import type { CompanionInputFieldMultiDropdown, CompanionOptionValues } from '@companion-module/base'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
@@ -22,6 +23,8 @@ export enum AssignActionId {
 	MixToMatrix = 'mix_to_mtx',
 	GroupToMatrix = 'grp_to_mtx',
 }
+
+const AssignMixOrLRSinksOptionId = 'mixAssign'
 
 /**
  * Convert the options value for a multidropdown field of numbered sinks into a
@@ -53,17 +56,19 @@ function assignOptionToSinks(assign: OptionValue, model: Model, sinkType: Exclud
 }
 
 /**
- * Convert the options value for a multidropdown field of numbered mixes-or-LR
- * into a well-typed list of numbers.
+ * Given the options for an action that is an assignment to mixes-or-LR, compute
+ * the specified array of mixes and LR sinks.
  *
- * @param mixAssign
- *   An `options.mixAssign` value consisting of zero or more mixes and LR.
+ * @param options
+ *   Action options containing a `mixAssign` option that's an array of zero or
+ *   more mixes or LR.
  * @param model
  *   The model of the mixer.
  * @returns
  *   An array of sinks.
  */
-function mixesAndLRAssignOptionToSinks(mixAssign: OptionValue, model: Model): number[] {
+function getMixAndLRSinks(options: CompanionOptionValues, model: Model): number[] {
+	const mixAssign = options[AssignMixOrLRSinksOptionId]
 	if (!Array.isArray(mixAssign)) {
 		return []
 	}
@@ -96,6 +101,14 @@ function mixesAndLRAssignOptionToSinks(mixAssign: OptionValue, model: Model): nu
 export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<AssignActionId> {
 	const model = mixer.model
 
+	const MixOrLRSinksOption = {
+		type: 'multidropdown',
+		label: 'Mix',
+		id: AssignMixOrLRSinksOptionId,
+		default: [],
+		choices: choices.mixesAndLR,
+	} as const satisfies CompanionInputFieldMultiDropdown
+
 	return {
 		[AssignActionId.InputChannelToMix]: {
 			name: 'Assign channel to mix',
@@ -108,13 +121,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 					choices: choices.inputChannels,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'multidropdown',
-					label: 'Mix',
-					id: 'mixAssign',
-					default: [],
-					choices: choices.mixesAndLR,
-				},
+				MixOrLRSinksOption,
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -128,7 +135,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 					return
 				}
 				const active = Boolean(options.mixActive)
-				const mixes = mixesAndLRAssignOptionToSinks(options.mixAssign, mixer.model)
+				const mixes = getMixAndLRSinks(options, mixer.model)
 				mixer.assignInputChannelToMixesAndLR(inputChannel, active, mixes)
 			},
 		},
@@ -180,13 +187,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 					choices: choices.groups,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'multidropdown',
-					label: 'Mix',
-					id: 'mixAssign',
-					default: [],
-					choices: choices.mixesAndLR,
-				},
+				MixOrLRSinksOption,
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -200,7 +201,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 					return
 				}
 				const active = Boolean(options.mixActive)
-				const mixes = mixesAndLRAssignOptionToSinks(options.mixAssign, mixer.model)
+				const mixes = getMixAndLRSinks(options, mixer.model)
 				mixer.assignGroupToMixesAndLR(group, active, mixes)
 			},
 		},
@@ -216,13 +217,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 					choices: choices.fxReturns,
 					minChoicesForSearch: 0,
 				},
-				{
-					type: 'multidropdown',
-					label: 'Mix',
-					id: 'mixAssign',
-					default: [],
-					choices: choices.mixesAndLR,
-				},
+				MixOrLRSinksOption,
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -236,7 +231,7 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 					return
 				}
 				const active = Boolean(options.mixActive)
-				const mixes = mixesAndLRAssignOptionToSinks(options.mixAssign, mixer.model)
+				const mixes = getMixAndLRSinks(options, mixer.model)
 				mixer.assignFXReturnToMixesAndLR(fxReturn, active, mixes)
 			},
 		},
