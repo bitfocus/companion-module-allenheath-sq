@@ -30,11 +30,31 @@ export enum LevelActionId {
 	FXReturnLevelInGroup = 'fxrlev_to_grp',
 	InputChannelLevelInFXSend = 'chlev_to_fxs',
 	GroupLevelInFXSend = 'grplev_to_fxs',
-	// The "fxslev" typo in the next line is in fact correct until it can be
-	// corrected in an upgrade script.
-	FXReturnLevelInFXSend = 'fxslev_to_fxs',
+	FXReturnLevelInFXSend = 'fxrlev_to_fxs',
 	MixOrLRLevelInMatrix = 'mixlev_to_mtx',
 	GroupLevelInMatrix = 'grplev_to_mtx',
+}
+
+const ObsoleteFXReturnLevelinFXSendId = 'fxslev_to_fxs'
+
+/**
+ * The action id for setting the level of an FX return in an FX send used to
+ * contain a typo: it claimed to be an "FX Send to FX Send" level.  Update the
+ * id to fix the typo.
+ *
+ * @param action
+ *   The action to potentially upgrade.
+ * @returns
+ *   True iff the action was an FX Return to FX Send level action and its action
+ *   ID was corrected.
+ */
+export function tryFixFXRLevelInFXSIdTypo(action: CompanionMigrationAction): boolean {
+	if (action.actionId !== ObsoleteFXReturnLevelinFXSendId) {
+		return false
+	}
+
+	action.actionId = LevelActionId.FXReturnLevelInFXSend
+	return true
 }
 
 const LevelSetSourceOptionId = 'input'

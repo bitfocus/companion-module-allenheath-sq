@@ -5,6 +5,7 @@ import {
 	type CompanionUpgradeContext,
 	EmptyUpgradeScript,
 } from '@companion-module/base'
+import { tryFixFXRLevelInFXSIdTypo } from './actions/level.js'
 import {
 	tryConvertOldLevelToOutputActionToSinkSpecific,
 	tryConvertOldPanToOutputActionToSinkSpecific,
@@ -61,4 +62,5 @@ export const UpgradeScripts = [
 	// users redundantly specify it.  So it goes.
 	ConfigUpdater(tryRemoveUnnecessaryLabelInConfig),
 	ActionUpdater(tryUpdateAllLRMixEncodings),
+	ActionUpdater(tryFixFXRLevelInFXSIdTypo),
 ]
