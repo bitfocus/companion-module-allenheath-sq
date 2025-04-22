@@ -29,28 +29,27 @@ function LOG(msg: string): void {
  *    The expected messages produced by tokenizing `packets`.
  */
 async function checkTokenizing(server: net.Server, port: number, interactions: readonly Interaction[]): Promise<void> {
-	const socketPromise = new Promise<net.Socket>((resolve: (socket: net.Socket) => void) => {
-		server.once('connection', (socket: net.Socket) => {
-			resolve(socket)
-		})
-	})
+	const [mixerSocket, connectionSocket] = await Promise.all([
+		new Promise<net.Socket>((resolve: (mixerSocket: net.Socket) => void) => {
+			server.once('connection', (mixerSocket: net.Socket) => {
+				resolve(mixerSocket)
+			})
+		}),
+		new Promise<TCPHelper>((resolve: (connectionSocket: TCPHelper) => void) => {
+			const connectionSocket = new TCPHelper('127.0.0.1', port)
 
-	const tcpReady = new Promise<TCPHelper>((resolve: (tcp: TCPHelper) => void) => {
-		const tcp = new TCPHelper('127.0.0.1', port)
-
-		tcp.once('connect', () => {
-			resolve(tcp)
-		})
-	})
-
-	const [sink, source] = await Promise.all([socketPromise, tcpReady])
+			connectionSocket.once('connect', () => {
+				resolve(connectionSocket)
+			})
+		}),
+	])
 	let sinkClosed = false
 
 	const verboseLog = (msg: string) => {
 		console.log(msg)
 	}
 
-	const tokenizer = new MidiTokenizer(source, verboseLog)
+	const tokenizer = new MidiTokenizer(connectionSocket, verboseLog)
 
 	const { promise, resolve } = promiseWithResolvers<MidiMessage>()
 
@@ -130,7 +129,7 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 				case 'mixer-write-midi-bytes': {
 					await new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
 						const { bytes } = interaction
-						sink.write(bytes, (err?: Error) => {
+						mixerSocket.write(bytes, (err?: Error) => {
 							LOG(`Wrote ${prettyBytes(Array.from(bytes))}${err !== undefined ? err : ''}`)
 							if (err !== undefined) {
 								reject(err)
@@ -171,7 +170,7 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 
 				case 'mixer-close-socket': {
 					await new Promise<void>((resolve: () => void) => {
-						sink.end(() => {
+						mixerSocket.end(() => {
 							sinkClosed = true
 							resolve()
 						})
@@ -200,11 +199,11 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 				}
 			}
 
-			sink.end(maybeClose)
+			mixerSocket.end(maybeClose)
 			server.close(maybeClose)
 		})
 
-		source.destroy()
+		connectionSocket.destroy()
 	}
 
 	if (!tokenizingComplete) {
