@@ -128,7 +128,7 @@ export class Mixer {
 	model: Model
 
 	/** The TCP socket used to interact with the mixer. */
-	socket: TCPHelper | null = null
+	#socket: TCPHelper | null = null
 
 	/** A store of current mute status for mixer inputs/outputs. */
 	readonly #muteStatus: Map<NRPN<'mute'>, boolean> = new Map()
@@ -180,7 +180,7 @@ export class Mixer {
 	 * Send the given bytes to the mixer.
 	 */
 	send(data: readonly number[]): void {
-		const socket = this.socket
+		const socket = this.#socket
 		if (socket !== null && socket.isConnected) {
 			const instance = this.#instance
 			if (instance.options.verbose) {
@@ -206,39 +206,56 @@ export class Mixer {
 		this.model = new Model(instance.options.model)
 	}
 
-	/** Stop this mixer connection. */
-	stop(status = InstanceStatus.Disconnected): void {
-		this.#instance.updateStatus(status)
-		if (this.socket !== null) {
-			this.socket.destroy()
-			this.socket = null
+	/**
+	 * Stop operating the mixer, updating instance status to the given status.
+	 */
+	#stop(status: InstanceStatus, reason: string): void {
+		this.#instance.updateStatus(status, reason)
+
+		const socket = this.#socket
+		if (socket !== null) {
+			socket.destroy()
+			this.#socket = null
 		}
 	}
 
+	/** Stop operating and disconnect from the mixer. */
+	stop(reason: string): void {
+		this.#stop(InstanceStatus.Disconnected, reason)
+	}
+
 	/** Start operating the SQ mixer, using options from the instance. */
-	start(host: string): void {
-		this.stop(InstanceStatus.Connecting)
+	start(host: string | null): void {
+		if (host === null) {
+			this.#stop(InstanceStatus.BadConfig, 'No mixer TCP/IP host specified')
+			return
+		}
+
+		this.#stop(InstanceStatus.Connecting, 'Starting mixer connection...')
 
 		const retrieveStatus = this.#instance.options.retrieveStatusAtStartup
 
 		const socket = new TCPHelper(host, SQMidiPort)
-		this.socket = socket
+		this.#socket = socket
 
 		const instance = this.#instance
 
 		socket.on('error', (err) => {
-			instance.log('error', `Error: ${err}`)
-			this.stop(InstanceStatus.ConnectionFailure)
+			const errStr = `Error: ${err}`
+			instance.log('error', errStr)
+			this.#stop(InstanceStatus.ConnectionFailure, errStr)
 		})
 
 		this.#processMixerReplies(socket).then(
 			() => {
-				instance.log('info', 'All mixer replies received, disconnecting')
-				this.stop(InstanceStatus.Disconnected)
+				const processingComplete = 'Mixer reply processing complete, disconnecting'
+				instance.log('info', processingComplete)
+				this.stop(processingComplete)
 			},
 			(reason: any) => {
-				instance.log('error', `Error processing replies: ${reason}`)
-				this.stop(InstanceStatus.ConnectionFailure)
+				const err = `Error processing replies: ${reason}`
+				instance.log('error', err)
+				this.#stop(InstanceStatus.ConnectionFailure, err)
 			},
 		)
 
@@ -282,7 +299,7 @@ export class Mixer {
 
 		const delayStatusRetrieval = instance.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
 
-		if (buff.length > 0 && this.socket !== null) {
+		if (buff.length > 0 && this.#socket !== null) {
 			let ctr = 0
 			for (let i = 0; i < buff.length; i++) {
 				this.send(buff[i])

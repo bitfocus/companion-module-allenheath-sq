@@ -1,11 +1,6 @@
 // Allen & Heath SQ Series
 
-import {
-	type CompanionVariableValue,
-	InstanceBase,
-	InstanceStatus,
-	type SomeCompanionConfigField,
-} from '@companion-module/base'
+import { type CompanionVariableValue, InstanceBase, type SomeCompanionConfigField } from '@companion-module/base'
 import { getActions } from './actions/actions.js'
 import { Choices } from './choices.js'
 import { GetConfigFields, type SQInstanceConfig } from './config.js'
@@ -34,7 +29,7 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 
 	override async destroy(): Promise<void> {
 		if (this.mixer !== null) {
-			this.mixer.stop(InstanceStatus.Disconnected)
+			this.mixer.stop('Module connection destroyed')
 			this.mixer = null
 		}
 	}
@@ -120,7 +115,7 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 				return
 			}
 
-			this.mixer.stop(InstanceStatus.Disconnected)
+			this.mixer.stop('Mixer connection restarting for configuration update...')
 		}
 
 		const mixer = new Mixer(this)
@@ -140,11 +135,6 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 		//this.checkVariables();
 		this.checkFeedbacks()
 
-		const host = newOptions.host
-		if (host === null) {
-			mixer.stop(InstanceStatus.BadConfig)
-		} else {
-			mixer.start(host)
-		}
+		mixer.start(newOptions.host)
 	}
 }
