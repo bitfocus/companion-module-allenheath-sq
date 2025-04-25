@@ -23,6 +23,8 @@ const customConfig = [
 	{
 		ignores: ['eslint.config.*'],
 		rules: {
+			'object-shorthand': 'error',
+			'no-useless-rename': 'error',
 			'n/no-missing-import': 'off',
 			'n/no-unpublished-import': 'error',
 			'@typescript-eslint/strict-boolean-expressions': 'error',
