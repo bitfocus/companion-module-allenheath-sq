@@ -1,6 +1,7 @@
 import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@companion-module/base'
 import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
+import { typeToMuteFeedback } from '../feedbacks/feedback-ids.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
 import { LR, type MixOrLR } from './lr.js'
@@ -129,13 +130,31 @@ export class Mixer {
 	/** The TCP socket used to interact with the mixer. */
 	socket: TCPHelper | null = null
 
+	/** A store of current mute status for mixer inputs/outputs. */
+	readonly #muteStatus: Map<NRPN<'mute'>, boolean> = new Map()
+
 	/**
-	 * A store of current mute status for mixer inputs/outputs.  Keys have the
-	 * form `"mute_${MSB}.${LSB}"`, where `MSB` and `LSB` come from the "Mute
-	 * Parameter Numbers" reference table in the
-	 * [SQ MIDI Protocol document](https://www.allen-heath.com/content/uploads/2023/11/SQ-MIDI-Protocol-Issue5.pdf).
+	 * Determine whether the given mute NRPN is muted.
+	 *
+	 * @param nrpn
+	 *   The mute NRPN to check.  The NRPN must be valid and have a registered
+	 *   mute status, or an error will be thrown.
+	 * @returns
+	 *   True if the NRPN is muted, false if it isn't.
 	 */
-	readonly fdbState: { [key: `mute_${number}.${number}`]: boolean } = {}
+	muted(nrpn: NRPN<'mute'>): boolean {
+		let status = this.#muteStatus.get(nrpn)
+		if (status === undefined) {
+			// This can occur at startup if feedbacks are checked before the
+			// connection is established and initial mute states queried, so it
+			// can't be a full-blown error unless/until we correlate this with
+			// connection status.  Treat the NRPN as unmuted for now.
+			const warning = `Attempt to access mute status of invalid NRPN: ${prettyNRPN(nrpn)}`
+			this.#instance.log('warn', warning)
+			status = false
+		}
+		return status
+	}
 
 	/**
 	 * A store of the last level of each source in its sinks as reported by the
@@ -232,6 +251,10 @@ export class Mixer {
 			}
 
 			forEachMute(this.model, (nrpn: NRPN<'mute'>) => {
+				// Initialize every mute NRPN's status.  (It'd be nice to use
+				// the type system to guarantee this somehow, but it's not clear
+				// how we could do it.)
+				this.#muteStatus.set(nrpn, false)
 				this.send(this.getNRPNValue(nrpn))
 			})
 
@@ -325,9 +348,13 @@ export class Mixer {
 		mixerChannelParser.on('mute', (nrpn: NRPN<'mute'>, vf: number) => {
 			verboseLog(`Mute received: ${prettyNRPN(nrpn)}, VF=${prettyByte(vf)}`)
 
-			const { MSB, LSB } = splitNRPN(nrpn)
-			this.fdbState[`mute_${MSB}.${LSB}`] = vf === 0x01
+			// This always overwrites an existing status.  It'd be nice to check
+			// that, but it's not worth an unavoidable extra function call to do
+			// so.
+			const muted = vf === 0x01
+			this.#muteStatus.set(nrpn, muted)
 
+			const { MSB, LSB } = splitNRPN(nrpn)
 			const CI: CallbackInfoType = CallbackInfo
 			instance.checkFeedbacks(CI.mute[`${MSB}:${LSB}`][0])
 		})
@@ -429,20 +456,39 @@ export class Mixer {
 	/** Perform the supplied mute operation upon the strip of the given type. */
 	#mute(strip: number, type: InputOutputType, op: MuteOperation): void {
 		const nrpn = calculateMuteNRPN(this.model, type, strip)
-		const { MSB, LSB } = splitNRPN(nrpn)
 
-		const key = `mute_${MSB}.${LSB}` as const
-		const fdbState = this.fdbState
-		if (op !== MuteOperation.Toggle) {
-			fdbState[key] = op === MuteOperation.On
-		} else {
-			fdbState[key] = !fdbState[key]
+		let newMuteStatus: boolean
+		let command: readonly number[]
+		switch (op) {
+			case MuteOperation.Toggle: {
+				const currentMuteStatus = this.#muteStatus.get(nrpn)
+				if (currentMuteStatus === undefined) {
+					const reason = `No mute status recorded for source/sink ${prettyNRPN(nrpn)} being toggled`
+					this.#instance.log('error', reason)
+					throw new Error(reason)
+				}
+
+				newMuteStatus = !currentMuteStatus
+				command = this.#nrpnIncrement(nrpn, 0x00)
+				break
+			}
+			case MuteOperation.On:
+			case MuteOperation.Off:
+				newMuteStatus = op === MuteOperation.On
+				command = this.#nrpnData(nrpn, 0x00, newMuteStatus ? 0x01 : 0x00)
+				break
 		}
 
-		this.#instance.checkFeedbacks()
-		const commands = [this.#nrpnData(nrpn, 0, Number(fdbState[key]))]
+		// An SQ-5 running 1.5.* firmware doesn't echo back mute status when a
+		// mute status is set/toggled.  (How other SQ models/firmware behave is
+		// presently unknown.)  Record the muting effect immediately so that
+		// feedbacks immediately reflect the change (and don't bother querying
+		// the new mute status because it'll just ratify this recorded status).
+		this.#muteStatus.set(nrpn, newMuteStatus)
+
+		this.#instance.checkFeedbacks(typeToMuteFeedback[type])
 		// XXX
-		void this.sendCommands(commands)
+		void this.sendCommands([command])
 	}
 
 	/** Act upon the mute status of the given input channel. */

@@ -4,7 +4,6 @@ import { type FeedbackDefinitions, type FeedbackId, MuteFeedbackId } from './fee
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
-import { splitNRPN } from '../mixer/nrpn/nrpn.js'
 
 const WHITE = combineRgb(255, 255, 255)
 const CARMINE_RED = combineRgb(153, 0, 51)
@@ -29,9 +28,9 @@ export function getFeedbacks(mixer: Mixer, choices: Choices): FeedbackDefinition
 				color: WHITE,
 				bgcolor: CARMINE_RED,
 			},
-			callback: (feedback, _context) => {
-				const { MSB, LSB } = splitNRPN(calculateMuteNRPN(mixer.model, type, Number(feedback.options.channel)))
-				return Boolean(mixer.fdbState[`mute_${MSB}.${LSB}`])
+			callback: ({ options }, _context) => {
+				const nrpn = calculateMuteNRPN(mixer.model, type, Number(options.channel))
+				return mixer.muted(nrpn)
 			},
 		}
 	}
