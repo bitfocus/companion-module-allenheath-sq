@@ -17,6 +17,11 @@ function permitLimitedUnpublishedImports(files, allowModules) {
 	return { files, rules: { 'n/no-unpublished-import': ['error', { allowModules }] } }
 }
 
+const testFilePatterns = ['src/**/*spec.ts', 'src/**/*test.ts']
+const testHelperPatterns = ['src/**/__tests__/*', 'src/**/__mocks__/*']
+
+const allTestFilePatterns = [...testFilePatterns, ...testHelperPatterns]
+
 const customConfig = [
 	...baseConfig,
 
@@ -36,10 +41,21 @@ const customConfig = [
 		},
 	},
 
-	permitLimitedUnpublishedImports(
-		['src/**/*spec.ts', 'src/**/*test.ts', 'src/**/__tests__/*', 'src/**/__mocks__/*'],
-		['vitest'],
-	),
+	{
+		files: allTestFilePatterns,
+		rules: {
+			'no-unused-vars': 'off',
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{
+					vars: 'all',
+					varsIgnorePattern: '^(?:test)?_',
+				},
+			],
+		},
+	},
+
+	permitLimitedUnpublishedImports(allTestFilePatterns, ['type-testing', 'vitest']),
 	permitLimitedUnpublishedImports(['eslint.config.mjs'], ['@companion-module/tools']),
 	permitLimitedUnpublishedImports(['jest.config.ts'], ['ts-jest']),
 	permitLimitedUnpublishedImports(['knip.config.ts'], ['knip']),

@@ -1,7 +1,14 @@
+import type { Expect, Equal, Extends, ExpectFalse } from 'type-testing'
 import { describe, expect, test } from 'vitest'
 import { Model } from '../model.js'
 import { type Param, splitNRPN } from './param.js'
-import { forEachSourceSinkLevel } from './source-to-sink.js'
+import { forEachSourceSinkLevel, type SourceSinkForNRPN, type SinkForMixAndLRInSinkForNRPN } from './source-to-sink.js'
+
+type test_MixesIntoSinkSet = Expect<Equal<SinkForMixAndLRInSinkForNRPN<'level'>, 'matrix'>>
+
+type test_CantSetFXRLevelInGroup = ExpectFalse<Extends<['fxReturn', 'group'], SourceSinkForNRPN<'level'>>>
+
+type test_CantSetInputLevelInGroup = ExpectFalse<Extends<['inputChannel', 'group'], SourceSinkForNRPN<'level'>>>
 
 describe('forEachSourceToSinkLevel', () => {
 	const model = new Model('SQ5')

@@ -1,3 +1,4 @@
+import type { Expect, Equal } from 'type-testing'
 import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
 import {
@@ -7,6 +8,8 @@ import {
 	type SinkAsOutputForNRPN,
 } from './output.js'
 import { type Param, splitNRPN, type UnbrandedParam } from './param.js'
+
+type test_SupportedAsOutput = Expect<Equal<SinkAsOutputForNRPN<'level'>, 'lr' | 'mix' | 'matrix' | 'dca' | 'fxSend'>>
 
 type OutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
 
