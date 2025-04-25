@@ -2,7 +2,7 @@ import type { Equal, Expect } from 'type-testing'
 import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
 import { calculateMuteNRPN } from './mute.js'
-import { splitNRPN, type UnbrandedParam } from './param.js'
+import { splitNRPN, type UnbrandedParam } from './nrpn.js'
 
 type test_AllMuteTypes = Expect<Equal<Parameters<typeof calculateMuteNRPN>[1], InputOutputType>>
 

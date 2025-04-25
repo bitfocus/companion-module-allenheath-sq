@@ -1,5 +1,5 @@
 import type { InputOutputType, Model } from '../model.js'
-import { calculateNRPN, toNRPN, type NRPN, type Param, type UnbrandedParam } from './param.js'
+import { calculateNRPN, toNRPN, type NRPN, type Param, type UnbrandedParam } from './nrpn.js'
 
 type MuteParameterBaseRaw = Readonly<Record<InputOutputType, Readonly<UnbrandedParam>>>
 

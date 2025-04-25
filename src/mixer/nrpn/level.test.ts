@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
-import { splitNRPN, type UnbrandedParam } from './param.js'
+import { splitNRPN, type UnbrandedParam } from './nrpn.js'
 import { LevelNRPNCalculator, type SourceSinkForNRPN } from './source-to-sink.js'
 
 describe('LevelNRPNCalculator', () => {

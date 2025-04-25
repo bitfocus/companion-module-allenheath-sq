@@ -1,7 +1,7 @@
 import type { Expect, Equal, Extends, ExpectFalse } from 'type-testing'
 import { describe, expect, test } from 'vitest'
 import { Model } from '../model.js'
-import { type Param, splitNRPN } from './param.js'
+import { type Param, splitNRPN } from './nrpn.js'
 import { forEachSourceSinkLevel, type SourceSinkForNRPN, type SinkForMixAndLRInSinkForNRPN } from './source-to-sink.js'
 
 type test_MixesIntoSinkSet = Expect<Equal<SinkForMixAndLRInSinkForNRPN<'level'>, 'matrix'>>

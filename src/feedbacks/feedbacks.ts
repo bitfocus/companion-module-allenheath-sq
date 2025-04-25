@@ -4,7 +4,7 @@ import { type FeedbackDefinitions, type FeedbackId, MuteFeedbackId } from './fee
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
-import { splitNRPN } from '../mixer/nrpn/param.js'
+import { splitNRPN } from '../mixer/nrpn/nrpn.js'
 
 const WHITE = combineRgb(255, 255, 255)
 const CARMINE_RED = combineRgb(153, 0, 51)

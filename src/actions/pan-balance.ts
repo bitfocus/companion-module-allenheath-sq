@@ -11,7 +11,7 @@ import type { sqInstance } from '../instance.js'
 import { LR, type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
-import { type NRPN, splitNRPN } from '../mixer/nrpn/param.js'
+import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import {
 	BalanceNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,

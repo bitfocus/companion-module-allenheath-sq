@@ -1,5 +1,5 @@
 import { getOutputCalculator, type InputOutputType, type Model } from '../model.js'
-import { calculateNRPN, type NRPN, toNRPN, type NRPNType, type Param, type UnbrandedParam } from './param.js'
+import { calculateNRPN, type NRPN, toNRPN, type NRPNType, type Param, type UnbrandedParam } from './nrpn.js'
 
 type OutputInfo = {
 	/** The base MSB/LSB for adjusting output level. */

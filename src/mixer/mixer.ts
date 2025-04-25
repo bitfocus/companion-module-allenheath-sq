@@ -9,13 +9,13 @@ import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
 import { type InputOutputType, Model } from './model.js'
 import { calculateMuteNRPN, forEachMute } from './nrpn/mute.js'
+import { type NRPN, type NRPNType, prettyNRPN, splitNRPN } from './nrpn/nrpn.js'
 import {
 	forEachOutputLevel,
 	OutputBalanceNRPNCalculator,
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from './nrpn/output.js'
-import { type NRPN, type NRPNType, prettyNRPN, splitNRPN } from './nrpn/param.js'
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,

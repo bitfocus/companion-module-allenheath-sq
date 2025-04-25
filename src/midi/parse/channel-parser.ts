@@ -1,4 +1,4 @@
-import { makeNRPN, type NRPN } from '../../mixer/nrpn/param.js'
+import { makeNRPN, type NRPN } from '../../mixer/nrpn/nrpn.js'
 import { manyPrettyBytes, prettyByte, prettyBytes } from '../../utils/pretty.js'
 import EventEmitter from 'eventemitter3'
 

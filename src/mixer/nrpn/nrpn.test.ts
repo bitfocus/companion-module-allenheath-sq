@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { calculateNRPN, makeNRPN, prettyNRPN, splitNRPN, toNRPN } from './param.js'
+import { calculateNRPN, makeNRPN, prettyNRPN, splitNRPN, toNRPN } from './nrpn.js'
 
 describe('NRPN', () => {
 	const ip1ToGrp1 = makeNRPN<'assign'>(0x66, 0x74)

@@ -1,7 +1,7 @@
 import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
-import { type NRPN, splitNRPN } from '../mixer/nrpn/param.js'
+import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { repr } from '../utils/pretty.js'
 
 /** Compute the set of level options for level-setting actions. */

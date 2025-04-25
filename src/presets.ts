@@ -6,7 +6,7 @@ import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
 import type { sqInstance } from './instance.js'
 import { LR } from './mixer/lr.js'
 import type { Model } from './mixer/model.js'
-import { type NRPN, splitNRPN } from './mixer/nrpn/param.js'
+import { type NRPN, splitNRPN } from './mixer/nrpn/nrpn.js'
 import { LevelNRPNCalculator } from './mixer/nrpn/source-to-sink.js'
 
 const White = combineRgb(255, 255, 255)

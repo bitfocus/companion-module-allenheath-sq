@@ -1,4 +1,4 @@
-import { makeNRPN } from '../../../mixer/nrpn/param.js'
+import { makeNRPN } from '../../../mixer/nrpn/nrpn.js'
 
 type ReceiveChannel = {
 	readonly type: 'receive-channel-message'

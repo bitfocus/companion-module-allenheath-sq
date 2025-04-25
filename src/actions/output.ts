@@ -10,12 +10,12 @@ import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import { getCommonCount } from '../mixer/models.js'
+import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import {
 	OutputBalanceNRPNCalculator,
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from '../mixer/nrpn/output.js'
-import { type NRPN, splitNRPN } from '../mixer/nrpn/param.js'
 import { getPanBalance, type PanBalanceChoice } from './pan-balance.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 

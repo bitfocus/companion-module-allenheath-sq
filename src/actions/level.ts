@@ -10,7 +10,7 @@ import type { sqInstance } from '../instance.js'
 import { LR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
-import type { NRPN } from '../mixer/nrpn/param.js'
+import type { NRPN } from '../mixer/nrpn/nrpn.js'
 import {
 	LevelNRPNCalculator,
 	type SinkForMixAndLRInSinkForNRPN,
