@@ -1,5 +1,4 @@
-// Don't enable @ts-check yet because `generateEslintConfig` doesn't ship with
-// TypeScript declaration support.
+// @ts-check
 
 import { generateEslintConfig } from '@companion-module/tools/eslint/config.mjs'
 
@@ -22,6 +21,7 @@ const testHelperPatterns = ['src/**/__tests__/*', 'src/**/__mocks__/*']
 
 const allTestFilePatterns = [...testFilePatterns, ...testHelperPatterns]
 
+/** @type {import('eslint').Linter.Config<import('eslint').Linter.RulesRecord>[]} */
 const customConfig = [
 	...baseConfig,
 
@@ -49,6 +49,12 @@ const customConfig = [
 				'error',
 				{
 					vars: 'all',
+					argsIgnorePattern: '^_',
+					caughtErrorsIgnorePattern: '^_',
+					// In addition to `_*' variables, allow `test_*` variables
+					// -- specifically type variables, but this rule doesn't
+					// support that further restriction now -- for use in tests
+					// of types that are performed using 'type-testing' helpers.
 					varsIgnorePattern: '^(?:test)?_',
 				},
 			],
@@ -57,7 +63,6 @@ const customConfig = [
 
 	permitLimitedUnpublishedImports(allTestFilePatterns, ['type-testing', 'vitest']),
 	permitLimitedUnpublishedImports(['eslint.config.mjs'], ['@companion-module/tools']),
-	permitLimitedUnpublishedImports(['jest.config.ts'], ['ts-jest']),
 	permitLimitedUnpublishedImports(['knip.config.ts'], ['knip']),
 	permitLimitedUnpublishedImports(['vitest.config.ts'], ['vitest']),
 ]
