@@ -13,7 +13,17 @@ const baseConfig = await generateEslintConfig({
  * @returns {import('eslint').Linter.Config<import('eslint').Linter.RulesRecord>}
  */
 function permitLimitedUnpublishedImports(files, allowModules) {
-	return { files, rules: { 'n/no-unpublished-import': ['error', { allowModules }] } }
+	return {
+		files,
+		rules: {
+			'n/no-unpublished-import': [
+				'error',
+				{
+					allowModules,
+				},
+			],
+		},
+	}
 }
 
 const testFilePatterns = ['src/**/*spec.ts', 'src/**/*test.ts']
@@ -37,7 +47,12 @@ const customConfig = [
 			radix: 'error',
 			'no-eval': 'error',
 			'no-implied-eval': 'error',
-			'@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
+			'@typescript-eslint/consistent-type-imports': [
+				'error',
+				{
+					fixStyle: 'inline-type-imports',
+				},
+			],
 		},
 	},
 
