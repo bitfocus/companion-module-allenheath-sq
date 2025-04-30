@@ -129,9 +129,9 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 				case 'mixer-write-midi-bytes': {
 					await new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
 						const { bytes } = interaction
-						mixerSocket.write(bytes, (err?: Error) => {
-							LOG(`Wrote ${prettyBytes(Array.from(bytes))}${err !== undefined ? err : ''}`)
-							if (err !== undefined) {
+						mixerSocket.write(bytes, (err?: Error | null) => {
+							LOG(`Wrote ${prettyBytes(Array.from(bytes))}${err ? ` (${err})` : ''}`)
+							if (err) {
 								reject(err)
 							} else {
 								resolve()
