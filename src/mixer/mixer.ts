@@ -1,4 +1,5 @@
 import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@companion-module/base'
+import { OutputPanBalanceActionId } from '../actions/output.js'
 import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
 import { typeToMuteFeedback } from '../feedbacks/feedback-ids.js'
@@ -30,7 +31,6 @@ import { enumValues } from '../utils/enumerate-enum.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
 import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
-import { OutputPanBalanceActionId } from '../actions/output.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values
