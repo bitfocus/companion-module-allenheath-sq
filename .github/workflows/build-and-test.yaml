@@ -28,9 +28,9 @@ jobs:
           yarn install
         env:
           CI: true
-      - name: Compile module code
+      - name: Type-check module and test code
         run: |
-          yarn build
+          yarn check-types
         env:
           CI: true
       - name: Lint module code
@@ -41,6 +41,11 @@ jobs:
       - name: Check for unused code
         run: |
           yarn knip
+      - name: Compile module code
+        run: |
+          yarn build
+        env:
+          CI: true
       - name: Run module tests
         run: |
           yarn test

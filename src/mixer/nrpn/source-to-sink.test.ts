@@ -4,6 +4,9 @@ import { Model } from '../model.js'
 import { type Param, splitNRPN } from './nrpn.js'
 import { forEachSourceSinkLevel, type SourceSinkForNRPN, type SinkForMixAndLRInSinkForNRPN } from './source-to-sink.js'
 
+// @ts-expect-error Perform a test that *must fail* to verify testing happens.
+type test_VerifyThatExpectAndEqualWillErrorIfMisused = Expect<Equal<true, false>>
+
 type test_MixesIntoSinkSet = Expect<Equal<SinkForMixAndLRInSinkForNRPN<'level'>, 'matrix'>>
 
 type test_CantSetFXRLevelInGroup = ExpectFalse<Extends<['fxReturn', 'group'], SourceSinkForNRPN<'level'>>>

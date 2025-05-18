@@ -6,6 +6,7 @@
 	"scripts": {
 		"postinstall": "husky",
 		"test": "vitest --run",
+		"check-types": "tsc -p tsconfig.json --noEmit  --noUnusedLocals false",
 		"package": "yarn build && companion-module-build",
 		"build": "rimraf dist && yarn build:main",
 		"build:main": "tsc -p tsconfig.build.json",
@@ -13,8 +14,8 @@
 		"lint:raw": "eslint",
 		"lint": "yarn lint:raw .",
 		"knip": "knip",
-		"check": "yarn build && yarn lint && yarn knip && echo PASS || echo FAIL",
-		"bt": "yarn install && yarn build && yarn lint && yarn test && yarn knip && echo PASS || echo FAIL"
+		"check": "yarn check-types && yarn lint && yarn knip && yarn build && echo PASS || echo FAIL",
+		"bt": "yarn install && yarn check-types && yarn lint && yarn knip && yarn build && yarn test && echo PASS || echo FAIL"
 	},
 	"license": "MIT",
 	"repository": {
