@@ -6,7 +6,6 @@ import { Choices } from './choices.js'
 import { GetConfigFields, type SQInstanceConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
 import { Mixer } from './mixer/mixer.js'
-import type { Model } from './mixer/model.js'
 import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
 import { getPresets } from './presets.js'
 import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
@@ -80,11 +79,11 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 	}
 
 	/** Set variable definitions for this instance. */
-	initVariableDefinitions(model: Model): void {
-		this.setVariableDefinitions(getVariables(model))
+	initVariableDefinitions(mixer: Mixer): void {
+		this.setVariableDefinitions(getVariables(mixer.model))
 
 		this.setVariableValues({
-			[SceneRecalledTriggerId]: 0,
+			[SceneRecalledTriggerId]: mixer.sceneRecalledTrigger,
 
 			// This value may very well be wrong, but there's no defined way to
 			// query what the current scene is, nor to be updated if it changes
@@ -125,7 +124,7 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 
 		const choices = new Choices(model)
 
-		this.initVariableDefinitions(model)
+		this.initVariableDefinitions(mixer)
 		this.setActionDefinitions(getActions(this, mixer, choices))
 		this.setFeedbackDefinitions(getFeedbacks(mixer, choices))
 

@@ -177,6 +177,16 @@ export class Mixer {
 	currentScene = 0
 
 	/**
+	 * The current value of the `sceneRecalledTrigger` variable, whose value is
+	 * changed every time a scene is recalled (whether or not the new scene is
+	 * different from the old scene).
+	 *
+	 * This value is randomly initialized to prevent users depending on its
+	 * exact value.
+	 */
+	sceneRecalledTrigger = Math.floor(Math.random() * 65536)
+
+	/**
 	 * Send the given bytes to the mixer.
 	 */
 	send(data: readonly number[]): void {
@@ -353,9 +363,9 @@ export class Mixer {
 			this.currentScene = newScene
 
 			const instance = this.#instance
-			const sceneRecalledTrigger = Number(instance.getVariableValue(SceneRecalledTriggerId)!)
+			const sceneRecalledTrigger = ++this.sceneRecalledTrigger
 			instance.setVariableValues({
-				[SceneRecalledTriggerId]: sceneRecalledTrigger + 1,
+				[SceneRecalledTriggerId]: sceneRecalledTrigger,
 
 				// The currentScene variable is 1-indexed, consistent with how
 				// the current scene is displayed to users in mixer UI.

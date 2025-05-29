@@ -19,7 +19,7 @@ export const SceneRecalledTriggerId = 'sceneRecalledTrigger'
 export function getVariables(model: Model): CompanionVariableDefinition[] {
 	const variables: CompanionVariableDefinition[] = [
 		{
-			name: 'Scene - Scene Recalled',
+			name: 'Scene - Scene Recalled Trigger',
 			variableId: SceneRecalledTriggerId,
 		},
 		{
