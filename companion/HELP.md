@@ -24,7 +24,7 @@ Controls the Allen & Heath SQ.
 - Talkback macro
 - Scene step increment
 
-New in v.2.1.0
+New in v.3.0.0
 
 - Fix scene recalling if the mixer MIDI channel isn't 1
 - Add Step +/-0.1dB choices for setting signal levels
