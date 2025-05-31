@@ -25,7 +25,7 @@ jobs:
       - name: Prepare Environment
         run: |
           corepack enable
-          yarn install
+          yarn install --immutable
         env:
           CI: true
       - name: Type-check module and test code
