@@ -3,17 +3,17 @@
 import { type CompanionVariableValue, InstanceBase, type SomeCompanionConfigField } from '@companion-module/base'
 import { getActions } from './actions/actions.js'
 import { Choices } from './choices.js'
-import { GetConfigFields, type SQInstanceConfig } from './config.js'
+import { GetConfigFields, type RawConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
 import { Mixer } from './mixer/mixer.js'
-import { canUpdateOptionsWithoutRestarting, noConnectionOptions, optionsFromConfig } from './options.js'
+import { canUpdateConfigWithoutRestarting, noConnectionConfig, validateConfig } from './config.js'
 import { getPresets } from './presets.js'
 import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
 
 /** An SQ mixer connection instance. */
-export class sqInstance extends InstanceBase<SQInstanceConfig> {
-	/** Options dictating the behavior of this instance. */
-	options = noConnectionOptions()
+export class sqInstance extends InstanceBase<RawConfig> {
+	/** Configuration dictating the behavior of this instance. */
+	config = noConnectionConfig()
 
 	/**
 	 * The mixer being manipulated by this instance if one has been identified.
@@ -33,7 +33,7 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 		}
 	}
 
-	override async init(config: SQInstanceConfig, _isFirstInit: boolean): Promise<void> {
+	override async init(config: RawConfig, _isFirstInit: boolean): Promise<void> {
 		void this.configUpdated(config)
 	}
 
@@ -92,14 +92,14 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 		})
 	}
 
-	override async configUpdated(config: SQInstanceConfig): Promise<void> {
-		const oldOptions = this.options
+	override async configUpdated(newConfig: RawConfig): Promise<void> {
+		const oldConfig = this.config
 
-		const newOptions = optionsFromConfig(config)
-		this.options = newOptions
+		validateConfig(newConfig)
+		this.config = newConfig
 
 		if (this.mixer !== null) {
-			if (canUpdateOptionsWithoutRestarting(oldOptions, newOptions)) {
+			if (canUpdateConfigWithoutRestarting(oldConfig, newConfig)) {
 				const label = this.label
 				if (label !== this.#lastLabel) {
 					// The instance label might be altered just before
@@ -134,6 +134,6 @@ export class sqInstance extends InstanceBase<SQInstanceConfig> {
 		//this.checkVariables();
 		this.checkFeedbacks()
 
-		mixer.start(newOptions.host)
+		mixer.start(newConfig.host)
 	}
 }

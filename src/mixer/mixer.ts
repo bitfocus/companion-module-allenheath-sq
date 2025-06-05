@@ -2,6 +2,7 @@ import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@compani
 import { OutputPanBalanceActionId } from '../actions/output.js'
 import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
+import type { Host } from '../config.js'
 import { typeToMuteFeedback } from '../feedbacks/feedback-ids.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
@@ -193,8 +194,8 @@ export class Mixer {
 		const socket = this.#socket
 		if (socket !== null && socket.isConnected) {
 			const instance = this.#instance
-			if (instance.options.verbose) {
-				instance.log('debug', `SEND: ${prettyBytes(data)} to ${instance.options.host}`)
+			if (instance.config.verbose) {
+				instance.log('debug', `SEND: ${prettyBytes(data)} to ${instance.config.host}`)
 			}
 
 			// XXX This needs to be handled better.
@@ -213,7 +214,7 @@ export class Mixer {
 	/** Create a mixer for the given instance. */
 	constructor(instance: sqInstance) {
 		this.#instance = instance
-		this.model = new Model(instance.options.model)
+		this.model = new Model(instance.config.model)
 	}
 
 	/**
@@ -235,15 +236,15 @@ export class Mixer {
 	}
 
 	/** Start operating the SQ mixer, using options from the instance. */
-	start(host: string | null): void {
-		if (host === null) {
+	start(host: Host | ''): void {
+		if (host === '') {
 			this.#stop(InstanceStatus.BadConfig, 'No mixer TCP/IP host specified')
 			return
 		}
 
 		this.#stop(InstanceStatus.Connecting, 'Starting mixer connection...')
 
-		const retrieveStatus = this.#instance.options.retrieveStatusAtStartup
+		const retrieveStatus = this.#instance.config.status
 
 		const socket = new TCPHelper(host, SQMidiPort)
 		this.#socket = socket
@@ -307,7 +308,7 @@ export class Mixer {
 		forEachSourceSinkLevel(model, getLevel)
 		forEachOutputLevel(model, getLevel)
 
-		const delayStatusRetrieval = instance.options.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
+		const delayStatusRetrieval = instance.config.status === RetrieveStatusAtStartup.Delayed
 
 		if (buff.length > 0 && this.#socket !== null) {
 			let ctr = 0
@@ -349,7 +350,7 @@ export class Mixer {
 		const instance = this.#instance
 
 		const verboseLog = (msg: string) => {
-			if (instance.options.verbose) {
+			if (instance.config.verbose) {
 				instance.log('debug', msg)
 			}
 		}
@@ -398,7 +399,7 @@ export class Mixer {
 				ost = true
 			}
 
-			const level = levelFromNRPNData(vc, vf, this.#instance.options.faderLaw)
+			const level = levelFromNRPNData(vc, vf, this.#instance.config.level)
 			instance.setVariableValues({
 				[levelKey]: level,
 			})
@@ -423,7 +424,7 @@ export class Mixer {
 			instance.setExtraVariable(variableId, name, variableValue)
 		})
 
-		return parseMidi(instance.options.midiChannel, verboseLog, tokenizer, mixerChannelParser)
+		return parseMidi(instance.config.midich, verboseLog, tokenizer, mixerChannelParser)
 	}
 
 	/** Compute a mixer "get" command to retrieve the value of an NRPN. */
@@ -445,7 +446,7 @@ export class Mixer {
 			throw new Error(`Attempting to set out-of-bounds scene ${scene}`)
 		}
 
-		const midiChannel = this.#instance.options.midiChannel
+		const midiChannel = this.#instance.config.midich
 		const BN = 0xb0 | midiChannel
 		const CN = 0xc0 | midiChannel
 		const sceneUpper = (scene >> 7) & 0x0f
@@ -820,7 +821,7 @@ export class Mixer {
 
 	/** Send a MIDI command to set the given level NRPN to the given level. */
 	#setLevel(nrpn: NRPN<'level'>, level: Level): void {
-		const [VC, VF] = nrpnDataFromLevel(level, this.#instance.options.faderLaw)
+		const [VC, VF] = nrpnDataFromLevel(level, this.#instance.config.level)
 		this.send(this.#nrpnData(nrpn, VC, VF))
 
 		// XXX Is this really needed?  Won't the mixer's reply indicating the
@@ -1450,7 +1451,7 @@ export class Mixer {
 			throw new Error(`Attempting to press invalid softkey ${softKey}`)
 		}
 
-		const command = [0x90 | this.#instance.options.midiChannel, 0x30 + softKey, 0x7f]
+		const command = [0x90 | this.#instance.config.midich, 0x30 + softKey, 0x7f]
 		// XXX
 		void this.sendCommands([command])
 	}
@@ -1461,7 +1462,7 @@ export class Mixer {
 			throw new Error(`Attempting to release invalid softkey ${softKey}`)
 		}
 
-		const command = [0x80 | this.#instance.options.midiChannel, 0x30 + softKey, 0x00]
+		const command = [0x80 | this.#instance.config.midich, 0x30 + softKey, 0x00]
 		// XXX
 		void this.sendCommands([command])
 	}
@@ -1478,7 +1479,7 @@ export class Mixer {
 	 */
 	#nrpnData<T extends NRPNType>(nrpn: NRPN<T>, vc: number, vf: number): NRPNDataMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | this.#instance.options.midiChannel
+		const BN = 0xb0 | this.#instance.config.midich
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x06, vc, BN, 0x26, vf]
 	}
 
@@ -1493,7 +1494,7 @@ export class Mixer {
 	 */
 	#nrpnIncrement<T extends NRPNType>(nrpn: NRPN<T>, val: number): NRPNIncDecMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | this.#instance.options.midiChannel
+		const BN = 0xb0 | this.#instance.config.midich
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x60, val]
 	}
 
@@ -1508,7 +1509,7 @@ export class Mixer {
 	 */
 	#nrpnDecrement<T extends NRPNType>(nrpn: NRPN<T>, val: number): NRPNIncDecMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | this.#instance.options.midiChannel
+		const BN = 0xb0 | this.#instance.config.midich
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x61, val]
 	}
 }

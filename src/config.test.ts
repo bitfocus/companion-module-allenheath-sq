@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import {
-	type SQInstanceConfig,
+	type RawConfig,
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 	tryRemoveUnnecessaryLabelInConfig,
@@ -8,7 +8,7 @@ import {
 
 describe('config upgrade to specify a missing model', () => {
 	test('config without model', () => {
-		const configMissingModel: SQInstanceConfig = {
+		const configMissingModel: RawConfig = {
 			host: '127.0.0.1',
 			level: 'LinearTaper',
 			talkback: 0,
@@ -27,7 +27,7 @@ describe('config upgrade to specify a missing model', () => {
 	})
 
 	test("config with model='SQ5'", () => {
-		const configWithModelSQ5: SQInstanceConfig = {
+		const configWithModelSQ5: RawConfig = {
 			host: '127.0.0.1',
 			model: 'SQ5',
 			level: 'LinearTaper',
@@ -48,7 +48,7 @@ describe('config upgrade to specify a missing model', () => {
 	})
 
 	test("config with model='SQ7'", () => {
-		const configWithModelSQ7: SQInstanceConfig = {
+		const configWithModelSQ7: RawConfig = {
 			host: '127.0.0.1',
 			model: 'SQ7',
 			level: 'LinearTaper',
@@ -71,7 +71,7 @@ describe('config upgrade to specify a missing model', () => {
 
 describe('config upgrade to specify a missing label', () => {
 	test('config without label', () => {
-		const configMissingLabel: SQInstanceConfig = {
+		const configMissingLabel: RawConfig = {
 			host: '127.0.0.1',
 			model: 'SQ5',
 			level: 'LinearTaper',
@@ -90,7 +90,7 @@ describe('config upgrade to specify a missing label', () => {
 	})
 
 	test("config with label='sq5'", () => {
-		const configWithLabelSQ5: SQInstanceConfig = {
+		const configWithLabelSQ5: RawConfig = {
 			host: '127.0.0.1',
 			model: 'SQ5',
 			level: 'LinearTaper',
@@ -113,7 +113,7 @@ describe('config upgrade to specify a missing label', () => {
 
 describe('config upgrade to remove an unnecessary label', () => {
 	test('config without label', () => {
-		const configMissingLabel: SQInstanceConfig = {
+		const configMissingLabel: RawConfig = {
 			host: '127.0.0.1',
 			model: 'SQ5',
 			level: 'LinearTaper',
@@ -131,7 +131,7 @@ describe('config upgrade to remove an unnecessary label', () => {
 	})
 
 	test('config with label', () => {
-		const configWithLabel: SQInstanceConfig = {
+		const configWithLabel: RawConfig = {
 			host: '127.0.0.1',
 			model: 'SQ5',
 			level: 'LinearTaper',

@@ -12,7 +12,7 @@ import {
 } from './actions/output.js'
 import { tryCoalesceSceneRecallActions } from './actions/scene.js'
 import {
-	type SQInstanceConfig,
+	type RawConfig,
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 	tryRemoveUnnecessaryLabelInConfig,
@@ -21,11 +21,8 @@ import { tryUpdateAllLRMixEncodings } from './mixer/lr.js'
 
 function ActionUpdater(
 	tryUpdate: (action: CompanionMigrationAction) => boolean,
-): CompanionStaticUpgradeScript<SQInstanceConfig> {
-	return (
-		_context: CompanionUpgradeContext<SQInstanceConfig>,
-		props: CompanionStaticUpgradeProps<SQInstanceConfig>,
-	) => {
+): CompanionStaticUpgradeScript<RawConfig> {
+	return (_context: CompanionUpgradeContext<RawConfig>, props: CompanionStaticUpgradeProps<RawConfig>) => {
 		return {
 			updatedActions: props.actions.filter(tryUpdate),
 			updatedConfig: null,
@@ -34,13 +31,8 @@ function ActionUpdater(
 	}
 }
 
-function ConfigUpdater(
-	tryUpdate: (config: SQInstanceConfig | null) => boolean,
-): CompanionStaticUpgradeScript<SQInstanceConfig> {
-	return (
-		_context: CompanionUpgradeContext<SQInstanceConfig>,
-		props: CompanionStaticUpgradeProps<SQInstanceConfig>,
-	) => {
+function ConfigUpdater(tryUpdate: (config: RawConfig | null) => boolean): CompanionStaticUpgradeScript<RawConfig> {
+	return (_context: CompanionUpgradeContext<RawConfig>, props: CompanionStaticUpgradeProps<RawConfig>) => {
 		return {
 			updatedActions: [],
 			updatedConfig: tryUpdate(props.config) ? props.config : null,

@@ -90,7 +90,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: instance.options.talkbackChannel,
+								inputChannel: instance.config.talkback,
 								mixAssign: [LR],
 								mixActive: false,
 							},
@@ -98,7 +98,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: instance.options.talkbackChannel,
+								inputChannel: instance.config.talkback,
 								mixAssign: [mix],
 								mixActive: true,
 							},
@@ -106,7 +106,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: LevelActionId.InputChannelLevelInMixOrLR,
 							options: {
-								input: instance.options.talkbackChannel,
+								input: instance.config.talkback,
 								assign: mix,
 								level: 49,
 							},
@@ -114,7 +114,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								strip: instance.options.talkbackChannel,
+								strip: instance.config.talkback,
 								mute: 2,
 							},
 						},
@@ -123,7 +123,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: instance.options.talkbackChannel,
+								inputChannel: instance.config.talkback,
 								mixAssign: [mix],
 								mixActive: false,
 							},
@@ -131,7 +131,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: LevelActionId.InputChannelLevelInMixOrLR,
 							options: {
-								input: instance.options.talkbackChannel,
+								input: instance.config.talkback,
 								assign: mix,
 								level: 0,
 							},
@@ -139,7 +139,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								strip: instance.options.talkbackChannel,
+								strip: instance.config.talkback,
 								mute: 1,
 							},
 						},
