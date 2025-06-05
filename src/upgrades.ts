@@ -16,6 +16,7 @@ import {
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 	tryRemoveUnnecessaryLabelInConfig,
+	tryRenameVariousConfigIds,
 } from './config.js'
 import { tryUpdateAllLRMixEncodings } from './mixer/lr.js'
 
@@ -55,4 +56,5 @@ export const UpgradeScripts = [
 	ConfigUpdater(tryRemoveUnnecessaryLabelInConfig),
 	ActionUpdater(tryUpdateAllLRMixEncodings),
 	ActionUpdater(tryFixFXRLevelInFXSIdTypo),
+	ConfigUpdater(tryRenameVariousConfigIds),
 ]

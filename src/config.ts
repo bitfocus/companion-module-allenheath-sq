@@ -61,6 +61,16 @@ export function tryRemoveUnnecessaryLabelInConfig(oldConfig: RawConfig | null): 
 	return false
 }
 
+function moveId(config: RawConfig, oldId: keyof RawConfig, newId: keyof SQInstanceConfig): void {
+	config[newId] = config[oldId]
+	delete config[oldId]
+}
+
+const FaderLawOptionId = 'faderLaw'
+const TalkbackChannelOptionId = 'talkbackChannel'
+const MidiChannelOptionId = 'midiChannel'
+const RetrieveStatusOptionId = 'retrieveStatusAtStartup'
+
 function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
 	// The number of input channels depends on how many input channels the
 	// user's chosen SQ model has.  Currently all SQs have the same number of
@@ -75,12 +85,23 @@ function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
 	return {
 		type: 'dropdown',
 		label: 'Default talkback input channel',
-		id: 'talkback',
+		id: TalkbackChannelOptionId,
 		width: 6,
 		default: 0,
 		choices: DefaultTalkbackInputChannelChoices,
 		minChoicesForSearch: 0,
 	}
+}
+
+export function tryRenameVariousConfigIds(config: RawConfig | null): boolean {
+	if (config !== null && 'level' in config) {
+		moveId(config, 'level', FaderLawOptionId)
+		moveId(config, 'talkback', TalkbackChannelOptionId)
+		moveId(config, 'midich', MidiChannelOptionId)
+		moveId(config, 'status', RetrieveStatusOptionId)
+		return true
+	}
+	return false
 }
 
 /** Get SQ module configuration fields. */
@@ -115,7 +136,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		},
 		{
 			type: 'dropdown',
-			id: 'level',
+			id: FaderLawOptionId,
 			label: 'NRPN Fader Law',
 			width: 6,
 			default: 'LinearTaper',
@@ -127,7 +148,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		createDefaultTalkbackChannelOption(),
 		{
 			type: 'number',
-			id: 'midich',
+			id: MidiChannelOptionId,
 			label: 'MIDI channel',
 			width: 6,
 			min: 1,
@@ -136,7 +157,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		},
 		{
 			type: 'dropdown',
-			id: 'status',
+			id: RetrieveStatusOptionId,
 			label: 'Retrieve console status',
 			width: 6,
 			default: 'full',
@@ -167,30 +188,26 @@ type SQInstanceConfig = {
 	/** The model of the mixer. */
 	model: ModelId
 
-	// XXX rename to faderLaw
 	/** The fader law specified in the mixer. */
-	level: FaderLaw
+	[FaderLawOptionId]: FaderLaw
 
-	// XXX rename to talkbackChannel
 	/**
 	 * The channel used for talkback (zero-indexed rather than 1-indexed as it
 	 * appears in UI).
 	 */
-	talkback: number
+	[TalkbackChannelOptionId]: number
 
-	// XXX rename to midiChannel
 	/**
 	 * The MIDI channel that should be used to communicate with the mixer.
 	 * (This is the encoding-level value, i.e. 0-15 rather than 1-16.)
 	 */
-	midich: number
+	[MidiChannelOptionId]: number
 
-	// XXX rename to retrieveStatusAtStartup
 	/**
 	 * How the mixer status (signal levels, etc.) should be retrieved at
 	 * startup.
 	 */
-	status: RetrieveStatusAtStartup
+	[RetrieveStatusOptionId]: RetrieveStatusAtStartup
 
 	/**
 	 * Log a whole bunch of extra information about ongoing operation if verbose
@@ -231,7 +248,7 @@ function toModelId(model: RawConfig['model']): ModelId {
 	}
 }
 
-function toFaderLaw(faderLawOpt: RawConfig['level']): FaderLaw {
+function toFaderLaw(faderLawOpt: RawConfig[typeof FaderLawOptionId]): FaderLaw {
 	const law = String(faderLawOpt)
 	switch (law) {
 		case 'LinearTaper':
@@ -243,19 +260,19 @@ function toFaderLaw(faderLawOpt: RawConfig['level']): FaderLaw {
 }
 
 function toNumberDefaultZero(v: RawConfig[string]): number {
-	if (typeof v === 'undefined') {
+	if (v === undefined) {
 		return 0
 	}
 
 	return Number(v)
 }
 
-function toTalkbackChannel(ch: RawConfig['talkback']): number {
+function toTalkbackChannel(ch: RawConfig[typeof TalkbackChannelOptionId]): number {
 	return toNumberDefaultZero(ch)
 }
 
-function toMidiChannel(midich: RawConfig['midich']): number {
-	const n = toNumberDefaultZero(midich)
+function toMidiChannel(midiChannel: RawConfig[typeof MidiChannelOptionId]): number {
+	const n = toNumberDefaultZero(midiChannel)
 	if (1 <= n && n <= 16) {
 		return n - 1
 	}
@@ -263,7 +280,7 @@ function toMidiChannel(midich: RawConfig['midich']): number {
 	return 0
 }
 
-function toRetrieveStatusAtStartup(status: RawConfig['status']): RetrieveStatusAtStartup {
+function toRetrieveStatusAtStartup(status: RawConfig[typeof RetrieveStatusOptionId]): RetrieveStatusAtStartup {
 	const retrieveStatus = String(status)
 	switch (retrieveStatus) {
 		case 'delay':
@@ -285,10 +302,10 @@ const toVerbose = Boolean
 export function validateConfig(config: RawConfig): asserts config is SQInstanceConfig {
 	config.host = toHost(config.host)
 	config.model = toModelId(config.model)
-	config.level = toFaderLaw(config.level)
-	config.talkback = toTalkbackChannel(config.talkback)
-	config.midich = toMidiChannel(config.midich)
-	config.status = toRetrieveStatusAtStartup(config.status)
+	config.faderLaw = toFaderLaw(config.faderLaw)
+	config.talkbackChannel = toTalkbackChannel(config.talkbackChannel)
+	config.midiChannel = toMidiChannel(config.midiChannel)
+	config.retrieveStatusAtStartup = toRetrieveStatusAtStartup(config.retrieveStatusAtStartup)
 	config.verbose = toVerbose(config.verbose)
 }
 
@@ -300,10 +317,10 @@ export function noConnectionConfig(): SQInstanceConfig {
 	return {
 		host: '',
 		model: DefaultModel,
-		level: 'LinearTaper',
-		talkback: 0,
-		midich: 0,
-		status: RetrieveStatusAtStartup.Fully,
+		faderLaw: 'LinearTaper',
+		talkbackChannel: 0,
+		midiChannel: 0,
+		retrieveStatusAtStartup: RetrieveStatusAtStartup.Fully,
 		verbose: false,
 	}
 }
@@ -329,7 +346,7 @@ export function canUpdateConfigWithoutRestarting(oldConfig: SQInstanceConfig, ne
 	// A different fader law changes the meaning of all level messages and can't
 	// really be synced up with any messages presently in flight, so forces a
 	// restart.
-	if (oldConfig.level !== newConfig.level) {
+	if (oldConfig.faderLaw !== newConfig.faderLaw) {
 		return false
 	}
 
@@ -339,7 +356,7 @@ export function canUpdateConfigWithoutRestarting(oldConfig: SQInstanceConfig, ne
 
 	// Changing MIDI channel could result in messages on old/new MIDI channel
 	// being missed, so force a restart.
-	if (oldConfig.midich !== newConfig.midich) {
+	if (oldConfig.midiChannel !== newConfig.midiChannel) {
 		return false
 	}
 

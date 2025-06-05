@@ -4,6 +4,7 @@ import {
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 	tryRemoveUnnecessaryLabelInConfig,
+	tryRenameVariousConfigIds,
 } from './config.js'
 
 describe('config upgrade to specify a missing model', () => {
@@ -147,5 +148,37 @@ describe('config upgrade to remove an unnecessary label', () => {
 		expect(tryRemoveUnnecessaryLabelInConfig(configWithLabel)).toBe(true)
 
 		expect('label' in configWithLabel).toBe(false)
+	})
+})
+
+describe('config field renames', () => {
+	test('level', () => {
+		const config: RawConfig = {
+			host: '',
+			model: 'SQ5',
+			level: 'AudioTaper',
+			talkback: 3,
+			midich: 7,
+			status: 'nosts',
+			verbose: true,
+		}
+
+		let tryResult = true
+		for (let i = 0; i < 2; i++) {
+			expect(tryRenameVariousConfigIds(config)).toBe(tryResult)
+			tryResult = false
+
+			expect(config).not.toHaveProperty('level')
+			expect(config).toHaveProperty('faderLaw', 'AudioTaper')
+
+			expect(config).not.toHaveProperty('talkback')
+			expect(config).toHaveProperty('talkbackChannel', 3)
+
+			expect(config).not.toHaveProperty('midich')
+			expect(config).toHaveProperty('midiChannel', 7)
+
+			expect(config).not.toHaveProperty('status')
+			expect(config).toHaveProperty('retrieveStatusAtStartup', 'nosts')
+		}
 	})
 })
