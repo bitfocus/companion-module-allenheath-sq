@@ -39,7 +39,7 @@
 		"eventemitter3": "^5.0.1"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "~2.0.4",
+		"@companion-module/tools": "^2.6.1",
 		"@types/node": "^22.15.18",
 		"eslint": "~9.39.2",
 		"eslint-plugin-n": "~17.23.2",
