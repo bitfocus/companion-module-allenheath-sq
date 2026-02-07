@@ -2,7 +2,7 @@ import type { CompanionVariableDefinition } from '@companion-module/base'
 import type { Model } from './mixer/model.js'
 import { type NRPN, splitNRPN } from './mixer/nrpn/nrpn.js'
 import { forEachOutputLevel } from './mixer/nrpn/output.js'
-import { forEachSourceSinkLevel } from './mixer/nrpn/source-to-sink.js'
+import { forEachSourceSinkLevel, forEachSourceSinkAssign } from './mixer/nrpn/source-to-sink.js'
 
 /**
  * The variable ID for the variable containing the last recalled scene
@@ -38,6 +38,14 @@ export function getVariables(model: Model): CompanionVariableDefinition[] {
 
 	forEachSourceSinkLevel(model, (nrpn, sourceDesc, sinkDesc) => {
 		addVariable(nrpn, `${sourceDesc} -> ${sinkDesc} Level`)
+	})
+
+	forEachSourceSinkAssign(model, (nrpn: NRPN<'assign'>, sourceDesc: string, sinkDesc: string) => {
+		const { MSB, LSB } = splitNRPN(nrpn)
+		variables.push({
+			name: `${sourceDesc} -> ${sinkDesc} Assigned`,
+			variableId: `assign_${MSB}.${LSB}`,
+		})
 	})
 
 	forEachOutputLevel(model, (nrpn, outputDesc) => {
