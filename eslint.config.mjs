@@ -7,6 +7,12 @@ const baseConfig = await generateEslintConfig({
 	enableTypescript: true,
 })
 
+const permittedUnpublishedImports = [
+	// The type-testing types are erased during compilation, so it's fine to use
+	// it as an unpublished import.
+	'type-testing',
+]
+
 /**
  * @param {import('eslint').Linter.Config<import('eslint').Linter.RulesRecord>['files']} files
  * @param {readonly string[]} allowModules
@@ -19,7 +25,7 @@ function permitLimitedUnpublishedImports(files, allowModules) {
 			'n/no-unpublished-import': [
 				'error',
 				{
-					allowModules,
+					allowModules: [...new Set(permittedUnpublishedImports.concat(allowModules))],
 				},
 			],
 		},
@@ -41,7 +47,12 @@ const customConfig = [
 			'object-shorthand': 'error',
 			'no-useless-rename': 'error',
 			'n/no-missing-import': 'off',
-			'n/no-unpublished-import': 'error',
+			'n/no-unpublished-import': [
+				'error',
+				{
+					allowModules: permittedUnpublishedImports,
+				},
+			],
 			'@typescript-eslint/strict-boolean-expressions': 'error',
 			eqeqeq: 'error',
 			radix: 'error',
@@ -53,12 +64,9 @@ const customConfig = [
 					fixStyle: 'inline-type-imports',
 				},
 			],
-		},
-	},
 
-	{
-		files: allTestFilePatterns,
-		rules: {
+			// Turn off the general unused-vars rule, and turn on a more refined
+			// TypeScript-specific rule.
 			'no-unused-vars': 'off',
 			'@typescript-eslint/no-unused-vars': [
 				'error',
@@ -66,17 +74,19 @@ const customConfig = [
 					vars: 'all',
 					argsIgnorePattern: '^_',
 					caughtErrorsIgnorePattern: '^_',
-					// In addition to `_*' variables, allow `test_*` variables
+					// In addition to `_*' variables, allow `assert_*` variables
 					// -- specifically type variables, but this rule doesn't
-					// support that further restriction now -- for use in tests
-					// of types that are performed using 'type-testing' helpers.
-					varsIgnorePattern: '^(?:test)?_',
+					// support that further restriction now -- for verifying
+					// type characteristics using 'type-testing' helpers.  As
+					// these will be erased during compilation, allow them in
+					// source files as well as in test files.
+					varsIgnorePattern: '^(?:assert)?_',
 				},
 			],
 		},
 	},
 
-	permitLimitedUnpublishedImports(allTestFilePatterns, ['type-testing', 'vitest']),
+	permitLimitedUnpublishedImports(allTestFilePatterns, ['vitest']),
 	permitLimitedUnpublishedImports(['eslint.config.mjs'], ['@companion-module/tools']),
 	permitLimitedUnpublishedImports(['knip.config.ts'], ['knip']),
 	permitLimitedUnpublishedImports(['vitest.config.ts'], ['vitest']),

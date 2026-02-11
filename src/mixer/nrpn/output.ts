@@ -1,3 +1,4 @@
+import type { Equal, Expect } from 'type-testing'
 import { getOutputCalculator, type InputOutputType, type Model } from '../model.js'
 import { calculateNRPN, type NRPN, toNRPN, type NRPNType, type Param, type UnbrandedParam } from './nrpn.js'
 
@@ -82,6 +83,8 @@ type OutputSinkMatchesNRPN<
 
 /** Enumerate all `Sink` usable as output supporting the given NRPN. */
 export type SinkAsOutputForNRPN<NRPN extends OutputNRPN> = OutputSinkMatchesNRPN<keyof OutputParameterBaseType, NRPN>[0]
+
+type assert_SupportedAsOutput = Expect<Equal<SinkAsOutputForNRPN<'level'>, 'lr' | 'mix' | 'matrix' | 'dca' | 'fxSend'>>
 
 class OutputNRPNCalculator<T extends OutputNRPN> {
 	readonly #inputOutputCounts

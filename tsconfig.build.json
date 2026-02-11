@@ -7,6 +7,11 @@
 		"paths": {
 			"*": ["./node_modules/*"]
 		},
-		"module": "es2022"
+		"module": "es2022",
+
+		// We rely on eslint @typescript-eslint/no-unused-vars to forbid unused
+		// variables (without limiting them just to names starting with '_'), so
+		// we turn off this error.
+		"noUnusedLocals": false
 	}
 }

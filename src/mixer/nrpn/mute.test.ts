@@ -4,7 +4,7 @@ import { type InputOutputType, Model } from '../model.js'
 import { calculateMuteNRPN } from './mute.js'
 import { splitNRPN, type UnbrandedParam } from './nrpn.js'
 
-type test_AllMuteTypes = Expect<Equal<Parameters<typeof calculateMuteNRPN>[1], InputOutputType>>
+type assert_AllMuteTypes = Expect<Equal<Parameters<typeof calculateMuteNRPN>[1], InputOutputType>>
 
 describe('calculateMuteNRPN', () => {
 	const model = new Model('SQ5')

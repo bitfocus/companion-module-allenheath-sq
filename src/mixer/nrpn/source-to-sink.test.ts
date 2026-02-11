@@ -1,17 +1,11 @@
-import type { Expect, Equal, Extends, ExpectFalse } from 'type-testing'
+import type { Expect, Equal } from 'type-testing'
 import { describe, expect, test } from 'vitest'
 import { Model } from '../model.js'
 import { type Param, splitNRPN } from './nrpn.js'
-import { forEachSourceSinkLevel, type SourceSinkForNRPN, type SinkForMixAndLRInSinkForNRPN } from './source-to-sink.js'
+import { forEachSourceSinkLevel } from './source-to-sink.js'
 
 // @ts-expect-error Perform a test that *must fail* to verify testing happens.
-type test_VerifyThatExpectAndEqualWillErrorIfMisused = Expect<Equal<true, false>>
-
-type test_MixesIntoSinkSet = Expect<Equal<SinkForMixAndLRInSinkForNRPN<'level'>, 'matrix'>>
-
-type test_CantSetFXRLevelInGroup = ExpectFalse<Extends<['fxReturn', 'group'], SourceSinkForNRPN<'level'>>>
-
-type test_CantSetInputLevelInGroup = ExpectFalse<Extends<['inputChannel', 'group'], SourceSinkForNRPN<'level'>>>
+type assert_VerifyThatExpectAndEqualWillErrorIfMisused = Expect<Equal<true, false>>
 
 describe('forEachSourceToSinkLevel', () => {
 	const model = new Model('SQ5')
