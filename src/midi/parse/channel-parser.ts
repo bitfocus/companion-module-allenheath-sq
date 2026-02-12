@@ -29,6 +29,12 @@ export interface MixerMessageEvents {
 	 * level specified by `vc`/`vf`.
 	 */
 	pan_level: [nrpn: NRPN<'panBalance'>, vc: number, vf: number]
+
+	/**
+	 * The assignment status of a source in a sink (assign NRPN) with the data
+	 * bytes `vc`/`vf`.
+	 */
+	assign: [nrpn: NRPN<'assign'>, vc: number, vf: number]
 }
 
 /**
@@ -149,6 +155,10 @@ export class ChannelParser extends EventEmitter<MixerMessageEvents> {
 						// Pan Level
 						else if (0x50 <= msb && msb <= 0x5f) {
 							this.emit('pan_level', makeNRPN(msb, lsb), vc, vf)
+						}
+						// Assign NRPNs
+						else if (0x60 <= msb && msb <= 0x6f) {
+							this.emit('assign', makeNRPN(msb, lsb), vc, vf)
 						} else {
 							verboseLog(
 								`Unhandled MSB/LSB ${prettyByte(msb)}/${prettyByte(lsb)} in NRPN data message ${manyPrettyBytes(first, second, third, fourth)}`,
