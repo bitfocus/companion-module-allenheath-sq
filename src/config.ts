@@ -18,8 +18,8 @@ export interface RawConfig {
 }
 
 /** Ensure a 'model' property is present in configs that lack it. */
-export function tryEnsureModelOptionInConfig(oldConfig: RawConfig | null): boolean {
-	if (oldConfig !== null && !('model' in oldConfig)) {
+export function tryEnsureModelOptionInConfig(oldConfig: RawConfig): boolean {
+	if (!('model' in oldConfig)) {
 		oldConfig.model = DefaultModel
 		return true
 	}
@@ -33,8 +33,8 @@ const DefaultConnectionLabel = 'SQ'
  * Ensure a 'label' property containing a connection label is present in configs
  * that lack it.
  */
-export function tryEnsureLabelInConfig(oldConfig: RawConfig | null): boolean {
-	if (oldConfig !== null && !('label' in oldConfig)) {
+export function tryEnsureLabelInConfig(oldConfig: RawConfig): boolean {
+	if (!('label' in oldConfig)) {
 		oldConfig.label = DefaultConnectionLabel
 		return true
 	}
@@ -53,8 +53,8 @@ export function tryEnsureLabelInConfig(oldConfig: RawConfig | null): boolean {
  * This function detects and, if present, removes the `'label'` option from
  * configs that have it.
  */
-export function tryRemoveUnnecessaryLabelInConfig(oldConfig: RawConfig | null): boolean {
-	if (oldConfig !== null && 'label' in oldConfig) {
+export function tryRemoveUnnecessaryLabelInConfig(oldConfig: RawConfig): boolean {
+	if ('label' in oldConfig) {
 		delete oldConfig.label
 		return true
 	}
@@ -93,8 +93,8 @@ function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
 	}
 }
 
-export function tryRenameVariousConfigIds(config: RawConfig | null): boolean {
-	if (config !== null && 'level' in config) {
+export function tryRenameVariousConfigIds(config: RawConfig): boolean {
+	if ('level' in config) {
 		moveId(config, 'level', FaderLawOptionId)
 		moveId(config, 'talkback', TalkbackChannelOptionId)
 		moveId(config, 'midich', MidiChannelOptionId)

@@ -32,11 +32,11 @@ function ActionUpdater(
 	}
 }
 
-function ConfigUpdater(tryUpdate: (config: RawConfig | null) => boolean): CompanionStaticUpgradeScript<RawConfig> {
+function ConfigUpdater(tryUpdate: (config: RawConfig) => boolean): CompanionStaticUpgradeScript<RawConfig> {
 	return (_context: CompanionUpgradeContext<RawConfig>, props: CompanionStaticUpgradeProps<RawConfig>) => {
 		return {
 			updatedActions: [],
-			updatedConfig: tryUpdate(props.config) ? props.config : null,
+			updatedConfig: props.config !== null && tryUpdate(props.config) ? props.config : null,
 			updatedFeedbacks: [],
 		}
 	}
@@ -57,4 +57,4 @@ export const UpgradeScripts = [
 	ActionUpdater(tryUpdateAllLRMixEncodings),
 	ActionUpdater(tryFixFXRLevelInFXSIdTypo),
 	ConfigUpdater(tryRenameVariousConfigIds),
-]
+] satisfies CompanionStaticUpgradeScript<RawConfig>[]
