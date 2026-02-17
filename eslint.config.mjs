@@ -14,6 +14,17 @@ const permittedUnpublishedImports = [
 ]
 
 /**
+ * Combine two arrays in arbitrary order, coalescing duplicated entries.
+ *
+ * @param {readonly string[]} s1
+ * @param {readonly string[]} s2
+ * @returns {readonly string[]}
+ */
+function mergeSets(s1, s2) {
+	return [...new Set(s1.concat(s2))]
+}
+
+/**
  * @param {import('eslint').Linter.Config<import('eslint').Linter.RulesRecord>['files']} files
  * @param {readonly string[]} allowModules
  * @returns {import('eslint').Linter.Config<import('eslint').Linter.RulesRecord>}
@@ -25,7 +36,7 @@ function permitLimitedUnpublishedImports(files, allowModules) {
 			'n/no-unpublished-import': [
 				'error',
 				{
-					allowModules: [...new Set(permittedUnpublishedImports.concat(allowModules))],
+					allowModules: mergeSets(permittedUnpublishedImports, allowModules),
 				},
 			],
 		},
