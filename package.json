@@ -6,7 +6,7 @@
 	"scripts": {
 		"postinstall": "husky",
 		"test": "vitest --run",
-		"check-types": "tsc -p tsconfig.json --noEmit  --noUnusedLocals false",
+		"check-types": "tsc -p tsconfig.json --noEmit",
 		"package": "yarn build && companion-module-build",
 		"build": "rimraf dist && yarn build:main",
 		"build:main": "tsc -p tsconfig.build.json",
