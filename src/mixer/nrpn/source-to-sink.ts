@@ -400,3 +400,27 @@ export function forEachSourceSinkLevel(model: Model, f: SourceSinkLevelFunctor):
 		}
 	}
 }
+
+type SourceSinkAssignFunctor = (nrpn: NRPN<'assign'>, sourceDesc: string, sinkDesc: string) => void
+
+/**
+ * For each source-sink relationship with assign parameters, invoke the given
+ * function.
+ */
+export function forEachSourceSinkAssign(model: Model, f: SourceSinkAssignFunctor): void {
+	for (const [sourceType, sinks] of Object.entries(SourceToSinkParameterBase)) {
+		for (const sinkType of Object.entries(sinks).flatMap(([sinkType, params]) => {
+			return 'assign' in params ? sinkType : []
+		})) {
+			const sourceSink = [sourceType, sinkType] as SourceSinkForNRPN<'assign'>
+
+			const calc = AssignNRPNCalculator.get(model, sourceSink)
+			model.forEach(sourceSink[0], (source, _sourceLabel, sourceDesc) => {
+				model.forEach(sourceSink[1], (sink, _sinkLabel, sinkDesc) => {
+					const nrpn = calc.calculate(source, sink)
+					f(nrpn, sourceDesc, sinkDesc)
+				})
+			})
+		}
+	}
+}
