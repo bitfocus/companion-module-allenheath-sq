@@ -23,6 +23,7 @@ import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
 	forEachSourceSinkLevel,
+	forEachSourceSinkAssign,
 	LevelNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
@@ -308,6 +309,10 @@ export class Mixer {
 		forEachSourceSinkLevel(model, getLevel)
 		forEachOutputLevel(model, getLevel)
 
+		// Request assign NRPNs as well so assignment variables are populated at startup
+		const getAssign = (nrpn: NRPN<'assign'>) => buff.push(this.getNRPNValue(nrpn))
+		forEachSourceSinkAssign(model, getAssign)
+
 		const delayStatusRetrieval = instance.config.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
 
 		if (buff.length > 0 && this.#socket !== null) {
@@ -422,6 +427,14 @@ export class Mixer {
 			const variableId = `pan_${MSB}.${LSB}`
 			const variableValue = vcvfToReadablePanBalance(vc, vf)
 			instance.setExtraVariable(variableId, name, variableValue)
+		})
+		mixerChannelParser.on('assign', (nrpn: NRPN<'assign'>, vc: number, vf: number) => {
+			verboseLog(`Assign received: ${prettyNRPN(nrpn)}, VC=${prettyByte(vc)}, VF=${prettyByte(vf)}`)
+
+			const { MSB, LSB } = splitNRPN(nrpn)
+			const variableId = `assign_${MSB}.${LSB}`
+			// Use '1'/'0' string values for Companion variables
+			instance.setVariableValues({ [variableId]: vf !== 0 ? '1' : '0' })
 		})
 
 		return parseMidi(instance.config.midiChannel, verboseLog, tokenizer, mixerChannelParser)
@@ -583,6 +596,8 @@ export class Mixer {
 	 */
 	#assignToSink(source: number, active: boolean, sink: number, calc: AssignNRPNCalculator): NRPNDataMessage {
 		const nrpn = calc.calculate(source, sink)
+		const { MSB, LSB } = splitNRPN(nrpn)
+		this.#instance.setVariableValues({ [`assign_${MSB}.${LSB}`]: active ? '1' : '0' })
 		return this.#nrpnData(nrpn, 0, active ? 1 : 0)
 	}
 
@@ -608,16 +623,15 @@ export class Mixer {
 		active: boolean,
 		mixes: readonly MixOrLR[],
 	): void {
-		const mixNrpn = AssignNRPNCalculator.get(this.model, [sourceType, 'mix'])
-		const lrNrpn = AssignNRPNCalculator.get(this.model, [sourceType, 'lr'])
+		const mixNrpnCalc = AssignNRPNCalculator.get(this.model, [sourceType, 'mix'])
+		const lrNrpnCalc = AssignNRPNCalculator.get(this.model, [sourceType, 'lr'])
 
-		const commands = mixes.map((mixOrLR) => {
+		const commands: readonly number[][] = mixes.map((mixOrLR) => {
 			return mixOrLR === LR
-				? this.#assignToSink(source, active, 0, lrNrpn)
-				: this.#assignToSink(source, active, mixOrLR, mixNrpn)
+				? this.#assignToSink(source, active, 0, lrNrpnCalc)
+				: this.#assignToSink(source, active, mixOrLR, mixNrpnCalc)
 		})
 
-		// XXX
 		void this.sendCommands(commands)
 	}
 
@@ -646,13 +660,10 @@ export class Mixer {
 		sinks: readonly number[],
 		sourceSink: SourceSinkForNRPN<'assign'>,
 	): void {
-		const nrpn = AssignNRPNCalculator.get(this.model, sourceSink)
+		const calc = AssignNRPNCalculator.get(this.model, sourceSink)
 
-		const commands = sinks.map((sink) => {
-			return this.#assignToSink(source, active, sink, nrpn)
-		})
+		const commands = sinks.map((sink) => this.#assignToSink(source, active, sink, calc))
 
-		// XXX
 		void this.sendCommands(commands)
 	}
 
