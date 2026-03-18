@@ -1,4 +1,4 @@
-import { type CompanionInputFieldDropdown } from '@companion-module/base'
+import { type CompanionActionDefinition, type CompanionInputFieldDropdown } from '@companion-module/base'
 import { type ActionDefinitions, type ActionId } from './actionid.js'
 import { assignActions } from './assign.js'
 import { type Choices } from '../choices.js'
@@ -8,8 +8,82 @@ import { type Mixer } from '../mixer/mixer.js'
 import { muteActions } from './mute.js'
 import { outputLevelActions, outputPanBalanceActions } from './output.js'
 import { panBalanceActions } from './pan-balance.js'
+import { resolveActionOptions } from './resolve-options.js'
 import { sceneActions } from './scene.js'
 import { softKeyActions } from './softkey.js'
+
+type ActionInputField = NonNullable<CompanionActionDefinition['options']>[number]
+
+function isVariableOverridableField(option: ActionInputField): option is ActionInputField & { id: string; label: string } {
+	return (
+		(option.type === 'dropdown' || option.type === 'number' || option.type === 'multidropdown') &&
+		typeof option.id === 'string' &&
+		typeof option.label === 'string'
+	)
+}
+
+function withVariableOverrideInputs<ActionSet extends string>(
+	actions: ActionDefinitions<ActionSet>,
+): ActionDefinitions<ActionSet> {
+	for (const actionId of Object.keys(actions) as ActionSet[]) {
+		const action = actions[actionId]
+		const { options } = action
+		if (options === undefined) {
+			continue
+		}
+
+		const extraOptions: ActionInputField[] = []
+		for (const option of options) {
+			if (!isVariableOverridableField(option)) {
+				continue
+			}
+
+			extraOptions.push(
+				{
+					type: 'checkbox',
+					id: `${option.id}__useVar`,
+					label: `Use variable for ${option.label}`,
+					default: false,
+				},
+				{
+					type: 'textinput',
+					id: `${option.id}_var`,
+					label: `${option.label} variable/local variable`,
+					default: '',
+				},
+			)
+		}
+
+		action.options = [...options, ...extraOptions]
+	}
+
+	return actions
+}
+
+function withResolvedActionOptions<ActionSet extends string>(
+	instance: sqInstance,
+	actions: ActionDefinitions<ActionSet>,
+): ActionDefinitions<ActionSet> {
+	for (const actionId of Object.keys(actions) as ActionSet[]) {
+		const action = actions[actionId]
+		const { callback } = action
+		if (callback === undefined) {
+			continue
+		}
+
+		const wrappedCallback: typeof callback = async (actionEvent, context) => {
+			const options = await resolveActionOptions(instance, actionEvent.options)
+			return callback({
+				...actionEvent,
+				options,
+			}, context)
+		}
+
+		action.callback = wrappedCallback
+	}
+
+	return actions
+}
 
 /**
  * Get all action definitions exposed by this module.
@@ -59,7 +133,7 @@ export function getActions(instance: sqInstance, mixer: Mixer, choices: Choices)
 		minChoicesForSearch: 0,
 	} as const
 
-	return {
+	const actions = {
 		...muteActions(instance, mixer, choices),
 		...(() => {
 			const rotaryActions = {}
@@ -78,4 +152,7 @@ export function getActions(instance: sqInstance, mixer: Mixer, choices: Choices)
 		...outputPanBalanceActions(instance, mixer, choices, PanLevelOption),
 		...sceneActions(instance, mixer),
 	}
+
+	withVariableOverrideInputs(actions)
+	return withResolvedActionOptions(instance, actions)
 }
