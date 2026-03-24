@@ -1,5 +1,5 @@
 {
-	"extends": "@companion-module/tools/tsconfig/node18/recommended",
+	"extends": "@companion-module/tools/tsconfig/node22/recommended-esm.json",
 	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules/**", "src/**/*spec.ts", "src/**/*test.ts", "src/**/__tests__/**", "src/**/__mocks__/**"],
 	"compilerOptions": {
@@ -7,7 +7,7 @@
 		"paths": {
 			"*": ["./node_modules/*"]
 		},
-		"module": "es2022",
+		"lib": ["ES2024"],
 
 		// We rely on eslint @typescript-eslint/no-unused-vars to forbid unused
 		// variables (without limiting them just to names starting with '_'), so

@@ -32,10 +32,10 @@
 		]
 	},
 	"engines": {
-		"node": "^18.12"
+		"node": "^22.11"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.10.0",
+		"@companion-module/base": "~1.11.3",
 		"eventemitter3": "^5.0.1"
 	},
 	"devDependencies": {

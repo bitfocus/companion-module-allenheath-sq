@@ -1,10 +1,9 @@
-import EventEmitter from 'eventemitter3'
+import { EventEmitter } from 'eventemitter3'
 import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
 import type { ExpectInteraction, Interaction, ReceiveInteraction } from './interactions.js'
 import type { NRPN } from '../../../mixer/nrpn/nrpn.js'
 import { parseMidi } from '../parse-midi.js'
 import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenizer.js'
-import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
 import { prettyBytes, repr } from '../../../utils/pretty.js'
 
 class MixerCommandBase {
@@ -54,7 +53,7 @@ class MockTokenizer extends EventEmitter<MidiMessageEvents> implements Tokenizer
 	constructor() {
 		super()
 
-		const { promise, resolve } = promiseWithResolvers<void>()
+		const { promise, resolve } = Promise.withResolvers<void>()
 		this.#runPromise = promise
 		this.#resolveRun = resolve
 	}
@@ -118,7 +117,7 @@ class MixerCommandIter {
 	}
 
 	static #waiter(): Waiter {
-		const { promise, resolve } = promiseWithResolvers<MixerCommand>()
+		const { promise, resolve } = Promise.withResolvers<MixerCommand>()
 		return { promise, resolve, resolved: false }
 	}
 

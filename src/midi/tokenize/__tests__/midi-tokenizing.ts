@@ -3,7 +3,6 @@ import net from 'net'
 import { type Interaction } from './interactions.js'
 import { type MidiMessage, type MidiMessageEvents, MidiTokenizer } from '../tokenizer.js'
 import { prettyByte, prettyBytes, repr } from '../../../utils/pretty.js'
-import { promiseWithResolvers } from '../../../utils/promise-with-resolvers.js'
 
 /** Turn on extra logging in performing test interactions to debug tests. */
 const DEBUG_LOGGING = true
@@ -51,7 +50,7 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 
 	const tokenizer = new MidiTokenizer(connectionSocket, verboseLog)
 
-	const { promise, resolve } = promiseWithResolvers<MidiMessage>()
+	const { promise, resolve } = Promise.withResolvers<MidiMessage>()
 
 	const waiting = [{ promise, resolve, resolved: false }]
 	let firstUnresolved = 0
@@ -74,7 +73,7 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 			waiter.resolve(handler(message))
 			waiter.resolved = true
 
-			const { promise, resolve } = promiseWithResolvers<MidiMessage>()
+			const { promise, resolve } = Promise.withResolvers<MidiMessage>()
 			waiting.push({ promise, resolve, resolved: false })
 		})
 	}

@@ -1,6 +1,6 @@
 import { makeNRPN, type NRPN } from '../../mixer/nrpn/nrpn.js'
 import { manyPrettyBytes, prettyByte, prettyBytes } from '../../utils/pretty.js'
-import EventEmitter from 'eventemitter3'
+import { EventEmitter } from 'eventemitter3'
 
 export interface MixerMessageEvents {
 	/** A scene change to `newScene` (zero-based) occurred. */
