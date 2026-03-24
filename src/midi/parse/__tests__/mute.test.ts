@@ -12,7 +12,7 @@ import { SysExEnd, SysExMessageShortest, SysExStart, SysRTContinue, SysRTTimingC
 
 describe('mute commands', () => {
 	test('mute on', async () => {
-		return TestParsing(0, [
+		return TestParsing(1, [
 			// Mute on, Ip48
 			ReceiveChannelMessage([0xb0, 0x63, 0x00]),
 			ReceiveChannelMessage([0xb0, 0x62, 0x48]),
@@ -42,7 +42,7 @@ describe('mute commands', () => {
 	})
 
 	test('mute off', async () => {
-		return TestParsing(3, [
+		return TestParsing(4, [
 			// Mute on, Aux4
 			ReceiveChannelMessage([0xb3, 0x63, 0x00]),
 			ReceiveChannelMessage([0xb3, 0x62, 0x2f]),

@@ -11,7 +11,7 @@ import { SysCommonMultiByte, SysCommonSingleByte } from '../../bytes.js'
 
 describe('pan/balance level commands', () => {
 	test('pan/balance', async () => {
-		return TestParsing(7, [
+		return TestParsing(8, [
 			// Ip37 in Aux10
 			ReceiveChannelMessage([0xb7, 0x63, 0x53]),
 			ReceiveChannelMessage([0xb7, 0x62, 0x7d]),

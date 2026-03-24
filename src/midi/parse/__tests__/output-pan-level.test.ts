@@ -5,7 +5,7 @@ import { TestParsing } from './test-parsing.js'
 
 describe('output pan/balance mixer commands', () => {
 	test('lr', async () => {
-		return TestParsing(7, [
+		return TestParsing(8, [
 			// LR, L100%
 			...PanLevel(0x7, 0x5f, 0x00, 0x00, 0x00).map(ReceiveChannelMessage),
 			ExpectPanLevelMessage(0x5f, 0x00, 0x00, 0x00),
@@ -19,7 +19,7 @@ describe('output pan/balance mixer commands', () => {
 	})
 
 	test('mix 1', async () => {
-		return TestParsing(3, [
+		return TestParsing(4, [
 			// Mix 1, L100%
 			...PanLevel(0x3, 0x5f, 0x01, 0x00, 0x00).map(ReceiveChannelMessage),
 			ExpectPanLevelMessage(0x5f, 0x01, 0x00, 0x00),
@@ -32,7 +32,7 @@ describe('output pan/balance mixer commands', () => {
 		])
 	})
 	test('mix 12', async () => {
-		return TestParsing(9, [
+		return TestParsing(10, [
 			// Mix 12, L100%
 			...PanLevel(0x9, 0x5f, 0x0c, 0x00, 0x00).map(ReceiveChannelMessage),
 			ExpectPanLevelMessage(0x5f, 0x0c, 0x00, 0x00),
@@ -46,7 +46,7 @@ describe('output pan/balance mixer commands', () => {
 	})
 
 	test('matrix 1', async () => {
-		return TestParsing(13, [
+		return TestParsing(14, [
 			// Matrix 1, L100%
 			...PanLevel(0xd, 0x5f, 0x11, 0x00, 0x00).map(ReceiveChannelMessage),
 			ExpectPanLevelMessage(0x5f, 0x11, 0x00, 0x00),
@@ -59,7 +59,7 @@ describe('output pan/balance mixer commands', () => {
 		])
 	})
 	test('matrix 3', async () => {
-		return TestParsing(2, [
+		return TestParsing(3, [
 			// Matrix 3, L100%
 			...PanLevel(0x2, 0x5f, 0x13, 0x00, 0x00).map(ReceiveChannelMessage),
 			ExpectPanLevelMessage(0x5f, 0x13, 0x00, 0x00),

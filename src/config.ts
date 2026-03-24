@@ -1,4 +1,5 @@
 import { type InputValue, Regex, type SomeCompanionConfigField } from '@companion-module/base'
+import { isUserMidiChannel, type MidiChannel, toMidiChannel, type UserMidiChannel } from './midi/channel.js'
 import { type FaderLaw, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import { DefaultModel, getCommonCount, type ModelId } from './mixer/models.js'
 import type { Branded } from './utils/brand.js'
@@ -198,10 +199,10 @@ type SQInstanceConfig = {
 	[TalkbackChannelOptionId]: number
 
 	/**
-	 * The MIDI channel that should be used to communicate with the mixer.
-	 * (This is the encoding-level value, i.e. 0-15 rather than 1-16.)
+	 * The MIDI channel that should be used to communicate with the mixer.  (Per
+	 * type, this is the user-friendly 1-based channel, i.e. 1-16.)
 	 */
-	[MidiChannelOptionId]: number
+	[MidiChannelOptionId]: UserMidiChannel
 
 	/**
 	 * How the mixer status (signal levels, etc.) should be retrieved at
@@ -271,13 +272,9 @@ function toTalkbackChannel(ch: RawConfig[typeof TalkbackChannelOptionId]): numbe
 	return toNumberDefaultZero(ch)
 }
 
-function toMidiChannel(midiChannel: RawConfig[typeof MidiChannelOptionId]): number {
+function toUserMidiChannel(midiChannel: RawConfig[typeof MidiChannelOptionId]): UserMidiChannel {
 	const n = toNumberDefaultZero(midiChannel)
-	if (1 <= n && n <= 16) {
-		return n - 1
-	}
-
-	return 0
+	return isUserMidiChannel(n) ? n : 1
 }
 
 function toRetrieveStatusAtStartup(status: RawConfig[typeof RetrieveStatusOptionId]): RetrieveStatusAtStartup {
@@ -304,9 +301,17 @@ export function validateConfig(config: RawConfig): asserts config is SQInstanceC
 	config.model = toModelId(config.model)
 	config.faderLaw = toFaderLaw(config.faderLaw)
 	config.talkbackChannel = toTalkbackChannel(config.talkbackChannel)
-	config.midiChannel = toMidiChannel(config.midiChannel)
+	config.midiChannel = toUserMidiChannel(config.midiChannel)
 	config.retrieveStatusAtStartup = toRetrieveStatusAtStartup(config.retrieveStatusAtStartup)
 	config.verbose = toVerbose(config.verbose)
+}
+
+/**
+ * Get the MIDI channel encoding value specified by `config`.  This value is
+ * 0-based (unlike the value stored in `config` which is 1-based).
+ */
+export function getMidiChannel(config: SQInstanceConfig): MidiChannel {
+	return toMidiChannel(config[MidiChannelOptionId])
 }
 
 /**
@@ -319,7 +324,7 @@ export function noConnectionConfig(): SQInstanceConfig {
 		model: DefaultModel,
 		faderLaw: 'LinearTaper',
 		talkbackChannel: 0,
-		midiChannel: 0,
+		midiChannel: 1,
 		retrieveStatusAtStartup: RetrieveStatusAtStartup.Fully,
 		verbose: false,
 	}

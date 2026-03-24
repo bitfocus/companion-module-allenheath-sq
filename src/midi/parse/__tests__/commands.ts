@@ -1,3 +1,5 @@
+import type { MidiChannel } from '../../channel.js'
+
 /**
  * Compute the sequence of MIDI messages that correspond to an SQ scene recall
  * command.
@@ -10,7 +12,7 @@
  * @returns
  *   An array of the MIDI messages that constitute the requested scene recall.
  */
-export function SceneCommand(channel: number, scene: number): [[number, number, number], [number, number]] {
+export function SceneCommand(channel: MidiChannel, scene: number): [[number, number, number], [number, number]] {
 	return [
 		[0xb0 | channel, 0x00, scene >> 7],
 		[0xc0 | channel, scene & 0x7f],
@@ -37,7 +39,7 @@ type NRPNData = [[number, number, number], [number, number, number], [number, nu
  * @param vf
  *   The velocity (fine) byte in the message.
  */
-function nrpnData(channel: number, msb: number, lsb: number, vc: number, vf: number): NRPNData {
+function nrpnData(channel: MidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
 	return [
 		[0xb0 | channel, 0x63, msb],
 		[0xb0 | channel, 0x62, lsb],
@@ -59,7 +61,7 @@ function nrpnData(channel: number, msb: number, lsb: number, vc: number, vf: num
  *   True to turn the mute on, false to turn it off.
  */
 function mute(
-	channel: number,
+	channel: MidiChannel,
 	msb: number,
 	lsb: number,
 	on: boolean,
@@ -78,7 +80,7 @@ function mute(
  *   The intended NRPN LSB.
  */
 export function MuteOn(
-	channel: number,
+	channel: MidiChannel,
 	msb: number,
 	lsb: number,
 ): [[number, number, number], [number, number, number], [number, number, number], [number, number, number]] {
@@ -96,7 +98,7 @@ export function MuteOn(
  *   The intended NRPN LSB.
  */
 export function MuteOff(
-	channel: number,
+	channel: MidiChannel,
 	msb: number,
 	lsb: number,
 ): [[number, number, number], [number, number, number], [number, number, number], [number, number, number]] {
@@ -117,7 +119,7 @@ export function MuteOff(
  * @param vf
  *   The velocity (fine) byte encoding half of the intended fader level.
  */
-export function FaderLevel(channel: number, msb: number, lsb: number, vc: number, vf: number): NRPNData {
+export function FaderLevel(channel: MidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
 	return nrpnData(channel, msb, lsb, vc, vf)
 }
 
@@ -136,6 +138,6 @@ export function FaderLevel(channel: number, msb: number, lsb: number, vc: number
  *   The velocity (fine) byte encoding half of the intended pan/balance level.
  * @returns
  */
-export function PanLevel(channel: number, msb: number, lsb: number, vc: number, vf: number): NRPNData {
+export function PanLevel(channel: MidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
 	return nrpnData(channel, msb, lsb, vc, vf)
 }

@@ -1,12 +1,7 @@
+import type { MidiChannel } from '../channel.js'
 import type { ChannelParser } from './channel-parser.js'
 import { prettyByte, prettyBytes } from '../../utils/pretty.js'
 import type { Tokenizer } from '../tokenize/tokenizer.js'
-
-/**
- * An SQ mixer message parser of all MIDI messages emitted by a MIDI tokenizer,
- * that forwards along messages in the mixer MIDI channel to a channel-specific
- * mixer channel parser.
- */
 
 /**
  * Given a MIDI tokenizer and the channel in which mixer commands will
@@ -27,7 +22,7 @@ import type { Tokenizer } from '../tokenize/tokenizer.js'
  *   notified with each received MIDI message in that channel.
  */
 export async function parseMidi(
-	midiChannel: number,
+	midiChannel: MidiChannel,
 	verboseLog: (msg: string) => void,
 	tokenizer: Tokenizer,
 	mixerChannelParser: ChannelParser,

@@ -1,4 +1,5 @@
 import { EventEmitter } from 'eventemitter3'
+import { toMidiChannel, type UserMidiChannel } from '../../channel.js'
 import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
 import type { ExpectInteraction, Interaction, ReceiveInteraction } from './interactions.js'
 import type { NRPN } from '../../../mixer/nrpn/nrpn.js'
@@ -179,13 +180,13 @@ class MixerCommandIter {
  * Run the provided series of interactions to verify parsing of MIDI messages
  * sent by a mixer.
  *
- * @param channel
+ * @param userChannel
  *   The MIDI channel in which mixer commands are processed.  (Messages in other
  *   MIDI channels are currently ignored.)
  * @param interactions
  *   The series of interactions to perform to test MIDI parsing.
  */
-export async function TestParsing(channel: number, interactions: readonly Interaction[]): Promise<void> {
+export async function TestParsing(userChannel: UserMidiChannel, interactions: readonly Interaction[]): Promise<void> {
 	const verboseLog = (msg: string): void => {
 		console.log(msg)
 	}
@@ -196,7 +197,7 @@ export async function TestParsing(channel: number, interactions: readonly Intera
 
 	const commandIter = await MixerCommandIter.create(midiChannelParser)
 
-	const runParser = parseMidi(channel, verboseLog, tokenizer, midiChannelParser)
+	const runParser = parseMidi(toMidiChannel(userChannel), verboseLog, tokenizer, midiChannelParser)
 
 	async function expectEvent(type: MixerCommand['type'], interaction: ExpectInteraction): Promise<void> {
 		console.log(`Performing ${interaction.type} for ${interaction.args}`)

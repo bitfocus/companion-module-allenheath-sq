@@ -2,7 +2,7 @@ import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@compani
 import { OutputPanBalanceActionId } from '../actions/output.js'
 import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
-import type { Host } from '../config.js'
+import { getMidiChannel, type Host } from '../config.js'
 import { typeToMuteFeedback } from '../feedbacks/feedback-ids.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
@@ -424,7 +424,7 @@ export class Mixer {
 			instance.setExtraVariable(variableId, name, variableValue)
 		})
 
-		return parseMidi(instance.config.midiChannel, verboseLog, tokenizer, mixerChannelParser)
+		return parseMidi(getMidiChannel(instance.config), verboseLog, tokenizer, mixerChannelParser)
 	}
 
 	/** Compute a mixer "get" command to retrieve the value of an NRPN. */
@@ -446,7 +446,7 @@ export class Mixer {
 			throw new Error(`Attempting to set out-of-bounds scene ${scene}`)
 		}
 
-		const midiChannel = this.#instance.config.midiChannel
+		const midiChannel = getMidiChannel(this.#instance.config)
 		const BN = 0xb0 | midiChannel
 		const CN = 0xc0 | midiChannel
 		const sceneUpper = (scene >> 7) & 0x0f
@@ -1451,7 +1451,7 @@ export class Mixer {
 			throw new Error(`Attempting to press invalid softkey ${softKey}`)
 		}
 
-		const command = [0x90 | this.#instance.config.midiChannel, 0x30 + softKey, 0x7f]
+		const command = [0x90 | getMidiChannel(this.#instance.config), 0x30 + softKey, 0x7f]
 		// XXX
 		void this.sendCommands([command])
 	}
@@ -1462,7 +1462,7 @@ export class Mixer {
 			throw new Error(`Attempting to release invalid softkey ${softKey}`)
 		}
 
-		const command = [0x80 | this.#instance.config.midiChannel, 0x30 + softKey, 0x00]
+		const command = [0x80 | getMidiChannel(this.#instance.config), 0x30 + softKey, 0x00]
 		// XXX
 		void this.sendCommands([command])
 	}
@@ -1479,7 +1479,7 @@ export class Mixer {
 	 */
 	#nrpnData<T extends NRPNType>(nrpn: NRPN<T>, vc: number, vf: number): NRPNDataMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | this.#instance.config.midiChannel
+		const BN = 0xb0 | getMidiChannel(this.#instance.config)
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x06, vc, BN, 0x26, vf]
 	}
 
@@ -1494,7 +1494,7 @@ export class Mixer {
 	 */
 	#nrpnIncrement<T extends NRPNType>(nrpn: NRPN<T>, val: number): NRPNIncDecMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | this.#instance.config.midiChannel
+		const BN = 0xb0 | getMidiChannel(this.#instance.config)
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x60, val]
 	}
 
@@ -1509,7 +1509,7 @@ export class Mixer {
 	 */
 	#nrpnDecrement<T extends NRPNType>(nrpn: NRPN<T>, val: number): NRPNIncDecMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | this.#instance.config.midiChannel
+		const BN = 0xb0 | getMidiChannel(this.#instance.config)
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x61, val]
 	}
 }
