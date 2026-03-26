@@ -1,6 +1,12 @@
 import { describe, test } from 'vitest'
 import { TestMidiTokenizing } from './midi-tokenizing.js'
-import { SysExStart, SysExEnd, SysRTTimingClock, SysCommonSongPosMessage, SysCommonSongPosition } from '../../bytes.js'
+import {
+	SysExStart,
+	SysExEnd,
+	SysRTTimingClock,
+	SysCommonSongPosMessage,
+	SysCommonSongPosition,
+} from '../../__tests__/bytes.js'
 import {
 	ExpectChannelMessage,
 	ExpectNextMessageNotReady,

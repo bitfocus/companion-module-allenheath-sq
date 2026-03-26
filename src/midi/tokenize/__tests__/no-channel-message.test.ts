@@ -1,6 +1,6 @@
 import { describe, test } from 'vitest'
 import { TestMidiTokenizing } from './midi-tokenizing.js'
-import { SysCommonMultiByte, SysExMessage } from '../../bytes.js'
+import { SysCommonMultiByte, SysExMessage } from '../../__tests__/bytes.js'
 import { ExpectNextMessageNotReady, MixerWriteMidiBytes } from './interactions.js'
 
 describe('parse status byte (ignored data to start)', () => {

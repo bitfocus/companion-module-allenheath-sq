@@ -7,7 +7,7 @@ import {
 	ReceiveSystemCommonMessage,
 } from './interactions.js'
 import { FaderLevel } from './commands.js'
-import { SysCommonMultiByte } from '../../bytes.js'
+import { SysCommonMultiByte } from '../../__tests__/bytes.js'
 
 describe('fader level', () => {
 	test('various fader level tests', async () => {

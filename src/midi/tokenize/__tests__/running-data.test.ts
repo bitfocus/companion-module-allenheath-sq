@@ -1,6 +1,6 @@
 import { describe, test } from 'vitest'
 import { TestMidiTokenizing } from './midi-tokenizing.js'
-import { SysCommonMultiByte, SysRTContinue } from '../../bytes.js'
+import { SysCommonMultiByte, SysRTContinue } from '../../__tests__/bytes.js'
 import {
 	ExpectNextMessageNotReady,
 	ExpectChannelMessage,

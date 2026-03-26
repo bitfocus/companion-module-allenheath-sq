@@ -8,7 +8,7 @@ import {
 	ReceiveSystemExclusiveMessage,
 } from './interactions.js'
 import { MuteOff, MuteOn } from './commands.js'
-import { SysExEnd, SysExMessageShortest, SysExStart, SysRTContinue, SysRTTimingClock } from '../../bytes.js'
+import { SysExEnd, SysExMessageShortest, SysExStart, SysRTContinue, SysRTTimingClock } from '../../__tests__/bytes.js'
 
 describe('mute commands', () => {
 	test('mute on', async () => {

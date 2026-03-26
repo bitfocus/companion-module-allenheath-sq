@@ -7,7 +7,7 @@ import {
 	ReceiveSystemCommonMessage,
 } from './interactions.js'
 import { PanLevel } from './commands.js'
-import { SysCommonMultiByte, SysCommonSingleByte } from '../../bytes.js'
+import { SysCommonMultiByte, SysCommonSingleByte } from '../../__tests__/bytes.js'
 
 describe('pan/balance level commands', () => {
 	test('pan/balance', async () => {

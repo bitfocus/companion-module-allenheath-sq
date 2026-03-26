@@ -6,7 +6,7 @@ import {
 	ReceiveChannelMessage,
 	ReceiveSystemRealTimeMessage,
 } from './interactions.js'
-import { SysCommonTuneRequest } from '../../bytes.js'
+import { SysCommonTuneRequest } from '../../__tests__/bytes.js'
 
 describe('scene changes', () => {
 	test('basic scene', async () => {
