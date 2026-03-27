@@ -6,3 +6,4 @@ package-lock.json
 /allenheath-sq-*.tgz
 /dist
 /.yarn
+/.vscode
