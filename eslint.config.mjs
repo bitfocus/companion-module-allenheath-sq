@@ -94,6 +94,19 @@ const customConfig = [
 					varsIgnorePattern: '^(?:assert)?_',
 				},
 			],
+
+			'no-restricted-imports': [
+				'error',
+				{
+					paths: [
+						{
+							name: '@companion-module/base',
+							importNames: ['assertNever'],
+							message: "Use `Expect<IsNever<typeof val>>` from 'type-testing' instead.",
+						},
+					],
+				},
+			],
 		},
 	},
 

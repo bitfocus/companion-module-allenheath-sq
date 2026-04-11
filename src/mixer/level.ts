@@ -1,4 +1,4 @@
-import { assertNever } from '@companion-module/base'
+import type { Expect, IsNever } from 'type-testing'
 import { type FaderLaw } from './mixer.js'
 
 /**
@@ -70,9 +70,10 @@ export function levelFromNRPNData(vc: number, vf: number, faderLaw: FaderLaw): L
 			return val < -89 ? '-inf' : val
 		}
 
-		default:
-			assertNever(faderLaw)
+		default: {
+			type assert_FaderLawIsNever = Expect<IsNever<typeof faderLaw>>
 			throw new Error(`Bad fader law: ${faderLaw}`)
+		}
 	}
 }
 
@@ -125,8 +126,9 @@ export function nrpnDataFromLevel(level: Level, faderLaw: FaderLaw): [number, nu
 			return [vc, vf]
 		}
 
-		default:
-			assertNever(faderLaw)
+		default: {
+			type assert_FaderLawIsNever = Expect<IsNever<typeof faderLaw>>
 			throw new Error(`Bad fader law: ${faderLaw}`)
+		}
 	}
 }
