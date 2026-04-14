@@ -8,7 +8,7 @@ import {
 } from './nrpn/output.js'
 import {
 	type SourceSinkCalculatorForNRPN,
-	type SourceSinkNRPN,
+	type SourceSinkNRPNType,
 	type SourceSinkForNRPN,
 	type SourceToSinkCalculatorCache,
 } from './nrpn/source-to-sink.js'
@@ -265,7 +265,7 @@ export function getOutputCalculator<NRPN extends OutputNRPN>(
 	return calc!
 }
 
-export function getSourceSinkCalculator<NRPN extends SourceSinkNRPN>(
+export function getSourceSinkCalculator<NRPN extends SourceSinkNRPNType>(
 	model: Model,
 	nrpnType: NRPN,
 	sourceSink: SourceSinkForNRPN<NRPN>,

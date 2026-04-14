@@ -22,10 +22,11 @@ import {
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
-	forEachSourceSinkLevel,
+	forEachSourceSinkNRPN,
 	LevelNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
+	type SourceSinkNRPNType,
 } from './nrpn/source-to-sink.js'
 import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
 import { enumValues } from '../utils/enumerate-enum.js'
@@ -303,10 +304,10 @@ export class Mixer {
 
 		const buff: NRPNIncDecMessage[] = []
 
-		const getLevel = (nrpn: NRPN<'level'>) => buff.push(this.getNRPNValue(nrpn))
+		const getNRPN = (nrpn: NRPN<SourceSinkNRPNType>) => buff.push(this.getNRPNValue(nrpn))
 
-		forEachSourceSinkLevel(model, getLevel)
-		forEachOutputLevel(model, getLevel)
+		forEachSourceSinkNRPN(model, 'level', getNRPN)
+		forEachOutputLevel(model, getNRPN)
 
 		const delayStatusRetrieval = instance.config.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
 

@@ -336,6 +336,8 @@ export class BalanceNRPNCalculator extends NRPNCalculator<'panBalance'> {
 	}
 }
 
+export type SourceSinkNRPNType = Exclude<NRPNType, 'mute'>
+
 export type SourceSinkCalculatorForNRPN<NRPN extends SourceSinkNRPN> = NRPN extends SourceSinkNRPN
 	? [NRPN] extends ['assign']
 		? typeof AssignNRPNCalculator
@@ -357,43 +359,50 @@ type SourceToSinkCalculatorCacheForNRPN<T extends SourceToSinkType, NRPN extends
 }
 
 export type SourceToSinkCalculatorCache = {
-	readonly assign: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'assign'>
-	readonly level: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'level'>
-	readonly panBalance: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, 'panBalance'>
+	readonly [Type in SourceSinkNRPNType]: SourceToSinkCalculatorCacheForNRPN<SourceToSinkParameterBaseType, Type>
+}
+
+const calculatorsByType: {
+	readonly [Type in SourceSinkNRPN]: SourceSinkCalculatorForNRPN<Type>
+} = {
+	assign: AssignNRPNCalculator,
+	level: LevelNRPNCalculator,
+	panBalance: BalanceNRPNCalculator,
 }
 
 /**
- * The functor type passed to `forEachSourceSinkLevel`.  Each invocation will be
- * for a source-sink level relationship.  The functor will be invoked with the
- * NRPN pair, a readable description of the source, and a readable description
- * of the sink.
- */
-type SourceSinkLevelFunctor = (nrpn: NRPN<'level'>, sourceDesc: string, sinkDesc: string) => void
-
-/**
- * For each source-sink relationship with adjustable level, invoke the given
- * function.
+ * For each source-sink relationship, invoke the given function for all NRPNs of
+ * the given type.
  *
  * @param model
  *   The SQ mixer model.
+ * @param nrpnType
+ *   The desired source-sink NRPN type.
  * @param f
- *   The function to invoke.  For each source-sink category of level, this
- *   function is called once for each possible source crossed with each possible
- *   sink.  For example, given that there's an inputChannel-mix category and
+ *   The function to invoke.  For each source-sink category of the requested
+ *   type, this function is called once for each possible source crossed with
+ *   each possible sink.  For example, given that there's an inputChannel-mix
+ *   category and each source-sink relationship includes a level and
  *   supposing a mixer model with four input channels and six mixes, the
  *   function will be invoked 4×6 for all possible level NRPNs.
  */
-export function forEachSourceSinkLevel(model: Model, f: SourceSinkLevelFunctor): void {
+export function forEachSourceSinkNRPN<Type extends SourceSinkNRPNType>(
+	model: Model,
+	nrpnType: Type,
+	f: (nrpn: NRPN<Type>, sourceDesc: string, sinkDesc: string) => void,
+): void {
+	const Calculator = calculatorsByType[nrpnType]
+
 	for (const [sourceType, sinks] of Object.entries(SourceToSinkParameterBase)) {
 		for (const sinkType of Object.entries(sinks).flatMap(([sinkType, params]) => {
-			return 'level' in params ? sinkType : []
+			return nrpnType in params ? sinkType : []
 		})) {
-			const sourceSink = [sourceType, sinkType] as SourceSinkForNRPN<'level'>
+			const sourceSink = [sourceType, sinkType] as SourceSinkForNRPN<Type>
 
-			const calc = LevelNRPNCalculator.get(model, sourceSink)
+			const calc = getSourceSinkCalculator(model, nrpnType, sourceSink, Calculator)
 			model.forEach(sourceSink[0], (source, _sourceLabel, sourceDesc) => {
 				model.forEach(sourceSink[1], (sink, _sinkLabel, sinkDesc) => {
-					const nrpn = calc.calculate(source, sink)
+					const nrpn = calc.calculate(source, sink) as NRPN<Type>
 					f(nrpn, sourceDesc, sinkDesc)
 				})
 			})
