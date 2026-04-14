@@ -156,11 +156,13 @@ export class ChannelParser extends EventEmitter<MixerMessageEvents> {
 					continue read_message
 				} // [BN xx yy] ...
 
-				// Ignore unrecognized messages.  This is not optional: the SQ-5
-				// sends scene change messages as [BN 00 BK | CN PG 00] rather than
-				// [BN 00 BK | CN PG] -- which per MIDI "running status" parsing is
+				// Ignore unrecognized messages.  At least SQ-5 1.5.* firmware requires
+				// this: it sends scene change messages as [BN 00 BK | CN PG 00] rather
+				// than [BN 00 BK | CN PG] -- which per MIDI "running status" parsing is
 				// the same as [BN 00 BK | CN PG | CN 00], and the [CN 00] ends up
-				// unrecognized.
+				// unrecognized.  (1.6.* firmware sends [BN 00 BK | CN PG] for scene
+				// changes.  We don't know if any other MIDI communications quirks
+				// require ignoring unrecognized channel messages.)
 				verboseLog(`Unrecognized channel message, ignoring: ${prettyBytes(first)}`)
 				continue read_message
 			} // parse_message: for(;;)
