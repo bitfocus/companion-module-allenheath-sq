@@ -75,6 +75,7 @@ const customConfig = [
 					fixStyle: 'inline-type-imports',
 				},
 			],
+			'n/prefer-node-protocol': 'error',
 
 			// Turn off the general unused-vars rule, and turn on a more refined
 			// TypeScript-specific rule.

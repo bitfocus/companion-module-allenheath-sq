@@ -1,5 +1,5 @@
 import { TCPHelper } from '@companion-module/base'
-import net from 'net'
+import net from 'node:net'
 import { type Interaction } from './interactions.js'
 import { type MidiMessage, type MidiMessageEvents, MidiTokenizer } from '../tokenizer.js'
 import { prettyByte, prettyBytes, repr } from '../../../utils/pretty.js'
