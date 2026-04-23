@@ -105,6 +105,11 @@ const customConfig = [
 							importNames: ['assertNever'],
 							message: "Use `Expect<IsNever<typeof val>>` from 'type-testing' instead.",
 						},
+						{
+							name: 'type-testing',
+							importNames: ['Extends'],
+							message: "Use `Equals` from 'type-testing' or `IsMemberOfUnion` instead.",
+						},
 					],
 				},
 			],

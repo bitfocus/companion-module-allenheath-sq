@@ -1,6 +1,7 @@
-import type { Equal, Expect, ExpectFalse, Extends } from 'type-testing'
+import type { Equal, Expect, ExpectFalse } from 'type-testing'
 import { getSourceSinkCalculator, type InputOutputType, type Model } from '../model.js'
 import { calculateNRPN, type NRPN, toNRPN, type NRPNType, type Param, type UnbrandedParam } from './nrpn.js'
+import type { IsMemberOfUnion } from '../../utils/is-member-of-union.js'
 
 type SourceToSinkInfo = {
 	/**
@@ -175,11 +176,13 @@ export type SourceSinkForNRPN<NRPN extends SourceSinkNRPN> = SourceSinkForSource
 
 // SQ MIDI docs once claimed you could set FX return levels in groups.  Verify
 // that this is not actually allowed.
-type assert_CantSetFXRLevelInGroup = ExpectFalse<Extends<['fxReturn', 'group'], SourceSinkForNRPN<'level'>>>
+type assert_CantSetFXRLevelInGroup = ExpectFalse<IsMemberOfUnion<['fxReturn', 'group'], SourceSinkForNRPN<'level'>>>
 
 // SQ MIDI docs once claimed you could set input channel levels in groups.
 // Verify that this is not actually allowed.
-type assert_CantSetInputLevelInGroup = ExpectFalse<Extends<['inputChannel', 'group'], SourceSinkForNRPN<'level'>>>
+type assert_CantSetInputLevelInGroup = ExpectFalse<
+	IsMemberOfUnion<['inputChannel', 'group'], SourceSinkForNRPN<'level'>>
+>
 
 type SourceForSourceToMixAndLRForNRPN<
 	Source extends InputOutputType,
