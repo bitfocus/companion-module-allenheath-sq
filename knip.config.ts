@@ -1,7 +1,7 @@
 import type { KnipConfig } from 'knip'
 
 const config: KnipConfig = {
-	entry: [],
+	entry: ['src/main.ts'],
 	project: ['src/**/*.ts', '*.ts', '*.mjs'],
 	ignoreDependencies: [
 		// This is used by n/* lint rules which Knip doesn't seem to be smart

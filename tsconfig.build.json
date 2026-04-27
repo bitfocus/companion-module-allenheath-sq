@@ -3,11 +3,17 @@
 	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules/**", "src/**/*spec.ts", "src/**/*test.ts", "src/**/__tests__/**", "src/**/__mocks__/**"],
 	"compilerOptions": {
+		"rootDir": "./src",
 		"outDir": "./dist",
 		"paths": {
 			"*": ["./node_modules/*"]
 		},
 		"lib": ["ES2024"],
+
+		// The recommended tsconfig includes a now-deprecated "alwaysStrict" option.
+		// Updating the module to use the 2.0.0 API will eliminate this issue.  In
+		// the meantime we ignore the deprecation warning.
+		"ignoreDeprecations": "6.0",
 
 		// We rely on eslint @typescript-eslint/no-unused-vars to forbid unused
 		// variables (without limiting them just to names starting with '_'), so
