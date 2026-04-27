@@ -51,7 +51,7 @@
 		"type-testing": "^0.2.0",
 		"typescript": "~6.0.3",
 		"typescript-eslint": "~8.59.0",
-		"vitest": "^4.0.18"
+		"vitest": "^4.1.5"
 	},
 	"packageManager": "yarn@4.13.0"
 }
