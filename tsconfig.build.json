@@ -10,10 +10,8 @@
 		},
 		"lib": ["ES2024"],
 
-		// The recommended tsconfig includes a now-deprecated "alwaysStrict" option.
-		// Updating the module to use the 2.0.0 API will eliminate this issue.  In
-		// the meantime we ignore the deprecation warning.
-		"ignoreDeprecations": "6.0",
+		// TypeScript >6.0 enforces this; opt in early for forwards-compatibility.
+		"alwaysStrict": true,
 
 		// We rely on eslint @typescript-eslint/no-unused-vars to forbid unused
 		// variables (without limiting them just to names starting with '_'), so
