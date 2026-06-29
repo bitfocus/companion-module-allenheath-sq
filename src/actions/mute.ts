@@ -16,17 +16,19 @@ import { repr } from '../utils/pretty.js'
  * Action IDs for all actions that mute, unmute, or toggle muting of a mixer
  * input/output.
  */
-export enum MuteActionId {
-	MuteInputChannel = 'mute_input',
-	MuteLR = 'mute_lr',
-	MuteMix = 'mute_aux',
-	MuteGroup = 'mute_group',
-	MuteMatrix = 'mute_matrix',
-	MuteFXSend = 'mute_fx_send',
-	MuteFXReturn = 'mute_fx_return',
-	MuteDCA = 'mute_dca',
-	MuteMuteGroup = 'mute_mutegroup',
-}
+export const MuteActionId = {
+	MuteInputChannel: 'mute_input',
+	MuteLR: 'mute_lr',
+	MuteMix: 'mute_aux',
+	MuteGroup: 'mute_group',
+	MuteMatrix: 'mute_matrix',
+	MuteFXSend: 'mute_fx_send',
+	MuteFXReturn: 'mute_fx_return',
+	MuteDCA: 'mute_dca',
+	MuteMuteGroup: 'mute_mutegroup',
+} as const
+
+export type MuteActionId = (typeof MuteActionId)[keyof typeof MuteActionId]
 
 function StripOption(label: string, choices: DropdownChoice[]): CompanionInputFieldDropdown {
 	return {

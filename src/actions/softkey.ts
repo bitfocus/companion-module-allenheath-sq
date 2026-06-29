@@ -7,9 +7,11 @@ import { type Model } from '../mixer/model.js'
 import { repr } from '../utils/pretty.js'
 
 /** Action IDs for all actions that operate softkeys. */
-export enum SoftKeyId {
-	SoftKey = 'key_soft',
-}
+export const SoftKeyId = {
+	SoftKey: 'key_soft',
+} as const
+
+export type SoftKeyId = (typeof SoftKeyId)[keyof typeof SoftKeyId]
 
 enum SoftKeyOp {
 	Toggle = '0',

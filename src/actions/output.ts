@@ -23,23 +23,27 @@ import { toSourceOrSink } from './to-source-or-sink.js'
  * Action IDs for all actions affecting the level of sinks when used as direct
  * mixer outputs.
  */
-export enum OutputLevelActionId {
-	LRLevelOutput = 'lr_level_output',
-	MixLevelOutput = 'mix_level_output',
-	FXSendLevelOutput = 'fxsend_level_output',
-	MatrixLevelOutput = 'matrix_level_output',
-	DCALevelOutput = 'dca_level_output',
-}
+export const OutputLevelActionId = {
+	LRLevelOutput: 'lr_level_output',
+	MixLevelOutput: 'mix_level_output',
+	FXSendLevelOutput: 'fxsend_level_output',
+	MatrixLevelOutput: 'matrix_level_output',
+	DCALevelOutput: 'dca_level_output',
+} as const
+
+export type OutputLevelActionId = (typeof OutputLevelActionId)[keyof typeof OutputLevelActionId]
 
 /**
  * Action IDs for all actions affecting the pan/balance of sinks when used as
  * direct mixer outputs.
  */
-export enum OutputPanBalanceActionId {
-	LRPanBalanceOutput = 'lr_panbalance_output',
-	MixPanBalanceOutput = 'mix_panbalance_output',
-	MatrixPanBalanceOutput = 'matrix_panbalance_output',
-}
+export const OutputPanBalanceActionId = {
+	LRPanBalanceOutput: 'lr_panbalance_output',
+	MixPanBalanceOutput: 'mix_panbalance_output',
+	MatrixPanBalanceOutput: 'matrix_panbalance_output',
+} as const
+
+export type OutputPanBalanceActionId = (typeof OutputPanBalanceActionId)[keyof typeof OutputPanBalanceActionId]
 
 /**
  * The action ID of the obsolete "Fader level to output" action, used to alter

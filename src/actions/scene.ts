@@ -7,10 +7,12 @@ import { type OptionValue } from './to-source-or-sink.js'
 import { repr } from '../utils/pretty.js'
 
 /** Action IDs for all actions that change the mixer's current scene. */
-export enum SceneActionId {
-	SceneRecall = 'scene_recall',
-	SceneStep = 'scene_step',
-}
+export const SceneActionId = {
+	SceneRecall: 'scene_recall',
+	SceneStep: 'scene_step',
+} as const
+
+export type SceneActionId = (typeof SceneActionId)[keyof typeof SceneActionId]
 
 /**
  * The action ID of an action whose implementation was identical to that of

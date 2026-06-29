@@ -16,18 +16,20 @@ import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink
  * Action IDs for all actions that activate/deactivate a mixer source within a
  * sink.
  */
-export enum AssignActionId {
-	InputChannelToMix = 'ch_to_mix',
-	InputChannelToGroup = 'ch_to_grp',
-	GroupToMix = 'grp_to_mix',
-	FXReturnToMix = 'fxr_to_mix',
-	FXReturnToGroup = 'fxr_to_grp',
-	InputChannelToFXSend = 'ch_to_fxs',
-	GroupToFXSend = 'grp_to_fxs',
-	FXReturnToFXSend = 'fxr_to_fxs',
-	MixToMatrix = 'mix_to_mtx',
-	GroupToMatrix = 'grp_to_mtx',
-}
+export const AssignActionId = {
+	InputChannelToMix: 'ch_to_mix',
+	InputChannelToGroup: 'ch_to_grp',
+	GroupToMix: 'grp_to_mix',
+	FXReturnToMix: 'fxr_to_mix',
+	FXReturnToGroup: 'fxr_to_grp',
+	InputChannelToFXSend: 'ch_to_fxs',
+	GroupToFXSend: 'grp_to_fxs',
+	FXReturnToFXSend: 'fxr_to_fxs',
+	MixToMatrix: 'mix_to_mtx',
+	GroupToMatrix: 'grp_to_mtx',
+} as const
+
+export type AssignActionId = (typeof AssignActionId)[keyof typeof AssignActionId]
 
 const AssignMixOrLRSinksOptionId = 'mixAssign'
 
