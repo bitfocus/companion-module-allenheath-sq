@@ -62,26 +62,28 @@ export type FaderLaw = 'LinearTaper' | 'AudioTaper'
  * This option allows some flexibility in how status is retrieved to mitigate
  * this issue.
  */
-export enum RetrieveStatusAtStartup {
+export const RetrieveStatusAtStartup = {
 	/**
 	 * Fully retrieve mixer status at connection startup.  This ties up the
 	 * mixer for the longest time, but when done there's no need to sync
 	 * something on-demand later.
 	 */
-	Fully = 'full',
+	Fully: 'full',
 
 	/**
 	 * Slightly delay retrieving mixer status after connection startup, then
 	 * stagger the retrieving of full status over a few seconds.
 	 */
-	Delayed = 'delay',
+	Delayed: 'delay',
 
 	/**
 	 * Don't retrieve any mixer status at connection startup.  Instead retrieve
 	 * individual statuses as they're needed.
 	 */
-	None = 'nosts',
-}
+	None: 'nosts',
+} as const
+
+export type RetrieveStatusAtStartup = (typeof RetrieveStatusAtStartup)[keyof typeof RetrieveStatusAtStartup]
 
 export enum MuteOperation {
 	Toggle = 0,
