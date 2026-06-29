@@ -13,17 +13,19 @@ export type FeedbackDefinitions<FeedbackSet extends string> = {
  * Feedback IDs for feedbacks reacting to the mute status of particular mixer
  * sources/sinks.
  */
-export enum MuteFeedbackId {
-	MuteInputChannel = 'mute_input',
-	MuteLR = 'mute_lr',
-	MuteMix = 'mute_aux',
-	MuteGroup = 'mute_group',
-	MuteMatrix = 'mute_matrix',
-	MuteDCA = 'mute_dca',
-	MuteFXReturn = 'mute_fx_return',
-	MuteFXSend = 'mute_fx_send',
-	MuteMuteGroup = 'mute_mutegroup',
-}
+export const MuteFeedbackId = {
+	MuteInputChannel: 'mute_input',
+	MuteLR: 'mute_lr',
+	MuteMix: 'mute_aux',
+	MuteGroup: 'mute_group',
+	MuteMatrix: 'mute_matrix',
+	MuteDCA: 'mute_dca',
+	MuteFXReturn: 'mute_fx_return',
+	MuteFXSend: 'mute_fx_send',
+	MuteMuteGroup: 'mute_mutegroup',
+} as const
+
+export type MuteFeedbackId = (typeof MuteFeedbackId)[keyof typeof MuteFeedbackId]
 
 /** A map associating mutable input/output types to mute feedback IDs. */
 export const typeToMuteFeedback: Record<InputOutputType, MuteFeedbackId> = {
