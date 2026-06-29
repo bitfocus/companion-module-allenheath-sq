@@ -1,8 +1,7 @@
-import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
-import type { CompanionInputFieldDropdown } from '../compat.js'
+import type { CompanionInputFieldDropdown, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
-import { FadeDurationOptionId, SignalLevelOptionId } from './schemas/fading.js'
+import { FadeDurationOptionId, type LevelAndFadeOptions, SignalLevelOptionId } from './schemas/fading.js'
 import { repr } from '../utils/pretty.js'
 
 export const FadingOption = {
@@ -76,7 +75,7 @@ type FadeType =
 
 const MsPerSecond = 1000
 
-export function getFadeType(instance: sqInstance, options: CompanionOptionValues): FadeType | null {
+export function getFadeType(instance: sqInstance, options: LevelAndFadeOptions): FadeType | null {
 	// Presets that incidentally invoke this function didn't always specify a
 	// fade time, so treat a missing fade as zero to support them.
 	const fade = options[FadeDurationOptionId]

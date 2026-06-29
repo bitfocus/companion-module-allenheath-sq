@@ -32,25 +32,25 @@ export const AssignSourceOptionId = 'source'
 export const AssignSinksOptionId = 'sinks'
 export const AssignStatusOptionId = 'status'
 
-type AssignStatusOption = {
+export type AssignStatusOption = {
 	[AssignStatusOptionId]: AssignStatus
 }
 
-type AssignSourceAndSinksOptions = {
+export type AssignSourceAndSinksOptions = {
 	[AssignSourceOptionId]: number
 	[AssignSinksOptionId]: number[]
 }
 
 type AssignSourceToSinksOptions = AssignSourceAndSinksOptions & AssignStatusOption
 
-type AssignSourceAndMixesAndLRSinksOptions = {
+export type AssignSourceAndMixesAndLRSinksOptions = {
 	[AssignSourceOptionId]: number
 	[AssignSinksOptionId]: (number | typeof LR)[]
 }
 
 type AssignSourceToMixesAndLRSinksOptions = AssignSourceAndMixesAndLRSinksOptions & AssignStatusOption
 
-type AssignMixOrLRSourceAndSinksOptions = {
+export type AssignMixOrLRSourceAndSinksOptions = {
 	[AssignSourceOptionId]: number | typeof LR
 	[AssignSinksOptionId]: number[]
 }

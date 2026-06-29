@@ -1,39 +1,26 @@
-import {
-	type CompanionVariableDefinition,
-	type CompanionVariableValue,
-	InstanceBase,
-	type SomeCompanionConfigField,
-} from '@companion-module/base'
+import type { Equal, Expect } from 'type-testing'
+import { InstanceBase, type SomeCompanionConfigField } from '@companion-module/base'
 import { getActions } from './actions/actions.js'
 import { Choices } from './choices.js'
-import { GetConfigFields, getHost, type SQConfig } from './config.js'
+import {
+	canUpdateConfigWithoutRestarting,
+	GetConfigFields,
+	getHost,
+	noConnectionConfig,
+	type SQConfig,
+	validateConfig,
+} from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
 import type { SQManifest } from './manifest.js'
 import { Mixer } from './mixer/mixer.js'
-import { canUpdateConfigWithoutRestarting, noConnectionConfig, validateConfig } from './config.js'
+import type { Model } from './mixer/model.js'
 import { getPresetDefinitions } from './presets/definitions.js'
-import {
-	CurrentSceneId,
-	SceneRecalledTriggerId,
-	type SQVariables,
-	type CompanionVariableDefinitions,
-} from './variables/manifest.js'
+import { getPresetsStructure } from './presets/structure.js'
+import { CurrentSceneId, SceneRecalledTriggerId, type SQVariables } from './variables/manifest.js'
 import { getVariables } from './variables/variables.js'
 
-function translateVariableDefinitions(defs: CompanionVariableDefinitions<SQVariables>): CompanionVariableDefinition[] {
-	return Object.entries(defs).map(
-		([variableId, { name }]): CompanionVariableDefinition => ({
-			name,
-			variableId,
-		}),
-	)
-}
-
-// Temporary use until the 2.0 upgrade puts it to real use.
-type _UseManifest = SQManifest
-
 /** An SQ mixer connection instance. */
-export class sqInstance extends InstanceBase<SQConfig> {
+export class sqInstance extends InstanceBase<SQManifest> {
 	/** Configuration dictating the behavior of this instance. */
 	config = noConnectionConfig()
 
@@ -75,7 +62,11 @@ export class sqInstance extends InstanceBase<SQConfig> {
 	 * @param variableValue
 	 *   The value of the variable.
 	 */
-	setExtraVariable(variableId: string, _name: string, variableValue: CompanionVariableValue): void {
+	setExtraVariable<Variable extends keyof SQVariables>(
+		variableId: Variable,
+		_name: string,
+		variableValue: NoInfer<SQVariables[Variable]>,
+	): void {
 		// The name of this potentially newly-defined variable is currently not
 		// used.  If we wanted to, we could redefine the entire variable set
 		// (with this new variable included), to expose this new variable in
@@ -92,9 +83,16 @@ export class sqInstance extends InstanceBase<SQConfig> {
 		try {
 			instanceOptions.disableVariableValidation = true
 
-			this.setVariableValues({
-				[variableId]: variableValue,
-			})
+			type assert_VariableAndValueAreCorrectlyTyped = Expect<Equal<SQVariables[Variable], typeof variableValue>>
+
+			this.setVariableValues(
+				// @ts-expect-error TypeScript currently misunderstands multiple
+				// non-overlapping index signatures, despite the above assertion
+				// passing, so the error here must be ignored.
+				{
+					[variableId]: variableValue,
+				},
+			)
 		} finally {
 			instanceOptions.disableVariableValidation = oldValue
 		}
@@ -102,7 +100,7 @@ export class sqInstance extends InstanceBase<SQConfig> {
 
 	/** Set variable definitions for this instance. */
 	initVariableDefinitions(mixer: Mixer): void {
-		this.setVariableDefinitions(translateVariableDefinitions(getVariables(mixer.model)))
+		this.setVariableDefinitions(getVariables(mixer.model))
 
 		this.setVariableValues({
 			[SceneRecalledTriggerId]: mixer.sceneRecalledTrigger,
@@ -112,6 +110,10 @@ export class sqInstance extends InstanceBase<SQConfig> {
 			// and this module didn't do it.
 			[CurrentSceneId]: 1,
 		})
+	}
+
+	#updatePresetDefinitions(model: Model): void {
+		this.setPresetDefinitions(getPresetsStructure(model), getPresetDefinitions(this, model))
 	}
 
 	override async configUpdated(newConfig: SQConfig): Promise<void> {
@@ -131,7 +133,7 @@ export class sqInstance extends InstanceBase<SQConfig> {
 					// presets, so if the label changes, we must redefine presets
 					// even if we don't have to restart the connection.
 					this.#lastLabel = label
-					this.setPresetDefinitions(getPresetDefinitions(this, this.mixer.model))
+					this.#updatePresetDefinitions(this.mixer.model)
 				}
 				return
 			}
@@ -142,19 +144,17 @@ export class sqInstance extends InstanceBase<SQConfig> {
 		const mixer = new Mixer(this)
 		this.mixer = mixer
 
-		const model = mixer.model
-
-		const choices = new Choices(model)
+		const choices = new Choices(mixer.model)
 
 		this.initVariableDefinitions(mixer)
 		this.setActionDefinitions(getActions(this, mixer, choices))
-		this.setFeedbackDefinitions(getFeedbacks(mixer))
+		this.setFeedbackDefinitions(getFeedbacks(this, mixer, choices))
 
 		this.#lastLabel = this.label
-		this.setPresetDefinitions(getPresetDefinitions(this, model))
+		this.#updatePresetDefinitions(mixer.model)
 
 		//this.checkVariables();
-		this.checkFeedbacks()
+		this.checkAllFeedbacks() // XXX optimize?
 
 		mixer.start(getHost(newConfig))
 	}

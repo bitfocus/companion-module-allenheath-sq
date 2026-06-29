@@ -1,13 +1,21 @@
 import type { Equal, Expect } from 'type-testing'
-import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
-import type { CompanionActionDefinitions, CompanionInputFieldDropdown } from '../compat.js'
+import type { CompanionActionDefinitions, CompanionInputFieldDropdown } from '@companion-module/base'
 import { faderNumber } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
-import { AllMuteStripActions, MuteActionId, type MuteActions, StatusOptionId, StripOptionId } from './schemas/mute.js'
+import {
+	AllMuteStripActions,
+	MuteActionId,
+	type MuteActions,
+	type MuteSignalOptions,
+	type MuteStatusOption,
+	StatusOptionId,
+	StripOptionId,
+} from './schemas/mute.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 import { MuteOperation } from '../types.js'
+import type { OldCompanionMigrationAction as CompanionMigrationAction } from '../upgrades/types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
@@ -116,7 +124,7 @@ type MuteOptions = {
 	status: MuteOperation
 }
 
-function getStatus(instance: sqInstance, options: CompanionOptionValues): MuteOperation | null {
+function getStatus(instance: sqInstance, options: MuteStatusOption): MuteOperation | null {
 	const statusOption = options[StatusOptionId]
 	let status
 	switch (statusOption) {
@@ -153,7 +161,7 @@ function getStatus(instance: sqInstance, options: CompanionOptionValues): MuteOp
 function getMuteOptions(
 	instance: sqInstance,
 	model: Model,
-	options: CompanionOptionValues,
+	options: MuteSignalOptions,
 	type: Exclude<InputOutputType, 'lr'>,
 ): MuteOptions | null {
 	const n = toSourceOrSink(instance, model, options[StripOptionId], type)

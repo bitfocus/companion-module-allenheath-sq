@@ -23,26 +23,26 @@ export type LevelActionId = (typeof LevelActionId)[keyof typeof LevelActionId]
 export const LevelSetSourceOptionId = 'source'
 export const LevelSetSinkOptionId = 'sink'
 
-type LevelSourceInMixOrLROptions = {
+export type LevelSourceInMixOrLROptions = {
 	[LevelSetSourceOptionId]: number
 	[LevelSetSinkOptionId]: number | typeof LR
 }
 
-type LevelFadeSourceInMixOrLROptions = LevelSourceInMixOrLROptions & LevelAndFadeOptions
+export type LevelFadeSourceInMixOrLROptions = LevelSourceInMixOrLROptions & LevelAndFadeOptions
 
-type LevelSourceInSinkOptions = {
+export type LevelSourceInSinkOptions = {
 	[LevelSetSourceOptionId]: number
 	[LevelSetSinkOptionId]: number
 }
 
-type LevelFadeSourceInSinkOptions = LevelSourceInSinkOptions & LevelAndFadeOptions
+export type LevelFadeSourceInSinkOptions = LevelSourceInSinkOptions & LevelAndFadeOptions
 
-type LevelMixOrLRInSinkOptions = {
+export type LevelMixOrLRInSinkOptions = {
 	[LevelSetSourceOptionId]: number | typeof LR
 	[LevelSetSinkOptionId]: number
 }
 
-type LevelFadeMixOrLRInSinkOptions = LevelMixOrLRInSinkOptions & LevelAndFadeOptions
+export type LevelFadeMixOrLRInSinkOptions = LevelMixOrLRInSinkOptions & LevelAndFadeOptions
 
 /** Signal level adjustment actions. */
 export type LevelActions = {

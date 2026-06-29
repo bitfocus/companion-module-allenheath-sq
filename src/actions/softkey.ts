@@ -1,6 +1,5 @@
 import type { Equal, Expect } from 'type-testing'
-import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
-import type { CompanionActionDefinitions } from '../compat.js'
+import type { CompanionActionDefinitions } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
@@ -10,9 +9,11 @@ import {
 	SoftKeyOptionId,
 	SoftKeyOp,
 	SoftKeyOpOptionId,
+	type SoftKeyOptions,
 } from './schemas/softkey.js'
+import type { OldCompanionMigrationAction as CompanionMigrationAction } from '../upgrades/types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
-import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
+import { type ZeroIndexed, zeroIndexedNumber } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
 
 const ObsoleteZeroBasedSoftKeyOptionId = 'softKey'
@@ -45,6 +46,7 @@ export function tryMakeSoftKeyOneIndexed(action: CompanionMigrationAction): bool
 	moveZeroIndexedOptionToOneIndexed(options, ObsoleteZeroBasedSoftKeyOptionId, SoftKeyOptionId)
 
 	let op: SoftKeyOp
+	// eslint-disable-next-line @typescript-eslint/no-base-to-string
 	switch (String(options[ObsoleteSoftKeyOperationId])) {
 		case ObsoleteSoftKeyOp.Toggle:
 			op = SoftKeyOp.Toggle
@@ -68,12 +70,12 @@ export function tryMakeSoftKeyOneIndexed(action: CompanionMigrationAction): bool
 	return true
 }
 
-type SoftKeyOptions = {
+type SoftKeyOperationInfo = {
 	softKey: ZeroIndexed
 	op: SoftKeyOp
 }
 
-function getSoftKeyOptions(instance: sqInstance, model: Model, options: CompanionOptionValues): SoftKeyOptions | null {
+function getSoftKeyOptions(instance: sqInstance, model: Model, options: SoftKeyOptions): SoftKeyOperationInfo | null {
 	const softKeyVal = Number(options[SoftKeyOptionId]) | 0
 	if (!(1 <= softKeyVal && softKeyVal <= model.softKeys)) {
 		instance.log('error', `Attempting to operate invalid softkey ${softKeyVal}, ignoring`)

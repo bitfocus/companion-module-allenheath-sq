@@ -1,7 +1,8 @@
-import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionOptionValues } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
 import { tryMakeAssignOptionsUserFriendly, tryUpgradeAssignMixOrLREncoding } from './assign.js'
 import { AssignActionId, type AssignStatus } from './schemas/assign.js'
+import { type OldCompanionMigrationAction as CompanionMigrationAction } from '../upgrades/types.js'
 
 function makeObsoleteAssignAction(actionId: AssignActionId, options: CompanionOptionValues): CompanionMigrationAction {
 	return {

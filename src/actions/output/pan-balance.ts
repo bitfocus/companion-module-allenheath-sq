@@ -1,6 +1,5 @@
 import type { Expect, IsNever } from 'type-testing'
-import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
-import type { CompanionActionDefinitions } from '../../compat.js'
+import type { CompanionActionDefinitions } from '@companion-module/base'
 import { faderNumber } from '../../fader-number.js'
 import type { sqInstance } from '../../instance.js'
 import type { Mixer } from '../../mixer/mixer.js'
@@ -14,9 +13,12 @@ import {
 	OutputPanBalanceActionId,
 	type OutputPanBalanceActions,
 	OutputPanBalanceSignalOptionId,
+	type OutputPanBalanceSignalOptions,
 } from './schemas/pan-balance.js'
+import type { PanBalanceOptions } from '../schemas/panning.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
+import type { OldCompanionMigrationAction } from '../../upgrades/types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
 import { repr } from '../../utils/pretty.js'
 
@@ -49,7 +51,7 @@ const ObsoleteOutputPanBalanceFaderOptionId = 'input'
  * This function rewrites actions that are old-style "pan/balance to output"
  * actions to new, sink-type-specific actions.
  */
-export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMigrationAction): boolean {
+export function tryConvertOldPanToOutputActionToSinkSpecific(action: OldCompanionMigrationAction): boolean {
 	if (action.actionId !== ObsoletePanToOutputId) {
 		return false
 	}
@@ -123,7 +125,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
  * zero-indexed number.  This function moves that old, zero-indexed number
  * option to a new, one-indexed number option.
  */
-export function tryMakeOutputPanBalanceItemOneIndexed(action: CompanionMigrationAction): boolean {
+export function tryMakeOutputPanBalanceItemOneIndexed(action: OldCompanionMigrationAction): boolean {
 	if (!AllOutputFaderPanBalanceActions.has(action.actionId)) {
 		return false
 	}
@@ -160,7 +162,7 @@ export function outputPanBalanceActions(
 		faderNumber(label, OutputPanBalanceSignalOptionId, counts, type)
 
 	const getNRPN = (
-		options: CompanionOptionValues,
+		options: OutputPanBalanceSignalOptions,
 		type: Exclude<SinkAsOutputForNRPN<'panBalance'>, 'lr'>,
 	): NRPN<'panBalance'> | null => {
 		const n = toSourceOrSink(instance, model, options[OutputPanBalanceSignalOptionId], type)
@@ -176,7 +178,7 @@ export function outputPanBalanceActions(
 		void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
 	}
 
-	const setPanBalance = (options: CompanionOptionValues, nrpn: NRPN<'panBalance'>) => {
+	const setPanBalance = (options: PanBalanceOptions, nrpn: NRPN<'panBalance'>) => {
 		const panBalance = getPanBalanceOperation(instance, options)
 		if (panBalance === null) {
 			return
@@ -208,9 +210,9 @@ export function outputPanBalanceActions(
 				PanLevelOption,
 				ShowVarOption,
 			],
-			learn: async ({ options }) => {
+			learn: async () => {
 				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip)
-				return learnShowVar(instance, options, nrpn)
+				return learnShowVar(instance, nrpn)
 			},
 			subscribe: async (_action) => {
 				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip)
@@ -220,6 +222,7 @@ export function outputPanBalanceActions(
 				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip)
 				setPanBalance(options, nrpn)
 			},
+			optionsToMonitorForSubscribe: [],
 		},
 		[OutputPanBalanceActionId.MixPanBalanceOutput]: {
 			name: 'Mix Pan/Bal to output',
@@ -230,7 +233,7 @@ export function outputPanBalanceActions(
 					return undefined
 				}
 
-				return learnShowVar(instance, options, nrpn)
+				return learnShowVar(instance, nrpn)
 			},
 			subscribe: async ({ options }) => {
 				const nrpn = getNRPN(options, 'mix')
@@ -248,6 +251,7 @@ export function outputPanBalanceActions(
 
 				setPanBalance(options, nrpn)
 			},
+			optionsToMonitorForSubscribe: [OutputPanBalanceSignalOptionId],
 		},
 
 		[OutputPanBalanceActionId.MatrixPanBalanceOutput]: {
@@ -259,7 +263,7 @@ export function outputPanBalanceActions(
 					return undefined
 				}
 
-				return learnShowVar(instance, options, nrpn)
+				return learnShowVar(instance, nrpn)
 			},
 			subscribe: async ({ options }) => {
 				const nrpn = getNRPN(options, 'matrix')
@@ -277,6 +281,7 @@ export function outputPanBalanceActions(
 
 				setPanBalance(options, nrpn)
 			},
+			optionsToMonitorForSubscribe: [OutputPanBalanceSignalOptionId],
 		},
 	}
 }

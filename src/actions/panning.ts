@@ -1,8 +1,12 @@
-import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
-import type { CompanionInputFieldDropdown, CompanionInputFieldTextInput } from '../compat.js'
+import type { CompanionInputFieldDropdown, CompanionInputFieldTextInput, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
-import { PanBalanceLevelOptionId, ShowVarOptionId } from './schemas/panning.js'
+import {
+	PanBalanceLevelOptionId,
+	type PanBalanceOptions,
+	type PanBalanceShowVarOption,
+	ShowVarOptionId,
+} from './schemas/panning.js'
 import type { PanBalance } from '../types.js'
 import { repr } from '../utils/pretty.js'
 
@@ -52,10 +56,7 @@ export const PanLevelOption = {
  * @returns
  *   The pan/balance operation to perform.
  */
-export function getPanBalanceOperation(
-	instance: sqInstance,
-	options: CompanionOptionValues,
-): PanBalanceOperation | null {
+export function getPanBalanceOperation(instance: sqInstance, options: PanBalanceOptions): PanBalanceOperation | null {
 	const rawOptionVal = options[PanBalanceLevelOptionId]
 	if (rawOptionVal === 998) {
 		return { type: 'step-right' }
@@ -94,15 +95,10 @@ export const ShowVarOption = {
  * Return the desired learned variables to write a pan/balance variable
  * specifier to the `ShowVarOption` output option.
  */
-export function learnShowVar<Options extends CompanionOptionValues>(
-	instance: sqInstance,
-	options: Options,
-	nrpn: NRPN<'panBalance'>,
-): Options {
+export function learnShowVar(instance: sqInstance, nrpn: NRPN<'panBalance'>): PanBalanceShowVarOption {
 	const { MSB, LSB } = splitNRPN(nrpn)
 
 	return {
-		...options,
 		[ShowVarOptionId]: `$(${instance.label}:pan_${MSB}.${LSB})`,
 	}
 }

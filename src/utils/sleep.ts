@@ -1,7 +1,7 @@
 /** Busy-wait until `ml` milliseconds have passed. */
 export function sleep(ml: number): void {
 	const dt = Date.now()
-	let cd = null
+	let cd: number
 	do {
 		cd = Date.now()
 	} while (cd - dt < ml)

@@ -20,26 +20,26 @@ export type PanBalanceActionId = (typeof PanBalanceActionId)[keyof typeof PanBal
 export const PanBalanceSourceOptionId = 'source'
 export const PanBalanceSinkOptionId = 'sink'
 
-type PanBalanceSourceAndMixOrLRSinkOptions = {
+export type PanBalanceSourceAndMixOrLRSinkOptions = {
 	[PanBalanceSourceOptionId]: number
 	[PanBalanceSinkOptionId]: number | 'lr'
 }
 
-type PanBalanceSourceInMixOrLROptions = PanBalanceSourceAndMixOrLRSinkOptions & PanBalanceOptions
+export type PanBalanceSourceInMixOrLROptions = PanBalanceSourceAndMixOrLRSinkOptions & PanBalanceOptions
 
-type PanBalanceMixOrLRSourceAndSinkOptions = {
+export type PanBalanceMixOrLRSourceAndSinkOptions = {
 	[PanBalanceSourceOptionId]: number | 'lr'
 	[PanBalanceSinkOptionId]: number
 }
 
-type PanBalanceMixOrLRInSinkOptions = PanBalanceMixOrLRSourceAndSinkOptions & PanBalanceOptions
+export type PanBalanceMixOrLRInSinkOptions = PanBalanceMixOrLRSourceAndSinkOptions & PanBalanceOptions
 
-type PanBalanceSourceAndSinkOptions = {
+export type PanBalanceSourceAndSinkOptions = {
 	[PanBalanceSourceOptionId]: number
 	[PanBalanceSinkOptionId]: number
 }
 
-type PanBalanceSourceInSinkOptions = PanBalanceSourceAndSinkOptions & PanBalanceOptions
+export type PanBalanceSourceInSinkOptions = PanBalanceSourceAndSinkOptions & PanBalanceOptions
 
 /** Signal pan/balance adjustment in stereo sink actions. */
 export type PanBalanceActions = {

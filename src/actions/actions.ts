@@ -1,9 +1,9 @@
-import type { CompanionActionDefinition } from '@companion-module/base'
+import type { CompanionActionDefinitions } from '@companion-module/base'
 import { assignActions } from './assign.js'
 import type { Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { levelActions } from './level.js'
-import type { ActionId } from './manifest.js'
+import type { SQActions } from './manifest.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { muteActions } from './mute.js'
 import { outputLevelActions } from './output/level.js'
@@ -28,7 +28,7 @@ export function getActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	choices: Choices,
-): Record<ActionId, CompanionActionDefinition> {
+): CompanionActionDefinitions<SQActions> {
 	const mixesAndLR = choices.mixesAndLR
 
 	return {

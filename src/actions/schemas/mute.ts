@@ -30,11 +30,11 @@ type MuteStripOption = {
 	[StripOptionId]: number
 }
 
-type MuteStatusOption = {
+export type MuteStatusOption = {
 	[StatusOptionId]: MuteOperation
 }
 
-type MuteSignalOptions = MuteStripOption & MuteStatusOption
+export type MuteSignalOptions = MuteStripOption & MuteStatusOption
 
 /** Signal muting actions. */
 export type MuteActions = {

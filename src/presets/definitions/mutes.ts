@@ -1,15 +1,36 @@
 import type {
-	CompanionButtonPresetDefinition,
 	CompanionButtonStyleProps,
 	CompanionFeedbackButtonStyleResult,
 	CompanionPresetAction,
+	CompanionPresetDefinition,
 	CompanionPresetDefinitions,
+	CompanionPresetOptionValues,
+	CompanionSimplePresetDefinition,
+	ExpressionOrValue,
 } from '@companion-module/base'
-import { type MuteActionId, StatusOptionId, StripOptionId } from '../../actions/schemas/mute.js'
-import type { MuteFeedbackId } from '../../feedbacks/schemas/mute.js'
-import type { Model } from '../../mixer/model.js'
+import type { SQActions } from '../../actions/manifest.js'
+import { type MuteActionId, type MuteSignalOptions, StatusOptionId, StripOptionId } from '../../actions/schemas/mute.js'
+import {
+	MuteFeedbackFaderOptionId,
+	type MuteFeedbackId,
+	type MuteFeedbackNumberedSignalOptions,
+} from '../../feedbacks/schemas/mute.js'
+import {
+	MuteDCAPresetId,
+	MuteFXReturnPresetId,
+	MuteFXSendPresetId,
+	MuteGroupPresetId,
+	MuteInputChannelPresetId,
+	MuteLRPresetId,
+	MuteMatrixPresetId,
+	MuteMixPresetId,
+	MuteMuteGroupPresetId,
+} from '../ids.js'
+import type { SQManifest } from '../../manifest.js'
 import { MuteOperation } from '../../types.js'
-import { White, Black } from '../../utils/colors.js'
+import { White, Black, CarmineRed } from '../../utils/colors.js'
+
+export const MutePresetStripLocalVariableId = 'n'
 
 const MutePresetStyleCommon = {
 	size: 'auto',
@@ -17,24 +38,39 @@ const MutePresetStyleCommon = {
 	bgcolor: Black,
 } as const satisfies Omit<CompanionButtonStyleProps, 'text'>
 
-const StatusOptionValue = MuteOperation.Toggle
+const StripNumberOptionValue = {
+	isExpression: true,
+	value: `$(local:${MutePresetStripLocalVariableId})`,
+} as const satisfies ExpressionOrValue<number>
 
-const MuteFeedbackStyle = {} as const satisfies CompanionFeedbackButtonStyleResult
+const StatusOptionValue = {
+	isExpression: false,
+	value: MuteOperation.Toggle,
+} as const satisfies ExpressionOrValue<MuteOperation>
 
-const EmptyStepList = [] as const satisfies CompanionPresetAction[]
+const NumberedSignalActionOptions = {
+	[StripOptionId]: StripNumberOptionValue,
+	[StatusOptionId]: StatusOptionValue,
+} as const satisfies CompanionPresetOptionValues<MuteSignalOptions>
 
-type NumberedSignalMuteType = Exclude<MuteFeedbackId & MuteActionId, 'mute_lr'>
+const MuteNumberedSignalFeedbackOptions = {
+	[MuteFeedbackFaderOptionId]: StripNumberOptionValue,
+} as const satisfies CompanionPresetOptionValues<MuteFeedbackNumberedSignalOptions>
+
+const MuteFeedbackStyle = {
+	color: Black,
+	bgcolor: CarmineRed,
+} as const satisfies CompanionFeedbackButtonStyleResult
+
+const EmptyStepList = [] as const satisfies CompanionPresetAction<SQActions>[]
 
 function createNumberedSignalMutePreset(
-	category: string,
 	label: string,
-	actionId: NumberedSignalMuteType,
-	n: number,
-): CompanionButtonPresetDefinition {
-	const name = `${label} ${n + 1}`
+	actionId: Exclude<MuteFeedbackId & MuteActionId, 'mute_lr'>,
+): CompanionSimplePresetDefinition<SQManifest> {
+	const name = `Mute ${label} $(local:${MutePresetStripLocalVariableId})`
 	return {
-		type: 'button',
-		category,
+		type: 'simple',
 		name,
 		style: {
 			text: name,
@@ -45,10 +81,7 @@ function createNumberedSignalMutePreset(
 				down: [
 					{
 						actionId,
-						options: {
-							[StripOptionId]: n + 1,
-							[StatusOptionId]: StatusOptionValue,
-						},
+						options: NumberedSignalActionOptions,
 					},
 				],
 				up: EmptyStepList,
@@ -57,20 +90,26 @@ function createNumberedSignalMutePreset(
 		feedbacks: [
 			{
 				feedbackId: actionId,
-				options: {
-					n: n + 1,
-				},
+				options: MuteNumberedSignalFeedbackOptions,
 				style: MuteFeedbackStyle,
+			},
+		],
+		localVariables: [
+			{
+				variableName: MutePresetStripLocalVariableId,
+				headline: `${label} to mute/unmute`,
+				variableType: 'simple',
+				startupValue: 1,
 			},
 		],
 	}
 }
 
-// The LR preset action doesn't have a strip identification option, so define
-// this preset specially to omit it.
+// The LR preset action doesn't have a strip identification option and doesn't
+// require a local variable to use in identfiying it.  Define this preset
+// specially to omit both.
 const MuteLRPresetDefinition = {
-	type: 'button',
-	category: 'Mute Mix - Group',
+	type: 'simple',
 	name: `Mute LR`,
 	style: {
 		text: 'Mute LR',
@@ -82,7 +121,7 @@ const MuteLRPresetDefinition = {
 				{
 					actionId: 'mute_lr',
 					options: {
-						[StatusOptionId]: MuteOperation.Toggle,
+						[StatusOptionId]: StatusOptionValue,
 					},
 				},
 			],
@@ -96,32 +135,18 @@ const MuteLRPresetDefinition = {
 			style: MuteFeedbackStyle,
 		},
 	],
-} as const satisfies CompanionButtonPresetDefinition
+} as const satisfies CompanionPresetDefinition<SQManifest>
 
-export function mutePresets(model: Model): CompanionPresetDefinitions {
-	const presets: CompanionPresetDefinitions = {}
-
-	/* MUTE */
-	const addMutePresetsForType = (
-		category: string,
-		label: string,
-		type: NumberedSignalMuteType,
-		count: number,
-	): void => {
-		for (let i = 0; i < count; i++) {
-			presets[`preset_${type}_${i}`] = createNumberedSignalMutePreset(category, label, type, i)
-		}
+export function mutePresets(): CompanionPresetDefinitions<SQManifest> {
+	return {
+		[MuteLRPresetId]: MuteLRPresetDefinition,
+		[MuteInputChannelPresetId]: createNumberedSignalMutePreset('Input Channel', 'mute_input'),
+		[MuteMixPresetId]: createNumberedSignalMutePreset('Mix', 'mute_aux'),
+		[MuteGroupPresetId]: createNumberedSignalMutePreset('Group', 'mute_group'),
+		[MuteMatrixPresetId]: createNumberedSignalMutePreset('Matrix', 'mute_group'),
+		[MuteFXSendPresetId]: createNumberedSignalMutePreset('FX Send', 'mute_fx_send'),
+		[MuteFXReturnPresetId]: createNumberedSignalMutePreset('FX Return', 'mute_fx_return'),
+		[MuteDCAPresetId]: createNumberedSignalMutePreset('DCA', 'mute_dca'),
+		[MuteMuteGroupPresetId]: createNumberedSignalMutePreset('Mute Group', 'mute_mutegroup'),
 	}
-
-	addMutePresetsForType('Mute Input', 'Input channel', 'mute_input', model.inputOutputCounts.inputChannel)
-	presets['preset_lr'] = MuteLRPresetDefinition
-	addMutePresetsForType('Mute Mix - Group', 'Mix', 'mute_aux', model.inputOutputCounts.mix)
-	addMutePresetsForType('Mute Mix - Group', 'Group', 'mute_group', model.inputOutputCounts.group)
-	addMutePresetsForType('Mute Mix - Group', 'Matrix', 'mute_matrix', model.inputOutputCounts.matrix)
-	addMutePresetsForType('Mute FX', 'FX Send', 'mute_fx_send', model.inputOutputCounts.fxSend)
-	addMutePresetsForType('Mute FX', 'FX Return', 'mute_fx_return', model.inputOutputCounts.fxReturn)
-	addMutePresetsForType('Mute DCA', 'DCA', 'mute_dca', model.inputOutputCounts.dca)
-	addMutePresetsForType('Mute MuteGroup', 'MuteGroup', 'mute_mutegroup', model.inputOutputCounts.muteGroup)
-
-	return presets
 }

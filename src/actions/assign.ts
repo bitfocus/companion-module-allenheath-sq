@@ -1,11 +1,12 @@
-import type { CompanionInputFieldBase, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
-import type { Choices } from '../choices.js'
 import type {
 	CompanionActionDefinitions,
+	CompanionInputFieldBase,
 	CompanionInputFieldDropdown,
 	CompanionInputFieldMultiDropdown,
 	CompanionInputFieldNumber,
-} from '../compat.js'
+	CompanionOptionValues,
+} from '@companion-module/base'
+import type { Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import {
 	convertZeroIndexedLowercaseLRArrayOptionToOneIndexedUppercaseLRArrayOption,
@@ -19,13 +20,18 @@ import type { InputOutputType, Model } from '../mixer/model.js'
 import {
 	AssignActionId,
 	type AssignActions,
+	type AssignMixOrLRSourceAndSinksOptions,
 	AssignSinksOptionId,
+	type AssignSourceAndMixesAndLRSinksOptions,
+	type AssignSourceAndSinksOptions,
 	AssignSourceOptionId,
 	AssignStatus,
+	type AssignStatusOption,
 	AssignStatusOptionId,
 } from './schemas/assign.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { LR } from '../types.js'
+import type { OldCompanionMigrationAction as CompanionMigrationAction } from '../upgrades/types.js'
 import {
 	convertZeroIndexedArrayOptionToOneIndexed,
 	moveZeroIndexedOptionToOneIndexed,
@@ -235,7 +241,7 @@ function assignOptionToSinks(
  * @returns
  *   An array of sinks.
  */
-function getMixAndLRSinks(options: CompanionOptionValues, model: Model): MixOrLR[] {
+function getMixAndLRSinks(options: AssignSourceAndMixesAndLRSinksOptions, model: Model): MixOrLR[] {
 	const mixAssign = options[AssignSinksOptionId]
 	if (!Array.isArray(mixAssign)) {
 		return []
@@ -286,7 +292,7 @@ function sinksOption(
 	}
 }
 
-function activate(options: CompanionOptionValues): boolean {
+function activate(options: AssignStatusOption): boolean {
 	switch (options[AssignStatusOptionId]) {
 		case AssignStatus.Active:
 			return true
@@ -369,12 +375,17 @@ export function assignActions(
 		MatrixSinks = sinkNumbers('Matrix', 'matrixes')
 	}
 
-	const getSource = (options: CompanionOptionValues, type: 'inputChannel' | 'group' | 'fxReturn') =>
-		toSourceOrSink(instance, model, options[AssignSourceOptionId], type)
-	const getMixOrLRSource = (options: CompanionOptionValues) => toMixOrLR(instance, model, options[AssignSourceOptionId])
+	const getSource = (
+		options: AssignSourceAndSinksOptions | AssignMixOrLRSourceAndSinksOptions | AssignSourceAndMixesAndLRSinksOptions,
+		type: 'inputChannel' | 'group' | 'fxReturn',
+	) => toSourceOrSink(instance, model, options[AssignSourceOptionId], type)
+	const getMixOrLRSource = (options: AssignMixOrLRSourceAndSinksOptions) =>
+		toMixOrLR(instance, model, options[AssignSourceOptionId])
 
-	const getSinks = (options: CompanionOptionValues, type: 'group' | 'fxSend' | 'matrix') =>
-		assignOptionToSinks(options[AssignSinksOptionId], model, type)
+	const getSinks = (
+		options: AssignSourceAndSinksOptions | AssignMixOrLRSourceAndSinksOptions | AssignSourceAndMixesAndLRSinksOptions,
+		type: 'group' | 'fxSend' | 'matrix',
+	) => assignOptionToSinks(options[AssignSinksOptionId], model, type)
 
 	return {
 		[AssignActionId.InputChannelToMix]: {

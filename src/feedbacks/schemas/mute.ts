@@ -24,11 +24,13 @@ export const AllMuteWithStripFeedbacks: ReadonlySet<string> = new Set(
 
 export const MuteFeedbackFaderOptionId = 'n'
 
-type MuteNumberedSignalType = {
+export type MuteFeedbackNumberedSignalOptions = {
+	[MuteFeedbackFaderOptionId]: number
+}
+
+export type MuteFeedbackNumberedSignalType = {
 	type: 'boolean'
-	options: {
-		[MuteFeedbackFaderOptionId]: number
-	}
+	options: MuteFeedbackNumberedSignalOptions
 }
 
 /** Mute feedbacks. */
@@ -38,14 +40,14 @@ export type MuteFeedbacks = {
 		// There's only one LR signal, so no need for an option to identify it.
 		options: Record<never, never>
 	}
-	[MuteFeedbackId.MuteInputChannel]: MuteNumberedSignalType
-	[MuteFeedbackId.MuteMix]: MuteNumberedSignalType
-	[MuteFeedbackId.MuteGroup]: MuteNumberedSignalType
-	[MuteFeedbackId.MuteMatrix]: MuteNumberedSignalType
-	[MuteFeedbackId.MuteDCA]: MuteNumberedSignalType
-	[MuteFeedbackId.MuteFXReturn]: MuteNumberedSignalType
-	[MuteFeedbackId.MuteFXSend]: MuteNumberedSignalType
-	[MuteFeedbackId.MuteMuteGroup]: MuteNumberedSignalType
+	[MuteFeedbackId.MuteInputChannel]: MuteFeedbackNumberedSignalType
+	[MuteFeedbackId.MuteMix]: MuteFeedbackNumberedSignalType
+	[MuteFeedbackId.MuteGroup]: MuteFeedbackNumberedSignalType
+	[MuteFeedbackId.MuteMatrix]: MuteFeedbackNumberedSignalType
+	[MuteFeedbackId.MuteDCA]: MuteFeedbackNumberedSignalType
+	[MuteFeedbackId.MuteFXReturn]: MuteFeedbackNumberedSignalType
+	[MuteFeedbackId.MuteFXSend]: MuteFeedbackNumberedSignalType
+	[MuteFeedbackId.MuteMuteGroup]: MuteFeedbackNumberedSignalType
 }
 
 type assert_AllMuteFeedbacksAccountedFor = Expect<Equal<keyof MuteFeedbacks, MuteFeedbackId>>

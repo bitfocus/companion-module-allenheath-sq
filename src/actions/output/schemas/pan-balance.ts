@@ -23,7 +23,7 @@ type OutputPanBalanceSignalOption = {
 	[OutputPanBalanceSignalOptionId]: number
 }
 
-type OutputPanBalanceSignalOptions = OutputPanBalanceSignalOption & PanBalanceOptions
+export type OutputPanBalanceSignalOptions = OutputPanBalanceSignalOption & PanBalanceOptions
 
 /** Output signal pan/balance adjustment actions. */
 export type OutputPanBalanceActions = {

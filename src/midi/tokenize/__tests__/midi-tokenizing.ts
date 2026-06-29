@@ -186,7 +186,7 @@ async function checkTokenizing(server: net.Server, port: number, interactions: r
 		if (e instanceof Error) {
 			throw e
 		} else {
-			throw new Error(`Parse testing threw error: ${e}`)
+			throw new Error(`Parse testing threw error: ${e}`, { cause: e })
 		}
 	} finally {
 		await new Promise<void>((resolve: () => void) => {

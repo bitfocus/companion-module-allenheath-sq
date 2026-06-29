@@ -1,5 +1,4 @@
-import type { CompanionInputFieldBase, DropdownChoice } from '@companion-module/base'
-import type { CompanionInputFieldDropdown } from './compat.js'
+import type { CompanionInputFieldBase, CompanionInputFieldDropdown, DropdownChoice } from '@companion-module/base'
 import type { Model } from './mixer/model.js'
 import { LR } from './types.js'
 

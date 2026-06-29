@@ -1,6 +1,5 @@
-import type { CompanionBooleanFeedbackDefinition, CompanionMigrationFeedback } from '@companion-module/base'
+import type { CompanionBooleanFeedbackDefinition, CompanionFeedbackDefinitions } from '@companion-module/base'
 import { faderNumber } from '../fader-number.js'
-import type { CompanionFeedbackDefinitions } from './manifest.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
@@ -8,9 +7,11 @@ import {
 	AllMuteWithStripFeedbacks,
 	MuteFeedbackFaderOptionId,
 	MuteFeedbackId,
+	type MuteFeedbackNumberedSignalType,
 	type MuteFeedbacks,
 } from './schemas/mute.js'
 import { LRStrip } from '../types.js'
+import { type OldCompanionMigrationFeedback as CompanionMigrationFeedback } from '../upgrades/types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import { CarmineRed, White } from '../utils/colors.js'
 import { type ZeroIndexed, zeroIndexedNumber } from '../utils/indexed.js'
@@ -93,7 +94,10 @@ export function muteFeedbacks(mixer: Mixer): CompanionFeedbackDefinitions<MuteFe
 	function stripOptions(
 		label: string,
 		type: Exclude<InputOutputType, 'lr'>,
-	): Pick<CompanionBooleanFeedbackDefinition, 'name' | 'options' | 'callback'> {
+	): Pick<
+		CompanionBooleanFeedbackDefinition<MuteFeedbackNumberedSignalType['options']>,
+		'name' | 'options' | 'callback'
+	> {
 		return {
 			name: `Mute ${label}`,
 			options: [faderOption(label, type)],

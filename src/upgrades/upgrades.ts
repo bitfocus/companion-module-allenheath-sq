@@ -1,4 +1,4 @@
-import { type CompanionStaticUpgradeScript, EmptyUpgradeScript } from '@companion-module/base'
+import { EmptyUpgradeScript } from '@companion-module/base'
 import { tryFixFXRLevelInFXSIdTypo } from '../actions/level.js'
 import { tryMakeMuteItemOneIndexed, tryTrimMuteLROptions } from '../actions/mute.js'
 import {
@@ -13,42 +13,51 @@ import { tryCoalesceSceneRecallActions } from '../actions/scene.js'
 import { tryMakeSoftKeyOneIndexed } from '../actions/softkey.js'
 import { tryMakeSourceSinkOptionsUserFriendly } from '../actions/user-friendly-sources-sinks.js'
 import {
-	type SQConfig,
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 	tryRemoveUnnecessaryLabelInConfig,
 	tryRenameVariousConfigIds,
 } from '../config.js'
+import { ExpressionlessActionUpdater, ExpressionlessFeedbackUpdater } from './expressionless-updaters.js'
 import { tryMakeMuteFeedbackItemOneIndexed, tryRemoveChannelFromMuteLRFeedback } from '../feedbacks/mute.js'
 import { tryUpdateAllLRMixEncodings } from '../mixer/lr.js'
+import type { UpgradeScript } from './types.js'
 import { ActionUpdater, ConfigUpdater, FeedbackUpdater } from './updaters.js'
+
+// There are no expression-aware upgrade scripts yet, so these are presently
+// naturally unused.  Add forcible uses of them so that `yarn knip` doesn't
+// require they be deleted and readded later.
+void ActionUpdater
+void FeedbackUpdater
 
 export const UpgradeScripts = [
 	EmptyUpgradeScript,
-	ActionUpdater(tryCoalesceSceneRecallActions),
+	ExpressionlessActionUpdater(tryCoalesceSceneRecallActions),
 	ConfigUpdater(tryEnsureModelOptionInConfig),
 	ConfigUpdater(tryEnsureLabelInConfig),
-	ActionUpdater(tryConvertOldLevelToOutputActionToSinkSpecific),
-	ActionUpdater(tryConvertOldPanToOutputActionToSinkSpecific),
+	ExpressionlessActionUpdater(tryConvertOldLevelToOutputActionToSinkSpecific),
+	ExpressionlessActionUpdater(tryConvertOldPanToOutputActionToSinkSpecific),
 	// ...yes, we added the `'label'` config option above because we thought it
 	// was the only way to get the instance label, and now we're removing it
 	// because there in fact *is* a way to get that label without requiring that
 	// users redundantly specify it.  So it goes.
 	ConfigUpdater(tryRemoveUnnecessaryLabelInConfig),
-	ActionUpdater(tryUpdateAllLRMixEncodings),
-	ActionUpdater(tryFixFXRLevelInFXSIdTypo),
+	ExpressionlessActionUpdater(tryUpdateAllLRMixEncodings),
+	ExpressionlessActionUpdater(tryFixFXRLevelInFXSIdTypo),
 	ConfigUpdater(tryRenameVariousConfigIds),
 	// Meticulously update every formerly zero-based option value to one-based,
 	// because a great many options, in order to be selectable by expression, need
 	// to be user-understandable.  Boo-urns!
-	ActionUpdater(tryMakeSoftKeyOneIndexed),
-	ActionUpdater(tryMakeMuteItemOneIndexed),
-	ActionUpdater(tryTrimMuteLROptions),
-	ActionUpdater(tryMakeOutputLevelItemOneIndexed),
-	ActionUpdater(tryMakeOutputPanBalanceItemOneIndexed),
-	FeedbackUpdater(tryRemoveChannelFromMuteLRFeedback),
-	FeedbackUpdater(tryMakeMuteFeedbackItemOneIndexed),
-	ActionUpdater(tryMakeSourceSinkOptionsUserFriendly),
+	ExpressionlessActionUpdater(tryMakeSoftKeyOneIndexed),
+	ExpressionlessActionUpdater(tryMakeMuteItemOneIndexed),
+	ExpressionlessActionUpdater(tryTrimMuteLROptions),
+	ExpressionlessActionUpdater(tryMakeOutputLevelItemOneIndexed),
+	ExpressionlessActionUpdater(tryMakeOutputPanBalanceItemOneIndexed),
+	ExpressionlessFeedbackUpdater(tryRemoveChannelFromMuteLRFeedback),
+	ExpressionlessFeedbackUpdater(tryMakeMuteFeedbackItemOneIndexed),
+	ExpressionlessActionUpdater(tryMakeSourceSinkOptionsUserFriendly),
 	// Here endeth meticulous, exhaustive updating of all zero-indexed option
 	// values to one-indexed.
-] satisfies CompanionStaticUpgradeScript<SQConfig>[]
+
+	// EXPRESSIONLESS UPDATERS ARE FORBIDDEN AFTER THIS POINT
+] satisfies UpgradeScript[]

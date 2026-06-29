@@ -1,7 +1,11 @@
 import type { Equal, Expect, IsNever } from 'type-testing'
-import type { CompanionMigrationAction, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type {
+	CompanionActionDefinitions,
+	CompanionInputFieldDropdown,
+	CompanionInputFieldNumber,
+	DropdownChoice,
+} from '@companion-module/base'
 import { mixOrLROption } from '../choices.js'
-import type { CompanionActionDefinitions, CompanionInputFieldDropdown, CompanionInputFieldNumber } from '../compat.js'
 import { faderNumber } from '../fader-number.js'
 import { FadingOption, getFadeType, LevelOption } from './fading.js'
 import type { sqInstance } from '../instance.js'
@@ -19,9 +23,18 @@ import {
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
 } from '../mixer/nrpn/source-to-sink.js'
-import { LevelActionId, type LevelActions, LevelSetSinkOptionId, LevelSetSourceOptionId } from './schemas/level.js'
+import {
+	LevelActionId,
+	type LevelActions,
+	type LevelFadeMixOrLRInSinkOptions,
+	type LevelFadeSourceInMixOrLROptions,
+	type LevelFadeSourceInSinkOptions,
+	LevelSetSinkOptionId,
+	LevelSetSourceOptionId,
+} from './schemas/level.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { LR, LRStrip } from '../types.js'
+import type { OldCompanionMigrationAction as CompanionMigrationAction } from '../upgrades/types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 
@@ -151,9 +164,9 @@ type LevelSourceToMixOrLR = [SourceForSourceInMixAndLRForNRPN<'level'>, 'mix-or-
 type LevelMixOrLRToSink = ['mix-or-lr', SinkForMixAndLRInSinkForNRPN<'level'>]
 
 type LevelSourceSinkOptions =
-	| [CompanionOptionValues, LevelSourceToSink]
-	| [CompanionOptionValues, ...LevelSourceToMixOrLR]
-	| [CompanionOptionValues, ...LevelMixOrLRToSink]
+	| [LevelFadeSourceInSinkOptions, LevelSourceToSink]
+	| [LevelFadeSourceInMixOrLROptions, ...LevelSourceToMixOrLR]
+	| [LevelFadeMixOrLRInSinkOptions, ...LevelMixOrLRToSink]
 
 function getLevelNRPN(
 	instance: sqInstance,

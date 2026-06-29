@@ -11,7 +11,7 @@ type PanBalanceLevelOption = {
 	[PanBalanceLevelOptionId]: PanBalanceChoice
 }
 
-type PanBalanceShowVarOption = {
+export type PanBalanceShowVarOption = {
 	[ShowVarOptionId]: string
 }
 

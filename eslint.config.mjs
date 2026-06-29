@@ -3,7 +3,6 @@
 import { generateEslintConfig } from '@companion-module/tools/eslint/config.mjs'
 
 const baseConfig = await generateEslintConfig({
-	enableJest: true,
 	enableTypescript: true,
 })
 
@@ -116,31 +115,6 @@ const customConfig = [
 							name: '@companion-module/base',
 							importNames: ['assertNever'],
 							message: "Use `Expect<IsNever<typeof val>>` from 'type-testing' instead.",
-						},
-						{
-							name: '@companion-module/base',
-							importNames: ['CompanionInputFieldCheckbox'],
-							message: "Use `CompanionInputFieldCheckbox` from 'src/compat.ts' instead.",
-						},
-						{
-							name: '@companion-module/base',
-							importNames: ['CompanionInputFieldDropdown'],
-							message: "Use `CompanionInputFieldDropdown` from 'src/compat.ts' instead.",
-						},
-						{
-							name: '@companion-module/base',
-							importNames: ['CompanionInputFieldMultiDropdown'],
-							message: "Use `CompanionInputFieldMultiDropdown` from 'src/compat.ts' instead.",
-						},
-						{
-							name: '@companion-module/base',
-							importNames: ['CompanionInputFieldNumber'],
-							message: "Use `CompanionInputFieldNumber` from 'src/compat.ts' instead.",
-						},
-						{
-							name: '@companion-module/base',
-							importNames: ['CompanionInputFieldTextInput'],
-							message: "Use `CompanionInputFieldTextInput` from 'src/compat.ts' instead.",
 						},
 						{
 							name: '@companion-module/base',

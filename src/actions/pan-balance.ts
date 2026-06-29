@@ -1,7 +1,11 @@
 import type { Equal, Expect, IsNever } from 'type-testing'
-import type { CompanionMigrationAction, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type {
+	CompanionActionDefinitions,
+	CompanionInputFieldDropdown,
+	CompanionInputFieldNumber,
+	DropdownChoice,
+} from '@companion-module/base'
 import { mixOrLROption } from '../choices.js'
-import type { CompanionActionDefinitions, CompanionInputFieldDropdown, CompanionInputFieldNumber } from '../compat.js'
 import { faderNumber } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import {
@@ -13,19 +17,24 @@ import type { Model } from '../mixer/model.js'
 import type { NRPN } from '../mixer/nrpn/nrpn.js'
 import {
 	BalanceNRPNCalculator,
-	type SinkForMixAndLRInSinkForNRPN,
 	type SourceForSourceInMixAndLRForNRPN,
+	type SinkForMixAndLRInSinkForNRPN,
 	type SourceSinkForNRPN,
 } from '../mixer/nrpn/source-to-sink.js'
 import { getPanBalanceOperation, learnShowVar, PanLevelOption, ShowVarOption } from './panning.js'
 import {
 	PanBalanceActionId,
 	type PanBalanceActions,
+	type PanBalanceMixOrLRInSinkOptions,
 	PanBalanceSinkOptionId,
+	type PanBalanceSourceInMixOrLROptions,
+	type PanBalanceSourceInSinkOptions,
 	PanBalanceSourceOptionId,
 } from './schemas/pan-balance.js'
+import type { PanBalanceOptions } from './schemas/panning.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { LR, LRStrip } from '../types.js'
+import type { OldCompanionMigrationAction as CompanionMigrationAction } from '../upgrades/types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 
@@ -117,7 +126,14 @@ type PanBalanceSourceSink =
 	| [SourceForSourceInMixAndLRForNRPN<'panBalance'>, 'mix-or-lr']
 	| ['mix-or-lr', SinkForMixAndLRInSinkForNRPN<'panBalance'>]
 
-type OptionsForPanBalanceSourceSink<_SourceSink extends PanBalanceSourceSink> = CompanionOptionValues
+type OptionsForPanBalanceSourceSink<SourceSink extends PanBalanceSourceSink> =
+	SourceSink extends SourceSinkForNRPN<'panBalance'>
+		? PanBalanceSourceInSinkOptions
+		: SourceSink extends [SourceForSourceInMixAndLRForNRPN<'panBalance'>, 'mix-or-lr']
+			? PanBalanceSourceInMixOrLROptions
+			: SourceSink extends ['mix-or-lr', SinkForMixAndLRInSinkForNRPN<'panBalance'>]
+				? PanBalanceMixOrLRInSinkOptions
+				: never
 
 function getPanBalanceNRPN<SourceSink extends PanBalanceSourceSink>(
 	instance: sqInstance,
@@ -227,7 +243,7 @@ export function panBalanceActions(
 		MixOrLRSink = mixNumberOrLRSink('Mix')
 	}
 
-	const setPanBalance = <Options extends CompanionOptionValues>(options: Options, nrpn: NRPN<'panBalance'>) => {
+	const setPanBalance = (options: PanBalanceOptions, nrpn: NRPN<'panBalance'>) => {
 		const panBalance = getPanBalanceOperation(instance, options)
 		if (panBalance === null) {
 			return
@@ -259,7 +275,7 @@ export function panBalanceActions(
 					return
 				}
 
-				return learnShowVar(instance, options, nrpn)
+				return learnShowVar(instance, nrpn)
 			},
 			subscribe: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['inputChannel', 'mix-or-lr'], options)
@@ -277,6 +293,7 @@ export function panBalanceActions(
 
 				setPanBalance(options, nrpn)
 			},
+			optionsToMonitorForSubscribe: [PanBalanceSourceOptionId, PanBalanceSinkOptionId],
 		},
 		[PanBalanceActionId.GroupPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal group level to mix',
@@ -287,7 +304,7 @@ export function panBalanceActions(
 					return
 				}
 
-				return learnShowVar(instance, options, nrpn)
+				return learnShowVar(instance, nrpn)
 			},
 			subscribe: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['group', 'mix-or-lr'], options)
@@ -305,6 +322,7 @@ export function panBalanceActions(
 
 				setPanBalance(options, nrpn)
 			},
+			optionsToMonitorForSubscribe: [PanBalanceSourceOptionId, PanBalanceSinkOptionId],
 		},
 		[PanBalanceActionId.FXReturnPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal FX return level to mix',
@@ -315,7 +333,7 @@ export function panBalanceActions(
 					return
 				}
 
-				return learnShowVar(instance, options, nrpn)
+				return learnShowVar(instance, nrpn)
 			},
 			subscribe: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['fxReturn', 'mix-or-lr'], options)
@@ -333,6 +351,7 @@ export function panBalanceActions(
 
 				setPanBalance(options, nrpn)
 			},
+			optionsToMonitorForSubscribe: [PanBalanceSourceOptionId, PanBalanceSinkOptionId],
 		},
 		[PanBalanceActionId.FXReturnPanBalanceInGroup]: {
 			name: 'Pan/Bal FX return level to group',
@@ -357,7 +376,7 @@ export function panBalanceActions(
 					return undefined
 				}
 
-				return learnShowVar(instance, options, nrpn)
+				return learnShowVar(instance, nrpn)
 			},
 			subscribe: async ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['mix-or-lr', 'matrix'], options)
@@ -376,6 +395,7 @@ export function panBalanceActions(
 
 				setPanBalance(options, nrpn)
 			},
+			optionsToMonitorForSubscribe: [PanBalanceSourceOptionId, PanBalanceSinkOptionId],
 		},
 		[PanBalanceActionId.GroupPanBalanceInMatrix]: {
 			name: 'Pan/Bal group level to matrix',
@@ -386,7 +406,7 @@ export function panBalanceActions(
 					return
 				}
 
-				return learnShowVar(instance, options, nrpn)
+				return learnShowVar(instance, nrpn)
 			},
 			subscribe: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['group', 'matrix'], options)
@@ -404,6 +424,7 @@ export function panBalanceActions(
 
 				setPanBalance(options, nrpn)
 			},
+			optionsToMonitorForSubscribe: [PanBalanceSourceOptionId, PanBalanceSinkOptionId],
 		},
 	}
 }

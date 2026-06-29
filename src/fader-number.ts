@@ -1,5 +1,4 @@
-import type { CompanionInputFieldBase } from '@companion-module/base'
-import type { CompanionInputFieldNumber } from './compat.js'
+import type { CompanionInputFieldBase, CompanionInputFieldNumber } from '@companion-module/base'
 import type { InputOutputType, Model } from './mixer/model.js'
 
 /**

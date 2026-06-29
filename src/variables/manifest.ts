@@ -1,4 +1,3 @@
-import type { CompanionVariableValues } from '@companion-module/base'
 import type { Level } from '../mixer/level.js'
 import type { PanBalance } from '../types.js'
 
@@ -21,10 +20,4 @@ export type SQVariables = {
 
 	[level: `level_${number}.${number}`]: Level
 	[panLevel: `pan_${number}.${number}`]: PanBalance
-}
-
-export type CompanionVariableDefinitions<TManifest extends CompanionVariableValues> = {
-	[variableId in keyof TManifest as variableId extends string ? variableId : never]: {
-		name: string
-	}
 }

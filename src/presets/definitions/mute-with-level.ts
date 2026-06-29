@@ -1,28 +1,33 @@
-import type { CompanionButtonPresetDefinition, CompanionPresetDefinitions } from '@companion-module/base'
+import type { CompanionPresetDefinitions, CompanionSimplePresetDefinition } from '@companion-module/base'
 import { MuteActionId, StatusOptionId, StripOptionId } from '../../actions/schemas/mute.js'
+import {
+	InputChannelLevelInMixFeedbackId,
+	InputChannelLevelInMixFeedbackInputChannelOptionId,
+	InputChannelLevelInMixFeedbackMixOptionId,
+} from '../../feedbacks/schemas/inputchannel-level-in-mix.js'
 import { MuteFeedbackId } from '../../feedbacks/schemas/mute.js'
-import type { sqInstance } from '../../instance.js'
+import type { MuteChannelWithLevelPresetId } from '../ids.js'
+import type { SQManifest } from '../../manifest.js'
 import type { Model } from '../../mixer/model.js'
-import { type NRPN, splitNRPN } from '../../mixer/nrpn/nrpn.js'
-import { LevelNRPNCalculator } from '../../mixer/nrpn/source-to-sink.js'
-import { MuteOperation } from '../../types.js'
-import { White, Black } from '../../utils/colors.js'
-import type { ZeroIndexed } from '../../utils/indexed.js'
+import { LR, MuteOperation } from '../../types.js'
+import { White, Black, CarmineRed } from '../../utils/colors.js'
+import { type ZeroIndexed } from '../../utils/indexed.js'
+
+export const MuteWithPresetChannelMixLocalVariableId = 'mix'
+
+const MuteWithPresetChannelMixDescriptionLocalVariableId = 'mix-description'
+
+const MuteWithPresetChannelUserFriendlyLevelLocalVariableId = 'mix-user-friendly-level'
 
 /* MUTE + FADER LEVEL */
-function createMuteInputPresetForChannelInMix(
+function createMuteInputPresetForChannel(
 	ch: ZeroIndexed,
 	channelLabel: string,
-	instanceLabel: string,
-	nrpn: NRPN<'level'>,
-	mixLabel: string,
-): CompanionButtonPresetDefinition {
-	const { MSB, LSB } = splitNRPN(nrpn)
-	const label = `${channelLabel}\\n${mixLabel}\\n$(${instanceLabel}:level_${MSB}.${LSB}) dB`
+): CompanionSimplePresetDefinition<SQManifest> {
+	const label = `${channelLabel}\\n$(local:${MuteWithPresetChannelMixDescriptionLocalVariableId})\\n$(local:${MuteWithPresetChannelUserFriendlyLevelLocalVariableId}) dB`
 
 	return {
-		type: 'button',
-		category: `Mt+dB CH-${mixLabel}`,
+		type: 'simple',
 		name: label,
 		style: {
 			text: label,
@@ -36,8 +41,14 @@ function createMuteInputPresetForChannelInMix(
 					{
 						actionId: MuteActionId.MuteInputChannel,
 						options: {
-							[StripOptionId]: ch + 1,
-							[StatusOptionId]: MuteOperation.Toggle,
+							[StripOptionId]: {
+								isExpression: false,
+								value: ch + 1,
+							},
+							[StatusOptionId]: {
+								isExpression: false,
+								value: MuteOperation.Toggle,
+							},
 						},
 					},
 				],
@@ -48,54 +59,65 @@ function createMuteInputPresetForChannelInMix(
 			{
 				feedbackId: MuteFeedbackId.MuteInputChannel,
 				options: {
-					n: ch + 1,
+					n: {
+						isExpression: false,
+						value: ch + 1,
+					},
+				},
+				style: {
+					color: Black,
+					bgcolor: CarmineRed,
+				},
+			},
+		],
+		localVariables: [
+			// The local variable identifying the sink mix, targeted for templating.
+			{
+				variableName: MuteWithPresetChannelMixLocalVariableId,
+				variableType: 'simple',
+				startupValue: {
+					isExpression: false,
+					value: LR,
+				},
+			},
+			// Local variables evaluating to a description of the requested mix,
+			// and the level of the input in the requested mix.
+			{
+				variableName: MuteWithPresetChannelUserFriendlyLevelLocalVariableId,
+				variableType: 'feedback',
+				feedbackId: InputChannelLevelInMixFeedbackId.LevelInMix,
+				options: {
+					[InputChannelLevelInMixFeedbackInputChannelOptionId]: {
+						isExpression: false,
+						value: ch + 1,
+					},
+					[InputChannelLevelInMixFeedbackMixOptionId]: {
+						isExpression: true,
+						value: `$(local:${MuteWithPresetChannelMixLocalVariableId})`,
+					},
+				},
+			},
+			{
+				variableName: MuteWithPresetChannelMixDescriptionLocalVariableId,
+				variableType: 'feedback',
+				feedbackId: InputChannelLevelInMixFeedbackId.SinkDescription,
+				options: {
+					[InputChannelLevelInMixFeedbackMixOptionId]: {
+						isExpression: true,
+						value: `$(local:${MuteWithPresetChannelMixLocalVariableId})`,
+					},
 				},
 			},
 		],
 	}
 }
 
-function addMuteInputPresetsForChannel(
-	presets: CompanionPresetDefinitions,
-	channel: ZeroIndexed,
-	channelLabel: string,
-	lrCalc: LevelNRPNCalculator,
-	mixCalc: LevelNRPNCalculator,
-	model: Model,
-	instance: sqInstance,
-): void {
-	model.forEach('lr', (lr, lrLabel) => {
-		const nrpn = lrCalc.calculate(channel, lr)
-		presets[`preset_mute_input${channel}_lr`] = createMuteInputPresetForChannelInMix(
-			channel,
-			channelLabel,
-			instance.label,
-			nrpn,
-			lrLabel,
-		)
-	})
+export function muteWithLevelPresets(model: Model): CompanionPresetDefinitions<SQManifest> {
+	const presets: CompanionPresetDefinitions<SQManifest> = {}
 
-	model.forEach('mix', (mix, mixLabel) => {
-		const nrpn = mixCalc.calculate(channel, mix)
-
-		presets[`preset_mute_input${channel}_mix${mix}`] = createMuteInputPresetForChannelInMix(
-			channel,
-			channelLabel,
-			instance.label,
-			nrpn,
-			mixLabel,
-		)
-	})
-}
-
-export function muteWithLevelPresets(instance: sqInstance, model: Model): CompanionPresetDefinitions {
-	const presets: CompanionPresetDefinitions = {}
-
-	// Input -> Mix
-	const mixCalc = LevelNRPNCalculator.get(model, ['inputChannel', 'mix'])
-	const lrCalc = LevelNRPNCalculator.get(model, ['inputChannel', 'lr'])
-	model.forEach('inputChannel', (channel, channelLabel) => {
-		addMuteInputPresetsForChannel(presets, channel, channelLabel, lrCalc, mixCalc, model, instance)
+	model.forEach('inputChannel', (channel: ZeroIndexed, channelLabel) => {
+		presets[`mute-with-level-inputchannel${channel + 1}` satisfies MuteChannelWithLevelPresetId] =
+			createMuteInputPresetForChannel(channel, channelLabel)
 	})
 
 	return presets

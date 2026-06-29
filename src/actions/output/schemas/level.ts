@@ -21,7 +21,7 @@ export const AllOutputLevelActions: ReadonlySet<string> = new Set(
 
 export const OutputLevelSignalOptionId = 'n'
 
-type OutputLevelSignalOption = {
+export type OutputLevelSignalOption = {
 	[OutputLevelSignalOptionId]: number
 }
 

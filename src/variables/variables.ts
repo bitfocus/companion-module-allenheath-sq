@@ -1,27 +1,16 @@
-import {
-	type CompanionVariableDefinitions,
-	CurrentSceneId,
-	SceneRecalledTriggerId,
-	type SQVariables,
-} from './manifest.js'
+import type { CompanionVariableDefinitions } from '@companion-module/base'
+import { CurrentSceneId, SceneRecalledTriggerId, type SQVariables } from './manifest.js'
 import type { Model } from '../mixer/model.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { forEachOutputLevel } from '../mixer/nrpn/output.js'
 import { forEachSourceSinkNRPN } from '../mixer/nrpn/source-to-sink.js'
 
 export function getVariables(model: Model): CompanionVariableDefinitions<SQVariables> {
-	const variables: CompanionVariableDefinitions<SQVariables> = {
-		[SceneRecalledTriggerId]: {
-			name: 'Scene - Scene Recalled Trigger',
-		},
-		[CurrentSceneId]: {
-			name: 'Scene - Current',
-		},
-	}
+	const levelVariables: Record<`level_${number}.${number}`, { name: string }> = {}
 
 	const addVariable = (nrpn: NRPN<'level'>, desc: string) => {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		variables[`level_${MSB}.${LSB}`] = {
+		levelVariables[`level_${MSB}.${LSB}`] = {
 			name: desc,
 		}
 	}
@@ -36,5 +25,14 @@ export function getVariables(model: Model): CompanionVariableDefinitions<SQVaria
 
 	//mute input, LR, aux, group, matrix, dca, fx return, fx send, mute group
 
-	return variables
+	return {
+		[SceneRecalledTriggerId]: {
+			name: 'Scene - Scene Recalled Trigger',
+		},
+		[CurrentSceneId]: {
+			name: 'Scene - Current',
+		},
+
+		...levelVariables,
+	}
 }

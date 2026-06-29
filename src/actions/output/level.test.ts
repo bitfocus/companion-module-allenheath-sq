@@ -1,4 +1,4 @@
-import type { CompanionActionInfo, CompanionMigrationAction } from '@companion-module/base'
+import type { CompanionActionInfo } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
 import {
 	ObsoleteLevelToOutputId,
@@ -8,6 +8,7 @@ import {
 import type { Level } from '../../mixer/level.js'
 import { OutputLevelActionId } from './schemas/level.js'
 import { AllMuteStripActions } from '../schemas/mute.js'
+import { type OldCompanionMigrationAction as CompanionMigrationAction } from '../../upgrades/types.js'
 
 function makeObsoleteOutputLevelAction(input: number, level: Level, fadeSeconds: number): CompanionActionInfo {
 	const cai: CompanionActionInfo = {

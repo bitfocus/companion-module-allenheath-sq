@@ -1,6 +1,5 @@
 import type { Expect, IsNever } from 'type-testing'
-import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
-import type { CompanionActionDefinitions } from '../../compat.js'
+import type { CompanionActionDefinitions } from '@companion-module/base'
 import { faderNumber } from '../../fader-number.js'
 import { FadingOption, getFadeType, LevelOption } from '../fading.js'
 import type { sqInstance } from '../../instance.js'
@@ -9,14 +8,17 @@ import type { InputOutputType, Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
 import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
+import type { LevelAndFadeOptions } from '../schemas/fading.js'
 import {
 	AllOutputLevelActions,
 	OutputLevelActionId,
 	type OutputLevelActions,
+	type OutputLevelSignalOption,
 	OutputLevelSignalOptionId,
 } from './schemas/level.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
+import type { OldCompanionMigrationAction } from '../../upgrades/types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
 
 /**
@@ -46,7 +48,7 @@ const ObsoleteOutputLevelFaderOptionId = 'input'
  * This function rewrites any old-style "level to output" actions to new,
  * sink-type-specific actions.
  */
-export function tryConvertOldLevelToOutputActionToSinkSpecific(action: CompanionMigrationAction): boolean {
+export function tryConvertOldLevelToOutputActionToSinkSpecific(action: OldCompanionMigrationAction): boolean {
 	if (action.actionId !== ObsoleteLevelToOutputId) {
 		return false
 	}
@@ -141,7 +143,7 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
  * number.  This function rewrites a zero-indexed number option into a new
  * one-indexed number option.
  */
-export function tryMakeOutputLevelItemOneIndexed(action: CompanionMigrationAction): boolean {
+export function tryMakeOutputLevelItemOneIndexed(action: OldCompanionMigrationAction): boolean {
 	if (!AllOutputLevelActions.has(action.actionId)) {
 		return false
 	}
@@ -159,7 +161,7 @@ export function tryMakeOutputLevelItemOneIndexed(action: CompanionMigrationActio
 function getOutputLevelNRPN(
 	instance: sqInstance,
 	model: Model,
-	options: CompanionOptionValues,
+	options: OutputLevelSignalOption,
 	sinkType: Exclude<SinkAsOutputForNRPN<'level'>, 'lr'>,
 ): NRPN<'level'> | null {
 	const sink = toSourceOrSink(instance, model, options[OutputLevelSignalOptionId], sinkType)
@@ -190,7 +192,7 @@ export function outputLevelActions(instance: sqInstance, mixer: Mixer): Companio
 	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
 		faderNumber(label, OutputLevelSignalOptionId, counts, type)
 
-	const fadeAction = <Options extends CompanionOptionValues>(nrpn: NRPN<'level'>, options: Options) => {
+	const fadeAction = (nrpn: NRPN<'level'>, options: LevelAndFadeOptions) => {
 		const fadeType = getFadeType(instance, options)
 		if (fadeType === null) {
 			return

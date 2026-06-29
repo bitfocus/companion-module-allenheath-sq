@@ -1,7 +1,7 @@
-import type { CompanionMigrationAction } from '@companion-module/base'
 import { tryMakeAssignOptionsUserFriendly } from './assign.js'
 import { tryMakeLevelSourceSinkOptionsUserFriendly } from './level.js'
 import { tryMakePanBalanceSourceSinkOptionsUserFriendly } from './pan-balance.js'
+import type { OldCompanionMigrationAction as CompanionMigrationAction } from '../upgrades/types.js'
 
 /**
  * Action options used to encode particular sources and sinks using zero-indexed

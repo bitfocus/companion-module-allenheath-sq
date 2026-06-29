@@ -15,6 +15,7 @@ export function manyPrettyBytes(...messages: readonly (readonly number[])[]): st
 
 type Representable =
 	| undefined
+	// force to distinct lines for readability
 	| null
 	| boolean
 	| number

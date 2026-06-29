@@ -1,6 +1,8 @@
+import type { MuteFeedbackId } from './feedbacks/schemas/mute.js'
+
 export type CallbackInfoType = {
 	mute: {
-		readonly [key: `${number}:${number}`]: readonly [string, number]
+		readonly [key: `${number}:${number}`]: readonly [MuteFeedbackId, number]
 	}
 }
 

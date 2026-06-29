@@ -18,7 +18,7 @@ export const SoftKeyOp = {
 
 export type SoftKeyOp = (typeof SoftKeyOp)[keyof typeof SoftKeyOp]
 
-type SoftKeyOptions = {
+export type SoftKeyOptions = {
 	[SoftKeyOptionId]: number
 	[SoftKeyOpOptionId]: SoftKeyOp
 }
