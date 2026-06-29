@@ -1,6 +1,7 @@
 import type { CompanionMigrationFeedback } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
-import { MuteFeedbackId, tryMakeMuteFeedbackItemOneIndexed } from './mute.js'
+import { tryMakeMuteFeedbackItemOneIndexed } from './mute.js'
+import { MuteFeedbackId } from './schemas/mute.js'
 
 function makeZeroIndexedMuteFeedback(feedbackId: MuteFeedbackId, channel: number): CompanionMigrationFeedback {
 	return {

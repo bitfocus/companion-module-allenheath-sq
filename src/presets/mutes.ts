@@ -1,6 +1,6 @@
 import type { CompanionPresetDefinitions } from '@companion-module/base'
 import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/schemas/mute.js'
-import { MuteFeedbackId } from '../feedbacks/mute.js'
+import { MuteFeedbackId } from '../feedbacks/schemas/mute.js'
 import type { Model } from '../mixer/model.js'
 import { MuteOperation } from '../types.js'
 import { White, Black } from '../utils/colors.js'

@@ -1,40 +1,19 @@
-import type {
-	CompanionBooleanFeedbackDefinition,
-	CompanionFeedbackDefinition,
-	CompanionMigrationFeedback,
-} from '@companion-module/base'
+import type { CompanionBooleanFeedbackDefinition, CompanionMigrationFeedback } from '@companion-module/base'
 import { faderNumber } from '../fader-number.js'
+import type { CompanionFeedbackDefinitions } from './manifest.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
+import {
+	AllMuteWithStripFeedbacks,
+	MuteFeedbackFaderOptionId,
+	MuteFeedbackId,
+	type MuteFeedbacks,
+} from './schemas/mute.js'
 import { LRStrip } from '../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import { CarmineRed, White } from '../utils/colors.js'
 import { type ZeroIndexed, zeroIndexedNumber } from '../utils/indexed.js'
-
-/**
- * Feedback IDs for feedbacks reacting to the mute status of particular mixer
- * sources/sinks.
- */
-export const MuteFeedbackId = {
-	MuteInputChannel: 'mute_input',
-	MuteLR: 'mute_lr',
-	MuteMix: 'mute_aux',
-	MuteGroup: 'mute_group',
-	MuteMatrix: 'mute_matrix',
-	MuteDCA: 'mute_dca',
-	MuteFXReturn: 'mute_fx_return',
-	MuteFXSend: 'mute_fx_send',
-	MuteMuteGroup: 'mute_mutegroup',
-} as const
-
-export type MuteFeedbackId = (typeof MuteFeedbackId)[keyof typeof MuteFeedbackId]
-
-const AllMuteWithStripFeedbacks: ReadonlySet<string> = new Set(
-	Object.values(MuteFeedbackId).filter((feedbackId) => feedbackId !== 'mute_lr'),
-)
-
-const MuteFeedbackFaderOptionId = 'n'
 
 const ObsoleteMuteFeedbackFaderOptionId = 'channel'
 
@@ -99,7 +78,7 @@ const CommonOptions = {
 	},
 } as const satisfies Pick<CompanionBooleanFeedbackDefinition, 'type' | 'description' | 'defaultStyle'>
 
-export function muteFeedbacks(mixer: Mixer): Record<MuteFeedbackId, CompanionFeedbackDefinition> {
+export function muteFeedbacks(mixer: Mixer): CompanionFeedbackDefinitions<MuteFeedbacks> {
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 

@@ -1,6 +1,6 @@
 import type { CompanionPresetDefinitions } from '@companion-module/base'
 import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/schemas/mute.js'
-import { MuteFeedbackId } from '../feedbacks/mute.js'
+import { MuteFeedbackId } from '../feedbacks/schemas/mute.js'
 import type { sqInstance } from '../instance.js'
 import type { Model } from '../mixer/model.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'

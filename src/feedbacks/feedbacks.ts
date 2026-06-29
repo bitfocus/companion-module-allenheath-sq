@@ -1,11 +1,8 @@
-import type { CompanionFeedbackDefinition } from '@companion-module/base'
+import type { CompanionFeedbackDefinitions, SQFeedbacks } from './manifest.js'
 import type { Mixer } from '../mixer/mixer.js'
-import { type MuteFeedbackId, muteFeedbacks } from './mute.js'
+import { muteFeedbacks } from './mute.js'
 
-/** All feedback IDs. */
-export type FeedbackId = MuteFeedbackId
-
-export function getFeedbacks(mixer: Mixer): Record<FeedbackId, CompanionFeedbackDefinition> {
+export function getFeedbacks(mixer: Mixer): CompanionFeedbackDefinitions<SQFeedbacks> {
 	return {
 		...muteFeedbacks(mixer),
 	}
