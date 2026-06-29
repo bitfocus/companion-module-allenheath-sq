@@ -13,11 +13,13 @@ export const SoftKeyActionId = {
 
 export type SoftKeyActionId = (typeof SoftKeyActionId)[keyof typeof SoftKeyActionId]
 
-enum SoftKeyOp {
-	Toggle = '0',
-	Press = '1',
-	Release = '2',
-}
+const SoftKeyOp = {
+	Toggle: '0',
+	Press: '1',
+	Release: '2',
+} as const
+
+type SoftKeyOp = (typeof SoftKeyOp)[keyof typeof SoftKeyOp]
 
 type SoftKeyOptions = {
 	softKey: number
