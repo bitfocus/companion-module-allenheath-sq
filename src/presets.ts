@@ -2,7 +2,7 @@ import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/b
 import { AssignActionId } from './actions/assign.js'
 import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
-import { MuteFeedbackId } from './feedbacks/feedback-ids.js'
+import { MuteFeedbackId } from './feedbacks/mute.js'
 import type { sqInstance } from './instance.js'
 import { LR } from './mixer/lr.js'
 import type { Model } from './mixer/model.js'

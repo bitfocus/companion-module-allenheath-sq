@@ -1,5 +1,5 @@
 import { type CompanionFeedbackDefinition } from '@companion-module/base'
-import type { InputOutputType } from '../mixer/model.js'
+import type { MuteFeedbackId } from './mute.js'
 
 /**
  * The type of feedback definitions for all feedbacks within the specified
@@ -7,37 +7,6 @@ import type { InputOutputType } from '../mixer/model.js'
  */
 export type FeedbackDefinitions<FeedbackSet extends string> = {
 	[actionId in FeedbackSet]: CompanionFeedbackDefinition
-}
-
-/**
- * Feedback IDs for feedbacks reacting to the mute status of particular mixer
- * sources/sinks.
- */
-export const MuteFeedbackId = {
-	MuteInputChannel: 'mute_input',
-	MuteLR: 'mute_lr',
-	MuteMix: 'mute_aux',
-	MuteGroup: 'mute_group',
-	MuteMatrix: 'mute_matrix',
-	MuteDCA: 'mute_dca',
-	MuteFXReturn: 'mute_fx_return',
-	MuteFXSend: 'mute_fx_send',
-	MuteMuteGroup: 'mute_mutegroup',
-} as const
-
-export type MuteFeedbackId = (typeof MuteFeedbackId)[keyof typeof MuteFeedbackId]
-
-/** A map associating mutable input/output types to mute feedback IDs. */
-export const typeToMuteFeedback: Record<InputOutputType, MuteFeedbackId> = {
-	inputChannel: MuteFeedbackId.MuteInputChannel,
-	group: MuteFeedbackId.MuteGroup,
-	mix: MuteFeedbackId.MuteMix,
-	lr: MuteFeedbackId.MuteLR,
-	muteGroup: MuteFeedbackId.MuteMuteGroup,
-	matrix: MuteFeedbackId.MuteMatrix,
-	fxReturn: MuteFeedbackId.MuteFXReturn,
-	fxSend: MuteFeedbackId.MuteFXSend,
-	dca: MuteFeedbackId.MuteDCA,
 }
 
 /** All feedback IDs. */
