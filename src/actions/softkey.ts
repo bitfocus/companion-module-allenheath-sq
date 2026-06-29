@@ -7,11 +7,11 @@ import { type Model } from '../mixer/model.js'
 import { repr } from '../utils/pretty.js'
 
 /** Action IDs for all actions that operate softkeys. */
-export const SoftKeyId = {
+export const SoftKeyActionId = {
 	SoftKey: 'key_soft',
 } as const
 
-export type SoftKeyId = (typeof SoftKeyId)[keyof typeof SoftKeyId]
+export type SoftKeyActionId = (typeof SoftKeyActionId)[keyof typeof SoftKeyActionId]
 
 enum SoftKeyOp {
 	Toggle = '0',
@@ -63,11 +63,15 @@ function getSoftKeyOptions(instance: sqInstance, model: Model, options: Companio
  * @returns
  *   The set of all softkey action definitions.
  */
-export function softKeyActions(instance: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<SoftKeyId> {
+export function softKeyActions(
+	instance: sqInstance,
+	mixer: Mixer,
+	choices: Choices,
+): ActionDefinitions<SoftKeyActionId> {
 	const model = mixer.model
 
 	return {
-		[SoftKeyId.SoftKey]: {
+		[SoftKeyActionId.SoftKey]: {
 			name: 'Press Softkey',
 			options: [
 				{

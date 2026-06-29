@@ -5,7 +5,7 @@ import type { MuteActionId } from './mute.js'
 import type { OutputLevelActionId, OutputPanBalanceActionId } from './output.js'
 import type { PanBalanceActionId } from './pan-balance.js'
 import type { SceneActionId } from './scene.js'
-import type { SoftKeyId } from './softkey.js'
+import type { SoftKeyActionId } from './softkey.js'
 
 /**
  * The type of action definitions for all actions within the specified action
@@ -20,7 +20,7 @@ export type ActionId =
 	| MuteActionId
 	| AssignActionId
 	| SceneActionId
-	| SoftKeyId
+	| SoftKeyActionId
 	| LevelActionId
 	| PanBalanceActionId
 	| OutputLevelActionId
