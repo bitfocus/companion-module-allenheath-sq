@@ -24,28 +24,11 @@ import {
 	type SourceSinkForNRPN,
 } from '../mixer/nrpn/source-to-sink.js'
 import { getPanBalanceOperation, learnShowVar, PanLevelOption, ShowVarOption } from './panning.js'
+import { PanBalanceActionId, PanBalanceSinkOptionId, PanBalanceSourceOptionId } from './schemas/pan-balance.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { LR, LRStrip } from '../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
-
-/**
- * Action IDs for all actions setting the pan/balance of a mixer source in a
- * mixer sink.
- */
-export const PanBalanceActionId = {
-	InputChannelPanBalanceInMixOrLR: 'chpan_to_mix',
-	GroupPanBalanceInMixOrLR: 'grppan_to_mix',
-	FXReturnPanBalanceInMixOrLR: 'fxrpan_to_mix',
-	FXReturnPanBalanceInGroup: 'fxrpan_to_grp',
-	MixOrLRPanBalanceInMatrix: 'mixpan_to_mtx',
-	GroupPanBalanceInMatrix: 'grppan_to_mtx',
-} as const
-
-export type PanBalanceActionId = (typeof PanBalanceActionId)[keyof typeof PanBalanceActionId]
-
-const PanBalanceSourceOptionId = 'source'
-const PanBalanceSinkOptionId = 'sink'
 
 const ObsoletePanBalanceSourceOptionId = 'input'
 const ObsoletePanBalanceSinkOptionId = 'assign'

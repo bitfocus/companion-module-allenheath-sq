@@ -8,28 +8,15 @@ import { getCommonCount } from '../../mixer/models.js'
 import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
 import { getPanBalanceOperation, learnShowVar, PanLevelOption, ShowVarOption } from '../panning.js'
+import {
+	AllOutputFaderPanBalanceActions,
+	OutputPanBalanceActionId,
+	OutputPanBalanceSignalOptionId,
+} from './schemas/pan-balance.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
 import { repr } from '../../utils/pretty.js'
-
-/**
- * Action IDs for all actions affecting the pan/balance of sinks when used as
- * direct mixer outputs.
- */
-export const OutputPanBalanceActionId = {
-	LRPanBalanceOutput: 'lr_panbalance_output',
-	MixPanBalanceOutput: 'mix_panbalance_output',
-	MatrixPanBalanceOutput: 'matrix_panbalance_output',
-} as const
-
-export type OutputPanBalanceActionId = (typeof OutputPanBalanceActionId)[keyof typeof OutputPanBalanceActionId]
-
-const AllOutputFaderPanBalanceActions: ReadonlySet<string> = new Set(
-	Object.values(OutputPanBalanceActionId).filter((actionId) => actionId !== 'lr_panbalance_output'),
-)
-
-const OutputPanBalanceFaderOptionId = 'n'
 
 /**
  * The action ID of the obsolete "Pan/Bal level to output" action, used to alter
@@ -144,7 +131,7 @@ export function tryMakeOutputPanBalanceItemOneIndexed(action: CompanionMigration
 		return false
 	}
 
-	moveZeroIndexedOptionToOneIndexed(options, ObsoleteOutputPanBalanceFaderOptionId, OutputPanBalanceFaderOptionId)
+	moveZeroIndexedOptionToOneIndexed(options, ObsoleteOutputPanBalanceFaderOptionId, OutputPanBalanceSignalOptionId)
 
 	return true
 }
@@ -168,13 +155,13 @@ export function outputPanBalanceActions(
 	const counts = model.inputOutputCounts
 
 	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
-		faderNumber(label, OutputPanBalanceFaderOptionId, counts, type)
+		faderNumber(label, OutputPanBalanceSignalOptionId, counts, type)
 
 	const getNRPN = (
 		options: CompanionOptionValues,
 		type: Exclude<SinkAsOutputForNRPN<'panBalance'>, 'lr'>,
 	): NRPN<'panBalance'> | null => {
-		const n = toSourceOrSink(instance, model, options[OutputPanBalanceFaderOptionId], type)
+		const n = toSourceOrSink(instance, model, options[OutputPanBalanceSignalOptionId], type)
 		if (n === null) {
 			return null
 		}

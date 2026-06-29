@@ -6,7 +6,8 @@ import type {
 } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
-import type { PanBalance } from '../mixer/pan-balance.js'
+import { PanBalanceLevelOptionId, ShowVarOptionId } from './schemas/panning.js'
+import type { PanBalance } from '../types.js'
 import { repr } from '../utils/pretty.js'
 
 type PanBalanceOperation =
@@ -28,7 +29,7 @@ type PanBalanceOperation =
 export const PanLevelOption = {
 	type: 'dropdown',
 	label: 'Level',
-	id: 'leveldb',
+	id: PanBalanceLevelOptionId,
 	default: 'CTR',
 	choices: ((): DropdownChoice[] => {
 		const panLevels: DropdownChoice[] = [
@@ -45,9 +46,6 @@ export const PanLevelOption = {
 	minChoicesForSearch: 0,
 } as const satisfies CompanionInputFieldDropdown
 
-/** The set of pan/balance choice values offered for selection as pan levels. */
-export type PanBalanceChoice = PanBalance | 998 | 999
-
 /**
  * Compute the pan/balance operation defined in the given options.
  *
@@ -62,7 +60,7 @@ export function getPanBalanceOperation(
 	instance: sqInstance,
 	options: CompanionOptionValues,
 ): PanBalanceOperation | null {
-	const rawOptionVal = options.leveldb
+	const rawOptionVal = options[PanBalanceLevelOptionId]
 	if (rawOptionVal === 998) {
 		return { type: 'step-right' }
 	}
@@ -92,13 +90,13 @@ export function getPanBalanceOperation(
 export const ShowVarOption = {
 	type: 'textinput',
 	label: 'Instance variable containing pan/balance level (click Learn to refresh)',
-	id: 'showvar',
+	id: ShowVarOptionId,
 	default: '',
 } as const satisfies CompanionInputFieldTextInput
 
 /**
  * Return the desired learned variables to write a pan/balance variable
- * specifier to the `showvar` output option.
+ * specifier to the `ShowVarOption` output option.
  */
 export function learnShowVar<Options extends CompanionOptionValues>(
 	instance: sqInstance,
@@ -109,6 +107,6 @@ export function learnShowVar<Options extends CompanionOptionValues>(
 
 	return {
 		...options,
-		showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
+		[ShowVarOptionId]: `$(${instance.label}:pan_${MSB}.${LSB})`,
 	}
 }

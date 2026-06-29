@@ -1,10 +1,8 @@
 import type { CompanionInputFieldDropdown, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
+import { FadeDurationOptionId, SignalLevelOptionId } from './schemas/fading.js'
 import { repr } from '../utils/pretty.js'
-
-export const SignalLevelOptionId = 'leveldb'
-export const FadeDurationOptionId = 'fade'
 
 export const FadingOption = {
 	type: 'dropdown',

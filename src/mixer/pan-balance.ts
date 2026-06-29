@@ -1,4 +1,4 @@
-export type PanBalance = 'CTR' | `L${number}` | `R${number}`
+import type { PanBalance } from '../types.js'
 
 const CENTER = (0x3f << 7) | 0x7f
 const MAX = (0x7f << 7) + 0x7f

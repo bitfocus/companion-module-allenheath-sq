@@ -1,7 +1,8 @@
 import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
-import { LevelActionId, tryUpgradeLevelMixOrLREncoding, tryMakeLevelSourceSinkOptionsUserFriendly } from './level.js'
+import { tryUpgradeLevelMixOrLREncoding, tryMakeLevelSourceSinkOptionsUserFriendly } from './level.js'
 import type { Level } from '../mixer/level.js'
+import { LevelActionId } from './schemas/level.js'
 
 function makeObsoleteLevelAction(actionId: LevelActionId, input: number, assign: number[]): CompanionMigrationAction {
 	return {

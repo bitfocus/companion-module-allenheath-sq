@@ -2,11 +2,11 @@ import type { CompanionActionInfo } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
 import {
 	ObsoletePanToOutputId,
-	OutputPanBalanceActionId,
 	tryConvertOldPanToOutputActionToSinkSpecific,
 	tryMakeOutputPanBalanceItemOneIndexed,
 } from './pan-balance.js'
-import type { PanBalanceChoice } from '../panning.js'
+import { OutputPanBalanceActionId } from './schemas/pan-balance.js'
+import type { PanBalanceChoice } from '../schemas/panning.js'
 
 function makeObsoleteOutputPanBalanceAction(input: number, panBalance: PanBalanceChoice): CompanionActionInfo {
 	const cai: CompanionActionInfo = {

@@ -1,7 +1,7 @@
 import type { Equal, Expect } from 'type-testing'
 import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@companion-module/base'
-import { OutputPanBalanceActionId } from '../actions/output/pan-balance.js'
-import { PanBalanceActionId } from '../actions/pan-balance.js'
+import { OutputPanBalanceActionId } from '../actions/output/schemas/pan-balance.js'
+import { PanBalanceActionId } from '../actions/schemas/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
 import {
 	getFaderLaw,
@@ -37,8 +37,8 @@ import {
 	type SourceSinkForNRPN,
 	type SourceSinkNRPNType,
 } from './nrpn/source-to-sink.js'
-import { type PanBalance, panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
-import { LR, LRStrip } from '../types.js'
+import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
+import { LR, LRStrip, MuteOperation, type PanBalance } from '../types.js'
 import { type OneIndexed, oneIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
@@ -94,14 +94,6 @@ export const RetrieveStatusAtStartup = {
 } as const
 
 export type RetrieveStatusAtStartup = (typeof RetrieveStatusAtStartup)[keyof typeof RetrieveStatusAtStartup]
-
-export const MuteOperation = {
-	Toggle: 'toggle',
-	On: 'on',
-	Off: 'off',
-} as const
-
-export type MuteOperation = (typeof MuteOperation)[keyof typeof MuteOperation]
 
 /** The port number used for MIDI-over-TCP connections to SQ mixers. */
 const SQMidiPort = 51325

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
-import { type PanBalance, panBalanceLevelToVCVF } from './pan-balance.js'
+import { panBalanceLevelToVCVF } from './pan-balance.js'
+import type { PanBalance } from '../types.js'
 
 describe('pan/balance choices to VC/VF', () => {
 	test('exact cases', () => {

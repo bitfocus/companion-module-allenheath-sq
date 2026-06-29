@@ -1,11 +1,11 @@
 import type { CompanionPresetDefinitions } from '@companion-module/base'
-import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/mute.js'
+import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/schemas/mute.js'
 import { MuteFeedbackId } from '../feedbacks/mute.js'
 import type { sqInstance } from '../instance.js'
 import type { Model } from '../mixer/model.js'
-import { MuteOperation } from '../mixer/mixer.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { LevelNRPNCalculator } from '../mixer/nrpn/source-to-sink.js'
+import { MuteOperation } from '../types.js'
 import { White, Black } from '../utils/colors.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 

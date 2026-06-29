@@ -5,10 +5,14 @@ import { getActions } from './actions/actions.js'
 import { Choices } from './choices.js'
 import { GetConfigFields, getHost, type SQConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
+import type { SQManifest } from './manifest.js'
 import { Mixer } from './mixer/mixer.js'
 import { canUpdateConfigWithoutRestarting, noConnectionConfig, validateConfig } from './config.js'
 import { getPresets } from './presets/presets.js'
 import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
+
+// Temporary use until the 2.0 upgrade puts it to real use.
+type _UseManifest = SQManifest
 
 /** An SQ mixer connection instance. */
 export class sqInstance extends InstanceBase<SQConfig> {

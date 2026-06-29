@@ -1,13 +1,8 @@
 import type { CompanionMigrationAction } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
-import { MuteOperation } from '../mixer/mixer.js'
-import {
-	AllMuteStripActions,
-	MuteActionId,
-	ObsoleteMuteStatus,
-	tryMakeMuteItemOneIndexed,
-	tryTrimMuteLROptions,
-} from './mute.js'
+import { ObsoleteMuteStatus, tryMakeMuteItemOneIndexed, tryTrimMuteLROptions } from './mute.js'
+import { AllMuteStripActions, MuteActionId } from './schemas/mute.js'
+import { MuteOperation } from '../types.js'
 
 function makeObsoleteMuteAction(actionId: MuteActionId, strip: number, mute: ObsoleteMuteStatus) {
 	return {

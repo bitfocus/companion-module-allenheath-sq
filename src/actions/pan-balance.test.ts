@@ -1,11 +1,8 @@
 import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
-import {
-	PanBalanceActionId,
-	tryMakePanBalanceSourceSinkOptionsUserFriendly,
-	tryUpgradePanBalanceMixOrLREncoding,
-} from './pan-balance.js'
-import type { PanBalanceChoice } from './panning.js'
+import { tryMakePanBalanceSourceSinkOptionsUserFriendly, tryUpgradePanBalanceMixOrLREncoding } from './pan-balance.js'
+import { PanBalanceActionId } from './schemas/pan-balance.js'
+import type { PanBalanceChoice } from './schemas/panning.js'
 
 function makeObsoletePanBalanceAction(
 	actionId: PanBalanceActionId,

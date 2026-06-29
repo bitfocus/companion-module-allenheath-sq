@@ -12,3 +12,13 @@ export const LR = 'LR'
  */
 
 export const LRStrip = zeroIndexedNumber(0)
+
+export const MuteOperation = {
+	Toggle: 'toggle',
+	On: 'on',
+	Off: 'off',
+} as const
+
+export type MuteOperation = (typeof MuteOperation)[keyof typeof MuteOperation]
+
+export type PanBalance = 'CTR' | `L${number}` | `R${number}`

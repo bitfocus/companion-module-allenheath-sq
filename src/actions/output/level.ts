@@ -8,29 +8,10 @@ import type { InputOutputType, Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
 import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
+import { AllOutputLevelActions, OutputLevelActionId, OutputLevelSignalOptionId } from './schemas/level.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
-
-/**
- * Action IDs for all actions affecting the level of sinks when used as direct
- * mixer outputs.
- */
-export const OutputLevelActionId = {
-	LRLevelOutput: 'lr_level_output',
-	MixLevelOutput: 'mix_level_output',
-	FXSendLevelOutput: 'fxsend_level_output',
-	MatrixLevelOutput: 'matrix_level_output',
-	DCALevelOutput: 'dca_level_output',
-} as const
-
-export type OutputLevelActionId = (typeof OutputLevelActionId)[keyof typeof OutputLevelActionId]
-
-const AllOutputLevelActions: ReadonlySet<string> = new Set(
-	Object.values(OutputLevelActionId).filter((actionId) => actionId !== 'lr_level_output'),
-)
-
-const OutputLevelFaderOptionId = 'n'
 
 /**
  * The action ID of the obsolete "Fader level to output" action, used to alter
@@ -164,7 +145,7 @@ export function tryMakeOutputLevelItemOneIndexed(action: CompanionMigrationActio
 		return false
 	}
 
-	moveZeroIndexedOptionToOneIndexed(options, ObsoleteOutputLevelFaderOptionId, OutputLevelFaderOptionId)
+	moveZeroIndexedOptionToOneIndexed(options, ObsoleteOutputLevelFaderOptionId, OutputLevelSignalOptionId)
 
 	return true
 }
@@ -175,7 +156,7 @@ function getOutputLevelNRPN(
 	options: CompanionOptionValues,
 	sinkType: Exclude<SinkAsOutputForNRPN<'level'>, 'lr'>,
 ): NRPN<'level'> | null {
-	const sink = toSourceOrSink(instance, model, options[OutputLevelFaderOptionId], sinkType)
+	const sink = toSourceOrSink(instance, model, options[OutputLevelSignalOptionId], sinkType)
 	if (sink === null) {
 		return null
 	}
@@ -204,7 +185,7 @@ export function outputLevelActions(
 	const counts = model.inputOutputCounts
 
 	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
-		faderNumber(label, OutputLevelFaderOptionId, counts, type)
+		faderNumber(label, OutputLevelSignalOptionId, counts, type)
 
 	const fadeAction = <Options extends CompanionOptionValues>(nrpn: NRPN<'level'>, options: Options) => {
 		const fadeType = getFadeType(instance, options)

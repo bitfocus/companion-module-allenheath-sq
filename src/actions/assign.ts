@@ -18,6 +18,13 @@ import {
 } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
+import {
+	AssignActionId,
+	AssignSinksOptionId,
+	AssignSourceOptionId,
+	AssignStatus,
+	AssignStatusOptionId,
+} from './schemas/assign.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { LR } from '../types.js'
 import {
@@ -25,37 +32,6 @@ import {
 	moveZeroIndexedOptionToOneIndexed,
 } from '../upgrades/zero-indexed-to-one.js'
 import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
-
-/**
- * Action IDs for all actions that activate/deactivate a mixer source within a
- * sink.
- */
-export const AssignActionId = {
-	InputChannelToMix: 'ch_to_mix',
-	InputChannelToGroup: 'ch_to_grp',
-	GroupToMix: 'grp_to_mix',
-	FXReturnToMix: 'fxr_to_mix',
-	FXReturnToGroup: 'fxr_to_grp',
-	InputChannelToFXSend: 'ch_to_fxs',
-	GroupToFXSend: 'grp_to_fxs',
-	FXReturnToFXSend: 'fxr_to_fxs',
-	MixToMatrix: 'mix_to_mtx',
-	GroupToMatrix: 'grp_to_mtx',
-} as const
-
-export type AssignActionId = (typeof AssignActionId)[keyof typeof AssignActionId]
-
-export const AssignStatus = {
-	Active: 'active',
-	Inactive: 'inactive',
-	// Toggle: 'toggle', // to be added later
-} as const
-
-export type AssignStatus = (typeof AssignStatus)[keyof typeof AssignStatus]
-
-export const AssignSourceOptionId = 'source'
-export const AssignSinksOptionId = 'sinks'
-export const AssignStatusOptionId = 'status'
 
 const ObsoleteMixOrLRSourceOptionId = 'inputMix'
 

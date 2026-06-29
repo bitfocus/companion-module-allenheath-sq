@@ -9,36 +9,12 @@ import { faderNumber } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
-import { MuteOperation } from '../mixer/mixer.js'
+import { AllMuteStripActions, MuteActionId, StatusOptionId, StripOptionId } from './schemas/mute.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
+import { MuteOperation } from '../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
-
-/**
- * Action IDs for all actions that mute, unmute, or toggle muting of a mixer
- * input/output.
- */
-export const MuteActionId = {
-	MuteInputChannel: 'mute_input',
-	MuteLR: 'mute_lr',
-	MuteMix: 'mute_aux',
-	MuteGroup: 'mute_group',
-	MuteMatrix: 'mute_matrix',
-	MuteFXSend: 'mute_fx_send',
-	MuteFXReturn: 'mute_fx_return',
-	MuteDCA: 'mute_dca',
-	MuteMuteGroup: 'mute_mutegroup',
-} as const
-
-export type MuteActionId = (typeof MuteActionId)[keyof typeof MuteActionId]
-
-export const AllMuteStripActions: ReadonlySet<string> = new Set(
-	Object.values(MuteActionId).filter((id) => id !== 'mute_lr'),
-)
-
-export const StripOptionId = 'n'
-export const StatusOptionId = 'status'
 
 const ObsoleteStripOptionId = 'strip'
 const ObsoleteStatusOptionId = 'mute'

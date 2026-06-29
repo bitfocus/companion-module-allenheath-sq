@@ -5,13 +5,12 @@ import {
 	AssignSourceOptionId,
 	AssignStatus,
 	AssignStatusOptionId,
-} from '../actions/assign.js'
-import { FadeDurationOptionId, SignalLevelOptionId } from '../actions/fading.js'
-import { LevelActionId, LevelSetSinkOptionId, LevelSetSourceOptionId } from '../actions/level.js'
-import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/mute.js'
-import { MuteOperation } from '../mixer/mixer.js'
+} from '../actions/schemas/assign.js'
+import { FadeDurationOptionId, SignalLevelOptionId } from '../actions/schemas/fading.js'
+import { LevelActionId, LevelSetSinkOptionId, LevelSetSourceOptionId } from '../actions/schemas/level.js'
+import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/schemas/mute.js'
 import type { Model } from '../mixer/model.js'
-import { LR } from '../types.js'
+import { LR, MuteOperation } from '../types.js'
 import { White, Black } from '../utils/colors.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 

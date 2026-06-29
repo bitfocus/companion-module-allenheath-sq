@@ -3,27 +3,10 @@ import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOpti
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
+import { SoftKeyActionId, SoftKeyOptionId, SoftKeyOp, SoftKeyOpOptionId } from './schemas/softkey.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
-
-/** Action IDs for all actions that operate softkeys. */
-export const SoftKeyActionId = {
-	SoftKey: 'key_soft',
-} as const
-
-export type SoftKeyActionId = (typeof SoftKeyActionId)[keyof typeof SoftKeyActionId]
-
-const SoftKeyOptionId = 'key'
-const SoftKeyOpOptionId = 'op'
-
-export const SoftKeyOp = {
-	Toggle: 'toggle',
-	Press: 'press',
-	Release: 'release',
-} as const
-
-export type SoftKeyOp = (typeof SoftKeyOp)[keyof typeof SoftKeyOp]
 
 const ObsoleteZeroBasedSoftKeyOptionId = 'softKey'
 const ObsoleteSoftKeyOperationId = 'pressedsk'

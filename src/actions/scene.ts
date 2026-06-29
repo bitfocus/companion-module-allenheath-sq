@@ -1,18 +1,11 @@
 import type { CompanionActionDefinition, CompanionMigrationAction } from '@companion-module/base'
+import type { sqInstance } from '../instance.js'
 import { type Model } from '../mixer/model.js'
 import { type Mixer } from '../mixer/mixer.js'
-import type { sqInstance } from '../instance.js'
+import { SceneActionId, SceneAdjustOptionId, SceneNumberOptionId } from './schemas/scene.js'
 import { type OptionValue } from './to-source-or-sink.js'
 import { type OneIndexed, oneIndexedNumber } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
-
-/** Action IDs for all actions that change the mixer's current scene. */
-export const SceneActionId = {
-	SceneRecall: 'scene_recall',
-	SceneStep: 'scene_step',
-} as const
-
-export type SceneActionId = (typeof SceneActionId)[keyof typeof SceneActionId]
 
 /**
  * The action ID of an action whose implementation was identical to that of
@@ -78,7 +71,7 @@ export function sceneActions(instance: sqInstance, mixer: Mixer): Record<SceneAc
 				{
 					type: 'number',
 					label: 'Scene nr.',
-					id: 'scene',
+					id: SceneNumberOptionId,
 					default: 1,
 					min: 1,
 					max: model.scenes,
@@ -86,7 +79,7 @@ export function sceneActions(instance: sqInstance, mixer: Mixer): Record<SceneAc
 				},
 			],
 			callback: async ({ options }) => {
-				const scene = toScene(instance, model, options.scene)
+				const scene = toScene(instance, model, options[SceneNumberOptionId])
 				if (scene === null) {
 					return
 				}
@@ -100,7 +93,7 @@ export function sceneActions(instance: sqInstance, mixer: Mixer): Record<SceneAc
 				{
 					type: 'number',
 					label: 'Scene +/-',
-					id: 'scene',
+					id: SceneAdjustOptionId,
 					default: 1,
 					min: StepMin,
 					max: StepMax,
@@ -108,7 +101,7 @@ export function sceneActions(instance: sqInstance, mixer: Mixer): Record<SceneAc
 				},
 			],
 			callback: async ({ options }) => {
-				const adjust = toSceneStep(instance, options.scene)
+				const adjust = toSceneStep(instance, options[SceneAdjustOptionId])
 				if (adjust === null) {
 					return
 				}
