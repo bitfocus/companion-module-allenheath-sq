@@ -42,7 +42,7 @@ import { LR, LRStrip, MuteOperation, type PanBalance } from '../types.js'
 import { type OneIndexed, oneIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
-import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
+import { CurrentSceneId, SceneRecalledTriggerId } from '../variables/manifest.js'
 
 /**
  * The two values of the NRPN fader law setting in the mixer.  The two values

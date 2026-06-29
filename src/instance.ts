@@ -1,6 +1,9 @@
-// Allen & Heath SQ Series
-
-import { type CompanionVariableValue, InstanceBase, type SomeCompanionConfigField } from '@companion-module/base'
+import {
+	type CompanionVariableDefinition,
+	type CompanionVariableValue,
+	InstanceBase,
+	type SomeCompanionConfigField,
+} from '@companion-module/base'
 import { getActions } from './actions/actions.js'
 import { Choices } from './choices.js'
 import { GetConfigFields, getHost, type SQConfig } from './config.js'
@@ -9,7 +12,22 @@ import type { SQManifest } from './manifest.js'
 import { Mixer } from './mixer/mixer.js'
 import { canUpdateConfigWithoutRestarting, noConnectionConfig, validateConfig } from './config.js'
 import { getPresets } from './presets/presets.js'
-import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
+import {
+	CurrentSceneId,
+	SceneRecalledTriggerId,
+	type SQVariables,
+	type CompanionVariableDefinitions,
+} from './variables/manifest.js'
+import { getVariables } from './variables/variables.js'
+
+function translateVariableDefinitions(defs: CompanionVariableDefinitions<SQVariables>): CompanionVariableDefinition[] {
+	return Object.entries(defs).map(
+		([variableId, { name }]): CompanionVariableDefinition => ({
+			name,
+			variableId,
+		}),
+	)
+}
 
 // Temporary use until the 2.0 upgrade puts it to real use.
 type _UseManifest = SQManifest
@@ -84,7 +102,7 @@ export class sqInstance extends InstanceBase<SQConfig> {
 
 	/** Set variable definitions for this instance. */
 	initVariableDefinitions(mixer: Mixer): void {
-		this.setVariableDefinitions(getVariables(mixer.model))
+		this.setVariableDefinitions(translateVariableDefinitions(getVariables(mixer.model)))
 
 		this.setVariableValues({
 			[SceneRecalledTriggerId]: mixer.sceneRecalledTrigger,
