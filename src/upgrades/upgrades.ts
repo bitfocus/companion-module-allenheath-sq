@@ -3,6 +3,7 @@ import { tryFixFXRLevelInFXSIdTypo } from '../actions/level.js'
 import { tryConvertOldLevelToOutputActionToSinkSpecific } from '../actions/output/level.js'
 import { tryConvertOldPanToOutputActionToSinkSpecific } from '../actions/output/pan-balance.js'
 import { tryCoalesceSceneRecallActions } from '../actions/scene.js'
+import { tryMakeSoftKeyOneIndexed } from '../actions/softkey.js'
 import {
 	type SQConfig,
 	tryEnsureLabelInConfig,
@@ -28,4 +29,8 @@ export const UpgradeScripts = [
 	ActionUpdater(tryUpdateAllLRMixEncodings),
 	ActionUpdater(tryFixFXRLevelInFXSIdTypo),
 	ConfigUpdater(tryRenameVariousConfigIds),
+	// Meticulously update every formerly zero-based option value to one-based,
+	// because a great many options, in order to be selectable by expression, need
+	// to be user-understandable.  Boo-urns!
+	ActionUpdater(tryMakeSoftKeyOneIndexed),
 ] satisfies CompanionStaticUpgradeScript<SQConfig>[]

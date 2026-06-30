@@ -1,7 +1,9 @@
-import type { CompanionActionDefinition, CompanionOptionValues } from '@companion-module/base'
+import type { Equal, Expect } from 'type-testing'
+import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
-import { type Mixer } from '../mixer/mixer.js'
-import { type Model } from '../mixer/model.js'
+import type { Mixer } from '../mixer/mixer.js'
+import type { Model } from '../mixer/model.js'
+import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
 
@@ -12,13 +14,69 @@ export const SoftKeyActionId = {
 
 export type SoftKeyActionId = (typeof SoftKeyActionId)[keyof typeof SoftKeyActionId]
 
-const SoftKeyOp = {
+const SoftKeyOptionId = 'key'
+const SoftKeyOpOptionId = 'op'
+
+export const SoftKeyOp = {
+	Toggle: 'toggle',
+	Press: 'press',
+	Release: 'release',
+} as const
+
+export type SoftKeyOp = (typeof SoftKeyOp)[keyof typeof SoftKeyOp]
+
+const ObsoleteZeroBasedSoftKeyOptionId = 'softKey'
+const ObsoleteSoftKeyOperationId = 'pressedsk'
+
+export const ObsoleteSoftKeyOp = {
 	Toggle: '0',
 	Press: '1',
 	Release: '2',
 } as const
 
-type SoftKeyOp = (typeof SoftKeyOp)[keyof typeof SoftKeyOp]
+export type ObsoleteSoftKeyOp = (typeof ObsoleteSoftKeyOp)[keyof typeof ObsoleteSoftKeyOp]
+
+/**
+ * This module once supported a 'key_soft' action taking a zero-based softkey
+ * and an operation identified as an inscutable number with a frankly bizarre
+ * option id.  Rewrite it to take a one-based softkey, and in passing rename the
+ * operation option id and make it take readable string values.
+ */
+export function tryMakeSoftKeyOneIndexed(action: CompanionMigrationAction): boolean {
+	if (action.actionId !== SoftKeyActionId.SoftKey) {
+		return false
+	}
+
+	const options = action.options
+	if (!(ObsoleteZeroBasedSoftKeyOptionId in options)) {
+		return false
+	}
+
+	moveZeroIndexedOptionToOneIndexed(options, ObsoleteZeroBasedSoftKeyOptionId, SoftKeyOptionId)
+
+	let op: SoftKeyOp
+	switch (String(options[ObsoleteSoftKeyOperationId])) {
+		case ObsoleteSoftKeyOp.Toggle:
+			op = SoftKeyOp.Toggle
+			break
+		case ObsoleteSoftKeyOp.Press:
+			op = SoftKeyOp.Press
+			break
+		case ObsoleteSoftKeyOp.Release:
+			op = SoftKeyOp.Release
+			break
+		default:
+			// Just transfer the unrecognized op value unchanged.
+			op = options[ObsoleteSoftKeyOperationId] as SoftKeyOp
+			break
+	}
+	type assert_opIsSoftKeyOp = Expect<Equal<typeof op, SoftKeyOp>>
+
+	options[SoftKeyOpOptionId] = op
+	delete options[ObsoleteSoftKeyOperationId]
+
+	return true
+}
 
 type SoftKeyOptions = {
 	softKey: ZeroIndexed
@@ -26,27 +84,23 @@ type SoftKeyOptions = {
 }
 
 function getSoftKeyOptions(instance: sqInstance, model: Model, options: CompanionOptionValues): SoftKeyOptions | null {
-	const softKeyVal = Number(options.softKey)
-	if (model.softKeys <= softKeyVal) {
+	const softKeyVal = Number(options[SoftKeyOptionId]) | 0
+	if (!(1 <= softKeyVal && softKeyVal <= model.softKeys)) {
 		instance.log('error', `Attempting to operate invalid softkey ${softKeyVal}, ignoring`)
 		return null
 	}
-	const softKey = zeroIndexedNumber(softKeyVal)
+	const softKey = zeroIndexedNumber(softKeyVal - 1)
 
-	const option = String(options.pressedsk)
-	let op
+	const option = String(options[SoftKeyOpOptionId])
+	let op: SoftKeyOp
 	switch (option) {
-		case '1':
-			op = SoftKeyOp.Press
-			break
-		case '2':
-			op = SoftKeyOp.Release
-			break
-		case '0':
-			op = SoftKeyOp.Toggle
+		case SoftKeyOp.Press:
+		case SoftKeyOp.Release:
+		case SoftKeyOp.Toggle:
+			op = option
 			break
 		default:
-			instance.log('error', `Bad softkey option value ${repr(option)}, ignoring`)
+			instance.log('error', `Bad softkey operation value ${repr(option)}, ignoring`)
 			return null
 	}
 
@@ -75,15 +129,15 @@ export function softKeyActions(instance: sqInstance, mixer: Mixer): Record<SoftK
 				{
 					type: 'number',
 					label: 'Soft Key',
-					id: 'softKey',
-					default: 0,
-					min: 0,
-					max: model.softKeys - 1,
+					id: SoftKeyOptionId,
+					default: 1,
+					min: 1,
+					max: model.softKeys,
 				},
 				{
 					type: 'dropdown',
-					label: 'Key type',
-					id: 'pressedsk',
+					label: 'Operation',
+					id: SoftKeyOpOptionId,
 					default: SoftKeyOp.Press,
 					choices: [
 						{ id: SoftKeyOp.Toggle, label: 'Toggle' },
