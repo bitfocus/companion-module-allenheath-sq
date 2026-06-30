@@ -7,15 +7,15 @@ import type { MidiChannel } from '../../channel.js'
  * @param channel
  *   The MIDI channel the scene recall should be sent on.
  * @param scene
- *   The scene to request.  (Note that this is zero-indexed, so on an SQ-5 with
- *   scenes 1-300 this will be `[0, 300)`.)
+ *   The one-indexed scene to request.
  * @returns
  *   An array of the MIDI messages that constitute the requested scene recall.
  */
 export function SceneCommand(channel: MidiChannel, scene: number): [[number, number, number], [number, number]] {
+	const sceneEncoded = scene - 1
 	return [
-		[0xb0 | channel, 0x00, scene >> 7],
-		[0xc0 | channel, scene & 0x7f],
+		[0xb0 | channel, 0x00, sceneEncoded >> 7],
+		[0xc0 | channel, sceneEncoded & 0x7f],
 	]
 }
 

@@ -29,6 +29,7 @@ import {
 	type SourceSinkNRPNType,
 } from './nrpn/source-to-sink.js'
 import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
+import { type OneIndexed, oneIndexedNumber } from '../utils/indexed.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
 import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
@@ -170,16 +171,15 @@ export class Mixer {
 	readonly lastValue: { [key: `level_${number}.${number}`]: CompanionVariableValue } = {}
 
 	/**
-	 * The scene currently recalled on the mixer minus one -- so this will be in
-	 * the range `[0, 300)` for scenes 1-300 displayed on the mixer.
+	 * The scene currently recalled on the mixer.  (The MIDI API doesn't allow us
+	 * to query the current scene, so this initial value is arbitrary.)
 	 *
 	 * Note that this value isn't updated when scene-change messages are *sent*
 	 * to the mixer, but only when scene-change messages are received *from* the
-	 * mixer.  (These messages can be the result of scene changes performed on
-	 * the mixer itself.)  Thus it slightly lags reality rather than slightly
-	 * preceding it.
+	 * mixer (including when the scene was changed on the mixer or with MixPad).
+	 * Thus it slightly lags reality rather than slightly preceding it.
 	 */
-	currentScene = 0
+	currentScene = oneIndexedNumber(1)
 
 	/**
 	 * The current value of the `sceneRecalledTrigger` variable, whose value is
@@ -362,7 +362,7 @@ export class Mixer {
 		const tokenizer = new MidiTokenizer(socket, verboseLog)
 
 		const mixerChannelParser = new ChannelParser(verboseLog)
-		mixerChannelParser.on('scene', (newScene: number) => {
+		mixerChannelParser.on('scene', (newScene: OneIndexed) => {
 			verboseLog(`Scene recalled: ${newScene}`)
 
 			this.currentScene = newScene
@@ -371,10 +371,7 @@ export class Mixer {
 			const sceneRecalledTrigger = ++this.sceneRecalledTrigger
 			instance.setVariableValues({
 				[SceneRecalledTriggerId]: sceneRecalledTrigger,
-
-				// The currentScene variable is 1-indexed, consistent with how
-				// the current scene is displayed to users in mixer UI.
-				[CurrentSceneId]: newScene + 1,
+				[CurrentSceneId]: newScene,
 			})
 		})
 		mixerChannelParser.on('mute', (nrpn: NRPN<'mute'>, vf: number) => {
@@ -441,20 +438,16 @@ export class Mixer {
 	 * mixers will not change scene.)
 	 *
 	 * @param scene
-	 *   The scene to recall.  Note that this is the scene displayed in mixer UI
-	 *   *minus one*, so this will be in range `[0, 300)` if the mixer supports
-	 *   scenes 1-300 in its UI.
+	 *   The scene to recall.
 	 */
-	setScene(scene: number): void {
-		if (scene < 0 || this.model.scenes <= scene) {
-			throw new Error(`Attempting to set out-of-bounds scene ${scene}`)
-		}
+	setScene(scene: OneIndexed): void {
+		const sceneEncoded = scene - 1
 
 		const midiChannel = getMidiChannel(this.#instance.config)
 		const BN = 0xb0 | midiChannel
 		const CN = 0xc0 | midiChannel
-		const sceneUpper = (scene >> 7) & 0x0f
-		const sceneLower = scene & 0x7f
+		const sceneUpper = (sceneEncoded >> 7) & 0x0f
+		const sceneLower = sceneEncoded & 0x7f
 
 		const sceneCommand = [BN, 0, sceneUpper, CN, sceneLower]
 		// XXX handle better
@@ -473,16 +466,16 @@ export class Mixer {
 	 */
 	stepSceneBy(adjust: number): void {
 		let newScene = this.currentScene + adjust
-		if (newScene < 0) {
-			newScene = 0
+		if (newScene < 1) {
+			newScene = 1
 		} else {
 			const sceneCount = this.model.scenes
-			if (sceneCount <= newScene) {
-				newScene = sceneCount - 1
+			if (sceneCount < newScene) {
+				newScene = sceneCount
 			}
 		}
 
-		this.setScene(newScene)
+		this.setScene(oneIndexedNumber(newScene))
 	}
 
 	/** Perform the supplied mute operation upon the strip of the given type. */

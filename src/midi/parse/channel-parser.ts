@@ -1,10 +1,11 @@
 import { makeNRPN, type NRPN } from '../../mixer/nrpn/nrpn.js'
+import { oneIndexedNumber, type OneIndexed } from '../../utils/indexed.js'
 import { manyPrettyBytes, prettyByte, prettyBytes } from '../../utils/pretty.js'
 import { EventEmitter } from 'eventemitter3'
 
 export interface MixerMessageEvents {
 	/** A scene change to `newScene` (zero-based) occurred. */
-	scene: [newScene: number]
+	scene: [newScene: OneIndexed]
 
 	/**
 	 * The input/output identified by MSB/LSB was muted (`vf=1`) or unmuted
@@ -92,8 +93,8 @@ export class ChannelParser extends EventEmitter<MixerMessageEvents> {
 						const aa = first[2]
 						const bb = second[1]
 
-						const newScene = ((aa & 0x7f) << 7) + bb
-						this.emit('scene', newScene)
+						const newScene = ((aa & 0x7f) << 7) + bb + 1
+						this.emit('scene', oneIndexedNumber(newScene))
 						continue read_message
 					} // [BN 00 aa] [CN bb]
 

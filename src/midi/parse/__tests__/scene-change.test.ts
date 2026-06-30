@@ -16,7 +16,7 @@ describe('scene changes', () => {
 			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xc0, 0x05]),
 			ExpectNextCommandReadiness(true),
-			ExpectSceneMessage(5),
+			ExpectSceneMessage(6),
 			ExpectNextCommandReadiness(false),
 		])
 	})
@@ -29,7 +29,7 @@ describe('scene changes', () => {
 			ReceiveSystemRealTimeMessage(SysCommonTuneRequest),
 			ReceiveChannelMessage([0xc6, 0x05]),
 			ExpectNextCommandReadiness(true),
-			ExpectSceneMessage(5),
+			ExpectSceneMessage(6),
 			ReceiveChannelMessage([0xc6, 0x00]), // extraneous but sent by SQ-5
 			ExpectNextCommandReadiness(false),
 			// in different channel, so should be ignored

@@ -81,7 +81,7 @@ export function ExpectNextCommandReadiness(ready: boolean): NextCommandReadiness
  * the given scene.
  *
  * @param scene
- *   The zero-indexed scene (i.e. `[0, 300)` for SQ mixer scenes 1-300).
+ *   The one-indexed scene (i.e. `[1, 300]` for SQ mixer scenes 1-300).
  */
 export function ExpectSceneMessage(scene: number): ExpectScene {
 	return { type: 'expect-scene', args: [scene] }

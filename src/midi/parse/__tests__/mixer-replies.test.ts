@@ -12,8 +12,8 @@ describe('reply processing', () => {
 	test('basic reply series', async () => {
 		return TestParsing(1, [
 			ExpectNextCommandReadiness(false),
-			...SceneCommand(0, 129).map(ReceiveChannelMessage),
-			ExpectSceneMessage((1 << 7) + 1),
+			...SceneCommand(0, 130).map(ReceiveChannelMessage),
+			ExpectSceneMessage(130),
 			// Mute on, Ip48
 			...MuteOn(0, 0x00, 0x2f).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x2f, 0x01),
@@ -30,9 +30,21 @@ describe('reply processing', () => {
 			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xc2, 0x01]),
 			ExpectNextCommandReadiness(true),
-			ExpectSceneMessage((1 << 7) + 1),
-			ReceiveChannelMessage([0xc2, 0x00]), // extraneous but sent by SQ-5
+			ExpectSceneMessage(130),
+
+			// We are now past a completed SQ command and *should* be at start of a
+			// new one.  `CN xx` is not the start of a documented SQ command, so in
+			// principle the SQ mixer shouldn't send it here.
+			//
+			// Nevertheless, some SQ-5 firmware (possibly 1.5.* but not 1.6.*) sends
+			// `CN 00` after every valid scene-change command (i.e. it sends the full
+			// MIDI sequence `BN xx xx CN yy 00` to change scene, with `CN yy 00`
+			// equivalent to `CN yy CN 00` per the MIDI running status optimization).
+			// So we must ensure we ignore this trailing extraneous `CN 00` message if
+			// we receive it.
+			ReceiveChannelMessage([0xc2, 0x00]),
 			ExpectNextCommandReadiness(false),
+
 			// Mute on, Ip48
 			...MuteOn(2, 0x00, 0x2f).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x2f, 0x01),
@@ -53,7 +65,7 @@ describe('reply processing', () => {
 			ReceiveChannelMessage([0xb0, 0x00, 0x01]),
 			ReceiveChannelMessage([0x97, 0x3c, 0x00]), // Channel 1, C-4, Note On (velocity 0)
 			ReceiveChannelMessage([0xc0, 0x01]),
-			ExpectSceneMessage((1 << 7) + 1),
+			ExpectSceneMessage(130),
 			// Mute on, Ip48
 			ReceiveChannelMessage([0xb0, 0x63, 0x00]),
 			ReceiveChannelMessage([0xb0, 0x62, 0x2f]),

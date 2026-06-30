@@ -4,6 +4,7 @@ import { type Mixer } from '../mixer/mixer.js'
 import { type ActionDefinitions } from './actionid.js'
 import type { sqInstance } from '../instance.js'
 import { type OptionValue } from './to-source-or-sink.js'
+import { type OneIndexed, oneIndexedNumber } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
 
 /** Action IDs for all actions that change the mixer's current scene. */
@@ -35,10 +36,10 @@ export function tryCoalesceSceneRecallActions(action: CompanionMigrationAction):
 	return true
 }
 
-function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): number | null {
-	const scene = Number(sceneOption) - 1
-	if (0 <= scene && scene < model.scenes) {
-		return scene
+function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): OneIndexed | null {
+	const scene = Number(sceneOption) | 0
+	if (1 <= scene && scene <= model.scenes) {
+		return oneIndexedNumber(scene)
 	}
 
 	instance.log('error', `Attempting to recall invalid scene ${repr(sceneOption)}, ignoring`)
@@ -73,7 +74,7 @@ export function sceneActions(instance: sqInstance, mixer: Mixer): ActionDefiniti
 
 	return {
 		[SceneActionId.SceneRecall]: {
-			name: 'Scene recall',
+			name: 'Recall scene',
 			options: [
 				{
 					type: 'number',
