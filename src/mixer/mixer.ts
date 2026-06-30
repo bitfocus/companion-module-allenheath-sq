@@ -85,11 +85,13 @@ export const RetrieveStatusAtStartup = {
 
 export type RetrieveStatusAtStartup = (typeof RetrieveStatusAtStartup)[keyof typeof RetrieveStatusAtStartup]
 
-export enum MuteOperation {
-	Toggle = 0,
-	On = 1,
-	Off = 2,
-}
+export const MuteOperation = {
+	Toggle: 0,
+	On: 1,
+	Off: 2,
+} as const
+
+export type MuteOperation = (typeof MuteOperation)[keyof typeof MuteOperation]
 
 /** The port number used for MIDI-over-TCP connections to SQ mixers. */
 const SQMidiPort = 51325
