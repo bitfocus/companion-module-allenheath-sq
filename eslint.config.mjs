@@ -53,6 +53,18 @@ const customConfig = [
 	...baseConfig,
 
 	{
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: 'TSEnumDeclaration',
+					message: 'Use `as const` objects and a corresponding type rather than a TypeScript enum',
+				},
+			],
+		},
+	},
+
+	{
 		ignores: ['eslint.config.*'],
 		rules: {
 			'object-shorthand': 'error',

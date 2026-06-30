@@ -29,7 +29,6 @@ import {
 	type SourceSinkNRPNType,
 } from './nrpn/source-to-sink.js'
 import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
-import { enumValues } from '../utils/enumerate-enum.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
 import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
@@ -337,7 +336,7 @@ export class Mixer {
 		// (This isn't *all* pan/balance levels in use, because pan/balance
 		// variables might be used without their corresponding actions.  But the
 		// Companion module API doesn't tell us about them.)
-		for (const actionId of enumValues(PanBalanceActionId)) {
+		for (const actionId of Object.values(PanBalanceActionId)) {
 			instance.subscribeActions(actionId)
 			if (delayStatusRetrieval) {
 				sleep(300)
@@ -345,7 +344,7 @@ export class Mixer {
 		}
 
 		// Also ensure output pan/balances are queried and variables created.
-		for (const actionId of enumValues(OutputPanBalanceActionId)) {
+		for (const actionId of Object.values(OutputPanBalanceActionId)) {
 			instance.subscribeActions(actionId)
 		}
 	}
