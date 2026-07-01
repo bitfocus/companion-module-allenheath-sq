@@ -40,7 +40,7 @@ export function getActions(
 	choices: Choices,
 ): Record<ActionId, CompanionActionDefinition> {
 	return {
-		...muteActions(instance, mixer, choices),
+		...muteActions(instance, mixer),
 		...(() => {
 			const rotaryActions = {}
 			if (mixer.model.rotaryKeys > 0) {

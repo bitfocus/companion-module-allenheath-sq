@@ -1,10 +1,9 @@
-import {
-	type CompanionActionDefinition,
-	type CompanionOptionValues,
-	type CompanionInputFieldDropdown,
-	type DropdownChoice,
+import type {
+	CompanionActionDefinition,
+	CompanionInputFieldDropdown,
+	CompanionOptionValues,
 } from '@companion-module/base'
-import { type Choices } from '../choices.js'
+import { faderNumber } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
@@ -33,17 +32,6 @@ export type MuteActionId = (typeof MuteActionId)[keyof typeof MuteActionId]
 
 export const StripOptionId = 'strip'
 export const MuteOptionId = 'mute'
-
-function StripOption(label: string, choices: DropdownChoice[]): CompanionInputFieldDropdown {
-	return {
-		type: 'dropdown',
-		label,
-		id: StripOptionId,
-		default: 0,
-		choices,
-		minChoicesForSearch: 0,
-	}
-}
 
 const MuteOption = {
 	type: 'dropdown',
@@ -120,17 +108,17 @@ function getMuteOptions(
  * @returns
  *   The set of all mute action definitions.
  */
-export function muteActions(
-	instance: sqInstance,
-	mixer: Mixer,
-	choices: Choices,
-): Record<MuteActionId, CompanionActionDefinition> {
+export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActionId, CompanionActionDefinition> {
 	const model = mixer.model
+	const counts = model.inputOutputCounts
+
+	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
+		faderNumber(label, StripOptionId, counts, type)
 
 	return {
 		[MuteActionId.MuteInputChannel]: {
 			name: 'Mute Input',
-			options: [StripOption('Input Channel', choices.inputChannels), MuteOption],
+			options: [faderOption('Input Channel', 'inputChannel'), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'inputChannel')
 				if (options === null) {
@@ -168,7 +156,7 @@ export function muteActions(
 
 		[MuteActionId.MuteMix]: {
 			name: 'Mute Mix',
-			options: [StripOption('Mix', choices.mixes), MuteOption],
+			options: [faderOption('Mix', 'mix'), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'mix')
 				if (options === null) {
@@ -181,7 +169,7 @@ export function muteActions(
 		},
 		[MuteActionId.MuteGroup]: {
 			name: 'Mute Group',
-			options: [StripOption('Group', choices.groups), MuteOption],
+			options: [faderOption('Group', 'group'), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'group')
 				if (options === null) {
@@ -194,7 +182,7 @@ export function muteActions(
 		},
 		[MuteActionId.MuteMatrix]: {
 			name: 'Mute Matrix',
-			options: [StripOption('Matrix', choices.matrixes), MuteOption],
+			options: [faderOption('Matrix', 'matrix'), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'matrix')
 				if (options === null) {
@@ -207,7 +195,7 @@ export function muteActions(
 		},
 		[MuteActionId.MuteFXSend]: {
 			name: 'Mute FX Send',
-			options: [StripOption('FX Send', choices.fxSends), MuteOption],
+			options: [faderOption('FX Send', 'fxSend'), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'fxSend')
 				if (options === null) {
@@ -220,7 +208,7 @@ export function muteActions(
 		},
 		[MuteActionId.MuteFXReturn]: {
 			name: 'Mute FX Return',
-			options: [StripOption('FX Return', choices.fxReturns), MuteOption],
+			options: [faderOption('FX Return', 'fxReturn'), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'fxReturn')
 				if (options === null) {
@@ -233,7 +221,7 @@ export function muteActions(
 		},
 		[MuteActionId.MuteDCA]: {
 			name: 'Mute DCA',
-			options: [StripOption('DCA', choices.dcas), MuteOption],
+			options: [faderOption('DCA', 'dca'), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'dca')
 				if (options === null) {
@@ -246,7 +234,7 @@ export function muteActions(
 		},
 		[MuteActionId.MuteMuteGroup]: {
 			name: 'Mute MuteGroup',
-			options: [StripOption('MuteGroup', choices.muteGroups), MuteOption],
+			options: [faderOption('MuteGroup', 'muteGroup'), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'muteGroup')
 				if (options === null) {
