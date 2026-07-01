@@ -75,14 +75,6 @@ function createMuteGroups(model: Model): DropdownChoice[] {
 	return muteGroups
 }
 
-function createSoftKeys(model: Model): DropdownChoice[] {
-	const softKeys: DropdownChoice[] = []
-	model.forEach('softKey', (softKey, softKeyLabel) => {
-		softKeys.push({ label: softKeyLabel, id: softKey })
-	})
-	return softKeys
-}
-
 function createAllFaders(model: Model): DropdownChoice[] {
 	// All fader mix choices
 	const allFaders: DropdownChoice[] = []
@@ -132,7 +124,6 @@ export class Choices {
 	readonly fxSends
 	readonly dcas
 	readonly muteGroups
-	readonly softKeys
 	readonly allFaders
 	readonly panBalanceFaders
 
@@ -146,7 +137,6 @@ export class Choices {
 		this.fxSends = createFXSends(model)
 		this.dcas = createDCAs(model)
 		this.muteGroups = createMuteGroups(model)
-		this.softKeys = createSoftKeys(model)
 		this.allFaders = createAllFaders(model)
 		this.panBalanceFaders = createPanBalanceOutputFaders(model)
 	}

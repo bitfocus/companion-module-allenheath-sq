@@ -50,7 +50,7 @@ export function getActions(
 			}
 			return rotaryActions
 		})(),
-		...softKeyActions(instance, mixer, choices),
+		...softKeyActions(instance, mixer),
 		...assignActions(instance, mixer, choices),
 		...levelActions(instance, mixer, choices),
 		...panBalanceActions(instance, mixer, choices),

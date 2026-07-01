@@ -1,5 +1,4 @@
 import type { CompanionActionDefinition, CompanionOptionValues } from '@companion-module/base'
-import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type Model } from '../mixer/model.js'
@@ -66,11 +65,7 @@ function getSoftKeyOptions(instance: sqInstance, model: Model, options: Companio
  * @returns
  *   The set of all softkey action definitions.
  */
-export function softKeyActions(
-	instance: sqInstance,
-	mixer: Mixer,
-	choices: Choices,
-): Record<SoftKeyActionId, CompanionActionDefinition> {
+export function softKeyActions(instance: sqInstance, mixer: Mixer): Record<SoftKeyActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
 	return {
@@ -78,12 +73,12 @@ export function softKeyActions(
 			name: 'Press Softkey',
 			options: [
 				{
-					type: 'dropdown',
+					type: 'number',
 					label: 'Soft Key',
 					id: 'softKey',
 					default: 0,
-					choices: choices.softKeys,
-					minChoicesForSearch: 0,
+					min: 0,
+					max: model.softKeys - 1,
 				},
 				{
 					type: 'dropdown',

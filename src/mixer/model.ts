@@ -83,7 +83,7 @@ export class Model {
 		this.scenes = sqModel.sceneCount
 	}
 
-	readonly #labelsDescs: Record<InputOutputType | 'softKey', LabelDesc> = {
+	readonly #labelsDescs: Record<InputOutputType, LabelDesc> = {
 		inputChannel: {
 			pairs: [],
 			generate(channel: number) {
@@ -132,14 +132,9 @@ export class Model {
 				return ['LR', 'LR']
 			},
 		},
-
-		softKey: {
-			pairs: [],
-			generate: (key: number) => [`SOFTKEY ${key + 1}`, `SoftKey ${key + 1}`],
-		},
 	}
 
-	forEach(type: InputOutputType | 'softKey', f: ForEachFunctor): void {
+	forEach(type: InputOutputType, f: ForEachFunctor): void {
 		const labelDescs = this.#labelsDescs[type]
 		const pairs = labelDescs.pairs
 		if (pairs.length === 0) {
