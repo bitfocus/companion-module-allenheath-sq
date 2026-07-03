@@ -31,11 +31,14 @@ export const MuteActionId = {
 
 export type MuteActionId = (typeof MuteActionId)[keyof typeof MuteActionId]
 
+const StripOptionId = 'strip'
+const MuteOptionId = 'mute'
+
 function StripOption(label: string, choices: DropdownChoice[]): CompanionInputFieldDropdown {
 	return {
 		type: 'dropdown',
 		label,
-		id: 'strip',
+		id: StripOptionId,
 		default: 0,
 		choices,
 		minChoicesForSearch: 0,
@@ -45,7 +48,7 @@ function StripOption(label: string, choices: DropdownChoice[]): CompanionInputFi
 const MuteOption = {
 	type: 'dropdown',
 	label: 'Mute',
-	id: 'mute',
+	id: MuteOptionId,
 	default: 0,
 	choices: [
 		{ label: 'Toggle', id: 0 },
@@ -80,12 +83,12 @@ function getMuteOptions(
 	options: CompanionOptionValues,
 	type: InputOutputType,
 ): MuteOptions | null {
-	const strip = toSourceOrSink(instance, model, options.strip, type)
+	const strip = toSourceOrSink(instance, model, options[StripOptionId], type)
 	if (strip === null) {
 		return null
 	}
 
-	const muteOption = options.mute
+	const muteOption = options[MuteOptionId]
 	const option = Number(muteOption)
 	let op
 	switch (option) {
@@ -141,22 +144,12 @@ export function muteActions(instance: sqInstance, mixer: Mixer, choices: Choices
 				{
 					type: 'dropdown',
 					label: 'LR',
-					id: 'strip',
+					id: StripOptionId,
 					default: 0,
 					choices: [{ label: `LR`, id: 0 }],
 					minChoicesForSearch: 99,
 				},
-				{
-					type: 'dropdown',
-					label: 'Mute',
-					id: 'mute',
-					default: 0,
-					choices: [
-						{ label: 'Toggle', id: 0 },
-						{ label: 'On', id: 1 },
-						{ label: 'Off', id: 2 },
-					],
-				},
+				MuteOption,
 			],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'lr')
