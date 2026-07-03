@@ -1,5 +1,6 @@
 import { type CompanionStaticUpgradeScript, EmptyUpgradeScript } from '@companion-module/base'
 import { tryFixFXRLevelInFXSIdTypo } from '../actions/level.js'
+import { tryMakeMuteItemOneIndexed, tryTrimMuteLROptions } from '../actions/mute.js'
 import { tryConvertOldLevelToOutputActionToSinkSpecific } from '../actions/output/level.js'
 import { tryConvertOldPanToOutputActionToSinkSpecific } from '../actions/output/pan-balance.js'
 import { tryCoalesceSceneRecallActions } from '../actions/scene.js'
@@ -33,4 +34,6 @@ export const UpgradeScripts = [
 	// because a great many options, in order to be selectable by expression, need
 	// to be user-understandable.  Boo-urns!
 	ActionUpdater(tryMakeSoftKeyOneIndexed),
+	ActionUpdater(tryMakeMuteItemOneIndexed),
+	ActionUpdater(tryTrimMuteLROptions),
 ] satisfies CompanionStaticUpgradeScript<SQConfig>[]

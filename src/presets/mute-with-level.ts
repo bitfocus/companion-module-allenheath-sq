@@ -1,8 +1,9 @@
 import type { CompanionPresetDefinitions } from '@companion-module/base'
-import { MuteActionId, MuteOptionId, StripOptionId } from '../actions/mute.js'
+import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/mute.js'
 import { MuteFeedbackId } from '../feedbacks/mute.js'
 import type { sqInstance } from '../instance.js'
 import type { Model } from '../mixer/model.js'
+import { MuteOperation } from '../mixer/mixer.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { LevelNRPNCalculator } from '../mixer/nrpn/source-to-sink.js'
 import { White, Black } from '../utils/colors.js'
@@ -39,8 +40,8 @@ export function muteWithLevelPresets(instance: sqInstance, model: Model): Compan
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								[StripOptionId]: ch,
-								[MuteOptionId]: 0,
+								[StripOptionId]: ch + 1,
+								[StatusOptionId]: MuteOperation.Toggle,
 							},
 						},
 					],

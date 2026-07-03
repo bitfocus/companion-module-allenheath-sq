@@ -1,6 +1,8 @@
+import type { Equal, Expect } from 'type-testing'
 import type {
 	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
+	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
 import { faderNumber } from '../fader-number.js'
@@ -8,7 +10,8 @@ import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { MuteOperation } from '../mixer/mixer.js'
-import { toSourceOrSink } from './to-source-or-sink.js'
+import { sourceOrSinkFromOneIndexed } from './to-source-or-sink.js'
+import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
 
@@ -30,24 +33,134 @@ export const MuteActionId = {
 
 export type MuteActionId = (typeof MuteActionId)[keyof typeof MuteActionId]
 
-export const StripOptionId = 'strip'
-export const MuteOptionId = 'mute'
+export const AllMuteStripActions: ReadonlySet<string> = new Set(
+	Object.values(MuteActionId).filter((id) => id !== 'mute_lr'),
+)
+
+export const StripOptionId = 'n'
+export const StatusOptionId = 'status'
+
+const ObsoleteStripOptionId = 'strip'
+const ObsoleteStatusOptionId = 'mute'
+
+export const ObsoleteMuteStatus = {
+	Toggle: 0,
+	On: 1,
+	Off: 2,
+} as const
+
+export type ObsoleteMuteStatus = (typeof ObsoleteMuteStatus)[keyof typeof ObsoleteMuteStatus]
+
+/**
+ * Translate an obsolete `mute: 0 | 1 | 2` option to the current
+ * `status: 'toggle' | 'on' | 'off'` in `options`.
+ */
+function rewriteObsoleteStatusOption(options: CompanionMigrationAction['options']): void {
+	let status: MuteOperation
+	switch (options[ObsoleteStatusOptionId]) {
+		case ObsoleteMuteStatus.Off:
+			status = MuteOperation.Off
+			break
+		case ObsoleteMuteStatus.On:
+			status = MuteOperation.On
+			break
+		case ObsoleteMuteStatus.Toggle:
+			status = MuteOperation.Toggle
+			break
+		default:
+			// Transfer the invalid option value unchanged.
+			status = options[ObsoleteStatusOptionId] as MuteOperation
+			break
+	}
+
+	type assert_statusIsMuteOperation = Expect<Equal<typeof status, MuteOperation>>
+
+	options[StatusOptionId] = status
+	delete options[ObsoleteStatusOptionId]
+}
+
+/**
+ * Mute actions, for any input/output type, used to identify a specific instance
+ * using an option with zero-indexed value, e.g. `[0, 48)` for 48 input
+ * channels.  Translate any such old zero-indexed option into a new one-indexed
+ * option -- and for good measure rename/reencode the mute-status option at the
+ * same time.
+ */
+export function tryMakeMuteItemOneIndexed(action: CompanionMigrationAction): boolean {
+	if (!AllMuteStripActions.has(action.actionId)) {
+		return false
+	}
+
+	const options = action.options
+
+	if (!(ObsoleteStripOptionId in options)) {
+		return false
+	}
+
+	moveZeroIndexedOptionToOneIndexed(options, ObsoleteStripOptionId, StripOptionId)
+
+	rewriteObsoleteStatusOption(options)
+
+	return true
+}
+
+/**
+ * The mute-LR action used to unnecessarily identify the single LR strip with an
+ * option.  Remove this option, and rename/reencode the mute-status option as is
+ * done above for all other mute actions.
+ */
+export function tryTrimMuteLROptions(action: CompanionMigrationAction): boolean {
+	if (action.actionId !== MuteActionId.MuteLR) {
+		return false
+	}
+
+	const options = action.options
+
+	if (!(ObsoleteStripOptionId in options)) {
+		return false
+	}
+
+	delete options[ObsoleteStripOptionId]
+
+	rewriteObsoleteStatusOption(options)
+
+	return true
+}
 
 const MuteOption = {
 	type: 'dropdown',
 	label: 'Mute',
-	id: MuteOptionId,
-	default: 0,
+	id: StatusOptionId,
+	default: MuteOperation.Toggle,
 	choices: [
-		{ label: 'Toggle', id: 0 },
-		{ label: 'On', id: 1 },
-		{ label: 'Off', id: 2 },
+		{ label: 'Toggle', id: MuteOperation.Toggle },
+		{ label: 'On', id: MuteOperation.On },
+		{ label: 'Off', id: MuteOperation.Off },
 	],
 } satisfies CompanionInputFieldDropdown
 
 type MuteOptions = {
-	strip: ZeroIndexed
-	op: MuteOperation
+	n: ZeroIndexed
+	status: MuteOperation
+}
+
+function getStatus(instance: sqInstance, options: CompanionOptionValues): MuteOperation | null {
+	const statusOption = options[StatusOptionId]
+	let status
+	switch (statusOption) {
+		case MuteOperation.Toggle:
+		case MuteOperation.Off:
+		case MuteOperation.On:
+			status = statusOption
+			break
+		default:
+			instance.log('error', `Mute status option has invalid value, action aborted: ${repr(statusOption)}`)
+			return null
+	}
+
+	type assert_statusIsMuteOperation = Expect<Equal<typeof status, MuteOperation>>
+
+	return status
 }
 
 /**
@@ -69,32 +182,22 @@ function getMuteOptions(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-	type: InputOutputType,
+	type: Exclude<InputOutputType, 'lr'>,
 ): MuteOptions | null {
-	const strip = toSourceOrSink(instance, model, options[StripOptionId], type)
-	if (strip === null) {
+	const n = sourceOrSinkFromOneIndexed(instance, model, options[StripOptionId], type)
+	if (n === null) {
 		return null
 	}
 
-	const muteOption = options[MuteOptionId]
-	const option = Number(muteOption)
-	let op
-	switch (option) {
-		case 0:
-			op = MuteOperation.Toggle
-			break
-		case 1:
-			op = MuteOperation.On
-			break
-		case 2:
-			op = MuteOperation.Off
-			break
-		default:
-			instance.log('error', `Mute option has invalid value, action aborted: ${repr(muteOption)}`)
-			return null
+	const status = getStatus(instance, options)
+	if (status === null) {
+		return null
 	}
 
-	return { strip, op }
+	type assert_nIsZeroIndexed = Expect<Equal<typeof n, ZeroIndexed>>
+	type assert_statusIsMuteOperation = Expect<Equal<typeof status, MuteOperation>>
+
+	return { n, status }
 }
 
 /**
@@ -125,32 +228,21 @@ export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActi
 					return
 				}
 
-				const { strip, op } = options
-				mixer.muteInputChannel(strip, op)
+				const { n, status } = options
+				mixer.muteInputChannel(n, status)
 			},
 		},
 
 		[MuteActionId.MuteLR]: {
 			name: 'Mute LR',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'LR',
-					id: StripOptionId,
-					default: 0,
-					choices: [{ label: `LR`, id: 0 }],
-					minChoicesForSearch: 99,
-				},
-				MuteOption,
-			],
-			callback: async ({ options: opt }) => {
-				const options = getMuteOptions(instance, model, opt, 'lr')
-				if (options === null) {
+			options: [MuteOption],
+			callback: async ({ options }) => {
+				const status = getStatus(instance, options)
+				if (status === null) {
 					return
 				}
 
-				const { op } = options
-				mixer.muteLR(op)
+				mixer.muteLR(status)
 			},
 		},
 
@@ -163,8 +255,8 @@ export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActi
 					return
 				}
 
-				const { strip, op } = options
-				mixer.muteMix(strip, op)
+				const { n, status } = options
+				mixer.muteMix(n, status)
 			},
 		},
 		[MuteActionId.MuteGroup]: {
@@ -176,8 +268,8 @@ export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActi
 					return
 				}
 
-				const { strip, op } = options
-				mixer.muteGroup(strip, op)
+				const { n, status } = options
+				mixer.muteGroup(n, status)
 			},
 		},
 		[MuteActionId.MuteMatrix]: {
@@ -189,8 +281,8 @@ export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActi
 					return
 				}
 
-				const { strip, op } = options
-				mixer.muteMatrix(strip, op)
+				const { n, status } = options
+				mixer.muteMatrix(n, status)
 			},
 		},
 		[MuteActionId.MuteFXSend]: {
@@ -202,8 +294,8 @@ export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActi
 					return
 				}
 
-				const { strip, op } = options
-				mixer.muteFXSend(strip, op)
+				const { n, status } = options
+				mixer.muteFXSend(n, status)
 			},
 		},
 		[MuteActionId.MuteFXReturn]: {
@@ -215,8 +307,8 @@ export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActi
 					return
 				}
 
-				const { strip, op } = options
-				mixer.muteFXReturn(strip, op)
+				const { n, status } = options
+				mixer.muteFXReturn(n, status)
 			},
 		},
 		[MuteActionId.MuteDCA]: {
@@ -228,8 +320,8 @@ export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActi
 					return
 				}
 
-				const { strip, op } = options
-				mixer.muteDCA(strip, op)
+				const { n, status } = options
+				mixer.muteDCA(n, status)
 			},
 		},
 		[MuteActionId.MuteMuteGroup]: {
@@ -241,8 +333,8 @@ export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActi
 					return
 				}
 
-				const { strip, op } = options
-				mixer.muteMuteGroup(strip, op)
+				const { n, status } = options
+				mixer.muteMuteGroup(n, status)
 			},
 		},
 	}

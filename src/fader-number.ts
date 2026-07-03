@@ -2,7 +2,7 @@ import type { CompanionInputFieldBase, CompanionInputFieldNumber } from '@compan
 import type { InputOutputType, Model } from './mixer/model.js'
 
 /**
- * Return a numeric option for selecting a zero-indexed signal of the indicated
+ * Return a numeric option for selecting a one-indexed signal of the indicated
  * type.
  */
 export function faderNumber<Id extends CompanionInputFieldBase['id']>(
@@ -15,8 +15,8 @@ export function faderNumber<Id extends CompanionInputFieldBase['id']>(
 		type: 'number',
 		label,
 		id,
-		default: 0,
-		min: 0,
-		max: counts[type] - 1,
+		default: 1,
+		min: 1,
+		max: counts[type],
 	}
 }

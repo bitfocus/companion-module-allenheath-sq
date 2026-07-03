@@ -97,9 +97,9 @@ export const RetrieveStatusAtStartup = {
 export type RetrieveStatusAtStartup = (typeof RetrieveStatusAtStartup)[keyof typeof RetrieveStatusAtStartup]
 
 export const MuteOperation = {
-	Toggle: 0,
-	On: 1,
-	Off: 2,
+	Toggle: 'toggle',
+	On: 'on',
+	Off: 'off',
 } as const
 
 export type MuteOperation = (typeof MuteOperation)[keyof typeof MuteOperation]
