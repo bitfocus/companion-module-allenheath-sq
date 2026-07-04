@@ -11,6 +11,7 @@ import { LR, type MixOrLR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROpti
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 
 /**
  * Action IDs for all actions that activate/deactivate a mixer source within a
@@ -74,17 +75,21 @@ export function tryUpgradeAssignMixOrLREncoding(action: CompanionMigrationAction
  * @returns
  *   An array of sinks.
  */
-function assignOptionToSinks(assign: OptionValue, model: Model, sinkType: Exclude<InputOutputType, 'mix'>): number[] {
+function assignOptionToSinks(
+	assign: OptionValue,
+	model: Model,
+	sinkType: Exclude<InputOutputType, 'mix'>,
+): ZeroIndexed[] {
 	if (!Array.isArray(assign)) {
 		return []
 	}
 
 	const sinkCount = model.inputOutputCounts[sinkType]
-	const sinks: number[] = []
+	const sinks: ZeroIndexed[] = []
 	for (const item of assign) {
 		const sink = Number(item)
 		if (sink < sinkCount) {
-			sinks.push(sink)
+			sinks.push(zeroIndexedNumber(sink))
 		}
 	}
 	return sinks
@@ -116,7 +121,7 @@ function getMixAndLRSinks(options: CompanionOptionValues, model: Model): MixOrLR
 		} else {
 			const sink = Number(item)
 			if (sink < sinkCount) {
-				sinks.push(sink)
+				sinks.push(zeroIndexedNumber(sink))
 			}
 		}
 	}

@@ -1,3 +1,4 @@
+import type { Equal, Expect } from 'type-testing'
 import type {
 	CompanionInputFieldDropdown,
 	CompanionMigrationAction,
@@ -7,7 +8,7 @@ import type { ActionDefinitions } from './actionid.js'
 import type { Choices } from '../choices.js'
 import { getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
-import { LR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
+import { LR, LRStrip, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
 import type { NRPN } from '../mixer/nrpn/nrpn.js'
@@ -18,6 +19,7 @@ import {
 	type SourceSinkForNRPN,
 } from '../mixer/nrpn/source-to-sink.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+import type { ZeroIndexed } from '../utils/indexed.js'
 
 /**
  * Action IDs for all actions that alter the level of a mixer source in a mixer
@@ -89,8 +91,8 @@ export function tryUpgradeLevelMixOrLREncoding(action: CompanionMigrationAction)
 }
 
 type LevelType = {
-	source: number
-	sink: number
+	source: ZeroIndexed
+	sink: ZeroIndexed
 	sourceSinkType: SourceSinkForNRPN<'level'>
 	nrpn: NRPN<'level'>
 }
@@ -136,7 +138,7 @@ function getLevelType(
 		}
 
 		sourceSinkType = [src === LR ? 'lr' : 'mix', srcSnkType[1]]
-		source = src === LR ? 0 : src
+		source = src === LR ? LRStrip : src
 	} else if (srcSnkType[1] === 'mix-or-lr') {
 		source = toSourceOrSink(instance, model, options[LevelSetSourceOptionId], srcSnkType[0])
 		if (source === null) {
@@ -149,7 +151,7 @@ function getLevelType(
 		}
 
 		sourceSinkType = [srcSnkType[0], snk === LR ? 'lr' : 'mix']
-		sink = snk === LR ? 0 : snk
+		sink = snk === LR ? LRStrip : snk
 	} else {
 		source = toSourceOrSink(instance, model, options[LevelSetSourceOptionId], srcSnkType[0])
 		if (source === null) {
@@ -165,6 +167,9 @@ function getLevelType(
 	}
 
 	const calc = LevelNRPNCalculator.get(model, sourceSinkType)
+
+	type assert_SourceIsZeroIndexed = Expect<Equal<typeof source, ZeroIndexed>>
+	type assert_SinkIsZeroIndexed = Expect<Equal<typeof sink, ZeroIndexed>>
 
 	return {
 		source,

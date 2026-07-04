@@ -1,6 +1,7 @@
 import type { Equal, Expect } from 'type-testing'
 import { getOutputCalculator, type InputOutputType, type Model } from '../model.js'
 import { calculateNRPN, type NRPN, toNRPN, type NRPNType, type Param, type UnbrandedParam } from './nrpn.js'
+import type { ZeroIndexed } from '../../utils/indexed.js'
 
 type OutputInfo = {
 	/** The base MSB/LSB for adjusting output level. */
@@ -103,7 +104,7 @@ class OutputNRPNCalculator<T extends OutputNRPN> {
 		this.#base = info[nrpnType] as Param<T>
 	}
 
-	calculate(sink: number): NRPN<T> {
+	calculate(sink: ZeroIndexed): NRPN<T> {
 		if (this.#inputOutputCounts[this.#sinkType] <= sink) {
 			throw new Error(`${this.#sinkType}=${sink} is invalid`)
 		}

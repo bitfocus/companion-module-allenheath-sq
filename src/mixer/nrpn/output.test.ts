@@ -7,6 +7,7 @@ import {
 	OutputLevelNRPNCalculator,
 	type SinkAsOutputForNRPN,
 } from './output.js'
+import { zeroIndexedNumber, type ZeroIndexed } from '../../utils/indexed.js'
 
 type OutputBehavior = { type: 'ok'; result: UnbrandedParam } | { type: 'error'; match: RegExp | string }
 
@@ -79,12 +80,13 @@ describe('OutputLevelNRPNCalculator', () => {
 	function* allLevelTests(): Generator<{
 		sinkType: InputOutputType
 		calc: OutputLevelNRPNCalculator
-		n: number
+		n: ZeroIndexed
 		behavior: OutputBehavior
 	}> {
 		for (const [sinkType, sinkTests] of outputLevelTests) {
 			const calc = OutputLevelNRPNCalculator.get(model, sinkType)
-			for (const [n, behavior] of sinkTests) {
+			for (const [n_, behavior] of sinkTests) {
+				const n = zeroIndexedNumber(n_)
 				yield { sinkType, calc, n, behavior }
 				switch (behavior.type) {
 					case 'ok':
@@ -164,12 +166,13 @@ describe('OutputBalanceNRPNCalculator', () => {
 	function* allBalanceTests(): Generator<{
 		sinkType: InputOutputType
 		calc: OutputBalanceNRPNCalculator
-		n: number
+		n: ZeroIndexed
 		behavior: OutputBehavior
 	}> {
 		for (const [sinkType, sinkTests] of outputPanBalanceTests) {
 			const calc = OutputBalanceNRPNCalculator.get(model, sinkType)
-			for (const [n, behavior] of sinkTests) {
+			for (const [n_, behavior] of sinkTests) {
+				const n = zeroIndexedNumber(n_)
 				yield { sinkType, calc, n, behavior }
 			}
 		}

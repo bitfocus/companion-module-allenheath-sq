@@ -4,6 +4,7 @@ import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type Model } from '../mixer/model.js'
+import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
 
 /** Action IDs for all actions that operate softkeys. */
@@ -22,16 +23,17 @@ const SoftKeyOp = {
 type SoftKeyOp = (typeof SoftKeyOp)[keyof typeof SoftKeyOp]
 
 type SoftKeyOptions = {
-	softKey: number
+	softKey: ZeroIndexed
 	op: SoftKeyOp
 }
 
 function getSoftKeyOptions(instance: sqInstance, model: Model, options: CompanionOptionValues): SoftKeyOptions | null {
-	const softKey = Number(options.softKey)
-	if (model.softKeys <= softKey) {
-		instance.log('error', `Attempting to operate invalid softkey ${softKey}, ignoring`)
+	const softKeyVal = Number(options.softKey)
+	if (model.softKeys <= softKeyVal) {
+		instance.log('error', `Attempting to operate invalid softkey ${softKeyVal}, ignoring`)
 		return null
 	}
+	const softKey = zeroIndexedNumber(softKeyVal)
 
 	const option = String(options.pressedsk)
 	let op

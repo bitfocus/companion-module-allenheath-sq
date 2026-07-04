@@ -4,6 +4,7 @@ import { type FeedbackDefinitions, type FeedbackId } from './feedback-ids.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
+import { zeroIndexedNumber } from '../utils/indexed.js'
 
 /**
  * Feedback IDs for feedbacks reacting to the mute status of particular mixer
@@ -60,7 +61,7 @@ export function muteFeedbacks(mixer: Mixer, choices: Choices): FeedbackDefinitio
 				bgcolor: CARMINE_RED,
 			},
 			callback: ({ options }, _context) => {
-				const nrpn = calculateMuteNRPN(mixer.model, type, Number(options.channel))
+				const nrpn = calculateMuteNRPN(mixer.model, type, zeroIndexedNumber(Number(options.channel)))
 				return mixer.muted(nrpn)
 			},
 		}

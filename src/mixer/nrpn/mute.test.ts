@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
 import { calculateMuteNRPN } from './mute.js'
 import { splitNRPN, type UnbrandedParam } from './nrpn.js'
+import { zeroIndexedNumber, type ZeroIndexed } from '../../utils/indexed.js'
 
 type assert_AllMuteTypes = Expect<Equal<Parameters<typeof calculateMuteNRPN>[1], InputOutputType>>
 
@@ -78,14 +79,14 @@ describe('calculateMuteNRPN', () => {
 
 	function* allMuteTests(): Generator<{
 		type: InputOutputType
-		n: number
+		n: ZeroIndexed
 		behavior: InputOutputBehavior
 	}> {
 		for (const key in allInputsOutputs) {
 			const type = key as InputOutputType
 			const tests = allInputsOutputs[type]
 			for (const [num, behavior] of Object.entries(tests)) {
-				const n = Number(num)
+				const n = zeroIndexedNumber(Number(num))
 				yield { type, n, behavior }
 			}
 		}

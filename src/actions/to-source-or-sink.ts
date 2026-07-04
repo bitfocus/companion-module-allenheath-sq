@@ -2,6 +2,7 @@ import type { CompanionOptionValues } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import { LR, type MixOrLR } from '../mixer/lr.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
+import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 
 /** The type of an option value. */
 export type OptionValue = CompanionOptionValues[keyof CompanionOptionValues]
@@ -28,10 +29,10 @@ export function toSourceOrSink(
 	model: Model,
 	optionValue: OptionValue,
 	type: InputOutputType,
-): number | null {
+): ZeroIndexed | null {
 	const n = Number(optionValue)
 	if (n < model.inputOutputCounts[type]) {
-		return n
+		return zeroIndexedNumber(n)
 	}
 
 	instance.log('error', `Invalid ${type} (${optionValue})`)
@@ -57,7 +58,7 @@ export function toMixOrLR(instance: sqInstance, model: Model, optionValue: Optio
 
 	const n = Number(optionValue)
 	if (n < model.inputOutputCounts.mix) {
-		return n
+		return zeroIndexedNumber(n)
 	}
 
 	instance.log('error', `Invalid mix-or-LR (${optionValue})`)

@@ -10,6 +10,7 @@ import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { MuteOperation } from '../mixer/mixer.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
+import type { ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
 
 /**
@@ -54,7 +55,7 @@ const MuteOption = {
 } satisfies CompanionInputFieldDropdown
 
 type MuteOptions = {
-	strip: number
+	strip: ZeroIndexed
 	op: MuteOperation
 }
 

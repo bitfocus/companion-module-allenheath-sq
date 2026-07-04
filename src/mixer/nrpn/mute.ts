@@ -1,5 +1,6 @@
 import type { InputOutputType, Model } from '../model.js'
 import { calculateNRPN, toNRPN, type NRPN, type Param, type UnbrandedParam } from './nrpn.js'
+import type { ZeroIndexed } from '../../utils/indexed.js'
 
 type MuteParameterBaseRaw = Readonly<Record<InputOutputType, Readonly<UnbrandedParam>>>
 
@@ -43,7 +44,7 @@ const MuteParameterBase = MuteParameterBaseRaw as ApplyMuteBranding<typeof MuteP
  * @returns
  *   The NRPN for the identified input/output.
  */
-export function calculateMuteNRPN(model: Model, inputOutputType: InputOutputType, n: number): NRPN<'mute'> {
+export function calculateMuteNRPN(model: Model, inputOutputType: InputOutputType, n: ZeroIndexed): NRPN<'mute'> {
 	if (model.inputOutputCounts[inputOutputType] <= n) {
 		throw new Error(`${inputOutputType}=${n} is invalid`)
 	}
@@ -56,7 +57,7 @@ type ForEachMuteFunctor = (nrpn: NRPN<'mute'>) => void
 export function forEachMute(model: Model, f: ForEachMuteFunctor): void {
 	for (const [type, base] of Object.entries(MuteParameterBase)) {
 		const muteType = type as InputOutputType
-		model.forEach(muteType, (n: number) => {
+		model.forEach(muteType, (n) => {
 			return f(calculateNRPN(toNRPN(base), n))
 		})
 	}

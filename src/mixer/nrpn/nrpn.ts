@@ -1,4 +1,5 @@
 import type { Branded } from '../../utils/brand.js'
+import type { ZeroIndexed } from '../../utils/indexed.js'
 import { prettyByte } from '../../utils/pretty.js'
 
 export type NRPNType = 'mute' | 'assign' | 'panBalance' | 'level'
@@ -30,7 +31,7 @@ export function makeNRPN<T extends NRPNType>(MSB: number, LSB: number): NRPN<T> 
 export type AssignParam = Param<'assign'>
 
 /** Compute the NRPN at the given offset from another NRPN. */
-export function calculateNRPN<T extends NRPNType>(nrpn: NRPN<T>, offset: number): NRPN<T> {
+export function calculateNRPN<T extends NRPNType>(nrpn: NRPN<T>, offset: ZeroIndexed): NRPN<T> {
 	return (nrpn + offset) as NRPN<T>
 }
 

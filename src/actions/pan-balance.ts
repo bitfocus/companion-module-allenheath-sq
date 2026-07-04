@@ -8,7 +8,7 @@ import type {
 import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
-import { LR, type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
+import { LR, LRStrip, type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
@@ -19,6 +19,7 @@ import {
 } from '../mixer/nrpn/source-to-sink.js'
 import { type PanBalance } from '../mixer/pan-balance.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+import type { ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
 
 /**
@@ -119,7 +120,7 @@ function getBalanceSourceToMixOrLRNumbers(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
-): [number, MixOrLR] | null {
+): [ZeroIndexed, MixOrLR] | null {
 	const source = toSourceOrSink(instance, model, options[PanBalanceSourceOptionId], sourceType)
 	if (source === null) {
 		return null
@@ -138,7 +139,7 @@ function getBalanceSourceToSinkNumbers(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
-): [number, number] | null {
+): [ZeroIndexed, ZeroIndexed] | null {
 	const source = toSourceOrSink(instance, model, options[PanBalanceSourceOptionId], sourceSink[0])
 	if (source === null) {
 		return null
@@ -166,7 +167,7 @@ function getBalanceSourceToMixOrLRParam(
 	const [source, mixOrLR] = sourceSink
 
 	return mixOrLR === LR
-		? BalanceNRPNCalculator.get(model, ['inputChannel', 'lr']).calculate(source, 0)
+		? BalanceNRPNCalculator.get(model, ['inputChannel', 'lr']).calculate(source, LRStrip)
 		: BalanceNRPNCalculator.get(model, ['inputChannel', 'mix']).calculate(source, mixOrLR)
 }
 
@@ -265,7 +266,7 @@ function panSourceToMixOrLRCallbackPrelude(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
-): [number, MixOrLR, PanBalanceChoice] | null {
+): [ZeroIndexed, MixOrLR, PanBalanceChoice] | null {
 	const sourceSink = getBalanceSourceToMixOrLRNumbers(instance, model, options, sourceType)
 	if (sourceSink === null) {
 		return null
@@ -284,7 +285,7 @@ function panSourceToSinkCallbackPrelude(
 	model: Model,
 	options: CompanionOptionValues,
 	sourceSink: SourceSinkForNRPN<'panBalance'>,
-): [number, number, PanBalanceChoice] | null {
+): [ZeroIndexed, ZeroIndexed, PanBalanceChoice] | null {
 	const sourceSinkNums = getBalanceSourceToSinkNumbers(instance, model, options, sourceSink)
 	if (sourceSinkNums === null) {
 		return null
@@ -302,7 +303,7 @@ function panMixOrLRToMatrix(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-): [MixOrLR, number] | null {
+): [MixOrLR, ZeroIndexed] | null {
 	const mixOrLR = toMixOrLR(instance, model, options[PanBalanceSourceOptionId])
 	if (mixOrLR === null) {
 		return null
@@ -328,7 +329,7 @@ function getMixOrLRToMatrixParam(
 	const [mixOrLR, matrix] = sourceSink
 
 	return mixOrLR === LR
-		? BalanceNRPNCalculator.get(model, ['lr', 'matrix']).calculate(0, matrix)
+		? BalanceNRPNCalculator.get(model, ['lr', 'matrix']).calculate(LRStrip, matrix)
 		: BalanceNRPNCalculator.get(model, ['mix', 'matrix']).calculate(mixOrLR, matrix)
 }
 

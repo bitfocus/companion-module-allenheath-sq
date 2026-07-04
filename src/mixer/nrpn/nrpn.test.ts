@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { calculateNRPN, makeNRPN, prettyNRPN, splitNRPN, toNRPN } from './nrpn.js'
+import { zeroIndexedNumber } from '../../utils/indexed.js'
 
 describe('NRPN', () => {
 	const ip1ToGrp1 = makeNRPN<'assign'>(0x66, 0x74)
@@ -13,7 +14,7 @@ describe('NRPN', () => {
 	const mixOutputBase = makeNRPN<'level'>(0x4f, 0x01)
 
 	test('calculateNRPN', () => {
-		expect(calculateNRPN(mixOutputBase, 4)).toBe((0x4f << 7) + 0x01 + 4)
+		expect(calculateNRPN(mixOutputBase, zeroIndexedNumber(4))).toBe((0x4f << 7) + 0x01 + 4)
 	})
 
 	const ip1ToGrp1Pair = splitNRPN(ip1ToGrp1)

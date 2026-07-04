@@ -7,7 +7,7 @@ import { getMidiChannel, type Host } from '../config.js'
 import { typeToMuteFeedback } from '../feedbacks/mute.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
-import { LR, type MixOrLR } from './lr.js'
+import { LR, LRStrip, type MixOrLR } from './lr.js'
 import { ChannelParser } from '../midi/parse/channel-parser.js'
 import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
@@ -30,7 +30,7 @@ import {
 	type SourceSinkNRPNType,
 } from './nrpn/source-to-sink.js'
 import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
-import { type OneIndexed, oneIndexedNumber } from '../utils/indexed.js'
+import { type OneIndexed, oneIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'
 import { SceneRecalledTriggerId, CurrentSceneId } from '../variables.js'
@@ -490,7 +490,7 @@ export class Mixer {
 	}
 
 	/** Perform the supplied mute operation upon the strip of the given type. */
-	#mute(strip: number, type: InputOutputType, op: MuteOperation): void {
+	#mute(strip: ZeroIndexed, type: InputOutputType, op: MuteOperation): void {
 		const nrpn = calculateMuteNRPN(this.model, type, strip)
 
 		let newMuteStatus: boolean
@@ -528,47 +528,47 @@ export class Mixer {
 	}
 
 	/** Act upon the mute status of the given input channel. */
-	muteInputChannel(inputChannel: number, op: MuteOperation): void {
+	muteInputChannel(inputChannel: ZeroIndexed, op: MuteOperation): void {
 		this.#mute(inputChannel, 'inputChannel', op)
 	}
 
 	/** Act upon the mute status of LR. */
 	muteLR(op: MuteOperation): void {
-		this.#mute(0, 'lr', op)
+		this.#mute(LRStrip, 'lr', op)
 	}
 
 	/** Act upon the mute status of the given mix. */
-	muteMix(mix: number, op: MuteOperation): void {
+	muteMix(mix: ZeroIndexed, op: MuteOperation): void {
 		this.#mute(mix, 'mix', op)
 	}
 
 	/** Act upon the mute status of the given mute group. */
-	muteGroup(group: number, op: MuteOperation): void {
+	muteGroup(group: ZeroIndexed, op: MuteOperation): void {
 		this.#mute(group, 'group', op)
 	}
 
 	/** Act upon the mute status of the given matrix. */
-	muteMatrix(matrix: number, op: MuteOperation): void {
+	muteMatrix(matrix: ZeroIndexed, op: MuteOperation): void {
 		this.#mute(matrix, 'matrix', op)
 	}
 
 	/** Act upon the mute status of the given FX send. */
-	muteFXSend(fxSend: number, op: MuteOperation): void {
+	muteFXSend(fxSend: ZeroIndexed, op: MuteOperation): void {
 		this.#mute(fxSend, 'fxSend', op)
 	}
 
 	/** Act upon the mute status of the given FX return. */
-	muteFXReturn(fxReturn: number, op: MuteOperation): void {
+	muteFXReturn(fxReturn: ZeroIndexed, op: MuteOperation): void {
 		this.#mute(fxReturn, 'fxReturn', op)
 	}
 
 	/** Act upon the mute status of the given DCA. */
-	muteDCA(dca: number, op: MuteOperation): void {
+	muteDCA(dca: ZeroIndexed, op: MuteOperation): void {
 		this.#mute(dca, 'dca', op)
 	}
 
 	/** Act upon the mute status of the given mute group. */
-	muteMuteGroup(strip: number, op: MuteOperation): void {
+	muteMuteGroup(strip: ZeroIndexed, op: MuteOperation): void {
 		this.#mute(strip, 'muteGroup', op)
 	}
 
@@ -589,7 +589,7 @@ export class Mixer {
 	 *   A calculator of the assign NRPN dictated by `source`, `sink`, and their
 	 *   types.
 	 */
-	#assignToSink(source: number, active: boolean, sink: number, calc: AssignNRPNCalculator): NRPNDataMessage {
+	#assignToSink(source: ZeroIndexed, active: boolean, sink: ZeroIndexed, calc: AssignNRPNCalculator): NRPNDataMessage {
 		const nrpn = calc.calculate(source, sink)
 		return this.#nrpnData(nrpn, 0, active ? 1 : 0)
 	}
@@ -611,7 +611,7 @@ export class Mixer {
 	 *   assigned.
 	 */
 	#assignSourceToMixesAndLR(
-		source: number,
+		source: ZeroIndexed,
 		sourceType: SourceForSourceInMixAndLRForNRPN<'assign'>,
 		active: boolean,
 		mixes: readonly MixOrLR[],
@@ -621,7 +621,7 @@ export class Mixer {
 
 		const commands = mixes.map((mixOrLR) => {
 			return mixOrLR === LR
-				? this.#assignToSink(source, active, 0, lrNrpn)
+				? this.#assignToSink(source, active, LRStrip, lrNrpn)
 				: this.#assignToSink(source, active, mixOrLR, mixNrpn)
 		})
 
@@ -649,9 +649,9 @@ export class Mixer {
 	 *   source-to-sink assignment.
 	 */
 	#assignSourceToSinks(
-		source: number,
+		source: ZeroIndexed,
 		active: boolean,
-		sinks: readonly number[],
+		sinks: readonly ZeroIndexed[],
 		sourceSink: SourceSinkForNRPN<'assign'>,
 	): void {
 		const nrpn = AssignNRPNCalculator.get(this.model, sourceSink)
@@ -675,7 +675,7 @@ export class Mixer {
 	 * @param mixes
 	 *   The mixes to activate it in, potentially including the LR mix.
 	 */
-	assignInputChannelToMixesAndLR(inputChannel: number, active: boolean, mixes: readonly MixOrLR[]): void {
+	assignInputChannelToMixesAndLR(inputChannel: ZeroIndexed, active: boolean, mixes: readonly MixOrLR[]): void {
 		this.#assignSourceToMixesAndLR(inputChannel, 'inputChannel', active, mixes)
 	}
 
@@ -690,7 +690,7 @@ export class Mixer {
 	 * @param groups
 	 *   The groups to activate it in.
 	 */
-	assignInputChannelToGroups(inputChannel: number, active: boolean, groups: readonly number[]): void {
+	assignInputChannelToGroups(inputChannel: ZeroIndexed, active: boolean, groups: readonly ZeroIndexed[]): void {
 		this.#assignSourceToSinks(inputChannel, active, groups, ['inputChannel', 'group'])
 	}
 
@@ -705,7 +705,7 @@ export class Mixer {
 	 * @param mixes
 	 *   The mixes to activate it in, potentially including the LR mix.
 	 */
-	assignGroupToMixesAndLR(group: number, active: boolean, mixes: readonly MixOrLR[]): void {
+	assignGroupToMixesAndLR(group: ZeroIndexed, active: boolean, mixes: readonly MixOrLR[]): void {
 		this.#assignSourceToMixesAndLR(group, 'group', active, mixes)
 	}
 
@@ -720,7 +720,7 @@ export class Mixer {
 	 * @param mixes
 	 *   The mixes to activate it in, potentially including the LR mix.
 	 */
-	assignFXReturnToMixesAndLR(fxReturn: number, active: boolean, mixes: readonly MixOrLR[]): void {
+	assignFXReturnToMixesAndLR(fxReturn: ZeroIndexed, active: boolean, mixes: readonly MixOrLR[]): void {
 		this.#assignSourceToMixesAndLR(fxReturn, 'fxReturn', active, mixes)
 	}
 
@@ -735,7 +735,7 @@ export class Mixer {
 	 * @param groups
 	 *   The groups to activate it in.
 	 */
-	assignFXReturnToGroups(fxReturn: number, active: boolean, groups: readonly number[]): void {
+	assignFXReturnToGroups(fxReturn: ZeroIndexed, active: boolean, groups: readonly ZeroIndexed[]): void {
 		this.#assignSourceToSinks(fxReturn, active, groups, ['fxReturn', 'group'])
 	}
 
@@ -750,7 +750,7 @@ export class Mixer {
 	 * @param fxSends
 	 *   The FX sends to activate it in.
 	 */
-	assignInputChannelToFXSends(inputChannel: number, active: boolean, fxSends: readonly number[]): void {
+	assignInputChannelToFXSends(inputChannel: ZeroIndexed, active: boolean, fxSends: readonly ZeroIndexed[]): void {
 		this.#assignSourceToSinks(inputChannel, active, fxSends, ['inputChannel', 'fxSend'])
 	}
 
@@ -765,7 +765,7 @@ export class Mixer {
 	 * @param fxSends
 	 *   The FX sends to activate it in.
 	 */
-	assignGroupToFXSends(group: number, active: boolean, fxSends: readonly number[]): void {
+	assignGroupToFXSends(group: ZeroIndexed, active: boolean, fxSends: readonly ZeroIndexed[]): void {
 		this.#assignSourceToSinks(group, active, fxSends, ['group', 'fxSend'])
 	}
 
@@ -780,7 +780,7 @@ export class Mixer {
 	 * @param fxSends
 	 *   The FX sends to activate it in.
 	 */
-	assignFXReturnToFXSends(fxReturn: number, active: boolean, fxSends: readonly number[]): void {
+	assignFXReturnToFXSends(fxReturn: ZeroIndexed, active: boolean, fxSends: readonly ZeroIndexed[]): void {
 		this.#assignSourceToSinks(fxReturn, active, fxSends, ['fxReturn', 'fxSend'])
 	}
 
@@ -793,8 +793,8 @@ export class Mixer {
 	 * @param matrixes
 	 *   The matrixes to activate it in.
 	 */
-	assignLRToMatrixes(active: boolean, matrixes: readonly number[]): void {
-		this.#assignSourceToSinks(0, active, matrixes, ['lr', 'matrix'])
+	assignLRToMatrixes(active: boolean, matrixes: readonly ZeroIndexed[]): void {
+		this.#assignSourceToSinks(LRStrip, active, matrixes, ['lr', 'matrix'])
 	}
 
 	/**
@@ -808,7 +808,7 @@ export class Mixer {
 	 * @param matrixes
 	 *   The matrixes to activate it in.
 	 */
-	assignMixToMatrixes(mix: number, active: boolean, matrixes: readonly number[]): void {
+	assignMixToMatrixes(mix: ZeroIndexed, active: boolean, matrixes: readonly ZeroIndexed[]): void {
 		this.#assignSourceToSinks(mix, active, matrixes, ['mix', 'matrix'])
 	}
 
@@ -823,7 +823,7 @@ export class Mixer {
 	 * @param matrixes
 	 *   The matrixes to activate it in.
 	 */
-	assignGroupToMatrixes(group: number, active: boolean, matrixes: readonly number[]): void {
+	assignGroupToMatrixes(group: ZeroIndexed, active: boolean, matrixes: readonly ZeroIndexed[]): void {
 		this.#assignSourceToSinks(group, active, matrixes, ['group', 'matrix'])
 	}
 
@@ -981,8 +981,8 @@ export class Mixer {
 	 *   direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
 	#fadeSourceLevelInSink(
-		source: number,
-		sink: number,
+		source: ZeroIndexed,
+		sink: ZeroIndexed,
 		sourceSink: SourceSinkForNRPN<'level'>,
 		start: Level,
 		end: Level,
@@ -996,7 +996,13 @@ export class Mixer {
 	 * Fade the level of the given input channel in the given mix from `start`
 	 * to `end` over `fadeTimeMs` milliseconds.
 	 */
-	fadeInputChannelLevelInMix(inputChannel: number, mix: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeInputChannelLevelInMix(
+		inputChannel: ZeroIndexed,
+		mix: ZeroIndexed,
+		start: Level,
+		end: Level,
+		fadeTimeMs: number,
+	): void {
 		this.#fadeSourceLevelInSink(inputChannel, mix, ['inputChannel', 'mix'], start, end, fadeTimeMs)
 	}
 
@@ -1004,15 +1010,15 @@ export class Mixer {
 	 * Fade the level of the given input channel in LR from `start` to `end`
 	 * over `fadeTimeMs` milliseconds.
 	 */
-	fadeInputChannelLevelInLR(inputChannel: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(inputChannel, 0, ['inputChannel', 'lr'], start, end, fadeTimeMs)
+	fadeInputChannelLevelInLR(inputChannel: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSourceLevelInSink(inputChannel, LRStrip, ['inputChannel', 'lr'], start, end, fadeTimeMs)
 	}
 
 	/**
 	 * Fade the level of the given group in the given mix from `start` to `end`
 	 * over `fadeTimeMs` milliseconds.
 	 */
-	fadeGroupLevelInMix(group: number, mix: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeGroupLevelInMix(group: ZeroIndexed, mix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSourceLevelInSink(group, mix, ['group', 'mix'], start, end, fadeTimeMs)
 	}
 
@@ -1020,15 +1026,15 @@ export class Mixer {
 	 * Fade the level of the given group in LR from `start` to `end` over
 	 * `fadeTimeMs` milliseconds.
 	 */
-	fadeGroupLevelInLR(group: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, 0, ['group', 'lr'], start, end, fadeTimeMs)
+	fadeGroupLevelInLR(group: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSourceLevelInSink(group, LRStrip, ['group', 'lr'], start, end, fadeTimeMs)
 	}
 
 	/**
 	 * Fade the level of the given FX return in the given mix from `start` to
 	 * `end` over `fadeTimeMs` milliseconds.
 	 */
-	fadeFXReturnLevelInMix(fxReturn: number, mix: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeFXReturnLevelInMix(fxReturn: ZeroIndexed, mix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSourceLevelInSink(fxReturn, mix, ['fxReturn', 'mix'], start, end, fadeTimeMs)
 	}
 
@@ -1036,8 +1042,8 @@ export class Mixer {
 	 * Fade the level of the given FX return in LR from `start` to `end` over
 	 * `fadeTimeMs` milliseconds.
 	 */
-	fadeFXReturnLevelInLR(fxReturn: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(fxReturn, 0, ['fxReturn', 'lr'], start, end, fadeTimeMs)
+	fadeFXReturnLevelInLR(fxReturn: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSourceLevelInSink(fxReturn, LRStrip, ['fxReturn', 'lr'], start, end, fadeTimeMs)
 	}
 
 	/**
@@ -1045,8 +1051,8 @@ export class Mixer {
 	 * `start` to `end` over `fadeTimeMs` milliseconds.
 	 */
 	fadeInputChannelLevelInFXSend(
-		inputChannel: number,
-		fxSend: number,
+		inputChannel: ZeroIndexed,
+		fxSend: ZeroIndexed,
 		start: Level,
 		end: Level,
 		fadeTimeMs: number,
@@ -1058,7 +1064,7 @@ export class Mixer {
 	 * Fade the level of the given group in the given FX send from `start` to
 	 * `end` over `fadeTimeMs` milliseconds.
 	 */
-	fadeGroupLevelInFXSend(group: number, fxSend: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeGroupLevelInFXSend(group: ZeroIndexed, fxSend: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSourceLevelInSink(group, fxSend, ['group', 'fxSend'], start, end, fadeTimeMs)
 	}
 
@@ -1066,7 +1072,13 @@ export class Mixer {
 	 * Fade the level of the given FX return in the given FX send from `start`
 	 * to `end` over `fadeTimeMs` milliseconds.
 	 */
-	fadeFXReturnLevelInFXSend(fxReturn: number, fxSend: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeFXReturnLevelInFXSend(
+		fxReturn: ZeroIndexed,
+		fxSend: ZeroIndexed,
+		start: Level,
+		end: Level,
+		fadeTimeMs: number,
+	): void {
 		this.#fadeSourceLevelInSink(fxReturn, fxSend, ['fxReturn', 'fxSend'], start, end, fadeTimeMs)
 	}
 
@@ -1074,7 +1086,7 @@ export class Mixer {
 	 * Fade the level of the given mix in the given matrix from `start` to `end`
 	 * over `fadeTimeMs` milliseconds.
 	 */
-	fadeMixLevelInMatrix(mix: number, matrix: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeMixLevelInMatrix(mix: ZeroIndexed, matrix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSourceLevelInSink(mix, matrix, ['mix', 'matrix'], start, end, fadeTimeMs)
 	}
 
@@ -1082,15 +1094,15 @@ export class Mixer {
 	 * Fade the level of LR in the given matrix from `start` to `end` over
 	 * `fadeTimeMs` milliseconds.
 	 */
-	fadeLRLevelInMatrix(matrix: number, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(0, matrix, ['lr', 'matrix'], start, end, fadeTimeMs)
+	fadeLRLevelInMatrix(matrix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
+		this.#fadeSourceLevelInSink(LRStrip, matrix, ['lr', 'matrix'], start, end, fadeTimeMs)
 	}
 
 	/**
 	 * Fade the level of the given group in the given matrix from `start` to
 	 * `end` over `fadeTimeMs` milliseconds.
 	 */
-	fadeGroupLevelInMatrix(group: number, matrix: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeGroupLevelInMatrix(group: ZeroIndexed, matrix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSourceLevelInSink(group, matrix, ['group', 'matrix'], start, end, fadeTimeMs)
 	}
 
@@ -1146,14 +1158,14 @@ export class Mixer {
 	 *   e.g. `2` for Aux 3.
 	 */
 	#setPanBalanceInMixOrLR(
-		source: number,
+		source: ZeroIndexed,
 		sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
 		panBalance: PanBalanceChoice,
 		mixOrLR: MixOrLR,
 	): void {
 		if (mixOrLR === LR) {
 			const calc = BalanceNRPNCalculator.get(this.model, [sourceType, 'lr'])
-			const nrpn = calc.calculate(source, 0)
+			const nrpn = calc.calculate(source, LRStrip)
 			this.#setPanBalance(nrpn, panBalance)
 		} else {
 			const calc = BalanceNRPNCalculator.get(this.model, [sourceType, 'mix'])
@@ -1182,9 +1194,9 @@ export class Mixer {
 	 *   pan/balance level of `source` in `sink`.
 	 */
 	#setPanBalanceInSink(
-		source: number,
+		source: ZeroIndexed,
 		panBalance: PanBalanceChoice,
-		sink: number,
+		sink: ZeroIndexed,
 		sourceSink: SourceSinkForNRPN<'panBalance'>,
 	) {
 		const calc = BalanceNRPNCalculator.get(this.model, sourceSink)
@@ -1202,7 +1214,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
-	setInputChannelPanBalanceInMixOrLR(channel: number, pan: PanBalanceChoice, mixOrLR: MixOrLR): void {
+	setInputChannelPanBalanceInMixOrLR(channel: ZeroIndexed, pan: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(channel, 'inputChannel', pan, mixOrLR)
 	}
 
@@ -1216,7 +1228,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
-	setGroupPanBalanceInMixOrLR(group: number, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
+	setGroupPanBalanceInMixOrLR(group: ZeroIndexed, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(group, 'group', panBalance, mixOrLR)
 	}
 
@@ -1230,7 +1242,7 @@ export class Mixer {
 	 * @param mixOrLR
 	 *   A mix, e.g. `2` for Aux 3, or LR.
 	 */
-	setFXReturnPanBalanceInMixOrLR(fxReturn: number, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
+	setFXReturnPanBalanceInMixOrLR(fxReturn: ZeroIndexed, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(fxReturn, 'fxReturn', panBalance, mixOrLR)
 	}
 
@@ -1242,8 +1254,8 @@ export class Mixer {
 	 * @param matrix
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
-	setLRPanBalanceInMatrix(panBalance: PanBalanceChoice, matrix: number): void {
-		this.#setPanBalanceInSink(0, panBalance, matrix, ['lr', 'matrix'])
+	setLRPanBalanceInMatrix(panBalance: PanBalanceChoice, matrix: ZeroIndexed): void {
+		this.#setPanBalanceInSink(LRStrip, panBalance, matrix, ['lr', 'matrix'])
 	}
 
 	/**
@@ -1256,7 +1268,7 @@ export class Mixer {
 	 * @param matrix
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
-	setMixPanBalanceInMatrix(mix: number, panBalance: PanBalanceChoice, matrix: number): void {
+	setMixPanBalanceInMatrix(mix: ZeroIndexed, panBalance: PanBalanceChoice, matrix: ZeroIndexed): void {
 		this.#setPanBalanceInSink(mix, panBalance, matrix, ['mix', 'matrix'])
 	}
 
@@ -1270,7 +1282,7 @@ export class Mixer {
 	 * @param matrix
 	 *   A matrix, e.g. `2` for matrix 3.
 	 */
-	setGroupPanBalanceInMatrix(group: number, panBalance: PanBalanceChoice, matrix: number): void {
+	setGroupPanBalanceInMatrix(group: ZeroIndexed, panBalance: PanBalanceChoice, matrix: ZeroIndexed): void {
 		this.#setPanBalanceInSink(group, panBalance, matrix, ['group', 'matrix'])
 	}
 
@@ -1294,7 +1306,7 @@ export class Mixer {
 	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
 	#fadeSinkAsOutput(
-		sink: number,
+		sink: ZeroIndexed,
 		sinkType: SinkAsOutputForNRPN<'level'>,
 		start: Level,
 		end: Level,
@@ -1321,13 +1333,15 @@ export class Mixer {
 	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
 	fadeLROutputLevel(start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSinkAsOutput(0, 'lr', start, end, fadeTimeMs)
+		this.#fadeSinkAsOutput(LRStrip, 'lr', start, end, fadeTimeMs)
 	}
 
 	/**
 	 * Fade the level of the given mix used as a mixer output from `start` to
 	 * `end` over `fadeTimeMs` milliseconds.
 	 *
+	 * @param mix
+	 *   The particular mix to fade as output, zero-indexed.
 	 * @param start
 	 *   The presumed level at start of the fade.  (This *should* be equal to
 	 *   the current level; if it isn't, the effect will be to immediately jump
@@ -1339,7 +1353,7 @@ export class Mixer {
 	 *   The amount of time, in milliseconds, that the fade should take.  (The
 	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
-	fadeMixOutputLevel(mix: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeMixOutputLevel(mix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSinkAsOutput(mix, 'mix', start, end, fadeTimeMs)
 	}
 
@@ -1347,6 +1361,8 @@ export class Mixer {
 	 * Fade the level of the given FX send used as a mixer output from `start`
 	 * to `end` over `fadeTimeMs` milliseconds.
 	 *
+	 * @param fxSend
+	 *   The particular FX send to fade as output, zero-indexed.
 	 * @param start
 	 *   The presumed level at start of the fade.  (This *should* be equal to
 	 *   the current level; if it isn't, the effect will be to immediately jump
@@ -1358,7 +1374,7 @@ export class Mixer {
 	 *   The amount of time, in milliseconds, that the fade should take.  (The
 	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
-	fadeFXSendOutputLevel(fxSend: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeFXSendOutputLevel(fxSend: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSinkAsOutput(fxSend, 'fxSend', start, end, fadeTimeMs)
 	}
 
@@ -1366,6 +1382,8 @@ export class Mixer {
 	 * Fade the level of the given matrix used as a mixer output from `start`
 	 * to `end` over `fadeTimeMs` milliseconds.
 	 *
+	 * @param matrix
+	 *   The particular matrix to fade as output, zero-indexed.
 	 * @param start
 	 *   The presumed level at start of the fade.  (This *should* be equal to
 	 *   the current level; if it isn't, the effect will be to immediately jump
@@ -1377,7 +1395,7 @@ export class Mixer {
 	 *   The amount of time, in milliseconds, that the fade should take.  (The
 	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
-	fadeMatrixOutputLevel(matrix: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeMatrixOutputLevel(matrix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSinkAsOutput(matrix, 'matrix', start, end, fadeTimeMs)
 	}
 
@@ -1385,6 +1403,8 @@ export class Mixer {
 	 * Fade the level of the given DCA used as a mixer output from `start` to
 	 * `end` over `fadeTimeMs` milliseconds.
 	 *
+	 * @param dca
+	 *   The particular DCA to fade as output, zero-indexed.
 	 * @param start
 	 *   The presumed level at start of the fade.  (This *should* be equal to
 	 *   the current level; if it isn't, the effect will be to immediately jump
@@ -1396,7 +1416,7 @@ export class Mixer {
 	 *   The amount of time, in milliseconds, that the fade should take.  (The
 	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
 	 */
-	fadeDCAOutputLevel(dca: number, start: Level, end: Level, fadeTimeMs: number): void {
+	fadeDCAOutputLevel(dca: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
 		this.#fadeSinkAsOutput(dca, 'dca', start, end, fadeTimeMs)
 	}
 
@@ -1413,7 +1433,7 @@ export class Mixer {
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
 	#setPanBalanceSinkAsOutput(
-		sink: number,
+		sink: ZeroIndexed,
 		sinkType: SinkAsOutputForNRPN<'panBalance'>,
 		panBalance: PanBalanceChoice,
 	): void {
@@ -1429,32 +1449,36 @@ export class Mixer {
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
 	setLROutputPanBalance(panBalance: PanBalanceChoice): void {
-		this.#setPanBalanceSinkAsOutput(0, 'lr', panBalance)
+		this.#setPanBalanceSinkAsOutput(LRStrip, 'lr', panBalance)
 	}
 
 	/**
 	 * Set the balance of a mix (not including LR) when assigned to physical
 	 * mixer outputs.
 	 *
+	 * @param mix
+	 *   The particular mix to pan/balance as output, zero-indexed.
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
-	setMixOutputPanBalance(mix: number, panBalance: PanBalanceChoice): void {
+	setMixOutputPanBalance(mix: ZeroIndexed, panBalance: PanBalanceChoice): void {
 		this.#setPanBalanceSinkAsOutput(mix, 'mix', panBalance)
 	}
 
 	/**
 	 * Set the balance of a matrix when assigned to physical mixer outputs.
 	 *
+	 * @param matrix
+	 *   The particular matrix to pan/balance as output, zero-indexed.
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 */
-	setMatrixOutputPanBalance(matrix: number, panBalance: PanBalanceChoice): void {
+	setMatrixOutputPanBalance(matrix: ZeroIndexed, panBalance: PanBalanceChoice): void {
 		this.#setPanBalanceSinkAsOutput(matrix, 'matrix', panBalance)
 	}
 
 	/** Press (and do not subsequently release) a softkey. */
-	pressSoftKey(softKey: number): void {
+	pressSoftKey(softKey: ZeroIndexed): void {
 		if (softKey < 0 || this.model.softKeys <= softKey) {
 			throw new Error(`Attempting to press invalid softkey ${softKey}`)
 		}
@@ -1465,7 +1489,7 @@ export class Mixer {
 	}
 
 	/** Release a previously-pressed softkey. */
-	releaseSoftKey(softKey: number): void {
+	releaseSoftKey(softKey: ZeroIndexed): void {
 		if (softKey < 0 || this.model.softKeys <= softKey) {
 			throw new Error(`Attempting to release invalid softkey ${softKey}`)
 		}

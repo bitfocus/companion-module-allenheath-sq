@@ -7,6 +7,7 @@ import type { ActionDefinitions } from '../actionid.js'
 import type { Choices } from '../../choices.js'
 import { faderOption, OutputFaderOptionId } from './common.js'
 import type { sqInstance } from '../../instance.js'
+import { LRStrip } from '../../mixer/lr.js'
 import type { Mixer } from '../../mixer/mixer.js'
 import type { InputOutputType, Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
@@ -14,6 +15,7 @@ import { splitNRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
 import { getPanBalance, type PanBalanceChoice } from '../pan-balance.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
+import type { ZeroIndexed } from '../../utils/indexed.js'
 
 /**
  * Action IDs for all actions affecting the pan/balance of sinks when used as
@@ -140,12 +142,12 @@ function getFader(
 	model: Model,
 	options: CompanionOptionValues,
 	type: Exclude<InputOutputType, 'lr'>,
-): number | null {
+): ZeroIndexed | null {
 	return toSourceOrSink(instance, model, options[OutputFaderOptionId], type)
 }
 
 type PanBalanceInfo = {
-	fader: number
+	fader: ZeroIndexed
 	panBalanceChoice: PanBalanceChoice
 }
 
@@ -210,7 +212,7 @@ export function outputPanBalanceActions(
 				ShowVar,
 			],
 			learn: async ({ options }) => {
-				const { MSB, LSB } = splitNRPN(OutputBalanceNRPNCalculator.get(model, 'lr').calculate(0))
+				const { MSB, LSB } = splitNRPN(OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip))
 
 				return {
 					...options,
@@ -218,7 +220,7 @@ export function outputPanBalanceActions(
 				}
 			},
 			subscribe: async (_action) => {
-				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(0)
+				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip)
 
 				// Send a "get" so the pan/balance variable is defined.
 				void mixer.sendCommands([mixer.getNRPNValue(nrpn)])

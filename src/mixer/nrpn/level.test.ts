@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
 import { splitNRPN, type UnbrandedParam } from './nrpn.js'
 import { LevelNRPNCalculator, type SourceSinkForNRPN } from './source-to-sink.js'
+import type { ZeroIndexed } from '../../utils/indexed.js'
 
 describe('LevelNRPNCalculator', () => {
 	const model = new Model('SQ5')
@@ -172,15 +173,17 @@ describe('LevelNRPNCalculator', () => {
 	function* sourceSinkTests(): Generator<{
 		calc: LevelNRPNCalculator
 		sourceSink: SourceSinkForNRPN<'level'>
-		source: number
-		sink: number
+		source: ZeroIndexed
+		sink: ZeroIndexed
 		behavior: LevelBehavior
 	}> {
 		for (const [sourceType, sinkTests] of Object.entries(tests)) {
 			for (const [sinkType, tests] of Object.entries(sinkTests)) {
 				const sourceSink = [sourceType, sinkType] as SourceSinkForNRPN<'level'>
 				const calc = LevelNRPNCalculator.get(model, sourceSink)
-				for (const [source, sink, behavior] of tests as LevelTests) {
+				for (const [source_, sink_, behavior] of tests as LevelTests) {
+					const source = source_ as ZeroIndexed
+					const sink = sink_ as ZeroIndexed
 					yield { calc, sourceSink, source, sink, behavior }
 				}
 			}

@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { type InputOutputType, Model } from '../model.js'
 import { splitNRPN, type UnbrandedParam } from './nrpn.js'
 import { BalanceNRPNCalculator, type SourceSinkForNRPN } from './source-to-sink.js'
+import { zeroIndexedNumber, type ZeroIndexed } from '../../utils/indexed.js'
 
 describe('BalanceNRPNCalculator', () => {
 	const model = new Model('SQ5')
@@ -142,15 +143,17 @@ describe('BalanceNRPNCalculator', () => {
 	function* sourceSinkTests(): Generator<{
 		calc: BalanceNRPNCalculator
 		sourceSink: SourceSinkForNRPN<'assign'>
-		source: number
-		sink: number
+		source: ZeroIndexed
+		sink: ZeroIndexed
 		behavior: BalanceBehavior
 	}> {
 		for (const [sourceType, sinkTests] of Object.entries(tests)) {
 			for (const [sinkType, tests] of Object.entries(sinkTests)) {
 				const sourceSink = [sourceType, sinkType] as SourceSinkForNRPN<'panBalance'>
 				const calc = BalanceNRPNCalculator.get(model, sourceSink)
-				for (const [source, sink, behavior] of tests as BalanceTests) {
+				for (const [source_, sink_, behavior] of tests as BalanceTests) {
+					const source = zeroIndexedNumber(source_)
+					const sink = zeroIndexedNumber(sink_)
 					yield { calc, sourceSink, source, sink, behavior }
 				}
 			}

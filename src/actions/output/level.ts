@@ -8,12 +8,14 @@ import type { Choices } from '../../choices.js'
 import { faderOption, OutputFaderOptionId } from './common.js'
 import { getFadeParameters } from '../fading.js'
 import type { sqInstance } from '../../instance.js'
+import { LRStrip } from '../../mixer/lr.js'
 import type { Mixer } from '../../mixer/mixer.js'
 import type { Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
 import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
+import type { ZeroIndexed } from '../../utils/indexed.js'
 
 /**
  * Action IDs for all actions affecting the level of sinks when used as direct
@@ -145,7 +147,7 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 }
 
 type FadeLevelInfo = {
-	sink: number
+	sink: ZeroIndexed
 	nrpn: NRPN<'level'>
 }
 
@@ -200,7 +202,7 @@ export function outputLevelActions(
 				fadingOption,
 			],
 			callback: async ({ options }) => {
-				const nrpn = OutputLevelNRPNCalculator.get(model, 'lr').calculate(0)
+				const nrpn = OutputLevelNRPNCalculator.get(model, 'lr').calculate(LRStrip)
 				const fade = getFadeParameters(instance, options, nrpn)
 				if (fade === null) {
 					return

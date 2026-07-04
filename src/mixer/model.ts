@@ -12,8 +12,9 @@ import {
 	type SourceSinkForNRPN,
 	type SourceToSinkCalculatorCache,
 } from './nrpn/source-to-sink.js'
+import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 
-type ForEachFunctor = (n: number, label: string, desc: string) => void
+type ForEachFunctor = (n: ZeroIndexed, label: string, desc: string) => void
 
 /** A record of the count of inputs, outputs, and soft keys on an SQ mixer. */
 type MixerCounts = {
@@ -39,7 +40,7 @@ export type InputOutputType = Exclude<keyof MixerCounts, 'softKey'>
 
 type LabelDesc = {
 	readonly pairs: (readonly [string, string])[]
-	readonly generate: (i: number) => readonly [string, string]
+	readonly generate: (i: ZeroIndexed) => readonly [string, string]
 }
 
 let outputCalculatorCache: (model: Model) => OutputCalculatorCache
@@ -96,37 +97,37 @@ export class Model {
 		},
 		group: {
 			pairs: [],
-			generate: (group: number) => [`GROUP ${group + 1}`, `Group ${group + 1}`],
+			generate: (group) => [`GROUP ${group + 1}`, `Group ${group + 1}`],
 		},
 		fxReturn: {
 			pairs: [],
-			generate: (fxr: number) => [`FX RETURN ${fxr + 1}`, `FX Return ${fxr + 1}`],
+			generate: (fxr) => [`FX RETURN ${fxr + 1}`, `FX Return ${fxr + 1}`],
 		},
 		fxSend: {
 			pairs: [],
-			generate: (fxs: number) => [`FX SEND ${fxs + 1}`, `FX Send ${fxs + 1}`],
+			generate: (fxs) => [`FX SEND ${fxs + 1}`, `FX Send ${fxs + 1}`],
 		},
 		matrix: {
 			pairs: [],
-			generate: (matrix: number) => [`MATRIX ${matrix + 1}`, `Matrix ${matrix + 1}`],
+			generate: (matrix) => [`MATRIX ${matrix + 1}`, `Matrix ${matrix + 1}`],
 		},
 		dca: {
 			pairs: [],
-			generate: (dca: number) => {
+			generate: (dca) => {
 				const label = `DCA ${dca + 1}`
 				return [label, label]
 			},
 		},
 		muteGroup: {
 			pairs: [],
-			generate: (muteGroup: number) => {
+			generate: (muteGroup) => {
 				const label = `MuteGroup ${muteGroup + 1}`
 				return [label, label]
 			},
 		},
 		lr: {
 			pairs: [],
-			generate: (_lr: number) => {
+			generate: (_lr) => {
 				// Note: `_lr === 0` here but `LR === 99`.
 				return ['LR', 'LR']
 			},
@@ -143,12 +144,12 @@ export class Model {
 		const pairs = labelDescs.pairs
 		if (pairs.length === 0) {
 			for (let i = 0, count = this.inputOutputCounts[type]; i < count; i++) {
-				pairs.push(labelDescs.generate(i))
+				pairs.push(labelDescs.generate(zeroIndexedNumber(i)))
 			}
 		}
 
 		pairs.forEach(([label, desc], i) => {
-			f(i, label, desc)
+			f(zeroIndexedNumber(i), label, desc)
 		})
 	}
 
