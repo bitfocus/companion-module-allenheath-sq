@@ -1,4 +1,4 @@
-import type { MidiChannel, UserMidiChannel } from '../../channel.js'
+import type { UserMidiChannel } from '../../channel.js'
 
 /**
  * Compute the sequence of MIDI messages that correspond to an SQ scene recall
@@ -40,12 +40,13 @@ type NRPNData = [[number, number, number], [number, number, number], [number, nu
  * @param vf
  *   The velocity (fine) byte in the message.
  */
-function nrpnData(channel: MidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
+function nrpnData(channel: UserMidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
+	const channelNibble = channel - 1
 	return [
-		[0xb0 | channel, 0x63, msb],
-		[0xb0 | channel, 0x62, lsb],
-		[0xb0 | channel, 0x06, vc],
-		[0xb0 | channel, 0x26, vf],
+		[0xb0 | channelNibble, 0x63, msb],
+		[0xb0 | channelNibble, 0x62, lsb],
+		[0xb0 | channelNibble, 0x06, vc],
+		[0xb0 | channelNibble, 0x26, vf],
 	]
 }
 
@@ -62,7 +63,7 @@ function nrpnData(channel: MidiChannel, msb: number, lsb: number, vc: number, vf
  *   True to turn the mute on, false to turn it off.
  */
 function mute(
-	channel: MidiChannel,
+	channel: UserMidiChannel,
 	msb: number,
 	lsb: number,
 	on: boolean,
@@ -85,7 +86,7 @@ export function MuteOn(
 	msb: number,
 	lsb: number,
 ): [[number, number, number], [number, number, number], [number, number, number], [number, number, number]] {
-	return mute((channel - 1) as MidiChannel, msb, lsb, true)
+	return mute(channel, msb, lsb, true)
 }
 
 /**
@@ -103,7 +104,7 @@ export function MuteOff(
 	msb: number,
 	lsb: number,
 ): [[number, number, number], [number, number, number], [number, number, number], [number, number, number]] {
-	return mute((channel - 1) as MidiChannel, msb, lsb, false)
+	return mute(channel, msb, lsb, false)
 }
 
 /**
@@ -121,7 +122,7 @@ export function MuteOff(
  *   The velocity (fine) byte encoding half of the intended fader level.
  */
 export function FaderLevel(channel: UserMidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
-	return nrpnData((channel - 1) as MidiChannel, msb, lsb, vc, vf)
+	return nrpnData(channel, msb, lsb, vc, vf)
 }
 
 /**
@@ -140,5 +141,5 @@ export function FaderLevel(channel: UserMidiChannel, msb: number, lsb: number, v
  * @returns
  */
 export function PanLevel(channel: UserMidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
-	return nrpnData((channel - 1) as MidiChannel, msb, lsb, vc, vf)
+	return nrpnData(channel, msb, lsb, vc, vf)
 }
