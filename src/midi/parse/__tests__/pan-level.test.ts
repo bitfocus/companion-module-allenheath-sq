@@ -35,7 +35,7 @@ describe('pan/balance level commands', () => {
 			ExpectPanLevelMessage(0x55, 0x29, 0x3f, 0x7f),
 			ExpectNextCommandReadiness(false),
 			// LR in Mtx1, L30%
-			...PanLevel(7, 0x5e, 0x24, 0x2c, 0x65).map(ReceiveChannelMessage),
+			...PanLevel(8, 0x5e, 0x24, 0x2c, 0x65).map(ReceiveChannelMessage),
 			ExpectNextCommandReadiness(true),
 			ExpectPanLevelMessage(0x5e, 0x24, 0x2c, 0x65),
 		])

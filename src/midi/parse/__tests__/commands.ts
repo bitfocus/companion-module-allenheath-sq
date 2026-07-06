@@ -139,6 +139,6 @@ export function FaderLevel(channel: UserMidiChannel, msb: number, lsb: number, v
  *   The velocity (fine) byte encoding half of the intended pan/balance level.
  * @returns
  */
-export function PanLevel(channel: MidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
-	return nrpnData(channel, msb, lsb, vc, vf)
+export function PanLevel(channel: UserMidiChannel, msb: number, lsb: number, vc: number, vf: number): NRPNData {
+	return nrpnData((channel - 1) as MidiChannel, msb, lsb, vc, vf)
 }
