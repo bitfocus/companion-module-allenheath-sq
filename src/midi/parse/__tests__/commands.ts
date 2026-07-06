@@ -1,4 +1,4 @@
-import type { MidiChannel } from '../../channel.js'
+import type { MidiChannel, UserMidiChannel } from '../../channel.js'
 
 /**
  * Compute the sequence of MIDI messages that correspond to an SQ scene recall
@@ -11,11 +11,12 @@ import type { MidiChannel } from '../../channel.js'
  * @returns
  *   An array of the MIDI messages that constitute the requested scene recall.
  */
-export function SceneCommand(channel: MidiChannel, scene: number): [[number, number, number], [number, number]] {
+export function SceneCommand(channel: UserMidiChannel, scene: number): [[number, number, number], [number, number]] {
+	const channelNibble = channel - 1
 	const sceneEncoded = scene - 1
 	return [
-		[0xb0 | channel, 0x00, sceneEncoded >> 7],
-		[0xc0 | channel, sceneEncoded & 0x7f],
+		[0xb0 | channelNibble, 0x00, sceneEncoded >> 7],
+		[0xc0 | channelNibble, sceneEncoded & 0x7f],
 	]
 }
 

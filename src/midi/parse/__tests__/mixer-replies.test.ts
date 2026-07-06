@@ -12,7 +12,7 @@ describe('reply processing', () => {
 	test('basic reply series', async () => {
 		return TestParsing(1, [
 			ExpectNextCommandReadiness(false),
-			...SceneCommand(0, 130).map(ReceiveChannelMessage),
+			...SceneCommand(1, 130).map(ReceiveChannelMessage),
 			ExpectSceneMessage(130),
 			// Mute on, Ip48
 			...MuteOn(0, 0x00, 0x2f).map(ReceiveChannelMessage),
