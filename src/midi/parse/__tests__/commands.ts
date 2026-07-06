@@ -99,11 +99,11 @@ export function MuteOn(
  *   The intended NRPN LSB.
  */
 export function MuteOff(
-	channel: MidiChannel,
+	channel: UserMidiChannel,
 	msb: number,
 	lsb: number,
 ): [[number, number, number], [number, number, number], [number, number, number], [number, number, number]] {
-	return mute(channel, msb, lsb, false)
+	return mute((channel - 1) as MidiChannel, msb, lsb, false)
 }
 
 /**

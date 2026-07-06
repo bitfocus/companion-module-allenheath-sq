@@ -18,7 +18,7 @@ describe('reply processing', () => {
 			...MuteOn(1, 0x00, 0x2f).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x2f, 0x01),
 			// Mute off, Aux1
-			...MuteOff(0, 0x00, 0x45).map(ReceiveChannelMessage),
+			...MuteOff(1, 0x00, 0x45).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x45, 0x00),
 		])
 	})

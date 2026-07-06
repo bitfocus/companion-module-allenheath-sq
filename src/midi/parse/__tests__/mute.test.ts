@@ -36,7 +36,7 @@ describe('mute commands', () => {
 			ReceiveSystemExclusiveMessage(SysExMessageShortest),
 			ExpectMuteMessage(0x02, 0x07, 0x00),
 			// Mute off, Aux3
-			...MuteOff(0, 0x00, 0x47).map(ReceiveChannelMessage),
+			...MuteOff(1, 0x00, 0x47).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x47, 0x00),
 		])
 	})
