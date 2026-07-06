@@ -37,7 +37,7 @@ describe('fader level', () => {
 			ExpectFaderLevelMessage(0x45, 0x06, 0x00, 0x00),
 			ExpectNextCommandReadiness(false),
 			// Grp3 in Aux4, 0dB (linear taper)
-			...FaderLevel(5, 0x45, 0x1f, 0x76, 0x5c).map(ReceiveChannelMessage),
+			...FaderLevel(6, 0x45, 0x1f, 0x76, 0x5c).map(ReceiveChannelMessage),
 			ExpectNextCommandReadiness(true),
 			ExpectFaderLevelMessage(0x45, 0x1f, 0x76, 0x5c),
 		])
