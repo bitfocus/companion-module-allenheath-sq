@@ -66,7 +66,7 @@ describe('mute commands', () => {
 			ReceiveChannelMessage([0xb3, 0x26, 0x00]),
 			ExpectMuteMessage(0x00, 0x2f, 0x00),
 			// Mute on, Aux1
-			...MuteOn(3, 0x00, 0x45).map(ReceiveChannelMessage),
+			...MuteOn(4, 0x00, 0x45).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x45, 0x01),
 		])
 	})

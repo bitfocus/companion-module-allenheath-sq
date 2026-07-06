@@ -15,7 +15,7 @@ describe('reply processing', () => {
 			...SceneCommand(1, 130).map(ReceiveChannelMessage),
 			ExpectSceneMessage(130),
 			// Mute on, Ip48
-			...MuteOn(0, 0x00, 0x2f).map(ReceiveChannelMessage),
+			...MuteOn(1, 0x00, 0x2f).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x2f, 0x01),
 			// Mute off, Aux1
 			...MuteOff(0, 0x00, 0x45).map(ReceiveChannelMessage),
@@ -46,7 +46,7 @@ describe('reply processing', () => {
 			ExpectNextCommandReadiness(false),
 
 			// Mute on, Ip48
-			...MuteOn(2, 0x00, 0x2f).map(ReceiveChannelMessage),
+			...MuteOn(3, 0x00, 0x2f).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x2f, 0x01),
 			// Mute off, Aux1
 			ReceiveChannelMessage([0xb2, 0x63, 0x00]),
