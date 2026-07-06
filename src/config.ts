@@ -1,5 +1,4 @@
 import { type InputValue, Regex, type SomeCompanionConfigField } from '@companion-module/base'
-import { isUserMidiChannel, type UserMidiChannel } from './midi/channel.js'
 import { type FaderLaw, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import { DefaultModel, getCommonCount, type ModelId } from './mixer/models.js'
 import type { Branded } from './utils/brand.js'
@@ -199,11 +198,8 @@ type SQInstanceConfig = {
 	 */
 	[TalkbackChannelOptionId]: number
 
-	/**
-	 * The MIDI channel that should be used to communicate with the mixer.  (Per
-	 * type, this is the user-friendly 1-based channel, i.e. 1-16.)
-	 */
-	[MidiChannelOptionId]: UserMidiChannel
+	/** The MIDI channel (1-16) used to communicate with the mixer. */
+	[MidiChannelOptionId]: OneIndexed
 
 	/**
 	 * How the mixer status (signal levels, etc.) should be retrieved at
@@ -273,9 +269,11 @@ function toTalkbackChannel(ch: RawConfig[typeof TalkbackChannelOptionId]): numbe
 	return toNumberDefaultZero(ch)
 }
 
-function toUserMidiChannel(midiChannel: RawConfig[typeof MidiChannelOptionId]): UserMidiChannel {
+function toMidiChannel(midiChannel: RawConfig[typeof MidiChannelOptionId]): OneIndexed {
+	// It is intentional here, to comport with past behavior, that MIDI Channel 1
+	// is the default for values not 1-16, including if the option is absent.
 	const n = toNumberDefaultZero(midiChannel)
-	return isUserMidiChannel(n) ? n : 1
+	return oneIndexedNumber(1 <= n && n <= 16 && (n | 0) === n ? n : 1)
 }
 
 function toRetrieveStatusAtStartup(status: RawConfig[typeof RetrieveStatusOptionId]): RetrieveStatusAtStartup {
@@ -302,7 +300,7 @@ export function validateConfig(config: RawConfig): asserts config is SQInstanceC
 	config.model = toModelId(config.model)
 	config.faderLaw = toFaderLaw(config.faderLaw)
 	config.talkbackChannel = toTalkbackChannel(config.talkbackChannel)
-	config.midiChannel = toUserMidiChannel(config.midiChannel)
+	config.midiChannel = toMidiChannel(config.midiChannel)
 	config.retrieveStatusAtStartup = toRetrieveStatusAtStartup(config.retrieveStatusAtStartup)
 	config.verbose = toVerbose(config.verbose)
 }
@@ -322,7 +320,7 @@ export function noConnectionConfig(): SQInstanceConfig {
 		model: DefaultModel,
 		faderLaw: 'LinearTaper',
 		talkbackChannel: 0,
-		midiChannel: 1,
+		midiChannel: oneIndexedNumber(1),
 		retrieveStatusAtStartup: RetrieveStatusAtStartup.Fully,
 		verbose: false,
 	}
