@@ -1,10 +1,11 @@
 import { EventEmitter } from 'eventemitter3'
-import { toMidiChannel, type UserMidiChannel } from '../../channel.js'
+import type { UserMidiChannel } from '../../channel.js'
 import { ChannelParser, type MixerMessageEvents } from '../channel-parser.js'
 import type { ExpectInteraction, Interaction, ReceiveInteraction } from './interactions.js'
 import type { NRPN } from '../../../mixer/nrpn/nrpn.js'
 import { parseMidi } from '../parse-midi.js'
 import { type MidiMessage, type MidiMessageEvents, type Tokenizer } from '../../tokenize/tokenizer.js'
+import { oneIndexedNumber } from '../../../utils/indexed.js'
 import { prettyBytes, repr } from '../../../utils/pretty.js'
 
 class MixerCommandBase {
@@ -197,7 +198,7 @@ export async function TestParsing(userChannel: UserMidiChannel, interactions: re
 
 	const commandIter = await MixerCommandIter.create(midiChannelParser)
 
-	const runParser = parseMidi(toMidiChannel(userChannel), verboseLog, tokenizer, midiChannelParser)
+	const runParser = parseMidi(oneIndexedNumber(userChannel), verboseLog, tokenizer, midiChannelParser)
 
 	async function expectEvent(type: MixerCommand['type'], interaction: ExpectInteraction): Promise<void> {
 		console.log(`Performing ${interaction.type} for ${interaction.args}`)

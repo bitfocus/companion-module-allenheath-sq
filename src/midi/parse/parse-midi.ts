@@ -1,7 +1,7 @@
-import type { MidiChannel } from '../channel.js'
 import type { ChannelParser } from './channel-parser.js'
-import { prettyByte, prettyBytes } from '../../utils/pretty.js'
 import type { Tokenizer } from '../tokenize/tokenizer.js'
+import type { OneIndexed } from '../../utils/indexed.js'
+import { prettyByte, prettyBytes } from '../../utils/pretty.js'
 
 /**
  * Given a MIDI tokenizer and the channel in which mixer commands will
@@ -22,21 +22,21 @@ import type { Tokenizer } from '../tokenize/tokenizer.js'
  *   notified with each received MIDI message in that channel.
  */
 export async function parseMidi(
-	midiChannel: MidiChannel,
+	midiChannel: OneIndexed,
 	verboseLog: (msg: string) => void,
 	tokenizer: Tokenizer,
 	mixerChannelParser: ChannelParser,
 ): Promise<void> {
+	const midiChannelNibble = midiChannel - 1
 	tokenizer.on('channel_message', (message: number[]) => {
-		const channel = message[0] & 0xf
-		if (channel === midiChannel) {
+		const incomingChannelNibble = message[0] & 0xf
+		if (incomingChannelNibble === midiChannelNibble) {
 			mixerChannelParser.handleMessage(message)
 		} else {
-			// If/when mixer MIDI strip commands are supported, they will be
-			// found when `channel === ((midiChannel + 1) % 16)`.  For now
-			// they're simply ignored like all non-`midiChannel` MIDI
-			// messages.
-			verboseLog(`Ignoring Ch ${channel} message ${prettyBytes(message)}`)
+			// If/when mixer MIDI strip commands are supported, they'll be found when
+			// `incomingChannelNibble === ((midiChannelNibble + 1) % 16)`.  For now
+			// they're ignored like all non-`midiChannelNibble` MIDI messages.
+			verboseLog(`Ignoring Ch ${incomingChannelNibble + 1} message ${prettyBytes(message)}`)
 		}
 	})
 	tokenizer.on('system_common', (message: number[]) => {

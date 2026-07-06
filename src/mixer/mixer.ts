@@ -1,3 +1,4 @@
+import type { Equal, Expect } from 'type-testing'
 import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@companion-module/base'
 import { OutputPanBalanceActionId } from '../actions/output.js'
 import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
@@ -434,6 +435,16 @@ export class Mixer {
 	}
 
 	/**
+	 * Compute the `N` low nibble containing the MIDI channel in `BN`, `CN`, and
+	 * so on.
+	 */
+	#midiChannelNibble(): number {
+		const midiChannel = getMidiChannel(this.#instance.config)
+		type assert_midiChannelIsOneIndexed = Expect<Equal<typeof midiChannel, OneIndexed>>
+		return midiChannel - 1
+	}
+
+	/**
 	 * Recall the specified scene.  (Note that if the scene doesn't exist, SQ
 	 * mixers will not change scene.)
 	 *
@@ -441,11 +452,11 @@ export class Mixer {
 	 *   The scene to recall.
 	 */
 	setScene(scene: OneIndexed): void {
+		const midiChannelNibble = this.#midiChannelNibble()
 		const sceneEncoded = scene - 1
 
-		const midiChannel = getMidiChannel(this.#instance.config)
-		const BN = 0xb0 | midiChannel
-		const CN = 0xc0 | midiChannel
+		const BN = 0xb0 | midiChannelNibble
+		const CN = 0xc0 | midiChannelNibble
 		const sceneUpper = (sceneEncoded >> 7) & 0x0f
 		const sceneLower = sceneEncoded & 0x7f
 
@@ -1448,7 +1459,7 @@ export class Mixer {
 			throw new Error(`Attempting to press invalid softkey ${softKey}`)
 		}
 
-		const command = [0x90 | getMidiChannel(this.#instance.config), 0x30 + softKey, 0x7f]
+		const command = [0x90 | this.#midiChannelNibble(), 0x30 + softKey, 0x7f]
 		// XXX
 		void this.sendCommands([command])
 	}
@@ -1459,7 +1470,7 @@ export class Mixer {
 			throw new Error(`Attempting to release invalid softkey ${softKey}`)
 		}
 
-		const command = [0x80 | getMidiChannel(this.#instance.config), 0x30 + softKey, 0x00]
+		const command = [0x80 | this.#midiChannelNibble(), 0x30 + softKey, 0x00]
 		// XXX
 		void this.sendCommands([command])
 	}
@@ -1476,7 +1487,7 @@ export class Mixer {
 	 */
 	#nrpnData<T extends NRPNType>(nrpn: NRPN<T>, vc: number, vf: number): NRPNDataMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | getMidiChannel(this.#instance.config)
+		const BN = 0xb0 | this.#midiChannelNibble()
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x06, vc, BN, 0x26, vf]
 	}
 
@@ -1491,7 +1502,7 @@ export class Mixer {
 	 */
 	#nrpnIncrement<T extends NRPNType>(nrpn: NRPN<T>, val: number): NRPNIncDecMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | getMidiChannel(this.#instance.config)
+		const BN = 0xb0 | this.#midiChannelNibble()
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x60, val]
 	}
 
@@ -1506,7 +1517,7 @@ export class Mixer {
 	 */
 	#nrpnDecrement<T extends NRPNType>(nrpn: NRPN<T>, val: number): NRPNIncDecMessage {
 		const { MSB, LSB } = splitNRPN(nrpn)
-		const BN = 0xb0 | getMidiChannel(this.#instance.config)
+		const BN = 0xb0 | this.#midiChannelNibble()
 		return [BN, 0x63, MSB, BN, 0x62, LSB, BN, 0x61, val]
 	}
 }

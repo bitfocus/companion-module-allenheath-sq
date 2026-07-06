@@ -1,8 +1,9 @@
 import { type InputValue, Regex, type SomeCompanionConfigField } from '@companion-module/base'
-import { isUserMidiChannel, type MidiChannel, toMidiChannel, type UserMidiChannel } from './midi/channel.js'
+import { isUserMidiChannel, type UserMidiChannel } from './midi/channel.js'
 import { type FaderLaw, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import { DefaultModel, getCommonCount, type ModelId } from './mixer/models.js'
 import type { Branded } from './utils/brand.js'
+import { type OneIndexed, oneIndexedNumber } from './utils/indexed.js'
 
 /**
  * The `TConfig` object type used to store instance configuration info.
@@ -306,12 +307,9 @@ export function validateConfig(config: RawConfig): asserts config is SQInstanceC
 	config.verbose = toVerbose(config.verbose)
 }
 
-/**
- * Get the MIDI channel encoding value specified by `config`.  This value is
- * 0-based (unlike the value stored in `config` which is 1-based).
- */
-export function getMidiChannel(config: SQInstanceConfig): MidiChannel {
-	return toMidiChannel(config[MidiChannelOptionId])
+/** Get the MIDI channel specified by `config`. */
+export function getMidiChannel(config: SQInstanceConfig): OneIndexed {
+	return oneIndexedNumber(config[MidiChannelOptionId])
 }
 
 /**
