@@ -1,6 +1,6 @@
 import type { Equal, Expect } from 'type-testing'
 import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@companion-module/base'
-import { OutputPanBalanceActionId } from '../actions/output.js'
+import { OutputPanBalanceActionId } from '../actions/output/pan-balance.js'
 import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
 import { getMidiChannel, type Host } from '../config.js'

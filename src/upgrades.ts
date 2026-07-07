@@ -6,10 +6,8 @@ import {
 	EmptyUpgradeScript,
 } from '@companion-module/base'
 import { tryFixFXRLevelInFXSIdTypo } from './actions/level.js'
-import {
-	tryConvertOldLevelToOutputActionToSinkSpecific,
-	tryConvertOldPanToOutputActionToSinkSpecific,
-} from './actions/output.js'
+import { tryConvertOldLevelToOutputActionToSinkSpecific } from './actions/output/level.js'
+import { tryConvertOldPanToOutputActionToSinkSpecific } from './actions/output/pan-balance.js'
 import { tryCoalesceSceneRecallActions } from './actions/scene.js'
 import {
 	type RawConfig,
