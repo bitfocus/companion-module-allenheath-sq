@@ -274,7 +274,7 @@ function getFader(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-	type: InputOutputType,
+	type: Exclude<InputOutputType, 'lr'>,
 ): number | null {
 	return toSourceOrSink(instance, model, options[OutputFaderOptionId], type)
 }
@@ -288,7 +288,7 @@ function getLevelType(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-	sinkType: SinkAsOutputForNRPN<'level'>,
+	sinkType: Exclude<SinkAsOutputForNRPN<'level'>, 'lr'>,
 ): FadeLevelInfo | null {
 	const sink = toSourceOrSink(instance, model, options[OutputFaderOptionId], sinkType)
 	if (sink === null) {
@@ -308,7 +308,7 @@ function getPanBalanceType(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
-	type: SinkAsOutputForNRPN<'panBalance'>,
+	type: Exclude<SinkAsOutputForNRPN<'panBalance'>, 'lr'>,
 ): PanBalanceInfo | null {
 	const fader = getFader(instance, model, options, type)
 	if (fader === null) {
