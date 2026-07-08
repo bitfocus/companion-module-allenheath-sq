@@ -1,11 +1,13 @@
-import type { CompanionActionInfo } from '@companion-module/base'
+import type { CompanionActionInfo, CompanionMigrationAction } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
 import {
 	ObsoleteLevelToOutputId,
 	OutputLevelActionId,
 	tryConvertOldLevelToOutputActionToSinkSpecific,
+	tryMakeOutputLevelItemOneIndexed,
 } from './level.js'
 import type { Level } from '../../mixer/level.js'
+import { AllMuteStripActions } from '../mute.js'
 
 function makeObsoleteOutputLevelAction(input: number, level: Level, fadeSeconds: number): CompanionActionInfo {
 	const cai: CompanionActionInfo = {
@@ -188,4 +190,112 @@ describe('obsolete output action convert to sink-specific output level action', 
 		expect(badObsoleteOutputLevelAction.actionId).toBe(ObsoleteLevelToOutputId)
 		expect(badObsoleteOutputLevelAction.options.input).toBe(40)
 	})
+})
+
+function makeObsoleteZeroIndexedOutputLevelAction(
+	actionId: OutputLevelActionId,
+	input: number,
+	level: Level,
+	fadeSeconds: number,
+): CompanionActionInfo {
+	const cai: CompanionActionInfo = {
+		id: 'abcOdOefghiOFjBkGHlJm',
+		controlId: '1/0/0',
+		actionId,
+		options: {
+			input,
+			leveldb: level,
+			fade: fadeSeconds,
+		},
+	}
+
+	return cai
+}
+
+function makeActionWithActionId(actionId: CompanionMigrationAction['actionId']): CompanionMigrationAction {
+	return {
+		id: 'foobar',
+		controlId: '3/1/4',
+		actionId,
+		options: {
+			// Supply all options, old and new, ensuring only the actionId is examined
+			input: 42,
+			n: 17,
+			leveldb: -5,
+			fade: 42,
+		},
+	}
+}
+
+describe('tryMakeOutputLevelItemOneIndexed', () => {
+	test.each(['USA', 'AUS', 'PAR', 'TUR', ...AllMuteStripActions, OutputLevelActionId.LRLevelOutput])(
+		'unrecognized actionId=$0',
+		(actionId) => {
+			const action = makeActionWithActionId(actionId)
+
+			expect(tryMakeOutputLevelItemOneIndexed(action)).toBe(false)
+			expect(tryMakeOutputLevelItemOneIndexed(action)).toBe(false)
+			expect(action.options).toEqual({
+				input: 42,
+				n: 17,
+				leveldb: -5,
+				fade: 42,
+			})
+		},
+	)
+
+	test.each([
+		{
+			actionId: OutputLevelActionId.DCALevelOutput,
+			input: 0,
+			level: '-inf',
+			fadeSeconds: 3,
+		},
+		{
+			actionId: OutputLevelActionId.MatrixLevelOutput,
+			input: 1,
+			level: +5,
+			fadeSeconds: 0,
+		},
+		{
+			actionId: OutputLevelActionId.MixLevelOutput,
+			input: 7,
+			level: 0,
+			fadeSeconds: 1,
+		},
+		{
+			actionId: OutputLevelActionId.FXSendLevelOutput,
+			input: 2,
+			level: 6,
+			fadeSeconds: 2,
+		},
+	] satisfies {
+		actionId: Exclude<OutputLevelActionId, 'lr_level_output'>
+		input: number
+		level: Level
+		fadeSeconds: number
+	}[])(
+		'upgrading of a zero-indexed output level option value: actionId=$actionId, zero-indexed-input=$input',
+		({ actionId, input, level, fadeSeconds }) => {
+			const action = makeObsoleteZeroIndexedOutputLevelAction(actionId, input, level, fadeSeconds)
+
+			expect(tryMakeOutputLevelItemOneIndexed(action)).toBe(true)
+			expect(action.actionId).toBe(actionId)
+			expect(action.options).toEqual({
+				n: input + 1,
+				leveldb: level,
+				fade: fadeSeconds,
+			})
+			expect(action.options).not.toHaveProperty('input')
+
+			expect(tryMakeOutputLevelItemOneIndexed(action)).toBe(false)
+			expect(action.actionId).toBe(actionId)
+			expect(action.options).toEqual({
+				n: input + 1,
+				leveldb: level,
+				fade: fadeSeconds,
+			})
+			expect(action.options).not.toHaveProperty('input')
+		},
+	)
 })
