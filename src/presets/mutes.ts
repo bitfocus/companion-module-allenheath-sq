@@ -50,7 +50,7 @@ export function mutePresets(model: Model): CompanionPresetDefinitions {
 							MuteFeedbackId[type] === MuteFeedbackId.MuteLR
 								? {}
 								: {
-										channel: i + 1,
+										n: i + 1,
 									},
 					},
 				],

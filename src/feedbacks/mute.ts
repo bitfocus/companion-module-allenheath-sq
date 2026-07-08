@@ -3,11 +3,12 @@ import type {
 	CompanionFeedbackDefinition,
 	CompanionMigrationFeedback,
 } from '@companion-module/base'
-import { faderNumberZeroIndexed } from '../fader-number.js'
+import { faderNumber } from '../fader-number.js'
 import { LRStrip } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
+import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import { CarmineRed, White } from '../utils/colors.js'
 import { type ZeroIndexed, zeroIndexedNumber } from '../utils/indexed.js'
 
@@ -29,7 +30,13 @@ export const MuteFeedbackId = {
 
 export type MuteFeedbackId = (typeof MuteFeedbackId)[keyof typeof MuteFeedbackId]
 
-const MuteFeedbackFaderOptionId = 'channel'
+const AllMuteWithStripFeedbacks: ReadonlySet<string> = new Set(
+	Object.values(MuteFeedbackId).filter((feedbackId) => feedbackId !== 'mute_lr'),
+)
+
+const MuteFeedbackFaderOptionId = 'n'
+
+const ObsoleteMuteFeedbackFaderOptionId = 'channel'
 
 /**
  * Mute-LR feedbacks used to include a zero-indexed number identifying the LR
@@ -41,11 +48,31 @@ export function tryRemoveChannelFromMuteLRFeedback(feedback: CompanionMigrationF
 	}
 
 	const options = feedback.options
-	if (!(MuteFeedbackFaderOptionId in options)) {
+	if (!(ObsoleteMuteFeedbackFaderOptionId in options)) {
 		return false
 	}
 
-	delete options[MuteFeedbackFaderOptionId]
+	delete options[ObsoleteMuteFeedbackFaderOptionId]
+
+	return true
+}
+
+/**
+ * Strip identification (e.g. input channel 3, mix 2, etc.) used to be done with
+ * a zero-indexed number.  If the zero-indexed option is present, convert it to
+ * a new one-indexed number option.
+ */
+export function tryMakeMuteFeedbackItemOneIndexed(feedback: CompanionMigrationFeedback): boolean {
+	if (!AllMuteWithStripFeedbacks.has(feedback.feedbackId)) {
+		return false
+	}
+
+	const options = feedback.options
+	if (!(ObsoleteMuteFeedbackFaderOptionId in options)) {
+		return false
+	}
+
+	moveZeroIndexedOptionToOneIndexed(options, ObsoleteMuteFeedbackFaderOptionId, MuteFeedbackFaderOptionId)
 
 	return true
 }
@@ -77,7 +104,7 @@ export function muteFeedbacks(mixer: Mixer): Record<MuteFeedbackId, CompanionFee
 	const counts = model.inputOutputCounts
 
 	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
-		faderNumberZeroIndexed(label, MuteFeedbackFaderOptionId, counts, type)
+		faderNumber(label, MuteFeedbackFaderOptionId, counts, type)
 
 	function getMuted(type: InputOutputType, n: ZeroIndexed): boolean {
 		const nrpn = calculateMuteNRPN(model, type, n)
@@ -91,7 +118,7 @@ export function muteFeedbacks(mixer: Mixer): Record<MuteFeedbackId, CompanionFee
 		return {
 			name: `Mute ${label}`,
 			options: [faderOption(label, type)],
-			callback: ({ options }) => getMuted(type, zeroIndexedNumber(Number(options[MuteFeedbackFaderOptionId]))),
+			callback: ({ options }) => getMuted(type, zeroIndexedNumber(Number(options[MuteFeedbackFaderOptionId]) - 1)),
 		}
 	}
 

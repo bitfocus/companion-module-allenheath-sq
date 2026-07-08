@@ -52,7 +52,7 @@ export function muteWithLevelPresets(instance: sqInstance, model: Model): Compan
 				{
 					feedbackId: MuteFeedbackId.MuteInputChannel,
 					options: {
-						channel: ch + 1,
+						n: ch + 1,
 					},
 				},
 			],
