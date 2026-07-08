@@ -55,11 +55,11 @@ const PanBalanceSinkOptionId = 'assign'
  */
 export function tryUpgradePanBalanceMixOrLREncoding(action: CompanionMigrationAction): boolean {
 	switch (action.actionId) {
-		case PanBalanceActionId.InputChannelPanBalanceInMixOrLR as string:
-		case PanBalanceActionId.GroupPanBalanceInMixOrLR as string:
-		case PanBalanceActionId.FXReturnPanBalanceInMixOrLR as string:
+		case PanBalanceActionId.InputChannelPanBalanceInMixOrLR:
+		case PanBalanceActionId.GroupPanBalanceInMixOrLR:
+		case PanBalanceActionId.FXReturnPanBalanceInMixOrLR:
 			return tryUpgradeMixOrLROptionEncoding(action, PanBalanceSinkOptionId)
-		case PanBalanceActionId.MixOrLRPanBalanceInMatrix as string:
+		case PanBalanceActionId.MixOrLRPanBalanceInMatrix:
 			return tryUpgradeMixOrLROptionEncoding(action, PanBalanceSourceOptionId)
 		default:
 			return false

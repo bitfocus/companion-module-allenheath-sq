@@ -79,11 +79,11 @@ const LevelSetSinkOptionId = 'assign'
  */
 export function tryUpgradeLevelMixOrLREncoding(action: CompanionMigrationAction): boolean {
 	switch (action.actionId) {
-		case LevelActionId.InputChannelLevelInMixOrLR as string:
-		case LevelActionId.GroupLevelInMixOrLR as string:
-		case LevelActionId.FXReturnLevelInMixOrLR as string:
+		case LevelActionId.InputChannelLevelInMixOrLR:
+		case LevelActionId.GroupLevelInMixOrLR:
+		case LevelActionId.FXReturnLevelInMixOrLR:
 			return tryUpgradeMixOrLRArrayEncoding(action, LevelSetSinkOptionId)
-		case LevelActionId.MixOrLRLevelInMatrix as string:
+		case LevelActionId.MixOrLRLevelInMatrix:
 			return tryUpgradeMixOrLROptionEncoding(action, LevelSetSourceOptionId)
 		default:
 			return false

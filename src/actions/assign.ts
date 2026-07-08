@@ -51,11 +51,11 @@ const AssignMixToMatrixSourceOptionId = 'inputMix'
  */
 export function tryUpgradeAssignMixOrLREncoding(action: CompanionMigrationAction): boolean {
 	switch (action.actionId) {
-		case AssignActionId.InputChannelToMix as string:
-		case AssignActionId.GroupToMix as string:
-		case AssignActionId.FXReturnToMix as string:
+		case AssignActionId.InputChannelToMix:
+		case AssignActionId.GroupToMix:
+		case AssignActionId.FXReturnToMix:
 			return tryUpgradeMixOrLRArrayEncoding(action, AssignMixOrLRSinksOptionId)
-		case AssignActionId.MixToMatrix as string:
+		case AssignActionId.MixToMatrix:
 			return tryUpgradeMixOrLROptionEncoding(action, AssignMixToMatrixSourceOptionId)
 		default:
 			return false
