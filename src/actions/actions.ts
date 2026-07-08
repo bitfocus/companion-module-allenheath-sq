@@ -1,6 +1,7 @@
 import type { CompanionActionDefinition } from '@companion-module/base'
 import { assignActions, type AssignActionId } from './assign.js'
 import { type Choices } from '../choices.js'
+import { faderNumberZeroIndexed } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import { levelActions, type LevelActionId } from './level.js'
 import { type Mixer } from '../mixer/mixer.js'
@@ -21,6 +22,11 @@ export type ActionId =
 	| PanBalanceActionId
 	| OutputLevelActionId
 	| OutputPanBalanceActionId
+
+// This export will flip-flop between being used and unused in subsequent
+// revisions.  Rather than add a @allowunused and then end up having to flip
+// *it*, we just add this use until it isn't intermittently needed.
+void faderNumberZeroIndexed
 
 /**
  * Get all action definitions exposed by this module.
@@ -54,7 +60,7 @@ export function getActions(
 		...assignActions(instance, mixer, choices),
 		...levelActions(instance, mixer, choices),
 		...panBalanceActions(instance, mixer, choices),
-		...outputLevelActions(instance, mixer, choices),
+		...outputLevelActions(instance, mixer),
 		...outputPanBalanceActions(instance, mixer, choices),
 		...sceneActions(instance, mixer),
 	}
