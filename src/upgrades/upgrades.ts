@@ -18,8 +18,9 @@ import {
 	tryRemoveUnnecessaryLabelInConfig,
 	tryRenameVariousConfigIds,
 } from '../config.js'
+import { tryRemoveChannelFromMuteLRFeedback } from '../feedbacks/mute.js'
 import { tryUpdateAllLRMixEncodings } from '../mixer/lr.js'
-import { ActionUpdater, ConfigUpdater } from './updaters.js'
+import { ActionUpdater, ConfigUpdater, FeedbackUpdater } from './updaters.js'
 
 export const UpgradeScripts = [
 	EmptyUpgradeScript,
@@ -44,4 +45,5 @@ export const UpgradeScripts = [
 	ActionUpdater(tryTrimMuteLROptions),
 	ActionUpdater(tryMakeOutputLevelItemOneIndexed),
 	ActionUpdater(tryMakeOutputPanBalanceItemOneIndexed),
+	FeedbackUpdater(tryRemoveChannelFromMuteLRFeedback),
 ] satisfies CompanionStaticUpgradeScript<SQConfig>[]

@@ -1,10 +1,12 @@
-import type { Choices } from '../choices.js'
-import { type FeedbackDefinitions, type FeedbackId } from './feedback-ids.js'
+import type { CompanionFeedbackDefinition } from '@companion-module/base'
 import type { Mixer } from '../mixer/mixer.js'
-import { muteFeedbacks } from './mute.js'
+import { type MuteFeedbackId, muteFeedbacks } from './mute.js'
 
-export function getFeedbacks(mixer: Mixer, choices: Choices): FeedbackDefinitions<FeedbackId> {
+/** All feedback IDs. */
+export type FeedbackId = MuteFeedbackId
+
+export function getFeedbacks(mixer: Mixer): Record<FeedbackId, CompanionFeedbackDefinition> {
 	return {
-		...muteFeedbacks(mixer, choices),
+		...muteFeedbacks(mixer),
 	}
 }

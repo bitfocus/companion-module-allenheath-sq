@@ -126,7 +126,7 @@ export class sqInstance extends InstanceBase<SQConfig> {
 
 		this.initVariableDefinitions(mixer)
 		this.setActionDefinitions(getActions(this, mixer, choices))
-		this.setFeedbackDefinitions(getFeedbacks(mixer, choices))
+		this.setFeedbackDefinitions(getFeedbacks(mixer))
 
 		this.#lastLabel = this.label
 		this.setPresetDefinitions(getPresets(this, model))
