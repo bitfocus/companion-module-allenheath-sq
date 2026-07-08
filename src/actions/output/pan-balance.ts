@@ -1,13 +1,12 @@
 import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
-import type { Choices } from '../../choices.js'
-import { faderOption, OutputFaderOptionId } from './common.js'
+import { faderNumberZeroIndexed } from '../../fader-number.js'
 import type { sqInstance } from '../../instance.js'
 import type { Mixer } from '../../mixer/mixer.js'
 import type { InputOutputType, Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
 import { splitNRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
-import { getPanBalance, PanLevelOption, type PanBalanceChoice } from '../pan-balance.js'
+import { getPanBalance, type PanBalanceChoice, PanLevelOption } from '../pan-balance.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
 import type { ZeroIndexed } from '../../utils/indexed.js'
@@ -23,6 +22,8 @@ export const OutputPanBalanceActionId = {
 } as const
 
 export type OutputPanBalanceActionId = (typeof OutputPanBalanceActionId)[keyof typeof OutputPanBalanceActionId]
+
+const OutputPanBalanceFaderOptionId = 'input'
 
 /**
  * The action ID of the obsolete "Pan/Bal level to output" action, used to alter
@@ -86,7 +87,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 	//
 	// return allFaders
 	const { options } = action
-	const input = Number(options[OutputFaderOptionId])
+	const input = Number(options[OutputPanBalanceFaderOptionId])
 	let newInput, newActionId
 	if (input < 0) {
 		// No valid inputs below zero.  Leave the action un-mutated in invalid
@@ -96,7 +97,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 		// LR is 0.
 		// The new action doesn't include an input property because there's only
 		// one LR.
-		delete options[OutputFaderOptionId]
+		delete options[OutputPanBalanceFaderOptionId]
 		action.actionId = OutputPanBalanceActionId.LRPanBalanceOutput
 		return true
 	} else if (input < 1 + mixCount) {
@@ -115,7 +116,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 		return false
 	}
 
-	options[OutputFaderOptionId] = newInput
+	options[OutputPanBalanceFaderOptionId] = newInput
 	action.actionId = newActionId
 	return true
 }
@@ -138,7 +139,7 @@ function getFader(
 	options: CompanionOptionValues,
 	type: Exclude<InputOutputType, 'lr'>,
 ): ZeroIndexed | null {
-	return toSourceOrSink(instance, model, options[OutputFaderOptionId], type)
+	return toSourceOrSink(instance, model, options[OutputPanBalanceFaderOptionId], type)
 }
 
 type PanBalanceInfo = {
@@ -176,17 +177,18 @@ function getPanBalanceType(
  *   The instance for which actions are being generated.
  * @param mixer
  *   The mixer object to use when executing the actions.
- * @param choices
- *   Option choices for use in the actions.
  * @returns
  *   The set of all output-adjustment action definitions.
  */
 export function outputPanBalanceActions(
 	instance: sqInstance,
 	mixer: Mixer,
-	choices: Choices,
 ): Record<OutputPanBalanceActionId, CompanionActionDefinition> {
 	const model = mixer.model
+	const counts = model.inputOutputCounts
+
+	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
+		faderNumberZeroIndexed(label, OutputPanBalanceFaderOptionId, counts, type)
 
 	const ShowVar = {
 		type: 'textinput',
@@ -228,7 +230,7 @@ export function outputPanBalanceActions(
 		},
 		[OutputPanBalanceActionId.MixPanBalanceOutput]: {
 			name: 'Mix Pan/Bal to output',
-			options: [faderOption('mixes', choices), PanLevelOption, ShowVar],
+			options: [faderOption('Mix', 'mix'), PanLevelOption, ShowVar],
 			learn: async ({ options }) => {
 				const mix = getFader(instance, model, options, 'mix')
 				if (mix === null) {
@@ -266,7 +268,7 @@ export function outputPanBalanceActions(
 
 		[OutputPanBalanceActionId.MatrixPanBalanceOutput]: {
 			name: 'Matrix Pan/Bal to output',
-			options: [faderOption('matrixes', choices), PanLevelOption, ShowVar],
+			options: [faderOption('Matrix', 'matrix'), PanLevelOption, ShowVar],
 			learn: async ({ options }) => {
 				const matrix = getFader(instance, model, options, 'matrix')
 				if (matrix === null) {

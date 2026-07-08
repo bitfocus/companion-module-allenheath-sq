@@ -61,7 +61,7 @@ export function getActions(
 		...levelActions(instance, mixer, choices),
 		...panBalanceActions(instance, mixer, choices),
 		...outputLevelActions(instance, mixer),
-		...outputPanBalanceActions(instance, mixer, choices),
+		...outputPanBalanceActions(instance, mixer),
 		...sceneActions(instance, mixer),
 	}
 }
