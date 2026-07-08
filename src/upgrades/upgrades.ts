@@ -5,7 +5,10 @@ import {
 	tryConvertOldLevelToOutputActionToSinkSpecific,
 	tryMakeOutputLevelItemOneIndexed,
 } from '../actions/output/level.js'
-import { tryConvertOldPanToOutputActionToSinkSpecific } from '../actions/output/pan-balance.js'
+import {
+	tryConvertOldPanToOutputActionToSinkSpecific,
+	tryMakeOutputPanBalanceItemOneIndexed,
+} from '../actions/output/pan-balance.js'
 import { tryCoalesceSceneRecallActions } from '../actions/scene.js'
 import { tryMakeSoftKeyOneIndexed } from '../actions/softkey.js'
 import {
@@ -40,4 +43,5 @@ export const UpgradeScripts = [
 	ActionUpdater(tryMakeMuteItemOneIndexed),
 	ActionUpdater(tryTrimMuteLROptions),
 	ActionUpdater(tryMakeOutputLevelItemOneIndexed),
+	ActionUpdater(tryMakeOutputPanBalanceItemOneIndexed),
 ] satisfies CompanionStaticUpgradeScript<SQConfig>[]

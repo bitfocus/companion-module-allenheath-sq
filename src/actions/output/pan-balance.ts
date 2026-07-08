@@ -1,5 +1,5 @@
 import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
-import { faderNumberZeroIndexed } from '../../fader-number.js'
+import { faderNumber } from '../../fader-number.js'
 import type { sqInstance } from '../../instance.js'
 import type { Mixer } from '../../mixer/mixer.js'
 import type { InputOutputType, Model } from '../../mixer/model.js'
@@ -7,8 +7,9 @@ import { getCommonCount } from '../../mixer/models.js'
 import { splitNRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
 import { getPanBalance, type PanBalanceChoice, PanLevelOption } from '../pan-balance.js'
-import { toSourceOrSink } from '../to-source-or-sink.js'
+import { sourceOrSinkFromOneIndexed } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
+import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../../utils/indexed.js'
 
 /**
@@ -23,7 +24,11 @@ export const OutputPanBalanceActionId = {
 
 export type OutputPanBalanceActionId = (typeof OutputPanBalanceActionId)[keyof typeof OutputPanBalanceActionId]
 
-const OutputPanBalanceFaderOptionId = 'input'
+const AllOutputFaderPanBalanceActions: ReadonlySet<string> = new Set(
+	Object.values(OutputPanBalanceActionId).filter((actionId) => actionId !== 'lr_panbalance_output'),
+)
+
+const OutputPanBalanceFaderOptionId = 'n'
 
 /**
  * The action ID of the obsolete "Pan/Bal level to output" action, used to alter
@@ -31,6 +36,8 @@ const OutputPanBalanceFaderOptionId = 'input'
  * outputs.
  */
 export const ObsoletePanToOutputId = 'pan_to_output'
+
+const ObsoleteOutputPanBalanceFaderOptionId = 'input'
 
 /**
  * Adjusting the pan/balance of various mixer sinks that can be assigned to
@@ -87,7 +94,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 	//
 	// return allFaders
 	const { options } = action
-	const input = Number(options[OutputPanBalanceFaderOptionId])
+	const input = Number(options[ObsoleteOutputPanBalanceFaderOptionId])
 	let newInput, newActionId
 	if (input < 0) {
 		// No valid inputs below zero.  Leave the action un-mutated in invalid
@@ -97,7 +104,7 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 		// LR is 0.
 		// The new action doesn't include an input property because there's only
 		// one LR.
-		delete options[OutputPanBalanceFaderOptionId]
+		delete options[ObsoleteOutputPanBalanceFaderOptionId]
 		action.actionId = OutputPanBalanceActionId.LRPanBalanceOutput
 		return true
 	} else if (input < 1 + mixCount) {
@@ -116,8 +123,28 @@ export function tryConvertOldPanToOutputActionToSinkSpecific(action: CompanionMi
 		return false
 	}
 
-	options[OutputPanBalanceFaderOptionId] = newInput
+	options[ObsoleteOutputPanBalanceFaderOptionId] = newInput
 	action.actionId = newActionId
+	return true
+}
+
+/**
+ * The fader specifier for an output pan/balance action used to be a
+ * zero-indexed number.  This function moves that old, zero-indexed number
+ * option to a new, one-indexed number option.
+ */
+export function tryMakeOutputPanBalanceItemOneIndexed(action: CompanionMigrationAction): boolean {
+	if (!AllOutputFaderPanBalanceActions.has(action.actionId)) {
+		return false
+	}
+
+	const options = action.options
+	if (!(ObsoleteOutputPanBalanceFaderOptionId in options)) {
+		return false
+	}
+
+	moveZeroIndexedOptionToOneIndexed(options, ObsoleteOutputPanBalanceFaderOptionId, OutputPanBalanceFaderOptionId)
+
 	return true
 }
 
@@ -139,7 +166,7 @@ function getFader(
 	options: CompanionOptionValues,
 	type: Exclude<InputOutputType, 'lr'>,
 ): ZeroIndexed | null {
-	return toSourceOrSink(instance, model, options[OutputPanBalanceFaderOptionId], type)
+	return sourceOrSinkFromOneIndexed(instance, model, options[OutputPanBalanceFaderOptionId], type)
 }
 
 type PanBalanceInfo = {
@@ -188,7 +215,7 @@ export function outputPanBalanceActions(
 	const counts = model.inputOutputCounts
 
 	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
-		faderNumberZeroIndexed(label, OutputPanBalanceFaderOptionId, counts, type)
+		faderNumber(label, OutputPanBalanceFaderOptionId, counts, type)
 
 	const ShowVar = {
 		type: 'textinput',

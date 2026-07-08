@@ -4,6 +4,7 @@ import {
 	ObsoletePanToOutputId,
 	OutputPanBalanceActionId,
 	tryConvertOldPanToOutputActionToSinkSpecific,
+	tryMakeOutputPanBalanceItemOneIndexed,
 } from './pan-balance.js'
 import type { PanBalanceChoice } from '../pan-balance.js'
 
@@ -129,4 +130,64 @@ describe('obsolete output action convert to sink-specific output pan/balance act
 		expect(badObsoleteOutputPanBalanceAction.actionId).toBe(ObsoletePanToOutputId)
 		expect(badObsoleteOutputPanBalanceAction.options.input).toBe(20)
 	})
+})
+
+function makeZeroIndexedOutputPanBalanceAction(
+	actionId: OutputPanBalanceActionId,
+	input: number,
+	panBalance: PanBalanceChoice,
+): CompanionActionInfo {
+	const cai: CompanionActionInfo = {
+		id: 'abcOdOefghiOFjBkGHlJm',
+		controlId: '1/0/0',
+		actionId,
+		options: {
+			...(actionId === OutputPanBalanceActionId.LRPanBalanceOutput ? {} : { input }),
+			leveldb: panBalance,
+		},
+	}
+
+	return cai
+}
+
+describe('output pan/balance zero-indexed input upgraded to one-indexed', () => {
+	test('LR output pan/balance should not be upgradable', () => {
+		const action = makeZeroIndexedOutputPanBalanceAction(OutputPanBalanceActionId.LRPanBalanceOutput, 42, 'L100')
+
+		expect(tryMakeOutputPanBalanceItemOneIndexed(action)).toBe(false)
+		expect(action.actionId).toBe(OutputPanBalanceActionId.LRPanBalanceOutput)
+		expect(action.options).toEqual({
+			leveldb: 'L100',
+		})
+
+		expect(tryMakeOutputPanBalanceItemOneIndexed(action)).toBe(false)
+		expect(action.actionId).toBe(OutputPanBalanceActionId.LRPanBalanceOutput)
+		expect(action.options).toEqual({
+			leveldb: 'L100',
+		})
+	})
+
+	test.each([
+		[OutputPanBalanceActionId.MixPanBalanceOutput, 7, 998],
+		[OutputPanBalanceActionId.MatrixPanBalanceOutput, 1, 'CTR'],
+	] satisfies [OutputPanBalanceActionId, number, PanBalanceChoice][])(
+		'$0 input=$1 panBalance=$2',
+		(actionId, input, panBalance) => {
+			const action = makeZeroIndexedOutputPanBalanceAction(actionId, input, panBalance)
+
+			expect(tryMakeOutputPanBalanceItemOneIndexed(action)).toBe(true)
+			expect(action.actionId).toBe(actionId)
+			expect(action.options).toEqual({
+				n: input + 1,
+				leveldb: panBalance,
+			})
+
+			expect(tryMakeOutputPanBalanceItemOneIndexed(action)).toBe(false)
+			expect(action.actionId).toBe(actionId)
+			expect(action.options).toEqual({
+				n: input + 1,
+				leveldb: panBalance,
+			})
+		},
+	)
 })
