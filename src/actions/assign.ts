@@ -128,32 +128,35 @@ function getMixAndLRSinks(options: CompanionOptionValues, model: Model): MixOrLR
 	return sinks
 }
 
-function sourceSinkOptions(
+function sourceOption(
 	sourceLabel: string,
 	sourceId: string,
 	sourceChoices: keyof Choices,
+	choices: Choices,
+): CompanionInputFieldDropdown {
+	return {
+		type: 'dropdown',
+		label: sourceLabel,
+		id: sourceId,
+		default: 0,
+		choices: choices[sourceChoices],
+		minChoicesForSearch: 0,
+	}
+}
+
+function sinkOption(
 	sinkLabel: string,
 	sinkId: string,
 	sinkChoices: keyof Choices,
 	choices: Choices,
-): [CompanionInputFieldDropdown, CompanionInputFieldMultiDropdown] {
-	return [
-		{
-			type: 'dropdown',
-			label: sourceLabel,
-			id: sourceId,
-			default: 0,
-			choices: choices[sourceChoices],
-			minChoicesForSearch: 0,
-		},
-		{
-			type: 'multidropdown',
-			label: sinkLabel,
-			id: sinkId,
-			default: [],
-			choices: choices[sinkChoices],
-		},
-	]
+): CompanionInputFieldMultiDropdown {
+	return {
+		type: 'multidropdown',
+		label: sinkLabel,
+		id: sinkId,
+		default: [],
+		choices: choices[sinkChoices],
+	}
 }
 
 /**
@@ -177,15 +180,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.InputChannelToMix]: {
 			name: 'Assign channel to mix',
 			options: [
-				...sourceSinkOptions(
-					'Input Channel',
-					'inputChannel',
-					'inputChannels',
-					'Mix',
-					AssignMixOrLRSinksOptionId,
-					'mixesAndLR',
-					choices,
-				),
+				sourceOption('Input Channel', 'inputChannel', 'inputChannels', choices),
+				sinkOption('Mix', AssignMixOrLRSinksOptionId, 'mixesAndLR', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -207,7 +203,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.InputChannelToGroup]: {
 			name: 'Assign channel to group',
 			options: [
-				...sourceSinkOptions('Input Channel', 'inputChannel', 'inputChannels', 'Group', 'grpAssign', 'groups', choices),
+				sourceOption('Input Channel', 'inputChannel', 'inputChannels', choices),
+				sinkOption('Group', 'grpAssign', 'groups', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -229,7 +226,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.GroupToMix]: {
 			name: 'Assign group to mix',
 			options: [
-				...sourceSinkOptions('Group', 'inputGrp', 'groups', 'Mix', AssignMixOrLRSinksOptionId, 'mixesAndLR', choices),
+				sourceOption('Group', 'inputGrp', 'groups', choices),
+				sinkOption('Mix', AssignMixOrLRSinksOptionId, 'mixesAndLR', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -251,15 +249,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.FXReturnToMix]: {
 			name: 'Assign FX return to mix',
 			options: [
-				...sourceSinkOptions(
-					'FX Return',
-					'inputFxr',
-					'fxReturns',
-					'Mix',
-					AssignMixOrLRSinksOptionId,
-					'mixesAndLR',
-					choices,
-				),
+				sourceOption('FX Return', 'inputFxr', 'fxReturns', choices),
+				sinkOption('Mix', AssignMixOrLRSinksOptionId, 'mixesAndLR', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -281,7 +272,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.FXReturnToGroup]: {
 			name: 'Assign FX Return to group',
 			options: [
-				...sourceSinkOptions('FX Return', 'inputFxr', 'fxReturns', 'Group', 'grpAssign', 'groups', choices),
+				sourceOption('FX Return', 'inputFxr', 'fxReturns', choices),
+				sinkOption('Group', 'grpAssign', 'groups', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -303,15 +295,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.InputChannelToFXSend]: {
 			name: 'Assign channel to FX Send',
 			options: [
-				...sourceSinkOptions(
-					'Input Channel',
-					'inputChannel',
-					'inputChannels',
-					'FX Send',
-					'fxsAssign',
-					'fxSends',
-					choices,
-				),
+				sourceOption('Input Channel', 'inputChannel', 'inputChannels', choices),
+				sinkOption('FX Send', 'fxsAssign', 'fxSends', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -333,7 +318,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.GroupToFXSend]: {
 			name: 'Assign group to FX send',
 			options: [
-				...sourceSinkOptions('Group', 'inputGrp', 'groups', 'FX Send', 'fxsAssign', 'fxSends', choices),
+				sourceOption('Group', 'inputGrp', 'groups', choices),
+				sinkOption('FX Send', 'fxsAssign', 'fxSends', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -355,7 +341,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.FXReturnToFXSend]: {
 			name: 'Assign FX return to FX send',
 			options: [
-				...sourceSinkOptions('FX return', 'inputFxr', 'fxReturns', 'FX Send', 'fxsAssign', 'fxSends', choices),
+				sourceOption('FX return', 'inputFxr', 'fxReturns', choices),
+				sinkOption('FX Send', 'fxsAssign', 'fxSends', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -377,15 +364,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.MixToMatrix]: {
 			name: 'Assign mix to matrix',
 			options: [
-				...sourceSinkOptions(
-					'Mix',
-					AssignMixToMatrixSourceOptionId,
-					'mixesAndLR',
-					'Matrix',
-					'mtxAssign',
-					'matrixes',
-					choices,
-				),
+				sourceOption('Mix', AssignMixToMatrixSourceOptionId, 'mixesAndLR', choices),
+				sinkOption('Matrix', 'mtxAssign', 'matrixes', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
@@ -412,7 +392,8 @@ export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choic
 		[AssignActionId.GroupToMatrix]: {
 			name: 'Assign group to matrix',
 			options: [
-				...sourceSinkOptions('Group', 'inputGrp', 'groups', 'Matrix', 'mtxAssign', 'matrixes', choices),
+				sourceOption('Group', 'inputGrp', 'groups', choices),
+				sinkOption('Matrix', 'mtxAssign', 'matrixes', choices),
 				{
 					type: 'checkbox',
 					label: 'Active',
