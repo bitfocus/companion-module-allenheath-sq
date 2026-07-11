@@ -10,14 +10,6 @@ function createInputChannels(model: Model): DropdownChoice[] {
 	return inputChannels
 }
 
-function createMixes(model: Model): DropdownChoice[] {
-	const mixes: DropdownChoice[] = []
-	model.forEach('mix', (id, label) => {
-		mixes.push({ label, id })
-	})
-	return mixes
-}
-
 function createMixesAndLR(model: Model): DropdownChoice[] {
 	const mixesAndLR: DropdownChoice[] = []
 	mixesAndLR.push({ label: 'LR', id: LR })
@@ -59,85 +51,20 @@ function createFXSends(model: Model): DropdownChoice[] {
 	return fxSends
 }
 
-function createDCAs(model: Model): DropdownChoice[] {
-	const dcas: DropdownChoice[] = []
-	model.forEach('dca', (dca, dcaLabel) => {
-		dcas.push({ label: dcaLabel, id: dca })
-	})
-	return dcas
-}
-
-function createMuteGroups(model: Model): DropdownChoice[] {
-	const muteGroups: DropdownChoice[] = []
-	model.forEach('muteGroup', (muteGroup, muteGroupLabel) => {
-		muteGroups.push({ label: muteGroupLabel, id: muteGroup })
-	})
-	return muteGroups
-}
-
-function createAllFaders(model: Model): DropdownChoice[] {
-	// All fader mix choices
-	const allFaders: DropdownChoice[] = []
-	allFaders.push({ label: `LR`, id: 0 })
-	model.forEach('mix', (mix, mixLabel) => {
-		allFaders.push({ label: mixLabel, id: mix + 1 })
-	})
-	model.forEach('fxSend', (fxs, fxsLabel) => {
-		allFaders.push({ label: fxsLabel, id: fxs + 1 + model.inputOutputCounts.mix })
-	})
-	model.forEach('matrix', (matrix, matrixLabel) => {
-		allFaders.push({
-			label: matrixLabel,
-			id: matrix + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend,
-		})
-	})
-	model.forEach('dca', (dca, dcaLabel) => {
-		allFaders.push({
-			label: dcaLabel,
-			id: dca + 1 + model.inputOutputCounts.mix + model.inputOutputCounts.fxSend + model.inputOutputCounts.matrix + 12,
-		})
-	})
-
-	return allFaders
-}
-
-function createPanBalanceOutputFaders(model: Model): DropdownChoice[] {
-	const allFaders: DropdownChoice[] = []
-	allFaders.push({ label: `LR`, id: 0 })
-	model.forEach('mix', (mix, mixLabel) => {
-		allFaders.push({ label: mixLabel, id: 1 + mix })
-	})
-	model.forEach('matrix', (matrix, matrixLabel) => {
-		allFaders.push({ label: matrixLabel, id: 0x11 + matrix })
-	})
-
-	return allFaders
-}
-
 export class Choices {
 	readonly inputChannels
-	readonly mixes
 	readonly mixesAndLR
 	readonly groups
 	readonly matrixes
 	readonly fxReturns
 	readonly fxSends
-	readonly dcas
-	readonly muteGroups
-	readonly allFaders
-	readonly panBalanceFaders
 
 	constructor(model: Model) {
 		this.inputChannels = createInputChannels(model)
-		this.mixes = createMixes(model)
 		this.mixesAndLR = createMixesAndLR(model)
 		this.groups = createGroups(model)
 		this.matrixes = createMatrixes(model)
 		this.fxReturns = createFXReturns(model)
 		this.fxSends = createFXSends(model)
-		this.dcas = createDCAs(model)
-		this.muteGroups = createMuteGroups(model)
-		this.allFaders = createAllFaders(model)
-		this.panBalanceFaders = createPanBalanceOutputFaders(model)
 	}
 }
