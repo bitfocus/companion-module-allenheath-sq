@@ -1,6 +1,7 @@
 import type { Equal, Expect, IsNever } from 'type-testing'
 import type {
 	CompanionActionDefinition,
+	CompanionInputFieldBase,
 	CompanionInputFieldDropdown,
 	CompanionMigrationAction,
 	CompanionOptionValues,
@@ -163,22 +164,15 @@ function getLevelNRPN(
 	return calc.calculate(source, sink)
 }
 
-function mixOrLRSource(sourceLabel: string, choices: Choices): CompanionInputFieldDropdown {
+function mixOrLROption<Id extends CompanionInputFieldBase['id']>(
+	label: string,
+	id: Id,
+	choices: Choices,
+): CompanionInputFieldDropdown {
 	return {
 		type: 'dropdown',
-		label: sourceLabel,
-		id: LevelSetSourceOptionId,
-		default: 0,
-		choices: choices.mixesAndLR,
-		minChoicesForSearch: 0,
-	}
-}
-
-function mixOrLRSink(sinkLabel: string, choices: Choices): CompanionInputFieldDropdown {
-	return {
-		type: 'dropdown',
-		label: sinkLabel,
-		id: LevelSetSinkOptionId,
+		label,
+		id,
 		default: 0,
 		choices: choices.mixesAndLR,
 		minChoicesForSearch: 0,
@@ -210,6 +204,8 @@ export function levelActions(
 		faderNumberZeroIndexed(label, LevelSetSourceOptionId, counts, type)
 	const sinkNumber = (label: string, type: 'group' | 'fxSend' | 'matrix') =>
 		faderNumberZeroIndexed(label, LevelSetSinkOptionId, counts, type)
+	const mixNumberOrLRSource = (label: string) => mixOrLROption(label, LevelSetSourceOptionId, choices)
+	const mixNumberOrLRSink = (label: string) => mixOrLROption(label, LevelSetSinkOptionId, choices)
 
 	const fadeAction = (...sourceSinkOptions: LevelSourceSinkOptions) => {
 		const nrpn = getLevelNRPN(instance, model, sourceSinkOptions)
@@ -248,21 +244,21 @@ export function levelActions(
 	return {
 		[LevelActionId.InputChannelLevelInMixOrLR]: {
 			name: 'Fader channel level to mix',
-			options: [sourceNumber('Input channel', 'inputChannel'), mixOrLRSink('Mix', choices), LevelOption, FadingOption],
+			options: [sourceNumber('Input channel', 'inputChannel'), mixNumberOrLRSink('Mix'), LevelOption, FadingOption],
 			callback: async ({ options }) => {
 				fadeAction(options, 'inputChannel', 'mix-or-lr')
 			},
 		},
 		[LevelActionId.GroupLevelInMixOrLR]: {
 			name: 'Fader group level to mix',
-			options: [sourceNumber('Group', 'group'), mixOrLRSink('Mix', choices), LevelOption, FadingOption],
+			options: [sourceNumber('Group', 'group'), mixNumberOrLRSink('Mix'), LevelOption, FadingOption],
 			callback: async ({ options }) => {
 				fadeAction(options, 'group', 'mix-or-lr')
 			},
 		},
 		[LevelActionId.FXReturnLevelInMixOrLR]: {
 			name: 'Fader FX return level to mix',
-			options: [sourceNumber('FX return', 'fxReturn'), mixOrLRSink('Mix', choices), LevelOption, FadingOption],
+			options: [sourceNumber('FX return', 'fxReturn'), mixNumberOrLRSink('Mix'), LevelOption, FadingOption],
 			callback: async ({ options }) => {
 				fadeAction(options, 'fxReturn', 'mix-or-lr')
 			},
@@ -309,7 +305,7 @@ export function levelActions(
 		},
 		[LevelActionId.MixOrLRLevelInMatrix]: {
 			name: 'Fader mix level to matrix',
-			options: [mixOrLRSource('Mix', choices), sinkNumber('Matrix', 'matrix'), LevelOption, FadingOption],
+			options: [mixNumberOrLRSource('Mix'), sinkNumber('Matrix', 'matrix'), LevelOption, FadingOption],
 			callback: async ({ options }) => {
 				fadeAction(options, 'mix-or-lr', 'matrix')
 			},
