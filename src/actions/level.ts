@@ -181,7 +181,7 @@ function getLevelType(
 
 function sourceOption(
 	sourceLabel: string,
-	sourceChoices: keyof Choices,
+	sourceChoices: 'inputChannels' | 'groups' | 'fxReturns',
 	choices: Choices,
 ): CompanionInputFieldDropdown {
 	return {
@@ -190,6 +190,17 @@ function sourceOption(
 		id: LevelSetSourceOptionId,
 		default: 0,
 		choices: choices[sourceChoices],
+		minChoicesForSearch: 0,
+	}
+}
+
+function mixOrLRSource(sourceLabel: string, choices: Choices): CompanionInputFieldDropdown {
+	return {
+		type: 'dropdown',
+		label: sourceLabel,
+		id: LevelSetSourceOptionId,
+		default: 0,
+		choices: choices.mixesAndLR,
 		minChoicesForSearch: 0,
 	}
 }
@@ -420,12 +431,7 @@ export function levelActions(
 		},
 		[LevelActionId.MixOrLRLevelInMatrix]: {
 			name: 'Fader mix level to matrix',
-			options: [
-				sourceOption('Mix', 'mixesAndLR', choices),
-				sinkOption('Matrix', 'matrixes', choices),
-				levelOption,
-				fadingOption,
-			],
+			options: [mixOrLRSource('Mix', choices), sinkOption('Matrix', 'matrixes', choices), levelOption, fadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['mix-or-lr', 'matrix'])
 				if (levelType === null) {
