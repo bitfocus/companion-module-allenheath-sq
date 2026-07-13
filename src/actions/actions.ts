@@ -1,4 +1,3 @@
-import { type CompanionInputFieldDropdown } from '@companion-module/base'
 import { type ActionDefinitions, type ActionId } from './actionid.js'
 import { assignActions } from './assign.js'
 import { type Choices } from '../choices.js'
@@ -25,23 +24,6 @@ import { softKeyActions } from './softkey.js'
  *   All actions defined by this module.
  */
 export function getActions(instance: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<ActionId> {
-	const FadingOption: CompanionInputFieldDropdown = {
-		type: 'dropdown',
-		label: 'Fading',
-		id: 'fade',
-		default: 0,
-		choices: [
-			{ label: `Off`, id: 0 },
-			{ label: `1s`, id: 1 },
-			{ label: `2s`, id: 2 },
-			{ label: `3s`, id: 3 },
-			//{label: `4s`, id: 4}, //added
-			//{label: `5s`, id: 5}, //added
-			//{label: `10s`, id: 10}, //added
-		],
-		minChoicesForSearch: 0,
-	}
-
 	const LevelOption = {
 		type: 'dropdown',
 		label: 'Level',
@@ -73,9 +55,9 @@ export function getActions(instance: sqInstance, mixer: Mixer, choices: Choices)
 		})(),
 		...softKeyActions(instance, mixer, choices),
 		...assignActions(instance, mixer, choices),
-		...levelActions(instance, mixer, choices, LevelOption, FadingOption),
+		...levelActions(instance, mixer, choices, LevelOption),
 		...panBalanceActions(instance, mixer, choices, PanLevelOption),
-		...outputLevelActions(instance, mixer, choices, LevelOption, FadingOption),
+		...outputLevelActions(instance, mixer, choices, LevelOption),
 		...outputPanBalanceActions(instance, mixer, choices, PanLevelOption),
 		...sceneActions(instance, mixer),
 	}

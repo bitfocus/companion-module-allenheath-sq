@@ -6,7 +6,7 @@ import type {
 import type { ActionDefinitions } from '../actionid.js'
 import type { Choices } from '../../choices.js'
 import { faderOption, OutputFaderOptionId } from './common.js'
-import { getFadeParameters } from '../fading.js'
+import { FadingOption, getFadeParameters } from '../fading.js'
 import type { sqInstance } from '../../instance.js'
 import { LRStrip } from '../../mixer/lr.js'
 import type { Mixer } from '../../mixer/mixer.js'
@@ -178,9 +178,6 @@ function getLevelType(
  *   Option choices for use in the actions.
  * @param levelOption
  *   An action option specifying all levels an output can be set to.
- * @param fadingOption
- *   An action option specifying various fade times over which the set to level
- *   should take place.
  * @returns
  *   The set of all output-adjustment action definitions.
  */
@@ -189,7 +186,6 @@ export function outputLevelActions(
 	mixer: Mixer,
 	choices: Choices,
 	levelOption: CompanionInputFieldDropdown,
-	fadingOption: CompanionInputFieldDropdown,
 ): ActionDefinitions<OutputLevelActionId> {
 	const model = mixer.model
 
@@ -199,7 +195,7 @@ export function outputLevelActions(
 			options: [
 				// There's only one LR, so don't include an input option.
 				levelOption,
-				fadingOption,
+				FadingOption,
 			],
 			callback: async ({ options }) => {
 				const nrpn = OutputLevelNRPNCalculator.get(model, 'lr').calculate(LRStrip)
@@ -215,7 +211,7 @@ export function outputLevelActions(
 
 		[OutputLevelActionId.MixLevelOutput]: {
 			name: 'Mix fader level to output',
-			options: [faderOption('mixes', choices), levelOption, fadingOption],
+			options: [faderOption('mixes', choices), levelOption, FadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, 'mix')
 				if (levelType === null) {
@@ -235,7 +231,7 @@ export function outputLevelActions(
 
 		[OutputLevelActionId.FXSendLevelOutput]: {
 			name: 'FX Send fader level to output',
-			options: [faderOption('fxSends', choices), levelOption, fadingOption],
+			options: [faderOption('fxSends', choices), levelOption, FadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, 'fxSend')
 				if (levelType === null) {
@@ -255,7 +251,7 @@ export function outputLevelActions(
 
 		[OutputLevelActionId.MatrixLevelOutput]: {
 			name: 'Matrix fader level to output',
-			options: [faderOption('matrixes', choices), levelOption, fadingOption],
+			options: [faderOption('matrixes', choices), levelOption, FadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, 'matrix')
 				if (levelType === null) {
@@ -275,7 +271,7 @@ export function outputLevelActions(
 
 		[OutputLevelActionId.DCALevelOutput]: {
 			name: 'DCA fader level to output',
-			options: [faderOption('dcas', choices), levelOption, fadingOption],
+			options: [faderOption('dcas', choices), levelOption, FadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, 'dca')
 				if (levelType === null) {

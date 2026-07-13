@@ -6,7 +6,7 @@ import type {
 } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import type { Choices } from '../choices.js'
-import { getFadeParameters } from './fading.js'
+import { FadingOption, getFadeParameters } from './fading.js'
 import type { sqInstance } from '../instance.js'
 import { LR, LRStrip, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
@@ -243,9 +243,6 @@ function mixOrLRSink(sinkLabel: string, choices: Choices): CompanionInputFieldDr
  *   Option choices for use in the actions.
  * @param levelOption
  *   An action option specifying all levels a source in a sink can be set to.
- * @param fadingOption
- *   An action option specifying various fade times over which the set to level
- *   should take place.
  * @returns
  *   The set of all level action definitions.
  */
@@ -254,7 +251,6 @@ export function levelActions(
 	mixer: Mixer,
 	choices: Choices,
 	levelOption: CompanionInputFieldDropdown,
-	fadingOption: CompanionInputFieldDropdown,
 ): ActionDefinitions<LevelActionId> {
 	const model = mixer.model
 
@@ -265,7 +261,7 @@ export function levelActions(
 				sourceOption('Input channel', 'inputChannels', choices),
 				mixOrLRSink('Mix', choices),
 				levelOption,
-				fadingOption,
+				FadingOption,
 			],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['inputChannel', 'mix-or-lr'])
@@ -294,7 +290,7 @@ export function levelActions(
 		},
 		[LevelActionId.GroupLevelInMixOrLR]: {
 			name: 'Fader group level to mix',
-			options: [sourceOption('Group', 'groups', choices), mixOrLRSink('Mix', choices), levelOption, fadingOption],
+			options: [sourceOption('Group', 'groups', choices), mixOrLRSink('Mix', choices), levelOption, FadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['group', 'mix-or-lr'])
 				if (levelType === null) {
@@ -326,7 +322,7 @@ export function levelActions(
 				sourceOption('FX return', 'fxReturns', choices),
 				mixOrLRSink('Mix', choices),
 				levelOption,
-				fadingOption,
+				FadingOption,
 			],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['fxReturn', 'mix-or-lr'])
@@ -373,7 +369,7 @@ export function levelActions(
 				sourceOption('Input channel', 'inputChannels', choices),
 				sinkOption('FX Send', 'fxSends', choices),
 				levelOption,
-				fadingOption,
+				FadingOption,
 			],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['inputChannel', 'fxSend'])
@@ -397,7 +393,7 @@ export function levelActions(
 				sourceOption('Group', 'groups', choices),
 				sinkOption('FX Send', 'fxSends', choices),
 				levelOption,
-				fadingOption,
+				FadingOption,
 			],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['group', 'fxSend'])
@@ -421,7 +417,7 @@ export function levelActions(
 				sourceOption('FX return', 'fxReturns', choices),
 				sinkOption('FX Send', 'fxSends', choices),
 				levelOption,
-				fadingOption,
+				FadingOption,
 			],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['fxReturn', 'fxSend'])
@@ -441,7 +437,7 @@ export function levelActions(
 		},
 		[LevelActionId.MixOrLRLevelInMatrix]: {
 			name: 'Fader mix level to matrix',
-			options: [mixOrLRSource('Mix', choices), sinkOption('Matrix', 'matrixes', choices), levelOption, fadingOption],
+			options: [mixOrLRSource('Mix', choices), sinkOption('Matrix', 'matrixes', choices), levelOption, FadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['mix-or-lr', 'matrix'])
 				if (levelType === null) {
@@ -473,7 +469,7 @@ export function levelActions(
 				sourceOption('Group', 'groups', choices),
 				sinkOption('Matrix', 'matrixes', choices),
 				levelOption,
-				fadingOption,
+				FadingOption,
 			],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['group', 'matrix'])

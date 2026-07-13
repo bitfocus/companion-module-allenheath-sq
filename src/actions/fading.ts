@@ -1,8 +1,25 @@
-import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type { CompanionInputFieldDropdown, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { repr } from '../utils/pretty.js'
+
+export const FadingOption = {
+	type: 'dropdown',
+	label: 'Fading',
+	id: 'fade',
+	default: 0,
+	choices: [
+		{ label: `Off`, id: 0 },
+		{ label: `1s`, id: 1 },
+		{ label: `2s`, id: 2 },
+		{ label: `3s`, id: 3 },
+		//{label: `4s`, id: 4}, //added
+		//{label: `5s`, id: 5}, //added
+		//{label: `10s`, id: 10}, //added
+	],
+	minChoicesForSearch: 0,
+} as const satisfies CompanionInputFieldDropdown
 
 /** Compute the set of level options for level-setting actions. */
 export function createLevels(): DropdownChoice[] {
