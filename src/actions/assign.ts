@@ -1,10 +1,10 @@
 import type {
+	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
 	CompanionInputFieldMultiDropdown,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
-import type { ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { LR, type MixOrLR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
@@ -173,7 +173,11 @@ function sinkOption(
  * @returns
  *   The set of all assignment action definitions.
  */
-export function assignActions(instance: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<AssignActionId> {
+export function assignActions(
+	instance: sqInstance,
+	mixer: Mixer,
+	choices: Choices,
+): Record<AssignActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
 	return {

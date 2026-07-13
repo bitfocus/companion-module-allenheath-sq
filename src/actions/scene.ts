@@ -1,7 +1,6 @@
-import type { CompanionMigrationAction } from '@companion-module/base'
+import type { CompanionActionDefinition, CompanionMigrationAction } from '@companion-module/base'
 import { type Model } from '../mixer/model.js'
 import { type Mixer } from '../mixer/mixer.js'
-import { type ActionDefinitions } from './actionid.js'
 import type { sqInstance } from '../instance.js'
 import { type OptionValue } from './to-source-or-sink.js'
 import { type OneIndexed, oneIndexedNumber } from '../utils/indexed.js'
@@ -69,7 +68,7 @@ function toSceneStep(instance: sqInstance, stepOption: OptionValue): number | nu
  * @returns
  *   The set of all scene action definitions.
  */
-export function sceneActions(instance: sqInstance, mixer: Mixer): ActionDefinitions<SceneActionId> {
+export function sceneActions(instance: sqInstance, mixer: Mixer): Record<SceneActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
 	return {

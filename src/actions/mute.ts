@@ -1,9 +1,9 @@
 import {
+	type CompanionActionDefinition,
 	type CompanionOptionValues,
 	type CompanionInputFieldDropdown,
 	type DropdownChoice,
 } from '@companion-module/base'
-import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
@@ -120,7 +120,11 @@ function getMuteOptions(
  * @returns
  *   The set of all mute action definitions.
  */
-export function muteActions(instance: sqInstance, mixer: Mixer, choices: Choices): ActionDefinitions<MuteActionId> {
+export function muteActions(
+	instance: sqInstance,
+	mixer: Mixer,
+	choices: Choices,
+): Record<MuteActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
 	return {

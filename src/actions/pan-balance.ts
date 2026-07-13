@@ -5,7 +5,6 @@ import type {
 	CompanionOptionValues,
 	DropdownChoice,
 } from '@companion-module/base'
-import { type ActionDefinitions } from './actionid.js'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { LR, LRStrip, type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
@@ -380,7 +379,7 @@ export function panBalanceActions(
 	mixer: Mixer,
 	choices: Choices,
 	panLevelOption: CompanionInputFieldDropdown,
-): ActionDefinitions<PanBalanceActionId> {
+): Record<PanBalanceActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
 	const ShowVarOption = {

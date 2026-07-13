@@ -1,5 +1,4 @@
-import { type CompanionOptionValues } from '@companion-module/base'
-import { type ActionDefinitions } from './actionid.js'
+import type { CompanionActionDefinition, CompanionOptionValues } from '@companion-module/base'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
@@ -71,7 +70,7 @@ export function softKeyActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	choices: Choices,
-): ActionDefinitions<SoftKeyActionId> {
+): Record<SoftKeyActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
 	return {

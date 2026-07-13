@@ -1,9 +1,9 @@
 import type {
+	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
-import type { ActionDefinitions } from '../actionid.js'
 import type { Choices } from '../../choices.js'
 import { faderOption, OutputFaderOptionId } from './common.js'
 import { FadingOption, getFadeParameters } from '../fading.js'
@@ -186,7 +186,7 @@ export function outputLevelActions(
 	mixer: Mixer,
 	choices: Choices,
 	levelOption: CompanionInputFieldDropdown,
-): ActionDefinitions<OutputLevelActionId> {
+): Record<OutputLevelActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
 	return {

@@ -1,9 +1,9 @@
 import type {
+	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
-import type { ActionDefinitions } from '../actionid.js'
 import type { Choices } from '../../choices.js'
 import { faderOption, OutputFaderOptionId } from './common.js'
 import type { sqInstance } from '../../instance.js'
@@ -193,7 +193,7 @@ export function outputPanBalanceActions(
 	mixer: Mixer,
 	choices: Choices,
 	panLevelOption: CompanionInputFieldDropdown,
-): ActionDefinitions<OutputPanBalanceActionId> {
+): Record<OutputPanBalanceActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
 	const ShowVar = {
