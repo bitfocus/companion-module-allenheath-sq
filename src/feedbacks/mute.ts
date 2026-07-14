@@ -4,10 +4,10 @@ import type {
 	CompanionMigrationFeedback,
 } from '@companion-module/base'
 import { faderNumber } from '../fader-number.js'
-import { LRStrip } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
+import { LRStrip } from '../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import { CarmineRed, White } from '../utils/colors.js'
 import { type ZeroIndexed, zeroIndexedNumber } from '../utils/indexed.js'

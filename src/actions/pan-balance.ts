@@ -6,7 +6,7 @@ import type {
 	CompanionOptionValues,
 	DropdownChoice,
 } from '@companion-module/base'
-import { type Choices } from '../choices.js'
+import { mixOrLROption } from '../choices.js'
 import type { sqInstance } from '../instance.js'
 import { type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
@@ -360,21 +360,6 @@ function signalOption<Id extends CompanionInputFieldNumber['id']>(
 	}
 }
 
-function mixOrLROption<Id extends CompanionInputFieldDropdown['id']>(
-	label: string,
-	id: Id,
-	choices: Choices,
-): CompanionInputFieldDropdown {
-	return {
-		type: 'dropdown',
-		label,
-		id,
-		default: 0,
-		choices: choices.mixesAndLR,
-		minChoicesForSearch: 0,
-	}
-}
-
 /**
  * Generate action definitions for adjusting the pan/balance of mixer sources
  * across mixer sinks.
@@ -383,15 +368,15 @@ function mixOrLROption<Id extends CompanionInputFieldDropdown['id']>(
  *   The instance for which actions are being generated.
  * @param mixer
  *   The mixer object to use when executing the actions.
- * @param choices
- *   Choice definitions for the mixer.
+ * @param mixesAndLR
+ *   A choices list containing all numbered mixes plus the LR mix.
  * @returns
  *   The set of all pan/balance action definitions.
  */
 export function panBalanceActions(
 	instance: sqInstance,
 	mixer: Mixer,
-	choices: Choices,
+	mixesAndLR: DropdownChoice[],
 ): Record<PanBalanceActionId, CompanionActionDefinition> {
 	const model = mixer.model
 	const counts = model.inputOutputCounts
@@ -406,8 +391,8 @@ export function panBalanceActions(
 	const sourceNumber = (label: string, type: 'inputChannel' | 'group' | 'fxReturn') =>
 		signalOption(label, PanBalanceSourceOptionId, counts, type)
 	const sinkNumber = (label: string, type: 'matrix') => signalOption(label, PanBalanceSinkOptionId, counts, type)
-	const mixNumberOrLRSource = (label: string) => mixOrLROption(label, PanBalanceSourceOptionId, choices)
-	const mixNumberOrLRSink = (label: string) => mixOrLROption(label, PanBalanceSinkOptionId, choices)
+	const mixNumberOrLRSource = (label: string) => mixOrLROption(label, PanBalanceSourceOptionId, mixesAndLR)
+	const mixNumberOrLRSink = (label: string) => mixOrLROption(label, PanBalanceSinkOptionId, mixesAndLR)
 
 	return {
 		[PanBalanceActionId.InputChannelPanBalanceInMixOrLR]: {

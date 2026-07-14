@@ -1,4 +1,4 @@
-import type { DropdownChoice } from '@companion-module/base'
+import type { CompanionInputFieldBase, CompanionInputFieldDropdown, DropdownChoice } from '@companion-module/base'
 import type { Model } from './mixer/model.js'
 import { LR } from './types.js'
 
@@ -46,5 +46,20 @@ export class Choices {
 		this.groups = createGroups(model)
 		this.matrixes = createMatrixes(model)
 		this.fxSends = createFXSends(model)
+	}
+}
+
+export function mixOrLROption<Id extends CompanionInputFieldBase['id']>(
+	label: string,
+	id: Id,
+	choices: DropdownChoice[],
+): CompanionInputFieldDropdown {
+	return {
+		type: 'dropdown',
+		label,
+		id,
+		default: 0,
+		choices,
+		minChoicesForSearch: 0,
 	}
 }

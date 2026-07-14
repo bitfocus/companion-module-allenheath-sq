@@ -1,6 +1,6 @@
 import type { CompanionActionDefinition } from '@companion-module/base'
 import { assignActions, type AssignActionId } from './assign.js'
-import { type Choices } from '../choices.js'
+import type { Choices } from '../choices.js'
 import { faderNumberZeroIndexed } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import { levelActions, type LevelActionId } from './level.js'
@@ -45,6 +45,8 @@ export function getActions(
 	mixer: Mixer,
 	choices: Choices,
 ): Record<ActionId, CompanionActionDefinition> {
+	const mixesAndLR = choices.mixesAndLR
+
 	return {
 		...muteActions(instance, mixer),
 		...(() => {
@@ -58,8 +60,8 @@ export function getActions(
 		})(),
 		...softKeyActions(instance, mixer),
 		...assignActions(instance, mixer, choices),
-		...levelActions(instance, mixer, choices),
-		...panBalanceActions(instance, mixer, choices),
+		...levelActions(instance, mixer, mixesAndLR),
+		...panBalanceActions(instance, mixer, mixesAndLR),
 		...outputLevelActions(instance, mixer),
 		...outputPanBalanceActions(instance, mixer),
 		...sceneActions(instance, mixer),
