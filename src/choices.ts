@@ -2,14 +2,6 @@ import type { DropdownChoice } from '@companion-module/base'
 import type { Model } from './mixer/model.js'
 import { LR } from './types.js'
 
-function createInputChannels(model: Model): DropdownChoice[] {
-	const inputChannels: DropdownChoice[] = []
-	model.forEach('inputChannel', (channel, channelLabel) => {
-		inputChannels.push({ label: channelLabel, id: channel })
-	})
-	return inputChannels
-}
-
 function createMixesAndLR(model: Model): DropdownChoice[] {
 	const mixesAndLR: DropdownChoice[] = []
 	mixesAndLR.push({ label: 'LR', id: LR })
@@ -35,14 +27,6 @@ function createMatrixes(model: Model): DropdownChoice[] {
 	return matrixes
 }
 
-function createFXReturns(model: Model): DropdownChoice[] {
-	const fxReturns: DropdownChoice[] = []
-	model.forEach('fxReturn', (fxr, fxrLabel) => {
-		fxReturns.push({ label: fxrLabel, id: fxr })
-	})
-	return fxReturns
-}
-
 function createFXSends(model: Model): DropdownChoice[] {
 	const fxSends: DropdownChoice[] = []
 	model.forEach('fxSend', (fxs, fxsLabel) => {
@@ -52,19 +36,15 @@ function createFXSends(model: Model): DropdownChoice[] {
 }
 
 export class Choices {
-	readonly inputChannels
 	readonly mixesAndLR
 	readonly groups
 	readonly matrixes
-	readonly fxReturns
 	readonly fxSends
 
 	constructor(model: Model) {
-		this.inputChannels = createInputChannels(model)
 		this.mixesAndLR = createMixesAndLR(model)
 		this.groups = createGroups(model)
 		this.matrixes = createMatrixes(model)
-		this.fxReturns = createFXReturns(model)
 		this.fxSends = createFXSends(model)
 	}
 }
