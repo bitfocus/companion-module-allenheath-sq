@@ -11,6 +11,7 @@ import {
 } from '../actions/output/pan-balance.js'
 import { tryCoalesceSceneRecallActions } from '../actions/scene.js'
 import { tryMakeSoftKeyOneIndexed } from '../actions/softkey.js'
+import { tryMakeSourceSinkOptionsUserFriendly } from '../actions/user-friendly-sources-sinks.js'
 import {
 	type SQConfig,
 	tryEnsureLabelInConfig,
@@ -47,4 +48,7 @@ export const UpgradeScripts = [
 	ActionUpdater(tryMakeOutputPanBalanceItemOneIndexed),
 	FeedbackUpdater(tryRemoveChannelFromMuteLRFeedback),
 	FeedbackUpdater(tryMakeMuteFeedbackItemOneIndexed),
+	ActionUpdater(tryMakeSourceSinkOptionsUserFriendly),
+	// Here endeth meticulous, exhaustive updating of all zero-indexed option
+	// values to one-indexed.
 ] satisfies CompanionStaticUpgradeScript<SQConfig>[]

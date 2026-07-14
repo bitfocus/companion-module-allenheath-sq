@@ -33,8 +33,8 @@ export function toSourceOrSink(
 	type: InputOutputType,
 ): ZeroIndexed | null {
 	const n = Number(optionValue)
-	if (n < model.inputOutputCounts[type]) {
-		return zeroIndexedNumber(n | 0)
+	if (1 <= n && n <= model.inputOutputCounts[type]) {
+		return zeroIndexedNumber((n | 0) - 1)
 	}
 
 	instance.log('error', `Invalid ${type} (${optionValue})`)
@@ -93,8 +93,8 @@ export function toMixOrLR(instance: sqInstance, model: Model, optionValue: Optio
 	}
 
 	const n = Number(optionValue)
-	if (n < model.inputOutputCounts.mix) {
-		return zeroIndexedNumber(n)
+	if (1 <= n && n <= model.inputOutputCounts.mix) {
+		return zeroIndexedNumber((n | 0) - 1)
 	}
 
 	instance.log('error', `Invalid mix-or-LR (${optionValue})`)

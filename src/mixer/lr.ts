@@ -1,9 +1,9 @@
-import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionInputFieldBase, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import { tryUpgradeAssignMixOrLREncoding } from '../actions/assign.js'
 import { tryUpgradeLevelMixOrLREncoding } from '../actions/level.js'
 import { tryUpgradePanBalanceMixOrLREncoding } from '../actions/pan-balance.js'
 import { LR } from '../types.js'
-import type { ZeroIndexed } from '../utils/indexed.js'
+import { type OneIndexed, oneIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 
 /**
  * The value of `LR` before it was changed to the constant string `'lr'`.  This
@@ -13,12 +13,35 @@ import type { ZeroIndexed } from '../utils/indexed.js'
  */
 const ObsoleteLREncoding = 99
 
-/** A value specifying either the LR mix or a numbered mix. */
+/**
+ * A value specifying either the LR mix or a zero-indexed mix.  (Zero indexing
+ * means that this type is not for user-visible use.)
+ */
 export type MixOrLR = ZeroIndexed | typeof LR
 
 type OptionArrayElement = Extract<NonNullable<CompanionOptionValues[string]>, any[]>[0]
 
-const isLRMixAndNeedsUpgrade = (mixOrLR: OptionArrayElement) => Number(mixOrLR) === ObsoleteLREncoding
+const isObsoleteLREncodingAndNeedsUpgrade = (mixOrLR: OptionArrayElement) => Number(mixOrLR) === ObsoleteLREncoding
+
+/**
+ * The value of `LR` used to be `'lr'`, lowercase: a perfectly cromulent string
+ * for essentially internal use (as long as you weren't manually editing
+ * .companionconfig files).
+ *
+ * But with the 2.0 module API and its ability to let options be specified by
+ * expression, suddenly the internal values of options (except if opted out) are
+ * user-facing API.
+ *
+ * It's perfectly debatable whether a lowercased `'lr'` is good enough.  But as
+ * all sources/sinks except LR used to be encoded as zero-indexed numbers and
+ * required an upgrade, there's reasonable argument to rewrite `'lr'` to `'LR'`
+ * in uppercase -- as it appears on the mixer surface to the user -- at the same
+ * time.
+ *
+ * So we have this additional obsolete encoding of LR for upgrade-script
+ * purposes.
+ */
+const ObsoleteLowercaseLREncoding = 'lr'
 
 /**
  * Try to upgrade the given action's option of `optionId` from a mix-or-LR array
@@ -40,14 +63,14 @@ export function tryUpgradeMixOrLRArrayEncoding(action: CompanionMigrationAction,
 		return false
 	}
 
-	const index = arrayOption.findIndex(isLRMixAndNeedsUpgrade)
+	const index = arrayOption.findIndex(isObsoleteLREncodingAndNeedsUpgrade)
 	if (index < 0) {
 		return false
 	}
 
 	for (let i = index; i < arrayOption.length; i++) {
-		if (isLRMixAndNeedsUpgrade(arrayOption[i])) {
-			arrayOption[i] = LR
+		if (isObsoleteLREncodingAndNeedsUpgrade(arrayOption[i])) {
+			arrayOption[i] = ObsoleteLowercaseLREncoding
 		}
 	}
 
@@ -73,7 +96,7 @@ export function tryUpgradeMixOrLROptionEncoding(action: CompanionMigrationAction
 		return false
 	}
 
-	options[optionId] = LR
+	options[optionId] = ObsoleteLowercaseLREncoding
 	return true
 }
 
@@ -96,11 +119,70 @@ export function tryUpgradeMixOrLROptionEncoding(action: CompanionMigrationAction
  *   encountered.
  */
 export function tryUpdateAllLRMixEncodings(action: CompanionMigrationAction): boolean {
-	// Every encoding of LR must be changed all at once, so perform the separate
-	// partial upgrades together in one combined upgrade script.
+	// Every encoding of LR must be changed all at once (because `LR` can only
+	// have one value), so perform the separate partial upgrades together in one
+	// combined upgrade script.
+	//
+	// Note that each script below only does `99` -> `'lr'`: that is, what it
+	// has always done.  If Companion runs this upgrade script on an action, by
+	// contract it must also run the upgrade script performing `'lr'` -> `'LR'`
+	// because it too will be not-yet-applied.
 	return (
 		tryUpgradeAssignMixOrLREncoding(action) ||
 		tryUpgradeLevelMixOrLREncoding(action) ||
 		tryUpgradePanBalanceMixOrLREncoding(action)
 	)
+}
+
+/**
+ * Rewrite an `oldId` option whose value is a zero-indexed-mix-or-lowercase-LR
+ * value, to a `newId` option whose value is a one-indexed-mix-or-uppercase-LR
+ * value.
+ */
+export function convertZeroIndexedLowercaseLROptionToOneIndexedUppercaseLROption(
+	options: CompanionMigrationAction['options'],
+	oldId: CompanionInputFieldBase['id'],
+	newId: CompanionInputFieldBase['id'],
+): void {
+	const oldValue = options[oldId]
+	delete options[oldId]
+
+	options[newId] = oldValue === ObsoleteLowercaseLREncoding ? LR : (Number(oldValue) | 0) + 1
+}
+
+/**
+ * Rewrite an `oldId` option whose value is a zero-indexed-mix-or-lowercase-LR
+ * array, to a `newId` option whose value is a one-indexed-mix-or-uppercase-LR
+ * array.
+ */
+export function convertZeroIndexedLowercaseLRArrayOptionToOneIndexedUppercaseLRArrayOption(
+	options: CompanionMigrationAction['options'],
+	oldId: CompanionInputFieldBase['id'],
+	newId: CompanionInputFieldBase['id'],
+): void {
+	const oldValue = options[oldId]
+	delete options[oldId]
+
+	let newValue: (OneIndexed | typeof LR)[]
+	if (!Array.isArray(oldValue)) {
+		// Transfer the old offending value unaltered, relying on Companion to
+		// sanitize it before actually offering it to the action callback.
+		newValue = oldValue as unknown as typeof newValue
+	} else {
+		for (let i = 0, count = oldValue.length; i < count; i++) {
+			const oldSignal = oldValue[i]
+
+			let newSignal: OneIndexed | typeof LR
+			if (oldSignal === ObsoleteLowercaseLREncoding) {
+				newSignal = LR
+			} else {
+				newSignal = oneIndexedNumber((Number(oldSignal) | 0) + 1)
+			}
+
+			oldValue[i] = newSignal
+		}
+		newValue = oldValue as typeof newValue
+	}
+
+	options[newId] = newValue
 }

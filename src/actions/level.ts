@@ -6,10 +6,14 @@ import type {
 	DropdownChoice,
 } from '@companion-module/base'
 import { mixOrLROption } from '../choices.js'
-import { faderNumberZeroIndexed } from '../fader-number.js'
+import { faderNumber } from '../fader-number.js'
 import { FadingOption, getFadeType, LevelOption } from './fading.js'
 import type { sqInstance } from '../instance.js'
-import { tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
+import {
+	convertZeroIndexedLowercaseLROptionToOneIndexedUppercaseLROption,
+	tryUpgradeMixOrLRArrayEncoding,
+	tryUpgradeMixOrLROptionEncoding,
+} from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
 import type { NRPN } from '../mixer/nrpn/nrpn.js'
@@ -21,6 +25,7 @@ import {
 } from '../mixer/nrpn/source-to-sink.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { LR, LRStrip } from '../types.js'
+import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 
 /**
@@ -40,6 +45,9 @@ export const LevelActionId = {
 } as const
 
 export type LevelActionId = (typeof LevelActionId)[keyof typeof LevelActionId]
+
+export const LevelSetSourceOptionId = 'source'
+export const LevelSetSinkOptionId = 'sink'
 
 const ObsoleteFXReturnLevelinFXSendId = 'fxslev_to_fxs'
 
@@ -63,8 +71,8 @@ export function tryFixFXRLevelInFXSIdTypo(action: CompanionMigrationAction): boo
 	return true
 }
 
-const LevelSetSourceOptionId = 'input'
-const LevelSetSinkOptionId = 'assign'
+const ObsoleteLevelSetSourceOptionId = 'input'
+const ObsoleteLevelSetSinkOptionId = 'assign'
 
 /**
  * The LR mix used to be identified using the number `99` in options.  This
@@ -84,12 +92,82 @@ export function tryUpgradeLevelMixOrLREncoding(action: CompanionMigrationAction)
 		case LevelActionId.InputChannelLevelInMixOrLR:
 		case LevelActionId.GroupLevelInMixOrLR:
 		case LevelActionId.FXReturnLevelInMixOrLR:
-			return tryUpgradeMixOrLRArrayEncoding(action, LevelSetSinkOptionId)
+			return tryUpgradeMixOrLRArrayEncoding(action, ObsoleteLevelSetSinkOptionId)
 		case LevelActionId.MixOrLRLevelInMatrix:
-			return tryUpgradeMixOrLROptionEncoding(action, LevelSetSourceOptionId)
+			return tryUpgradeMixOrLROptionEncoding(action, ObsoleteLevelSetSourceOptionId)
 		default:
 			return false
 	}
+}
+
+type SourceSinkInfo = {
+	sourceIsMixOrLR: boolean
+	sinkIsMixOrLR: boolean
+}
+
+const OnlySourceIsMixOrLR = {
+	sourceIsMixOrLR: true,
+	sinkIsMixOrLR: false,
+} as const satisfies SourceSinkInfo
+
+const OnlySinkIsMixOrLR = {
+	sourceIsMixOrLR: false,
+	sinkIsMixOrLR: true,
+} as const satisfies SourceSinkInfo
+
+const SourceAndSinkAreNotMixOrLR = {
+	sourceIsMixOrLR: false,
+	sinkIsMixOrLR: false,
+} as const satisfies SourceSinkInfo
+
+const UserUnfriendlyOptionInfo = {
+	[LevelActionId.InputChannelLevelInMixOrLR]: OnlySinkIsMixOrLR,
+	[LevelActionId.GroupLevelInMixOrLR]: OnlySinkIsMixOrLR,
+	[LevelActionId.FXReturnLevelInMixOrLR]: OnlySinkIsMixOrLR,
+	[LevelActionId.InputChannelLevelInFXSend]: SourceAndSinkAreNotMixOrLR,
+	[LevelActionId.GroupLevelInFXSend]: SourceAndSinkAreNotMixOrLR,
+	[LevelActionId.FXReturnLevelInFXSend]: SourceAndSinkAreNotMixOrLR,
+	[LevelActionId.GroupLevelInMatrix]: SourceAndSinkAreNotMixOrLR,
+	[LevelActionId.MixOrLRLevelInMatrix]: OnlySourceIsMixOrLR,
+	// FXR to Group is omitted because the action is obsolete and does nothing.
+} as const satisfies Record<Exclude<LevelActionId, 'fxrlev_to_grp'>, SourceSinkInfo>
+
+/**
+ * Level-fading action source/sink options used to be zero-indexed numbers, or
+ * `'lr'` for the LR mix.
+ *
+ * With the 2.0 module API and options being allowed to be defined with
+ * expressions, these zero-indexed numbers ought be instead one-indexed to match
+ * user expectations.  Additionally, `'lr'` as nicety ought be `'LR'` because
+ * that's how it's referred to on the mixer surface.
+ *
+ * This function attempts to rewrite source/sink numbers to be one-indexed and
+ * change `'lr'` to `'LR'`, returning true if rewriting succeeded.
+ */
+export function tryMakeLevelSourceSinkOptionsUserFriendly(action: CompanionMigrationAction): boolean {
+	if (!Object.hasOwn(UserUnfriendlyOptionInfo, action.actionId)) {
+		return false
+	}
+
+	const options = action.options
+	if (!(ObsoleteLevelSetSourceOptionId in options)) {
+		return false
+	}
+
+	const { sourceIsMixOrLR, sinkIsMixOrLR } =
+		UserUnfriendlyOptionInfo[action.actionId as keyof typeof UserUnfriendlyOptionInfo]
+
+	const convertSource = sourceIsMixOrLR
+		? convertZeroIndexedLowercaseLROptionToOneIndexedUppercaseLROption
+		: moveZeroIndexedOptionToOneIndexed
+	convertSource(options, ObsoleteLevelSetSourceOptionId, LevelSetSourceOptionId)
+
+	const convertSink = sinkIsMixOrLR
+		? convertZeroIndexedLowercaseLROptionToOneIndexedUppercaseLROption
+		: moveZeroIndexedOptionToOneIndexed
+	convertSink(options, ObsoleteLevelSetSinkOptionId, LevelSetSinkOptionId)
+
+	return true
 }
 
 type LevelSourceToSink = SourceSinkForNRPN<'level'>
@@ -185,9 +263,9 @@ export function levelActions(
 	const counts = model.inputOutputCounts
 
 	const sourceNumber = (label: string, type: 'inputChannel' | 'group' | 'fxReturn') =>
-		faderNumberZeroIndexed(label, LevelSetSourceOptionId, counts, type)
+		faderNumber(label, LevelSetSourceOptionId, counts, type)
 	const sinkNumber = (label: string, type: 'group' | 'fxSend' | 'matrix') =>
-		faderNumberZeroIndexed(label, LevelSetSinkOptionId, counts, type)
+		faderNumber(label, LevelSetSinkOptionId, counts, type)
 	const mixNumberOrLRSource = (label: string) => mixOrLROption(label, LevelSetSourceOptionId, mixesAndLR)
 	const mixNumberOrLRSink = (label: string) => mixOrLROption(label, LevelSetSinkOptionId, mixesAndLR)
 

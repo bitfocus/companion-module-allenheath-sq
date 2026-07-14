@@ -25,7 +25,7 @@ describe('Model.forEach', () => {
 	test('lr', () => {
 		// Although `LR` is a constant string now, this shouldn't affect the
 		// enumeration of LR signals.
-		expect(LR).toBe('lr')
+		expect(LR).toBe('LR')
 
 		const results: [number, string, string][] = []
 

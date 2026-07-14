@@ -22,7 +22,7 @@ describe('ugprade LR array encoding', () => {
 		expect(action.options.bar).toBe(42)
 	})
 
-	test('obsolete LR as not array', () => {
+	test('doubly-obsolete LR as not array', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
 			hooah: 99,
 		})
@@ -31,9 +31,9 @@ describe('ugprade LR array encoding', () => {
 		expect(action.options.hooah).toBe(99)
 	})
 
-	test('modern LR as not array', () => {
+	test('obsolete LR as not array', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
-			spatchcock: LR,
+			spatchcock: 'lr',
 		})
 
 		expect(tryUpgradeMixOrLRArrayEncoding(action, 'spatchcock')).toBe(false)
@@ -58,51 +58,99 @@ describe('ugprade LR array encoding', () => {
 		expect(action.options.quux).toEqual([17])
 	})
 
-	test('single element obsolete LR array', () => {
+	test('single element doubly-obsolete LR array', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
 			waldo: [99],
 		})
 
 		expect(tryUpgradeMixOrLRArrayEncoding(action, 'waldo')).toBe(true)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
 		expect(action.options.waldo).toEqual(['lr'])
 	})
 
 	// In theory this shouldn't happen that the upgrade script is run on an
 	// upgraded action, but let's play it safe.
-	test('single element modern LR array', () => {
+	test('single element obsolete LR array', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
-			waldo: [LR],
+			waldo: ['lr'],
 		})
 
 		expect(tryUpgradeMixOrLRArrayEncoding(action, 'waldo')).toBe(false)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
 		expect(action.options.waldo).toEqual(['lr'])
 	})
 
-	test('multiple elements leading obsolete LR array', () => {
+	// And again, with modern LR.
+	test('single element obsolete LR array', () => {
+		const action: CompanionMigrationAction = makeUpgradeAction({
+			waldo: ['LR'],
+		})
+
+		expect(tryUpgradeMixOrLRArrayEncoding(action, 'waldo')).toBe(false)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
+		expect(action.options.waldo).toEqual(['LR'])
+	})
+
+	test('multiple elements leading doubly-obsolete LR array', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
 			aight: [99, 2],
 		})
 
 		expect(tryUpgradeMixOrLRArrayEncoding(action, 'aight')).toBe(true)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
 		expect(action.options.aight).toEqual(['lr', 2])
+	})
+
+	test('multiple elements leading obsolete LR array', () => {
+		const action: CompanionMigrationAction = makeUpgradeAction({
+			aight: ['lr', 2],
+		})
+
+		expect(tryUpgradeMixOrLRArrayEncoding(action, 'aight')).toBe(false)
+		// This upgrade function does only 99 -> 'lr', not 'lr' -> 'LR'.
+		expect(action.options.aight).toEqual(['lr', 2])
+	})
+
+	// Again, shouldn't happen, but playing it safe.
+	test('multiple elements leading obsolete LR array', () => {
+		const action: CompanionMigrationAction = makeUpgradeAction({
+			kookaburra: ['lr', 2],
+		})
+
+		expect(tryUpgradeMixOrLRArrayEncoding(action, 'kookaburra')).toBe(false)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
+		expect(action.options.kookaburra).toEqual(['lr', 2])
 	})
 
 	// Again, shouldn't happen, but playing it safe.
 	test('multiple elements leading modern LR array', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
-			kookaburra: [LR, 2],
+			attaboy: ['LR', 2],
 		})
 
-		expect(tryUpgradeMixOrLRArrayEncoding(action, 'kookaburra')).toBe(false)
-		expect(action.options.kookaburra).toEqual(['lr', 2])
+		expect(tryUpgradeMixOrLRArrayEncoding(action, 'attaboy')).toBe(false)
+		expect(action.options.attaboy).toEqual(['LR', 2])
 	})
 
-	test('multiple elements multiple obsolete LR array', () => {
+	test('multiple elements multiple doubly-obsolete LR array', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
 			dorado: [3, 99, 2, 99, 6],
 		})
 
 		expect(tryUpgradeMixOrLRArrayEncoding(action, 'dorado')).toBe(true)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
 		expect(action.options.dorado).toEqual([3, 'lr', 2, 'lr', 6])
 	})
 
@@ -112,12 +160,15 @@ describe('ugprade LR array encoding', () => {
 		})
 
 		expect(tryUpgradeMixOrLRArrayEncoding(action, 'legitimateSalvage')).toBe(true)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
 		expect(action.options.legitimateSalvage).toEqual([9, 'lr'])
 	})
 })
 
 describe('ugprade LR option encoding', () => {
-	test('not obsolete LR', () => {
+	test('not doubly-obsolete LR', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
 			bar: 42,
 		})
@@ -126,22 +177,40 @@ describe('ugprade LR option encoding', () => {
 		expect(action.options.bar).toBe(42)
 	})
 
-	test('obsolete LR', () => {
+	test('doubly-obsolete LR', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
 			eit: 99,
 		})
 
 		expect(tryUpgradeMixOrLROptionEncoding(action, 'eit')).toBe(true)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
 		expect(action.options.eit).toBe('lr')
 	})
 
-	test('obsolete LR erroneously as string', () => {
+	test('doubly-obsolete LR erroneously as string', () => {
 		const action: CompanionMigrationAction = makeUpgradeAction({
 			eit: '99',
 		})
 
 		expect(tryUpgradeMixOrLROptionEncoding(action, 'eit')).toBe(true)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
 		expect(action.options.eit).toBe('lr')
+	})
+
+	test('obsolete LR', () => {
+		const action: CompanionMigrationAction = makeUpgradeAction({
+			fnord: 'lr',
+		})
+
+		expect(tryUpgradeMixOrLROptionEncoding(action, 'fnord')).toBe(false)
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
+		expect(action.options.fnord).toBe('lr')
 	})
 
 	test('modern LR', () => {
@@ -150,6 +219,9 @@ describe('ugprade LR option encoding', () => {
 		})
 
 		expect(tryUpgradeMixOrLROptionEncoding(action, 'fnord')).toBe(false)
-		expect(action.options.fnord).toBe('lr')
+		// This upgrade function performs only the partial upgrade to the
+		// now-obsolete encoding in lowercase, not the modern user-friendly
+		// encoding in uppercase.
+		expect(action.options.fnord).toBe('LR')
 	})
 })

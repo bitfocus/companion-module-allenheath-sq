@@ -2,10 +2,20 @@ import type { Expect, Equal } from 'type-testing'
 import { describe, expect, test } from 'vitest'
 import { Model } from '../model.js'
 import { type Param, splitNRPN } from './nrpn.js'
-import { forEachSourceSinkNRPN } from './source-to-sink.js'
+import { forEachSourceSinkNRPN, LevelNRPNCalculator } from './source-to-sink.js'
+import { LRStrip } from '../../types.js'
+import { zeroIndexedNumber } from '../../utils/indexed.js'
 
 // @ts-expect-error Perform a test that *must fail* to verify testing happens.
 type assert_VerifyThatExpectAndEqualWillErrorIfMisused = Expect<Equal<true, false>>
+
+describe('LRStrip', () => {
+	test('LRStrip is within range when passed to an X-to-LR calculator', () => {
+		const model = new Model('SQ5')
+		const calc = LevelNRPNCalculator.get(model, ['inputChannel', 'lr'])
+		expect(() => calc.calculate(zeroIndexedNumber(0), LRStrip)).not.toThrow()
+	})
+})
 
 describe('forEachSourceSinkNRPN', () => {
 	describe('assign', () => {

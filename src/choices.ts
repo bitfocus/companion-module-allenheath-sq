@@ -6,7 +6,7 @@ function createMixesAndLR(model: Model): DropdownChoice[] {
 	const mixesAndLR: DropdownChoice[] = []
 	mixesAndLR.push({ label: 'LR', id: LR })
 	model.forEach('mix', (id, label) => {
-		mixesAndLR.push({ label, id })
+		mixesAndLR.push({ label, id: id + 1 })
 	})
 	return mixesAndLR
 }
@@ -14,7 +14,7 @@ function createMixesAndLR(model: Model): DropdownChoice[] {
 function createGroups(model: Model): DropdownChoice[] {
 	const groups: DropdownChoice[] = []
 	model.forEach('group', (group, groupLabel) => {
-		groups.push({ label: groupLabel, id: group })
+		groups.push({ label: groupLabel, id: group + 1 })
 	})
 	return groups
 }
@@ -22,7 +22,7 @@ function createGroups(model: Model): DropdownChoice[] {
 function createMatrixes(model: Model): DropdownChoice[] {
 	const matrixes: DropdownChoice[] = []
 	model.forEach('matrix', (matrix, matrixLabel) => {
-		matrixes.push({ label: matrixLabel, id: matrix })
+		matrixes.push({ label: matrixLabel, id: matrix + 1 })
 	})
 	return matrixes
 }
@@ -30,7 +30,7 @@ function createMatrixes(model: Model): DropdownChoice[] {
 function createFXSends(model: Model): DropdownChoice[] {
 	const fxSends: DropdownChoice[] = []
 	model.forEach('fxSend', (fxs, fxsLabel) => {
-		fxSends.push({ label: fxsLabel, id: fxs })
+		fxSends.push({ label: fxsLabel, id: fxs + 1 })
 	})
 	return fxSends
 }
@@ -58,7 +58,7 @@ export function mixOrLROption<Id extends CompanionInputFieldBase['id']>(
 		type: 'dropdown',
 		label,
 		id,
-		default: 0,
+		default: 1,
 		choices,
 		minChoicesForSearch: 0,
 	}
