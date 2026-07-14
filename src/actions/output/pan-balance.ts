@@ -1,9 +1,4 @@
-import type {
-	CompanionActionDefinition,
-	CompanionInputFieldDropdown,
-	CompanionMigrationAction,
-	CompanionOptionValues,
-} from '@companion-module/base'
+import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import type { Choices } from '../../choices.js'
 import { faderOption, OutputFaderOptionId } from './common.js'
 import type { sqInstance } from '../../instance.js'
@@ -13,7 +8,7 @@ import type { InputOutputType, Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
 import { splitNRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
-import { getPanBalance, type PanBalanceChoice } from '../pan-balance.js'
+import { getPanBalance, PanLevelOption, type PanBalanceChoice } from '../pan-balance.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
 import type { ZeroIndexed } from '../../utils/indexed.js'
 
@@ -183,8 +178,6 @@ function getPanBalanceType(
  *   The mixer object to use when executing the actions.
  * @param choices
  *   Option choices for use in the actions.
- * @param panLevelOption
- *   An action option specifying pan amounts for the output.
  * @returns
  *   The set of all output-adjustment action definitions.
  */
@@ -192,7 +185,6 @@ export function outputPanBalanceActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	choices: Choices,
-	panLevelOption: CompanionInputFieldDropdown,
 ): Record<OutputPanBalanceActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
@@ -208,7 +200,7 @@ export function outputPanBalanceActions(
 			name: 'LR Pan/Bal to output',
 			options: [
 				// There's only one LR, so don't include a fader option.
-				panLevelOption,
+				PanLevelOption,
 				ShowVar,
 			],
 			learn: async ({ options }) => {
@@ -236,7 +228,7 @@ export function outputPanBalanceActions(
 		},
 		[OutputPanBalanceActionId.MixPanBalanceOutput]: {
 			name: 'Mix Pan/Bal to output',
-			options: [faderOption('mixes', choices), panLevelOption, ShowVar],
+			options: [faderOption('mixes', choices), PanLevelOption, ShowVar],
 			learn: async ({ options }) => {
 				const mix = getFader(instance, model, options, 'mix')
 				if (mix === null) {
@@ -274,7 +266,7 @@ export function outputPanBalanceActions(
 
 		[OutputPanBalanceActionId.MatrixPanBalanceOutput]: {
 			name: 'Matrix Pan/Bal to output',
-			options: [faderOption('matrixes', choices), panLevelOption, ShowVar],
+			options: [faderOption('matrixes', choices), PanLevelOption, ShowVar],
 			learn: async ({ options }) => {
 				const matrix = getFader(instance, model, options, 'matrix')
 				if (matrix === null) {

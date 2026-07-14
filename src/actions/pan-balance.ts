@@ -65,17 +65,27 @@ export function tryUpgradePanBalanceMixOrLREncoding(action: CompanionMigrationAc
 	}
 }
 
-/** Compute the set of pan/balance level options for pan/balance actions. */
-export function createPanLevels(): DropdownChoice[] {
-	const panLevels = []
-	panLevels.push({ label: `Step Right`, id: 998 }, { label: `Step Left`, id: 999 })
-	for (let i = -100; i <= 100; i += 5) {
-		const pos = i < 0 ? `L${Math.abs(i)}` : i === 0 ? `CTR` : `R${i}`
-		panLevels.push({ label: `${pos}`, id: `${pos}` })
-	}
+/**
+ * A dropdown option of the set of pan/balance level options for pan/balance
+ * actions.
+ */
+export const PanLevelOption = {
+	type: 'dropdown',
+	label: 'Level',
+	id: 'leveldb',
+	default: 'CTR',
+	choices: ((): DropdownChoice[] => {
+		const panLevels = []
+		panLevels.push({ label: `Step Right`, id: 998 }, { label: `Step Left`, id: 999 })
+		for (let i = -100; i <= 100; i += 5) {
+			const pos = i < 0 ? `L${Math.abs(i)}` : i === 0 ? `CTR` : `R${i}`
+			panLevels.push({ label: `${pos}`, id: `${pos}` })
+		}
 
-	return panLevels
-}
+		return panLevels
+	})(),
+	minChoicesForSearch: 0,
+} as const satisfies CompanionInputFieldDropdown
 
 /** The set of pan/balance choice values offered for selection as pan levels. */
 export type PanBalanceChoice = PanBalance | 998 | 999
@@ -369,8 +379,6 @@ function sourceSinkOptions(
  *   The mixer object to use when executing the actions.
  * @param choices
  *   Choice definitions for the mixer.
- * @param panLevelOption
- *   An input option containing a list of usable pan/balance positions.
  * @returns
  *   The set of all pan/balance action definitions.
  */
@@ -378,7 +386,6 @@ export function panBalanceActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	choices: Choices,
-	panLevelOption: CompanionInputFieldDropdown,
 ): Record<PanBalanceActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
@@ -394,7 +401,7 @@ export function panBalanceActions(
 			name: 'Pan/Bal channel level to mix',
 			options: [
 				...sourceSinkOptions('Input channel', 'inputChannels', 'Mix', 'mixesAndLR', choices),
-				panLevelOption,
+				PanLevelOption,
 				ShowVarOption,
 			],
 			learn: panSourceToMixOrLRLearn(instance, model, 'inputChannel'),
@@ -411,7 +418,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.GroupPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal group level to mix',
-			options: [...sourceSinkOptions('Group', 'groups', 'Mix', 'mixesAndLR', choices), panLevelOption, ShowVarOption],
+			options: [...sourceSinkOptions('Group', 'groups', 'Mix', 'mixesAndLR', choices), PanLevelOption, ShowVarOption],
 			learn: panSourceToMixOrLRLearn(instance, model, 'group'),
 			subscribe: panSourceToMixOrLRSubscribe(instance, mixer, model, 'group'),
 			callback: async ({ options }) => {
@@ -428,7 +435,7 @@ export function panBalanceActions(
 			name: 'Pan/Bal FX return level to mix',
 			options: [
 				...sourceSinkOptions('FX return', 'fxReturns', 'Mix', 'mixesAndLR', choices),
-				panLevelOption,
+				PanLevelOption,
 				ShowVarOption,
 			],
 			learn: panSourceToMixOrLRLearn(instance, model, 'fxReturn'),
@@ -461,7 +468,7 @@ export function panBalanceActions(
 			name: 'Pan/Bal mix level to matrix',
 			options: [
 				...sourceSinkOptions('Mix', 'mixesAndLR', 'Matrix', 'matrixes', choices),
-				panLevelOption,
+				PanLevelOption,
 				ShowVarOption,
 			],
 			learn: ({ options }, _context): CompanionOptionValues | undefined => {
@@ -506,7 +513,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.GroupPanBalanceInMatrix]: {
 			name: 'Pan/Bal group level to matrix',
-			options: [...sourceSinkOptions('Group', 'groups', 'Matrix', 'matrixes', choices), panLevelOption, ShowVarOption],
+			options: [...sourceSinkOptions('Group', 'groups', 'Matrix', 'matrixes', choices), PanLevelOption, ShowVarOption],
 			learn: panSourceToSinkLearn(instance, model, ['group', 'matrix']),
 			subscribe: panSourceToSinkSubscribe(instance, mixer, model, ['group', 'matrix']),
 			callback: async ({ options }) => {

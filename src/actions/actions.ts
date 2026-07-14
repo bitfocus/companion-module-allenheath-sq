@@ -39,15 +39,6 @@ export function getActions(
 	mixer: Mixer,
 	choices: Choices,
 ): Record<ActionId, CompanionActionDefinition> {
-	const PanLevelOption = {
-		type: 'dropdown',
-		label: 'Level',
-		id: 'leveldb',
-		default: 'CTR',
-		choices: choices.panLevels,
-		minChoicesForSearch: 0,
-	} as const
-
 	return {
 		...muteActions(instance, mixer, choices),
 		...(() => {
@@ -62,9 +53,9 @@ export function getActions(
 		...softKeyActions(instance, mixer, choices),
 		...assignActions(instance, mixer, choices),
 		...levelActions(instance, mixer, choices),
-		...panBalanceActions(instance, mixer, choices, PanLevelOption),
+		...panBalanceActions(instance, mixer, choices),
 		...outputLevelActions(instance, mixer, choices),
-		...outputPanBalanceActions(instance, mixer, choices, PanLevelOption),
+		...outputPanBalanceActions(instance, mixer, choices),
 		...sceneActions(instance, mixer),
 	}
 }
