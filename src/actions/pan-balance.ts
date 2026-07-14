@@ -342,28 +342,24 @@ function getMixOrLRToMatrixParam(
 		: BalanceNRPNCalculator.get(model, ['mix', 'matrix']).calculate(mixOrLR, matrix)
 }
 
-function sourceOption(
-	sourceLabel: string,
-	sourceChoices: keyof Choices,
-	choices: Choices,
-): CompanionInputFieldDropdown {
+function signalOption(label: string, id: string, choice: keyof Choices, choices: Choices): CompanionInputFieldDropdown {
 	return {
 		type: 'dropdown',
-		label: sourceLabel,
-		id: PanBalanceSourceOptionId,
+		label,
+		id,
 		default: 0,
-		choices: choices[sourceChoices],
+		choices: choices[choice],
 		minChoicesForSearch: 0,
 	}
 }
 
-function sinkOption(sinkLabel: string, sinkChoices: keyof Choices, choices: Choices): CompanionInputFieldDropdown {
+function mixOrLROption(label: string, id: string, choices: Choices): CompanionInputFieldDropdown {
 	return {
 		type: 'dropdown',
-		label: sinkLabel,
-		id: PanBalanceSinkOptionId,
+		label,
+		id,
 		default: 0,
-		choices: choices[sinkChoices],
+		choices: choices.mixesAndLR,
 		minChoicesForSearch: 0,
 	}
 }
@@ -395,12 +391,19 @@ export function panBalanceActions(
 		default: '',
 	} as const
 
+	const sourceNumber = (label: string, choice: keyof Choices) =>
+		signalOption(label, PanBalanceSourceOptionId, choice, choices)
+	const sinkNumber = (label: string, choice: keyof Choices) =>
+		signalOption(label, PanBalanceSinkOptionId, choice, choices)
+	const mixNumberOrLRSource = (label: string) => mixOrLROption(label, PanBalanceSourceOptionId, choices)
+	const mixNumberOrLRSink = (label: string) => mixOrLROption(label, PanBalanceSinkOptionId, choices)
+
 	return {
 		[PanBalanceActionId.InputChannelPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal channel level to mix',
 			options: [
-				sourceOption('Input channel', 'inputChannels', choices),
-				sinkOption('Mix', 'mixesAndLR', choices),
+				sourceNumber('Input channel', 'inputChannels'),
+				mixNumberOrLRSink('Mix'),
 				PanLevelOption,
 				ShowVarOption,
 			],
@@ -418,12 +421,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.GroupPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal group level to mix',
-			options: [
-				sourceOption('Group', 'groups', choices),
-				sinkOption('Mix', 'mixesAndLR', choices),
-				PanLevelOption,
-				ShowVarOption,
-			],
+			options: [sourceNumber('Group', 'groups'), mixNumberOrLRSink('Mix'), PanLevelOption, ShowVarOption],
 			learn: panSourceToMixOrLRLearn(instance, model, 'group'),
 			subscribe: panSourceToMixOrLRSubscribe(instance, mixer, model, 'group'),
 			callback: async ({ options }) => {
@@ -438,12 +436,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.FXReturnPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal FX return level to mix',
-			options: [
-				sourceOption('FX return', 'fxReturns', choices),
-				sinkOption('Mix', 'mixesAndLR', choices),
-				PanLevelOption,
-				ShowVarOption,
-			],
+			options: [sourceNumber('FX return', 'fxReturns'), mixNumberOrLRSink('Mix'), PanLevelOption, ShowVarOption],
 			learn: panSourceToMixOrLRLearn(instance, model, 'fxReturn'),
 			subscribe: panSourceToMixOrLRSubscribe(instance, mixer, model, 'fxReturn'),
 			callback: async ({ options }) => {
@@ -472,12 +465,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.MixOrLRPanBalanceInMatrix]: {
 			name: 'Pan/Bal mix level to matrix',
-			options: [
-				sourceOption('Mix', 'mixesAndLR', choices),
-				sinkOption('Matrix', 'matrixes', choices),
-				PanLevelOption,
-				ShowVarOption,
-			],
+			options: [mixNumberOrLRSource('Mix'), sinkNumber('Matrix', 'matrixes'), PanLevelOption, ShowVarOption],
 			learn: ({ options }, _context): CompanionOptionValues | undefined => {
 				const nrpn = getMixOrLRToMatrixParam(instance, model, options)
 				if (nrpn === null) {
@@ -520,12 +508,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.GroupPanBalanceInMatrix]: {
 			name: 'Pan/Bal group level to matrix',
-			options: [
-				sourceOption('Group', 'groups', choices),
-				sinkOption('Matrix', 'matrixes', choices),
-				PanLevelOption,
-				ShowVarOption,
-			],
+			options: [sourceNumber('Group', 'groups'), sinkNumber('Matrix', 'matrixes'), PanLevelOption, ShowVarOption],
 			learn: panSourceToSinkLearn(instance, model, ['group', 'matrix']),
 			subscribe: panSourceToSinkSubscribe(instance, mixer, model, ['group', 'matrix']),
 			callback: async ({ options }) => {
