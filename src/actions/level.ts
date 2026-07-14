@@ -6,7 +6,7 @@ import type {
 	CompanionOptionValues,
 } from '@companion-module/base'
 import type { Choices } from '../choices.js'
-import { FadingOption, getFadeParameters } from './fading.js'
+import { FadingOption, getFadeParameters, LevelOption } from './fading.js'
 import type { sqInstance } from '../instance.js'
 import { LR, LRStrip, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
@@ -241,8 +241,6 @@ function mixOrLRSink(sinkLabel: string, choices: Choices): CompanionInputFieldDr
  *   The mixer object to use when executing the actions.
  * @param choices
  *   Option choices for use in the actions.
- * @param levelOption
- *   An action option specifying all levels a source in a sink can be set to.
  * @returns
  *   The set of all level action definitions.
  */
@@ -250,7 +248,6 @@ export function levelActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	choices: Choices,
-	levelOption: CompanionInputFieldDropdown,
 ): Record<LevelActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
@@ -260,7 +257,7 @@ export function levelActions(
 			options: [
 				sourceOption('Input channel', 'inputChannels', choices),
 				mixOrLRSink('Mix', choices),
-				levelOption,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async ({ options }) => {
@@ -290,7 +287,7 @@ export function levelActions(
 		},
 		[LevelActionId.GroupLevelInMixOrLR]: {
 			name: 'Fader group level to mix',
-			options: [sourceOption('Group', 'groups', choices), mixOrLRSink('Mix', choices), levelOption, FadingOption],
+			options: [sourceOption('Group', 'groups', choices), mixOrLRSink('Mix', choices), LevelOption, FadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['group', 'mix-or-lr'])
 				if (levelType === null) {
@@ -321,7 +318,7 @@ export function levelActions(
 			options: [
 				sourceOption('FX return', 'fxReturns', choices),
 				mixOrLRSink('Mix', choices),
-				levelOption,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async ({ options }) => {
@@ -368,7 +365,7 @@ export function levelActions(
 			options: [
 				sourceOption('Input channel', 'inputChannels', choices),
 				sinkOption('FX Send', 'fxSends', choices),
-				levelOption,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async ({ options }) => {
@@ -392,7 +389,7 @@ export function levelActions(
 			options: [
 				sourceOption('Group', 'groups', choices),
 				sinkOption('FX Send', 'fxSends', choices),
-				levelOption,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async ({ options }) => {
@@ -416,7 +413,7 @@ export function levelActions(
 			options: [
 				sourceOption('FX return', 'fxReturns', choices),
 				sinkOption('FX Send', 'fxSends', choices),
-				levelOption,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async ({ options }) => {
@@ -437,7 +434,7 @@ export function levelActions(
 		},
 		[LevelActionId.MixOrLRLevelInMatrix]: {
 			name: 'Fader mix level to matrix',
-			options: [mixOrLRSource('Mix', choices), sinkOption('Matrix', 'matrixes', choices), levelOption, FadingOption],
+			options: [mixOrLRSource('Mix', choices), sinkOption('Matrix', 'matrixes', choices), LevelOption, FadingOption],
 			callback: async ({ options }) => {
 				const levelType = getLevelType(instance, model, options, ['mix-or-lr', 'matrix'])
 				if (levelType === null) {
@@ -468,7 +465,7 @@ export function levelActions(
 			options: [
 				sourceOption('Group', 'groups', choices),
 				sinkOption('Matrix', 'matrixes', choices),
-				levelOption,
+				LevelOption,
 				FadingOption,
 			],
 			callback: async ({ options }) => {

@@ -39,15 +39,6 @@ export function getActions(
 	mixer: Mixer,
 	choices: Choices,
 ): Record<ActionId, CompanionActionDefinition> {
-	const LevelOption = {
-		type: 'dropdown',
-		label: 'Level',
-		id: 'leveldb',
-		default: 0,
-		choices: choices.levels,
-		minChoicesForSearch: 0,
-	} as const
-
 	const PanLevelOption = {
 		type: 'dropdown',
 		label: 'Level',
@@ -70,9 +61,9 @@ export function getActions(
 		})(),
 		...softKeyActions(instance, mixer, choices),
 		...assignActions(instance, mixer, choices),
-		...levelActions(instance, mixer, choices, LevelOption),
+		...levelActions(instance, mixer, choices),
 		...panBalanceActions(instance, mixer, choices, PanLevelOption),
-		...outputLevelActions(instance, mixer, choices, LevelOption),
+		...outputLevelActions(instance, mixer, choices),
 		...outputPanBalanceActions(instance, mixer, choices, PanLevelOption),
 		...sceneActions(instance, mixer),
 	}

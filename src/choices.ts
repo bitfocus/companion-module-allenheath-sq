@@ -1,5 +1,4 @@
 import type { DropdownChoice } from '@companion-module/base'
-import { createLevels } from './actions/fading.js'
 import { createPanLevels } from './actions/pan-balance.js'
 import { LR } from './mixer/lr.js'
 import type { Model } from './mixer/model.js'
@@ -135,7 +134,6 @@ export class Choices {
 	readonly dcas
 	readonly muteGroups
 	readonly softKeys
-	readonly levels
 	readonly panLevels
 	readonly allFaders
 	readonly panBalanceFaders
@@ -151,7 +149,6 @@ export class Choices {
 		this.dcas = createDCAs(model)
 		this.muteGroups = createMuteGroups(model)
 		this.softKeys = createSoftKeys(model)
-		this.levels = createLevels()
 		this.panLevels = createPanLevels()
 		this.allFaders = createAllFaders(model)
 		this.panBalanceFaders = createPanBalanceOutputFaders(model)
