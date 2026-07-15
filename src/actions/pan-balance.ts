@@ -47,7 +47,7 @@ const PanBalanceSinkOptionId = 'assign'
  * `'lr'`, i.e. `LR`.
  *
  * @param action
- *   An action to potentially ugprade.
+ *   An action to potentially upgrade.
  * @returns
  *   True iff the action was a pan/balance action containing an identification
  *   of the LR mix that was rewritten to use `'lr'`.
