@@ -5,18 +5,18 @@ import {
 	type CompanionUpgradeContext,
 	EmptyUpgradeScript,
 } from '@companion-module/base'
-import { tryFixFXRLevelInFXSIdTypo } from './actions/level.js'
-import { tryConvertOldLevelToOutputActionToSinkSpecific } from './actions/output/level.js'
-import { tryConvertOldPanToOutputActionToSinkSpecific } from './actions/output/pan-balance.js'
-import { tryCoalesceSceneRecallActions } from './actions/scene.js'
+import { tryFixFXRLevelInFXSIdTypo } from '../actions/level.js'
+import { tryConvertOldLevelToOutputActionToSinkSpecific } from '../actions/output/level.js'
+import { tryConvertOldPanToOutputActionToSinkSpecific } from '../actions/output/pan-balance.js'
+import { tryCoalesceSceneRecallActions } from '../actions/scene.js'
 import {
 	type RawConfig,
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 	tryRemoveUnnecessaryLabelInConfig,
 	tryRenameVariousConfigIds,
-} from './config.js'
-import { tryUpdateAllLRMixEncodings } from './mixer/lr.js'
+} from '../config.js'
+import { tryUpdateAllLRMixEncodings } from '../mixer/lr.js'
 
 function ActionUpdater(
 	tryUpdate: (action: CompanionMigrationAction) => boolean,
