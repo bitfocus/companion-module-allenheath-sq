@@ -2,7 +2,7 @@ import { type InputValue, Regex, type SomeCompanionConfigField } from '@companio
 import { type FaderLaw, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import { DefaultModel, getCommonCount, type ModelId } from './mixer/models.js'
 import type { Branded } from './utils/brand.js'
-import { type OneIndexed, oneIndexedNumber } from './utils/indexed.js'
+import { type OneIndexed, oneIndexedNumber, type ZeroIndexed, zeroIndexedNumber } from './utils/indexed.js'
 
 /**
  * The `TConfig` object type used to store instance configuration info.
@@ -267,6 +267,11 @@ function toNumberDefaultZero(v: RawConfig[string]): number {
 
 function toTalkbackChannel(ch: RawConfig[typeof TalkbackChannelOptionId]): number {
 	return toNumberDefaultZero(ch)
+}
+
+/** Get the talkback channel specified by the user as config option. */
+export function getTalkbackChannel(config: SQInstanceConfig): ZeroIndexed {
+	return zeroIndexedNumber(toNumberDefaultZero(config.talkbackChannel))
 }
 
 function toMidiChannel(midiChannel: RawConfig[typeof MidiChannelOptionId]): OneIndexed {

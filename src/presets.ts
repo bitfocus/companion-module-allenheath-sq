@@ -1,13 +1,16 @@
+import type { Equal, Expect } from 'type-testing'
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import { AssignActionId } from './actions/assign.js'
 import { LevelActionId } from './actions/level.js'
 import { MuteActionId } from './actions/mute.js'
+import { getTalkbackChannel } from './config.js'
 import { MuteFeedbackId } from './feedbacks/mute.js'
 import type { sqInstance } from './instance.js'
 import { LR } from './mixer/lr.js'
 import type { Model } from './mixer/model.js'
 import { type NRPN, splitNRPN } from './mixer/nrpn/nrpn.js'
 import { LevelNRPNCalculator } from './mixer/nrpn/source-to-sink.js'
+import type { ZeroIndexed } from './utils/indexed.js'
 
 const White = combineRgb(255, 255, 255)
 const Black = combineRgb(0, 0, 0)
@@ -74,6 +77,9 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 
 	/* TALKBACK*/
 	model.forEach('mix', (mix, mixLabel, mixDesc) => {
+		const talkbackChannelZeroIndexed = getTalkbackChannel(instance.config)
+		type assert_TalkbackChannelIsZeroIndexed = Expect<Equal<typeof talkbackChannelZeroIndexed, ZeroIndexed>>
+
 		presets[`preset_talkback_mix${mix}`] = {
 			type: 'button',
 			category: 'Talkback',
@@ -90,7 +96,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: instance.config.talkbackChannel,
+								inputChannel: talkbackChannelZeroIndexed,
 								mixAssign: [LR],
 								mixActive: false,
 							},
@@ -98,7 +104,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: instance.config.talkbackChannel,
+								inputChannel: talkbackChannelZeroIndexed,
 								mixAssign: [mix],
 								mixActive: true,
 							},
@@ -106,7 +112,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: LevelActionId.InputChannelLevelInMixOrLR,
 							options: {
-								input: instance.config.talkbackChannel,
+								input: talkbackChannelZeroIndexed,
 								assign: mix,
 								level: 49,
 							},
@@ -114,7 +120,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								strip: instance.config.talkbackChannel,
+								strip: talkbackChannelZeroIndexed,
 								mute: 2,
 							},
 						},
@@ -123,7 +129,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: AssignActionId.InputChannelToMix,
 							options: {
-								inputChannel: instance.config.talkbackChannel,
+								inputChannel: talkbackChannelZeroIndexed,
 								mixAssign: [mix],
 								mixActive: false,
 							},
@@ -131,7 +137,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: LevelActionId.InputChannelLevelInMixOrLR,
 							options: {
-								input: instance.config.talkbackChannel,
+								input: talkbackChannelZeroIndexed,
 								assign: mix,
 								level: 0,
 							},
@@ -139,7 +145,7 @@ export function getPresets(instance: sqInstance, model: Model): CompanionPresetD
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								strip: instance.config.talkbackChannel,
+								strip: talkbackChannelZeroIndexed,
 								mute: 1,
 							},
 						},
