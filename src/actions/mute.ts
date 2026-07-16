@@ -10,7 +10,7 @@ import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
 import { MuteOperation } from '../mixer/mixer.js'
-import { sourceOrSinkFromOneIndexed } from './to-source-or-sink.js'
+import { toSourceOrSink } from './to-source-or-sink.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
@@ -184,7 +184,7 @@ function getMuteOptions(
 	options: CompanionOptionValues,
 	type: Exclude<InputOutputType, 'lr'>,
 ): MuteOptions | null {
-	const n = sourceOrSinkFromOneIndexed(instance, model, options[StripOptionId], type)
+	const n = toSourceOrSink(instance, model, options[StripOptionId], type)
 	if (n === null) {
 		return null
 	}

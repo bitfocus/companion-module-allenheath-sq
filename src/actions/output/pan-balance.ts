@@ -8,7 +8,7 @@ import { getCommonCount } from '../../mixer/models.js'
 import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
 import { getPanBalanceOperation, learnShowVar, PanLevelOption, ShowVarOption } from '../panning.js'
-import { sourceOrSinkFromOneIndexed } from '../to-source-or-sink.js'
+import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
 import { repr } from '../../utils/pretty.js'
@@ -174,7 +174,7 @@ export function outputPanBalanceActions(
 		options: CompanionOptionValues,
 		type: Exclude<SinkAsOutputForNRPN<'panBalance'>, 'lr'>,
 	): NRPN<'panBalance'> | null => {
-		const n = sourceOrSinkFromOneIndexed(instance, model, options[OutputPanBalanceFaderOptionId], type)
+		const n = toSourceOrSink(instance, model, options[OutputPanBalanceFaderOptionId], type)
 		if (n === null) {
 			return null
 		}

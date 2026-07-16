@@ -8,7 +8,7 @@ import type { InputOutputType, Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
 import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
-import { sourceOrSinkFromOneIndexed } from '../to-source-or-sink.js'
+import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
 
@@ -175,7 +175,7 @@ function getOutputLevelNRPN(
 	options: CompanionOptionValues,
 	sinkType: Exclude<SinkAsOutputForNRPN<'level'>, 'lr'>,
 ): NRPN<'level'> | null {
-	const sink = sourceOrSinkFromOneIndexed(instance, model, options[OutputLevelFaderOptionId], sinkType)
+	const sink = toSourceOrSink(instance, model, options[OutputLevelFaderOptionId], sinkType)
 	if (sink === null) {
 		return null
 	}
