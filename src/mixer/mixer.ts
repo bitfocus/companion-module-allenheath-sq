@@ -3,7 +3,15 @@ import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@compani
 import { OutputPanBalanceActionId } from '../actions/output/pan-balance.js'
 import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
-import { getMidiChannel, type Host } from '../config.js'
+import {
+	getFaderLaw,
+	getHost,
+	getMidiChannel,
+	getModelId,
+	getRetrieveStatusAtStartup,
+	getVerbose,
+	type Host,
+} from '../config.js'
 import { typeToMuteFeedback } from '../feedbacks/mute.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
@@ -199,8 +207,8 @@ export class Mixer {
 		const socket = this.#socket
 		if (socket !== null && socket.isConnected) {
 			const instance = this.#instance
-			if (instance.config.verbose) {
-				instance.log('debug', `SEND: ${prettyBytes(data)} to ${instance.config.host}`)
+			if (getVerbose(instance.config)) {
+				instance.log('debug', `SEND: ${prettyBytes(data)} to ${getHost(instance.config)}`)
 			}
 
 			// XXX This needs to be handled better.
@@ -219,7 +227,7 @@ export class Mixer {
 	/** Create a mixer for the given instance. */
 	constructor(instance: sqInstance) {
 		this.#instance = instance
-		this.model = new Model(instance.config.model)
+		this.model = new Model(getModelId(instance.config))
 	}
 
 	/**
@@ -249,7 +257,7 @@ export class Mixer {
 
 		this.#stop(InstanceStatus.Connecting, 'Starting mixer connection...')
 
-		const retrieveStatus = this.#instance.config.retrieveStatusAtStartup
+		const retrieveStatus = getRetrieveStatusAtStartup(this.#instance.config)
 
 		const socket = new TCPHelper(host, SQMidiPort)
 		this.#socket = socket
@@ -313,7 +321,7 @@ export class Mixer {
 		forEachSourceSinkNRPN(model, 'level', getNRPN)
 		forEachOutputLevel(model, getNRPN)
 
-		const delayStatusRetrieval = instance.config.retrieveStatusAtStartup === RetrieveStatusAtStartup.Delayed
+		const delayStatusRetrieval = getRetrieveStatusAtStartup(instance.config) === RetrieveStatusAtStartup.Delayed
 
 		if (buff.length > 0 && this.#socket !== null) {
 			let ctr = 0
@@ -355,7 +363,7 @@ export class Mixer {
 		const instance = this.#instance
 
 		const verboseLog = (msg: string) => {
-			if (instance.config.verbose) {
+			if (getVerbose(instance.config)) {
 				instance.log('debug', msg)
 			}
 		}
@@ -401,7 +409,7 @@ export class Mixer {
 				ost = true
 			}
 
-			const level = levelFromNRPNData(vc, vf, this.#instance.config.faderLaw)
+			const level = levelFromNRPNData(vc, vf, getFaderLaw(this.#instance.config))
 			instance.setVariableValues({
 				[levelKey]: level,
 			})
@@ -829,7 +837,7 @@ export class Mixer {
 
 	/** Send a MIDI command to set the given level NRPN to the given level. */
 	#setLevel(nrpn: NRPN<'level'>, level: Level): void {
-		const [VC, VF] = nrpnDataFromLevel(level, this.#instance.config.faderLaw)
+		const [VC, VF] = nrpnDataFromLevel(level, getFaderLaw(this.#instance.config))
 		this.send(this.#nrpnData(nrpn, VC, VF))
 
 		// XXX Is this really needed?  Won't the mixer's reply indicating the

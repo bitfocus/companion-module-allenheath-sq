@@ -3,7 +3,7 @@
 import { type CompanionVariableValue, InstanceBase, type SomeCompanionConfigField } from '@companion-module/base'
 import { getActions } from './actions/actions.js'
 import { Choices } from './choices.js'
-import { GetConfigFields, type RawConfig } from './config.js'
+import { GetConfigFields, getHost, type SQConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
 import { Mixer } from './mixer/mixer.js'
 import { canUpdateConfigWithoutRestarting, noConnectionConfig, validateConfig } from './config.js'
@@ -11,7 +11,7 @@ import { getPresets } from './presets.js'
 import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
 
 /** An SQ mixer connection instance. */
-export class sqInstance extends InstanceBase<RawConfig> {
+export class sqInstance extends InstanceBase<SQConfig> {
 	/** Configuration dictating the behavior of this instance. */
 	config = noConnectionConfig()
 
@@ -33,7 +33,7 @@ export class sqInstance extends InstanceBase<RawConfig> {
 		}
 	}
 
-	override async init(config: RawConfig, _isFirstInit: boolean): Promise<void> {
+	override async init(config: SQConfig, _isFirstInit: boolean): Promise<void> {
 		void this.configUpdated(config)
 	}
 
@@ -92,7 +92,7 @@ export class sqInstance extends InstanceBase<RawConfig> {
 		})
 	}
 
-	override async configUpdated(newConfig: RawConfig): Promise<void> {
+	override async configUpdated(newConfig: SQConfig): Promise<void> {
 		const oldConfig = this.config
 
 		validateConfig(newConfig)
@@ -134,6 +134,6 @@ export class sqInstance extends InstanceBase<RawConfig> {
 		//this.checkVariables();
 		this.checkFeedbacks()
 
-		mixer.start(newConfig.host)
+		mixer.start(getHost(newConfig))
 	}
 }

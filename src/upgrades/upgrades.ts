@@ -11,6 +11,7 @@ import { tryConvertOldPanToOutputActionToSinkSpecific } from '../actions/output/
 import { tryCoalesceSceneRecallActions } from '../actions/scene.js'
 import {
 	type RawConfig,
+	type SQConfig,
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
 	tryRemoveUnnecessaryLabelInConfig,
@@ -20,8 +21,8 @@ import { tryUpdateAllLRMixEncodings } from '../mixer/lr.js'
 
 function ActionUpdater(
 	tryUpdate: (action: CompanionMigrationAction) => boolean,
-): CompanionStaticUpgradeScript<RawConfig> {
-	return (_context: CompanionUpgradeContext<RawConfig>, props: CompanionStaticUpgradeProps<RawConfig>) => {
+): CompanionStaticUpgradeScript<SQConfig> {
+	return (_context: CompanionUpgradeContext<SQConfig>, props: CompanionStaticUpgradeProps<SQConfig>) => {
 		return {
 			updatedActions: props.actions.filter(tryUpdate),
 			updatedConfig: null,
@@ -30,8 +31,8 @@ function ActionUpdater(
 	}
 }
 
-function ConfigUpdater(tryUpdate: (config: RawConfig) => boolean): CompanionStaticUpgradeScript<RawConfig> {
-	return (_context: CompanionUpgradeContext<RawConfig>, props: CompanionStaticUpgradeProps<RawConfig>) => {
+function ConfigUpdater(tryUpdate: (config: RawConfig) => boolean): CompanionStaticUpgradeScript<SQConfig> {
+	return (_context: CompanionUpgradeContext<SQConfig>, props: CompanionStaticUpgradeProps<SQConfig>) => {
 		return {
 			updatedActions: [],
 			updatedConfig: props.config !== null && tryUpdate(props.config) ? props.config : null,
@@ -55,4 +56,4 @@ export const UpgradeScripts = [
 	ActionUpdater(tryUpdateAllLRMixEncodings),
 	ActionUpdater(tryFixFXRLevelInFXSIdTypo),
 	ConfigUpdater(tryRenameVariousConfigIds),
-] satisfies CompanionStaticUpgradeScript<RawConfig>[]
+] satisfies CompanionStaticUpgradeScript<SQConfig>[]

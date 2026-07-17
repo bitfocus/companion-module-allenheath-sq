@@ -1,21 +1,192 @@
-import { type InputValue, Regex, type SomeCompanionConfigField } from '@companion-module/base'
+import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
 import { type FaderLaw, RetrieveStatusAtStartup } from './mixer/mixer.js'
 import { DefaultModel, getCommonCount, type ModelId } from './mixer/models.js'
 import type { Branded } from './utils/brand.js'
 import { type OneIndexed, oneIndexedNumber, type ZeroIndexed, zeroIndexedNumber } from './utils/indexed.js'
 
+const FaderLawOptionId = 'faderLaw'
+const TalkbackChannelOptionId = 'talkbackChannel'
+const MidiChannelOptionId = 'midiChannel'
+const RetrieveStatusOptionId = 'retrieveStatusAtStartup'
+
 /**
- * The `TConfig` object type used to store instance configuration info.
- *
- * Nothing ensures that Companion config objects conform to the `TConfig` type
- * specified by a module.  Therefore we leave this type underdefined, not
- * well-defined, so that configuration info will be defensively processed.  (We
- * use `SQInstanceOptions` to store configuration choices as well-typed values
- * for the long haul.  See the `options.ts:optionsFromConfig` destructuring
- * parameter for a list of the field/types we expect to find in config objects.)
+ * A less-typed config type suitable for use where a representation less
+ * constrained than the actual config type is being worked with -- for example
+ * in upgrade scripts and similar contexts.
  */
-export interface RawConfig {
-	[key: string]: InputValue | undefined
+export type RawConfig = Record<string, unknown>
+
+/** All mixer config options. */
+export type SQConfig = {
+	// Before the 2.0 module API, nothing ensures that Companion config objects
+	// conform to the module `TConfig` type.  Therefore we code accesses
+	// extra-defensively in order to deal with wrongly-typed values sneaking in:
+	//
+	//  * We pass a `SQConfig` received from Companion through `validateConfig`,
+	//   which will field-by-field massage an `SQConfig` whose actual value is
+	//   potentially not consistent with the `SQConfig` type into true
+	//   type-correctness.
+	//  * We use accessor `get*` functions, operating on `SQConfig`, to return
+	//   well-typed//and validated* values for each configuration option.
+	//
+	// To illustrate, consider the `host` field.  The user should specify a
+	// valid hostname (presently only an IPv4 address), but Companion doesn't
+	// enforce this.  At the `validateConfig` step we pass that field through
+	// the `toHost` function, which rewrites it only into a `string`, consistent
+	// with what Companion's `"textinput"` config field will pass us.  Then when
+	// the module wants to know the user's specified host -- and its actual
+	// validity as a hostname -- we use `getHost` passing the full `SQConfig`,
+	// which will take the now guaranteed `string` field, test whether it's a
+	// valid hostname, and return a branded `Host` value for it -- or the empty
+	// string if the field doesn't contain a valid hostname.
+
+	/**
+	 * The TCP/IP hostname of the mixer, or the empty string if no hostname was
+	 * validly specified.
+	 */
+	host: string
+
+	/** The model of the mixer. */
+	model: string
+
+	/** The fader law specified in the mixer. */
+	[FaderLawOptionId]: string
+
+	/**
+	 * The channel used for talkback (zero-indexed rather than 1-indexed as it
+	 * appears in UI).
+	 */
+	[TalkbackChannelOptionId]: number
+
+	/** The MIDI channel (1-16) used to communicate with the mixer. */
+	[MidiChannelOptionId]: number
+
+	/**
+	 * How the mixer status (signal levels, etc.) should be retrieved at
+	 * startup.
+	 */
+	[RetrieveStatusOptionId]: string
+
+	/**
+	 * Log a whole bunch of extra information about ongoing operation if verbose
+	 * logging is enabled.
+	 */
+	verbose: boolean
+}
+
+const ipRegExp = new RegExp(Regex.IP.slice(1, -1))
+
+/** A valid hostname as well-formed IP address. */
+export type Host = Branded<string, 'config-host-valid-ip'>
+
+function isValidHost(str: string): str is Host {
+	return ipRegExp.test(str)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-base-to-string
+const toHost = (v: unknown) => (v === undefined ? '' : String(v))
+
+/**
+ * Get either a valid hostname from configuration, or the empty string if a
+ * valid hostname wasn't configured.
+ */
+export function getHost(config: SQConfig): Host | '' {
+	const str = config.host
+	if (isValidHost(str)) {
+		return str
+	}
+	return ''
+}
+
+const toModelId = String
+
+/** Get the configured model ID. */
+export function getModelId(config: SQConfig): ModelId {
+	const modelStr = String(config.model)
+	switch (modelStr) {
+		case 'SQ5':
+		case 'SQ6':
+		case 'SQ7':
+			return modelStr
+		default:
+			return DefaultModel
+	}
+}
+
+const toFaderLaw = (v: unknown): FaderLaw => String(v) as FaderLaw
+
+/** Get the configured fader law. */
+export function getFaderLaw(config: SQConfig): FaderLaw {
+	const law = config[FaderLawOptionId]
+	switch (law) {
+		case 'LinearTaper':
+		case 'AudioTaper':
+			return law
+		default:
+			return 'LinearTaper'
+	}
+}
+
+// This is encoded in zero-indexed form, i.e. input channel 1 is encoded as 0.
+// If the option is missing, interpreting as 0 entails interpreting as input
+// channel 1.
+const toTalkbackChannel = toNumberDefaultZero
+
+/** Get the talkback channel specified by the user as config option. */
+export function getTalkbackChannel(config: SQConfig): ZeroIndexed {
+	return zeroIndexedNumber(config[TalkbackChannelOptionId])
+}
+
+// It's intentional, to comport with past behavior (and with the default MIDI
+// channel on SQ mixers), that MIDI Channel 1 is the default for values not
+// 1-16, including if the option is absent.
+const toMidiChannel = toNumberDefaultZero
+
+/**
+ * Get the (one-indexed, i.e. 1 through 16 inclusive) MIDI channel used to
+ * communicate with the mixer.
+ */
+export function getMidiChannel(config: SQConfig): OneIndexed {
+	const n = config[MidiChannelOptionId]
+	return oneIndexedNumber(1 <= n && n <= 16 && (n | 0) === n ? n : 1)
+}
+
+const toRetrieveStatusAtStartup = String
+
+/**
+ * Get the status-retrieval value used to determine how to retrieve mixer state
+ * at module startup.
+ */
+export function getRetrieveStatusAtStartup(config: SQConfig): RetrieveStatusAtStartup {
+	const retrieveStatus = String(config[RetrieveStatusOptionId])
+	switch (retrieveStatus) {
+		case 'delay':
+		case 'nosts':
+		case 'full':
+			return retrieveStatus
+		default:
+			return RetrieveStatusAtStartup.Fully
+	}
+}
+
+const toVerbose = Boolean
+
+/** Get whether verbose logging is enabled. */
+export const getVerbose = Boolean
+
+/**
+ * Force `config` into type-conformance (but not necessarily semantic validity)
+ * with `SQConfig`.  (The individual accessor functions must be used to get
+ * semantic validity.)
+ */
+export function validateConfig(config: RawConfig): asserts config is SQConfig {
+	config.host = toHost(config.host)
+	config.model = toModelId(config.model)
+	config.faderLaw = toFaderLaw(config.faderLaw)
+	config.talkbackChannel = toTalkbackChannel(config.talkbackChannel)
+	config.midiChannel = toMidiChannel(config.midiChannel)
+	config.retrieveStatusAtStartup = toRetrieveStatusAtStartup(config.retrieveStatusAtStartup)
+	config.verbose = toVerbose(config.verbose)
 }
 
 /** Ensure a 'model' property is present in configs that lack it. */
@@ -62,15 +233,14 @@ export function tryRemoveUnnecessaryLabelInConfig(oldConfig: RawConfig): boolean
 	return false
 }
 
-function moveId(config: RawConfig, oldId: keyof RawConfig, newId: keyof SQInstanceConfig): void {
-	config[newId] = config[oldId]
+// `newId` could be `keyof SQConfig`, but then this couldn't be used for a
+// very-old upgrade script that upgraded to a new option, that itself was
+// subsequently moved or deleted.  So `string` is the best we can do.
+function moveId(config: RawConfig, oldId: string, newId: string): void {
+	const value = config[oldId]
 	delete config[oldId]
+	config[newId] = value
 }
-
-const FaderLawOptionId = 'faderLaw'
-const TalkbackChannelOptionId = 'talkbackChannel'
-const MidiChannelOptionId = 'midiChannel'
-const RetrieveStatusOptionId = 'retrieveStatusAtStartup'
 
 function createDefaultTalkbackChannelOption(): SomeCompanionConfigField {
 	// The number of input channels depends on how many input channels the
@@ -178,86 +348,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 	]
 }
 
-/** Config information controlling the operation of a mixer instance. */
-type SQInstanceConfig = {
-	/**
-	 * The TCP/IP hostname of the mixer, or the empty string if no hostname was
-	 * validly specified.
-	 */
-	host: Host | ''
-
-	/** The model of the mixer. */
-	model: ModelId
-
-	/** The fader law specified in the mixer. */
-	[FaderLawOptionId]: FaderLaw
-
-	/**
-	 * The channel used for talkback (zero-indexed rather than 1-indexed as it
-	 * appears in UI).
-	 */
-	[TalkbackChannelOptionId]: number
-
-	/** The MIDI channel (1-16) used to communicate with the mixer. */
-	[MidiChannelOptionId]: OneIndexed
-
-	/**
-	 * How the mixer status (signal levels, etc.) should be retrieved at
-	 * startup.
-	 */
-	[RetrieveStatusOptionId]: RetrieveStatusAtStartup
-
-	/**
-	 * Log a whole bunch of extra information about ongoing operation if verbose
-	 * logging is enabled.
-	 */
-	verbose: boolean
-}
-
-const ipRegExp = new RegExp(Regex.IP.slice(1, -1))
-
-/** A valid hostname as well-formed IP address. */
-export type Host = Branded<string, 'config-host-valid-ip'>
-
-function isValidHost(str: string): str is Host {
-	return ipRegExp.test(str)
-}
-
-function toHost(host: RawConfig['host']): Host | '' {
-	if (host !== undefined) {
-		const str = String(host)
-		if (isValidHost(str)) {
-			return str
-		}
-	}
-
-	return ''
-}
-
-function toModelId(model: RawConfig['model']): ModelId {
-	const modelStr = String(model)
-	switch (modelStr) {
-		case 'SQ5':
-		case 'SQ6':
-		case 'SQ7':
-			return modelStr
-		default:
-			return DefaultModel
-	}
-}
-
-function toFaderLaw(faderLawOpt: RawConfig[typeof FaderLawOptionId]): FaderLaw {
-	const law = String(faderLawOpt)
-	switch (law) {
-		case 'LinearTaper':
-		case 'AudioTaper':
-			return law
-		default:
-			return 'LinearTaper'
-	}
-}
-
-function toNumberDefaultZero(v: RawConfig[string]): number {
+function toNumberDefaultZero(v: unknown): number {
 	if (v === undefined) {
 		return 0
 	}
@@ -265,61 +356,11 @@ function toNumberDefaultZero(v: RawConfig[string]): number {
 	return Number(v)
 }
 
-function toTalkbackChannel(ch: RawConfig[typeof TalkbackChannelOptionId]): number {
-	return toNumberDefaultZero(ch)
-}
-
-/** Get the talkback channel specified by the user as config option. */
-export function getTalkbackChannel(config: SQInstanceConfig): ZeroIndexed {
-	return zeroIndexedNumber(toNumberDefaultZero(config.talkbackChannel))
-}
-
-function toMidiChannel(midiChannel: RawConfig[typeof MidiChannelOptionId]): OneIndexed {
-	// It is intentional here, to comport with past behavior, that MIDI Channel 1
-	// is the default for values not 1-16, including if the option is absent.
-	const n = toNumberDefaultZero(midiChannel)
-	return oneIndexedNumber(1 <= n && n <= 16 && (n | 0) === n ? n : 1)
-}
-
-function toRetrieveStatusAtStartup(status: RawConfig[typeof RetrieveStatusOptionId]): RetrieveStatusAtStartup {
-	const retrieveStatus = String(status)
-	switch (retrieveStatus) {
-		case 'delay':
-			return RetrieveStatusAtStartup.Delayed
-		case 'nosts':
-			return RetrieveStatusAtStartup.None
-		case 'full':
-		default:
-			return RetrieveStatusAtStartup.Fully
-	}
-}
-
-const toVerbose = Boolean
-
-/**
- * Validate 'config' as a validly-encoded configuration, massaging it into type
- * conformance as necessary.
- */
-export function validateConfig(config: RawConfig): asserts config is SQInstanceConfig {
-	config.host = toHost(config.host)
-	config.model = toModelId(config.model)
-	config.faderLaw = toFaderLaw(config.faderLaw)
-	config.talkbackChannel = toTalkbackChannel(config.talkbackChannel)
-	config.midiChannel = toMidiChannel(config.midiChannel)
-	config.retrieveStatusAtStartup = toRetrieveStatusAtStartup(config.retrieveStatusAtStartup)
-	config.verbose = toVerbose(config.verbose)
-}
-
-/** Get the MIDI channel specified by `config`. */
-export function getMidiChannel(config: SQInstanceConfig): OneIndexed {
-	return oneIndexedNumber(config[MidiChannelOptionId])
-}
-
 /**
  * Instance config suitable for use at instance creation before initialization
  * with an actual config.
  */
-export function noConnectionConfig(): SQInstanceConfig {
+export function noConnectionConfig(): SQConfig {
 	return {
 		host: '',
 		model: DefaultModel,
@@ -336,7 +377,7 @@ export function noConnectionConfig(): SQInstanceConfig {
  * determine whether applying the new config to it requires restarting the
  * connection.
  */
-export function canUpdateConfigWithoutRestarting(oldConfig: SQInstanceConfig, newConfig: SQInstanceConfig): boolean {
+export function canUpdateConfigWithoutRestarting(oldConfig: SQConfig, newConfig: SQConfig): boolean {
 	// A different host straightforwardly requires a connection restart.
 	if (oldConfig.host !== newConfig.host) {
 		return false
