@@ -74,6 +74,13 @@ export type SQConfig = {
 	verbose: boolean
 }
 
+/**
+ * All mixer secrets.
+ *
+ * @allowunused
+ */
+export type SQSecrets = undefined
+
 const ipRegExp = new RegExp(Regex.IP.slice(1, -1))
 
 /** A valid hostname as well-formed IP address. */
