@@ -1,5 +1,6 @@
 import type { Expect, IsNever } from 'type-testing'
-import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionActionDefinitions } from '../../compat.js'
 import { faderNumber } from '../../fader-number.js'
 import type { sqInstance } from '../../instance.js'
 import type { Mixer } from '../../mixer/mixer.js'
@@ -11,6 +12,7 @@ import { getPanBalanceOperation, learnShowVar, PanLevelOption, ShowVarOption } f
 import {
 	AllOutputFaderPanBalanceActions,
 	OutputPanBalanceActionId,
+	type OutputPanBalanceActions,
 	OutputPanBalanceSignalOptionId,
 } from './schemas/pan-balance.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
@@ -150,7 +152,7 @@ export function tryMakeOutputPanBalanceItemOneIndexed(action: CompanionMigration
 export function outputPanBalanceActions(
 	instance: sqInstance,
 	mixer: Mixer,
-): Record<OutputPanBalanceActionId, CompanionActionDefinition> {
+): CompanionActionDefinitions<OutputPanBalanceActions> {
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 

@@ -1,6 +1,5 @@
 import type { Equal, Expect, IsNever } from 'type-testing'
 import type {
-	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
 	CompanionInputFieldNumber,
 	CompanionMigrationAction,
@@ -8,6 +7,7 @@ import type {
 	DropdownChoice,
 } from '@companion-module/base'
 import { mixOrLROption } from '../choices.js'
+import type { CompanionActionDefinitions } from '../compat.js'
 import { faderNumber } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import {
@@ -24,7 +24,12 @@ import {
 	type SourceSinkForNRPN,
 } from '../mixer/nrpn/source-to-sink.js'
 import { getPanBalanceOperation, learnShowVar, PanLevelOption, ShowVarOption } from './panning.js'
-import { PanBalanceActionId, PanBalanceSinkOptionId, PanBalanceSourceOptionId } from './schemas/pan-balance.js'
+import {
+	PanBalanceActionId,
+	type PanBalanceActions,
+	PanBalanceSinkOptionId,
+	PanBalanceSourceOptionId,
+} from './schemas/pan-balance.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { LR, LRStrip } from '../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
@@ -201,7 +206,7 @@ export function panBalanceActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	mixesAndLR: DropdownChoice[],
-): Record<PanBalanceActionId, CompanionActionDefinition> {
+): CompanionActionDefinitions<PanBalanceActions> {
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 

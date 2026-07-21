@@ -1,9 +1,16 @@
 import type { Equal, Expect } from 'type-testing'
-import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionActionDefinitions } from '../compat.js'
 import type { sqInstance } from '../instance.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
-import { SoftKeyActionId, SoftKeyOptionId, SoftKeyOp, SoftKeyOpOptionId } from './schemas/softkey.js'
+import {
+	SoftKeyActionId,
+	type SoftKeyActions,
+	SoftKeyOptionId,
+	SoftKeyOp,
+	SoftKeyOpOptionId,
+} from './schemas/softkey.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
 import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
@@ -102,7 +109,7 @@ function getSoftKeyOptions(instance: sqInstance, model: Model, options: Companio
  * @returns
  *   The set of all softkey action definitions.
  */
-export function softKeyActions(instance: sqInstance, mixer: Mixer): Record<SoftKeyActionId, CompanionActionDefinition> {
+export function softKeyActions(instance: sqInstance, mixer: Mixer): CompanionActionDefinitions<SoftKeyActions> {
 	const model = mixer.model
 
 	return {

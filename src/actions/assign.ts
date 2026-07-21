@@ -1,5 +1,4 @@
 import type {
-	CompanionActionDefinition,
 	CompanionInputFieldBase,
 	CompanionInputFieldDropdown,
 	CompanionInputFieldMultiDropdown,
@@ -7,7 +6,8 @@ import type {
 	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
-import { type Choices } from '../choices.js'
+import type { Choices } from '../choices.js'
+import type { CompanionActionDefinitions } from '../compat.js'
 import type { sqInstance } from '../instance.js'
 import {
 	convertZeroIndexedLowercaseLRArrayOptionToOneIndexedUppercaseLRArrayOption,
@@ -20,6 +20,7 @@ import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import {
 	AssignActionId,
+	type AssignActions,
 	AssignSinksOptionId,
 	AssignSourceOptionId,
 	AssignStatus,
@@ -330,7 +331,7 @@ export function assignActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	choices: Choices,
-): Record<AssignActionId, CompanionActionDefinition> {
+): CompanionActionDefinitions<AssignActions> {
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 

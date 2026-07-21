@@ -1,5 +1,6 @@
 import type { Expect, IsNever } from 'type-testing'
-import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionActionDefinitions } from '../../compat.js'
 import { faderNumber } from '../../fader-number.js'
 import { FadingOption, getFadeType, LevelOption } from '../fading.js'
 import type { sqInstance } from '../../instance.js'
@@ -8,7 +9,12 @@ import type { InputOutputType, Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
 import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
-import { AllOutputLevelActions, OutputLevelActionId, OutputLevelSignalOptionId } from './schemas/level.js'
+import {
+	AllOutputLevelActions,
+	OutputLevelActionId,
+	type OutputLevelActions,
+	OutputLevelSignalOptionId,
+} from './schemas/level.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
@@ -177,10 +183,7 @@ function getOutputLevelNRPN(
  * @returns
  *   The set of all output-adjustment action definitions.
  */
-export function outputLevelActions(
-	instance: sqInstance,
-	mixer: Mixer,
-): Record<OutputLevelActionId, CompanionActionDefinition> {
+export function outputLevelActions(instance: sqInstance, mixer: Mixer): CompanionActionDefinitions<OutputLevelActions> {
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 

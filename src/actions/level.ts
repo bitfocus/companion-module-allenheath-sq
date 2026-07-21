@@ -1,6 +1,5 @@
 import type { Equal, Expect, IsNever } from 'type-testing'
 import type {
-	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
 	CompanionInputFieldNumber,
 	CompanionMigrationAction,
@@ -8,6 +7,7 @@ import type {
 	DropdownChoice,
 } from '@companion-module/base'
 import { mixOrLROption } from '../choices.js'
+import type { CompanionActionDefinitions } from '../compat.js'
 import { faderNumber } from '../fader-number.js'
 import { FadingOption, getFadeType, LevelOption } from './fading.js'
 import type { sqInstance } from '../instance.js'
@@ -25,7 +25,7 @@ import {
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
 } from '../mixer/nrpn/source-to-sink.js'
-import { LevelActionId, LevelSetSinkOptionId, LevelSetSourceOptionId } from './schemas/level.js'
+import { LevelActionId, type LevelActions, LevelSetSinkOptionId, LevelSetSourceOptionId } from './schemas/level.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
 import { LR, LRStrip } from '../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
@@ -240,7 +240,7 @@ export function levelActions(
 	instance: sqInstance,
 	mixer: Mixer,
 	mixesAndLR: DropdownChoice[],
-): Record<LevelActionId, CompanionActionDefinition> {
+): CompanionActionDefinitions<LevelActions> {
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 

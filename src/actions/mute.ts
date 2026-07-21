@@ -1,15 +1,15 @@
 import type { Equal, Expect } from 'type-testing'
 import type {
-	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
+import type { CompanionActionDefinitions } from '../compat.js'
 import { faderNumber } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
 import { type InputOutputType, type Model } from '../mixer/model.js'
-import { AllMuteStripActions, MuteActionId, StatusOptionId, StripOptionId } from './schemas/mute.js'
+import { AllMuteStripActions, MuteActionId, type MuteActions, StatusOptionId, StripOptionId } from './schemas/mute.js'
 import { toSourceOrSink } from './to-source-or-sink.js'
 import { MuteOperation } from '../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../upgrades/zero-indexed-to-one.js'
@@ -187,7 +187,7 @@ function getMuteOptions(
  * @returns
  *   The set of all mute action definitions.
  */
-export function muteActions(instance: sqInstance, mixer: Mixer): Record<MuteActionId, CompanionActionDefinition> {
+export function muteActions(instance: sqInstance, mixer: Mixer): CompanionActionDefinitions<MuteActions> {
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 
