@@ -342,7 +342,12 @@ function getMixOrLRToMatrixParam(
 		: BalanceNRPNCalculator.get(model, ['mix', 'matrix']).calculate(mixOrLR, matrix)
 }
 
-function signalOption(label: string, id: string, choice: keyof Choices, choices: Choices): CompanionInputFieldDropdown {
+function signalOption<Id extends CompanionInputFieldDropdown['id']>(
+	label: string,
+	id: Id,
+	choice: keyof Choices,
+	choices: Choices,
+): CompanionInputFieldDropdown {
 	return {
 		type: 'dropdown',
 		label,
@@ -353,7 +358,11 @@ function signalOption(label: string, id: string, choice: keyof Choices, choices:
 	}
 }
 
-function mixOrLROption(label: string, id: string, choices: Choices): CompanionInputFieldDropdown {
+function mixOrLROption<Id extends CompanionInputFieldDropdown['id']>(
+	label: string,
+	id: Id,
+	choices: Choices,
+): CompanionInputFieldDropdown {
 	return {
 		type: 'dropdown',
 		label,

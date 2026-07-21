@@ -128,9 +128,9 @@ function getMixAndLRSinks(options: CompanionOptionValues, model: Model): MixOrLR
 	return sinks
 }
 
-function sourceOption(
+function sourceOption<Id extends CompanionInputFieldDropdown['id']>(
 	sourceLabel: string,
-	sourceId: string,
+	sourceId: Id,
 	sourceChoices: keyof Choices,
 	choices: Choices,
 ): CompanionInputFieldDropdown {
@@ -144,9 +144,9 @@ function sourceOption(
 	}
 }
 
-function sinkOption(
+function sinkOption<Id extends CompanionInputFieldMultiDropdown['id']>(
 	sinkLabel: string,
-	sinkId: string,
+	sinkId: Id,
 	sinkChoices: keyof Choices,
 	choices: Choices,
 ): CompanionInputFieldMultiDropdown {
