@@ -1,9 +1,10 @@
-import { combineRgb, type CompanionFeedbackDefinition, type DropdownChoice } from '@companion-module/base'
+import type { CompanionFeedbackDefinition, DropdownChoice } from '@companion-module/base'
 import type { Choices } from '../choices.js'
 import { type FeedbackDefinitions, type FeedbackId } from './feedback-ids.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
+import { CarmineRed, White } from '../utils/colors.js'
 import { zeroIndexedNumber } from '../utils/indexed.js'
 
 /**
@@ -23,9 +24,6 @@ export const MuteFeedbackId = {
 } as const
 
 export type MuteFeedbackId = (typeof MuteFeedbackId)[keyof typeof MuteFeedbackId]
-
-const WHITE = combineRgb(255, 255, 255)
-const CARMINE_RED = combineRgb(153, 0, 51)
 
 /** A map associating mutable input/output types to mute feedback IDs. */
 export const typeToMuteFeedback: Record<InputOutputType, MuteFeedbackId> = {
@@ -57,8 +55,8 @@ export function muteFeedbacks(mixer: Mixer, choices: Choices): FeedbackDefinitio
 				},
 			],
 			defaultStyle: {
-				color: WHITE,
-				bgcolor: CARMINE_RED,
+				color: White,
+				bgcolor: CarmineRed,
 			},
 			callback: ({ options }, _context) => {
 				const nrpn = calculateMuteNRPN(mixer.model, type, zeroIndexedNumber(Number(options.channel)))

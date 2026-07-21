@@ -1,5 +1,5 @@
 import type { Equal, Expect } from 'type-testing'
-import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
+import type { CompanionPresetDefinitions } from '@companion-module/base'
 import { AssignActionId } from '../actions/assign.js'
 import { LevelActionId } from '../actions/level.js'
 import { MuteActionId } from '../actions/mute.js'
@@ -10,10 +10,8 @@ import { LR } from '../mixer/lr.js'
 import type { Model } from '../mixer/model.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { LevelNRPNCalculator } from '../mixer/nrpn/source-to-sink.js'
+import { Black, White } from '../utils/colors.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
-
-const White = combineRgb(255, 255, 255)
-const Black = combineRgb(0, 0, 0)
 
 // Doesn't this lint make *no sense* for intersections?  The intersection of two
 // types that *do not* duplicate is just `never`, which makes any such

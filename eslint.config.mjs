@@ -118,6 +118,11 @@ const customConfig = [
 							message: "Use `Expect<IsNever<typeof val>>` from 'type-testing' instead.",
 						},
 						{
+							name: '@companion-module/base',
+							importNames: ['combineRgb'],
+							message: 'Please define a named constant in src/utils/colors.ts.',
+						},
+						{
 							name: 'type-testing',
 							importNames: ['Extends'],
 							message: "Use `Equals` from 'type-testing' or `IsMemberOfUnion` instead.",
