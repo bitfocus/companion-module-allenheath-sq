@@ -7,7 +7,7 @@ import { GetConfigFields, getHost, type SQConfig } from './config.js'
 import { getFeedbacks } from './feedbacks/feedbacks.js'
 import { Mixer } from './mixer/mixer.js'
 import { canUpdateConfigWithoutRestarting, noConnectionConfig, validateConfig } from './config.js'
-import { getPresets } from './presets.js'
+import { getPresets } from './presets/presets.js'
 import { CurrentSceneId, getVariables, SceneRecalledTriggerId } from './variables.js'
 
 /** An SQ mixer connection instance. */
