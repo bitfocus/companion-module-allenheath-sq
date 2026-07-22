@@ -123,6 +123,12 @@ const customConfig = [
 							message: "Use `Equals` from 'type-testing' or `IsMemberOfUnion` instead.",
 						},
 					],
+					patterns: [
+						{
+							group: ['@companion-module/base/*', 'type-testing/*'],
+							message: 'Use the top-level import path, not nested references to generated files',
+						},
+					],
 				},
 			],
 		},
