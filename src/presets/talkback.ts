@@ -1,7 +1,7 @@
 import type { CompanionPresetDefinitions } from '@companion-module/base'
 import { AssignActionId } from '../actions/assign.js'
 import { LevelActionId } from '../actions/level.js'
-import { MuteActionId } from '../actions/mute.js'
+import { MuteActionId, MuteOptionId, StripOptionId } from '../actions/mute.js'
 import { LR } from '../mixer/lr.js'
 import type { Model } from '../mixer/model.js'
 import { White, Black } from '../utils/colors.js'
@@ -51,8 +51,8 @@ export function talkbackPresets(talkbackChannel: ZeroIndexed, model: Model): Com
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								strip: talkbackChannel,
-								mute: 2,
+								[StripOptionId]: talkbackChannel,
+								[MuteOptionId]: 2,
 							},
 						},
 					],
@@ -76,8 +76,8 @@ export function talkbackPresets(talkbackChannel: ZeroIndexed, model: Model): Com
 						{
 							actionId: MuteActionId.MuteInputChannel,
 							options: {
-								strip: talkbackChannel,
-								mute: 1,
+								[StripOptionId]: talkbackChannel,
+								[MuteOptionId]: 1,
 							},
 						},
 					],

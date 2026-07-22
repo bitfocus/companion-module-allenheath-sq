@@ -31,8 +31,8 @@ export const MuteActionId = {
 
 export type MuteActionId = (typeof MuteActionId)[keyof typeof MuteActionId]
 
-const StripOptionId = 'strip'
-const MuteOptionId = 'mute'
+export const StripOptionId = 'strip'
+export const MuteOptionId = 'mute'
 
 function StripOption(label: string, choices: DropdownChoice[]): CompanionInputFieldDropdown {
 	return {
