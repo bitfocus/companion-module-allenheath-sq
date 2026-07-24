@@ -1,16 +1,9 @@
-import {
-	type CompanionMigrationAction,
-	type CompanionStaticUpgradeProps,
-	type CompanionStaticUpgradeScript,
-	type CompanionUpgradeContext,
-	EmptyUpgradeScript,
-} from '@companion-module/base'
+import { type CompanionStaticUpgradeScript, EmptyUpgradeScript } from '@companion-module/base'
 import { tryFixFXRLevelInFXSIdTypo } from '../actions/level.js'
 import { tryConvertOldLevelToOutputActionToSinkSpecific } from '../actions/output/level.js'
 import { tryConvertOldPanToOutputActionToSinkSpecific } from '../actions/output/pan-balance.js'
 import { tryCoalesceSceneRecallActions } from '../actions/scene.js'
 import {
-	type RawConfig,
 	type SQConfig,
 	tryEnsureLabelInConfig,
 	tryEnsureModelOptionInConfig,
@@ -18,28 +11,7 @@ import {
 	tryRenameVariousConfigIds,
 } from '../config.js'
 import { tryUpdateAllLRMixEncodings } from '../mixer/lr.js'
-
-function ActionUpdater(
-	tryUpdate: (action: CompanionMigrationAction) => boolean,
-): CompanionStaticUpgradeScript<SQConfig> {
-	return (_context: CompanionUpgradeContext<SQConfig>, props: CompanionStaticUpgradeProps<SQConfig>) => {
-		return {
-			updatedActions: props.actions.filter(tryUpdate),
-			updatedConfig: null,
-			updatedFeedbacks: [],
-		}
-	}
-}
-
-function ConfigUpdater(tryUpdate: (config: RawConfig) => boolean): CompanionStaticUpgradeScript<SQConfig> {
-	return (_context: CompanionUpgradeContext<SQConfig>, props: CompanionStaticUpgradeProps<SQConfig>) => {
-		return {
-			updatedActions: [],
-			updatedConfig: props.config !== null && tryUpdate(props.config) ? props.config : null,
-			updatedFeedbacks: [],
-		}
-	}
-}
+import { ActionUpdater, ConfigUpdater } from './updaters.js'
 
 export const UpgradeScripts = [
 	EmptyUpgradeScript,
