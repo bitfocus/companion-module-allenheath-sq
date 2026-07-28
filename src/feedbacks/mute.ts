@@ -1,11 +1,15 @@
-import type { CompanionFeedbackDefinition, CompanionMigrationFeedback } from '@companion-module/base'
+import type {
+	CompanionBooleanFeedbackDefinition,
+	CompanionFeedbackDefinition,
+	CompanionMigrationFeedback,
+} from '@companion-module/base'
 import { faderNumberZeroIndexed } from '../fader-number.js'
 import { LRStrip } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType } from '../mixer/model.js'
 import { calculateMuteNRPN } from '../mixer/nrpn/mute.js'
 import { CarmineRed, White } from '../utils/colors.js'
-import { zeroIndexedNumber } from '../utils/indexed.js'
+import { type ZeroIndexed, zeroIndexedNumber } from '../utils/indexed.js'
 
 /**
  * Feedback IDs for feedbacks reacting to the mute status of particular mixer
@@ -59,42 +63,76 @@ export const typeToMuteFeedback = {
 	dca: MuteFeedbackId.MuteDCA,
 } as const satisfies Record<InputOutputType, MuteFeedbackId>
 
+const CommonOptions = {
+	type: 'boolean',
+	description: 'Change color',
+	defaultStyle: {
+		color: White,
+		bgcolor: CarmineRed,
+	},
+} as const satisfies Pick<CompanionBooleanFeedbackDefinition, 'type' | 'description' | 'defaultStyle'>
+
 export function muteFeedbacks(mixer: Mixer): Record<MuteFeedbackId, CompanionFeedbackDefinition> {
-	const counts = mixer.model.inputOutputCounts
+	const model = mixer.model
+	const counts = model.inputOutputCounts
 
 	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
 		faderNumberZeroIndexed(label, MuteFeedbackFaderOptionId, counts, type)
 
-	function muteFeedback(label: string, type: InputOutputType): CompanionFeedbackDefinition {
+	function getMuted(type: InputOutputType, n: ZeroIndexed): boolean {
+		const nrpn = calculateMuteNRPN(model, type, n)
+		return mixer.muted(nrpn)
+	}
+
+	function stripOptions(
+		label: string,
+		type: Exclude<InputOutputType, 'lr'>,
+	): Pick<CompanionBooleanFeedbackDefinition, 'name' | 'options' | 'callback'> {
 		return {
-			type: 'boolean',
 			name: `Mute ${label}`,
-			description: 'Change colour',
-			options: type === 'lr' ? [] : [faderOption(label, type)],
-			defaultStyle: {
-				color: White,
-				bgcolor: CarmineRed,
-			},
-			callback: ({ options }, _context) => {
-				const nrpn = calculateMuteNRPN(
-					mixer.model,
-					type,
-					type === 'lr' ? LRStrip : zeroIndexedNumber(Number(options[MuteFeedbackFaderOptionId])),
-				)
-				return mixer.muted(nrpn)
-			},
+			options: [faderOption(label, type)],
+			callback: ({ options }) => getMuted(type, zeroIndexedNumber(Number(options[MuteFeedbackFaderOptionId]))),
 		}
 	}
 
 	return {
-		[MuteFeedbackId.MuteLR]: muteFeedback('LR', 'lr'),
-		[MuteFeedbackId.MuteInputChannel]: muteFeedback('Input', 'inputChannel'),
-		[MuteFeedbackId.MuteMix]: muteFeedback('Mix', 'mix'),
-		[MuteFeedbackId.MuteGroup]: muteFeedback('Group', 'group'),
-		[MuteFeedbackId.MuteMatrix]: muteFeedback('Matrix', 'matrix'),
-		[MuteFeedbackId.MuteDCA]: muteFeedback('DCA', 'dca'),
-		[MuteFeedbackId.MuteFXReturn]: muteFeedback('FX Return', 'fxReturn'),
-		[MuteFeedbackId.MuteFXSend]: muteFeedback('FX Send', 'fxSend'),
-		[MuteFeedbackId.MuteMuteGroup]: muteFeedback('MuteGroup', 'muteGroup'),
+		[MuteFeedbackId.MuteLR]: {
+			...CommonOptions,
+			name: 'Mute LR',
+			options: [],
+			callback: () => getMuted('lr', LRStrip),
+		},
+		[MuteFeedbackId.MuteInputChannel]: {
+			...CommonOptions,
+			...stripOptions('Input Channel', 'inputChannel'),
+		},
+		[MuteFeedbackId.MuteMix]: {
+			...CommonOptions,
+			...stripOptions('Mix', 'mix'),
+		},
+		[MuteFeedbackId.MuteGroup]: {
+			...CommonOptions,
+			...stripOptions('Group', 'group'),
+		},
+		[MuteFeedbackId.MuteMatrix]: {
+			...CommonOptions,
+			...stripOptions('Matrix', 'matrix'),
+		},
+		[MuteFeedbackId.MuteDCA]: {
+			...CommonOptions,
+			...stripOptions('DCA', 'dca'),
+		},
+		[MuteFeedbackId.MuteFXReturn]: {
+			...CommonOptions,
+			...stripOptions('FX Return', 'fxReturn'),
+		},
+		[MuteFeedbackId.MuteFXSend]: {
+			...CommonOptions,
+			...stripOptions('FX Send', 'fxSend'),
+		},
+		[MuteFeedbackId.MuteMuteGroup]: {
+			...CommonOptions,
+			...stripOptions('MuteGroup', 'muteGroup'),
+		},
 	}
 }
