@@ -160,9 +160,9 @@ function sinkOption<Id extends CompanionInputFieldMultiDropdown['id']>(
 }
 
 /**
- * Generate action definitions for assigning sources to mixes: input channel to
- * mix, group to mix/aux, input channel to FX send, output to matrix, and so
- * on and so forth.
+ * Generate action definitions for assigning sources to sinks: input channel to
+ * mix, group to mix, input channel to FX send, output to matrix, and so on and
+ * so forth.
  *
  * @param instance
  *   The instance for which actions are being generated.

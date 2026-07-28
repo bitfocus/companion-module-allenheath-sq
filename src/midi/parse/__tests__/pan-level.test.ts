@@ -12,7 +12,7 @@ import { SysCommonMultiByte, SysCommonSingleByte } from '../../__tests__/bytes.j
 describe('pan/balance level commands', () => {
 	test('pan/balance', async () => {
 		return TestParsing(8, [
-			// Ip37 in Aux10
+			// Ip37 in Mix10
 			ReceiveChannelMessage([0xb7, 0x63, 0x53]),
 			ReceiveChannelMessage([0xb7, 0x62, 0x7d]),
 			// Channel 1, C-1, Note on (DAW channel, i.e. 0 = one more than 7)
@@ -24,7 +24,7 @@ describe('pan/balance level commands', () => {
 			ExpectPanLevelMessage(0x53, 0x7d, 0x00, 0x00),
 			// abortive message, discarded
 			ReceiveChannelMessage([0xb7, 0x63, 0x55]),
-			// Group 4 in Aux2, CTR
+			// Group 4 in Mix2, CTR
 			ReceiveChannelMessage([0xb7, 0x63, 0x55]),
 			ReceiveChannelMessage([0xb7, 0x62, 0x29]),
 			ReceiveSystemCommonMessage(SysCommonMultiByte),

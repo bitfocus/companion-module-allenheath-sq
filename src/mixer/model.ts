@@ -93,7 +93,7 @@ export class Model {
 		},
 		mix: {
 			pairs: [],
-			generate: (mix) => [`AUX ${mix + 1}`, `Aux ${mix + 1}`],
+			generate: (mix) => [`MIX ${mix + 1}`, `Mix ${mix + 1}`],
 		},
 		group: {
 			pairs: [],

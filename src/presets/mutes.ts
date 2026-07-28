@@ -56,7 +56,7 @@ export function mutePresets(model: Model): CompanionPresetDefinitions {
 
 	createtMute('Mute Input', 'Input channel', 'MuteInputChannel', model.inputOutputCounts.inputChannel)
 	createtMute('Mute Mix - Group', 'LR', 'MuteLR', model.inputOutputCounts.lr)
-	createtMute('Mute Mix - Group', 'Aux', 'MuteMix', model.inputOutputCounts.mix)
+	createtMute('Mute Mix - Group', 'Mix', 'MuteMix', model.inputOutputCounts.mix)
 	createtMute('Mute Mix - Group', 'Group', 'MuteGroup', model.inputOutputCounts.group)
 	createtMute('Mute Mix - Group', 'Matrix', 'MuteMatrix', model.inputOutputCounts.matrix)
 	createtMute('Mute FX', 'FX Send', 'MuteFXSend', model.inputOutputCounts.fxSend)

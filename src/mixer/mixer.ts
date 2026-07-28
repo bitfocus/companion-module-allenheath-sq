@@ -1163,7 +1163,7 @@ export class Mixer {
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param mixOrLR
 	 *   The mix (or LR) in which `source`'s pan/balance level will be adjusted,
-	 *   e.g. `2` for Aux 3.
+	 *   e.g. `2` for Mix 3.
 	 */
 	#setPanBalanceInMixOrLR(
 		source: ZeroIndexed,
@@ -1194,7 +1194,7 @@ export class Mixer {
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param sink
 	 *   The numbered sink in which `source`'s pan/balance level will be
-	 *   adjusted, e.g. `2` for Aux 3.
+	 *   adjusted, e.g. `2` for Mix 3.
 	 * @param sinkType
 	 *   The type of `sink`.
 	 * @param paramsType
@@ -1220,7 +1220,7 @@ export class Mixer {
 	 * @param pan
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Aux 3, or LR.
+	 *   A mix, e.g. `2` for Mix 3, or LR.
 	 */
 	setInputChannelPanBalanceInMixOrLR(channel: ZeroIndexed, pan: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(channel, 'inputChannel', pan, mixOrLR)
@@ -1234,7 +1234,7 @@ export class Mixer {
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Aux 3, or LR.
+	 *   A mix, e.g. `2` for Mix 3, or LR.
 	 */
 	setGroupPanBalanceInMixOrLR(group: ZeroIndexed, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(group, 'group', panBalance, mixOrLR)
@@ -1248,7 +1248,7 @@ export class Mixer {
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Aux 3, or LR.
+	 *   A mix, e.g. `2` for Mix 3, or LR.
 	 */
 	setFXReturnPanBalanceInMixOrLR(fxReturn: ZeroIndexed, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
 		this.#setPanBalanceInMixOrLR(fxReturn, 'fxReturn', panBalance, mixOrLR)
@@ -1270,7 +1270,7 @@ export class Mixer {
 	 * Set the pan/balance of a mix within a matrix.
 	 *
 	 * @param mix
-	 *   A mix, e.g. `2` for Aux 3.
+	 *   A mix, e.g. `2` for Mix 3.
 	 * @param panBalance
 	 *   A pan/balance choice; see `createPanLevels` for details.
 	 * @param matrix

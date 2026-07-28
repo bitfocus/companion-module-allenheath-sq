@@ -12,7 +12,7 @@ import { SysCommonMultiByte } from '../../__tests__/bytes.js'
 describe('fader level', () => {
 	test('various fader level tests', async () => {
 		return TestParsing(6, [
-			// Ip23 in Aux3
+			// Ip23 in Mix3
 			ReceiveChannelMessage([0xb5, 0x63, 0x42]),
 			ReceiveChannelMessage([0xb5, 0x62, 0x4e]),
 			// Channel 6, C-1, Note on (DAW channel, i.e. 6 = one more than 5)
@@ -28,7 +28,7 @@ describe('fader level', () => {
 			ReceiveChannelMessage([0xb5, 0x62, 0x4e]),
 			ReceiveChannelMessage([0xb5, 0x06, 0x00]),
 			ExpectNextCommandReadiness(false),
-			// Group 1 in Aux3
+			// Group 1 in Mix3
 			ReceiveChannelMessage([0xb5, 0x63, 0x45]),
 			ReceiveChannelMessage([0xb5, 0x62, 0x06]),
 			ReceiveChannelMessage([0xb5, 0x06, 0x00]),
@@ -36,7 +36,7 @@ describe('fader level', () => {
 			ExpectNextCommandReadiness(true),
 			ExpectFaderLevelMessage(0x45, 0x06, 0x00, 0x00),
 			ExpectNextCommandReadiness(false),
-			// Grp3 in Aux4, 0dB (linear taper)
+			// Grp3 in Mix4, 0dB (linear taper)
 			...FaderLevel(6, 0x45, 0x1f, 0x76, 0x5c).map(ReceiveChannelMessage),
 			ExpectNextCommandReadiness(true),
 			ExpectFaderLevelMessage(0x45, 0x1f, 0x76, 0x5c),

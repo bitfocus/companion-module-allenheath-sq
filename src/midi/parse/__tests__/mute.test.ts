@@ -35,7 +35,7 @@ describe('mute commands', () => {
 			ExpectNextCommandReadiness(true),
 			ReceiveSystemExclusiveMessage(SysExMessageShortest),
 			ExpectMuteMessage(0x02, 0x07, 0x00),
-			// Mute off, Aux3
+			// Mute off, Mix3
 			...MuteOff(1, 0x00, 0x47).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x47, 0x00),
 		])
@@ -43,7 +43,7 @@ describe('mute commands', () => {
 
 	test('mute off', async () => {
 		return TestParsing(4, [
-			// Mute on, Aux4
+			// Mute on, Mix4
 			ReceiveChannelMessage([0xb3, 0x63, 0x00]),
 			ReceiveChannelMessage([0xb3, 0x62, 0x2f]),
 			// Channel 1, C-1, Note on (DAW channel, i.e. 1 = one more than 0)
@@ -65,7 +65,7 @@ describe('mute commands', () => {
 			ExpectNextCommandReadiness(false),
 			ReceiveChannelMessage([0xb3, 0x26, 0x00]),
 			ExpectMuteMessage(0x00, 0x2f, 0x00),
-			// Mute on, Aux1
+			// Mute on, Mix1
 			...MuteOn(4, 0x00, 0x45).map(ReceiveChannelMessage),
 			ExpectMuteMessage(0x00, 0x45, 0x01),
 		])

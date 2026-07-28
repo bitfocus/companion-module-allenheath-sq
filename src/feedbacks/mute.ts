@@ -68,7 +68,7 @@ export function muteFeedbacks(mixer: Mixer, choices: Choices): FeedbackDefinitio
 	return {
 		[MuteFeedbackId.MuteInputChannel]: muteFeedback('Input', 'inputChannel', choices.inputChannels),
 		[MuteFeedbackId.MuteLR]: muteFeedback('LR', 'lr', [{ label: `LR`, id: 0 }]),
-		[MuteFeedbackId.MuteMix]: muteFeedback('Aux', 'mix', choices.mixes),
+		[MuteFeedbackId.MuteMix]: muteFeedback('Mix', 'mix', choices.mixes),
 		[MuteFeedbackId.MuteGroup]: muteFeedback('Group', 'group', choices.groups),
 		[MuteFeedbackId.MuteMatrix]: muteFeedback('Matrix', 'matrix', choices.matrixes),
 		[MuteFeedbackId.MuteDCA]: muteFeedback('DCA', 'dca', choices.dcas),

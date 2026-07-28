@@ -218,7 +218,7 @@ describe('forEachOutputLevel', () => {
 	test('mix 7', () => {
 		expect(
 			results.findIndex(([{ MSB, LSB }, sinkDesc]) => {
-				return MSB === 0x4f && LSB === 0x07 && sinkDesc === 'Aux 7'
+				return MSB === 0x4f && LSB === 0x07 && sinkDesc === 'Mix 7'
 			}),
 		).greaterThanOrEqual(0)
 	})

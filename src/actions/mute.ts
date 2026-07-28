@@ -167,8 +167,8 @@ export function muteActions(
 		},
 
 		[MuteActionId.MuteMix]: {
-			name: 'Mute Aux',
-			options: [StripOption('Aux', choices.mixes), MuteOption],
+			name: 'Mute Mix',
+			options: [StripOption('Mix', choices.mixes), MuteOption],
 			callback: async ({ options: opt }) => {
 				const options = getMuteOptions(instance, model, opt, 'mix')
 				if (options === null) {
