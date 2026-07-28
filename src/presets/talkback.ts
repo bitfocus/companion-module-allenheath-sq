@@ -1,4 +1,4 @@
-import type { CompanionPresetDefinitions } from '@companion-module/base'
+import type { CompanionPresetDefinition, CompanionPresetDefinitions } from '@companion-module/base'
 import {
 	AssignActionId,
 	AssignSinksOptionId,
@@ -17,8 +17,8 @@ import type { ZeroIndexed } from '../utils/indexed.js'
 export function talkbackPresets(talkbackChannel: ZeroIndexed, model: Model): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
 
-	model.forEach('mix', (mix, mixLabel, mixDesc) => {
-		presets[`preset_talkback_mix${mix}`] = {
+	function talkbackPresetForMix(mix: ZeroIndexed, mixLabel: string, mixDesc: string): CompanionPresetDefinition {
+		return {
 			type: 'button',
 			category: 'Talkback',
 			name: `Talk to ${mixDesc}`,
@@ -94,6 +94,10 @@ export function talkbackPresets(talkbackChannel: ZeroIndexed, model: Model): Com
 			],
 			feedbacks: [],
 		}
+	}
+
+	model.forEach('mix', (mix, mixLabel, mixDesc) => {
+		presets[`preset_talkback_mix${mix}`] = talkbackPresetForMix(mix, mixLabel, mixDesc)
 	})
 
 	return presets
