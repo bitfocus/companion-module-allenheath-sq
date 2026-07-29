@@ -6,6 +6,7 @@ import {
 	AssignStatus,
 	AssignStatusOptionId,
 } from '../actions/assign.js'
+import { FadeDurationOptionId, SignalLevelOptionId } from '../actions/fading.js'
 import { LevelActionId, LevelSetSinkOptionId, LevelSetSourceOptionId } from '../actions/level.js'
 import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/mute.js'
 import { MuteOperation } from '../mixer/mixer.js'
@@ -52,7 +53,8 @@ export function talkbackPresets(talkbackChannel: ZeroIndexed, model: Model): Com
 							options: {
 								[LevelSetSourceOptionId]: talkbackChannel + 1,
 								[LevelSetSinkOptionId]: mix + 1,
-								leveldb: 49,
+								[SignalLevelOptionId]: 49,
+								[FadeDurationOptionId]: 0,
 							},
 						},
 						{
@@ -77,7 +79,8 @@ export function talkbackPresets(talkbackChannel: ZeroIndexed, model: Model): Com
 							options: {
 								[LevelSetSourceOptionId]: talkbackChannel + 1,
 								[LevelSetSinkOptionId]: mix + 1,
-								leveldb: 0,
+								[SignalLevelOptionId]: 0,
+								[FadeDurationOptionId]: 0,
 							},
 						},
 						{

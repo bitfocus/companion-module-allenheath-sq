@@ -3,10 +3,13 @@ import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
 import { repr } from '../utils/pretty.js'
 
+export const SignalLevelOptionId = 'leveldb'
+export const FadeDurationOptionId = 'fade'
+
 export const FadingOption = {
 	type: 'dropdown',
 	label: 'Fading',
-	id: 'fade',
+	id: FadeDurationOptionId,
 	default: 0,
 	choices: [
 		{ label: `Off`, id: 0 },
@@ -26,7 +29,7 @@ export const FadingOption = {
 export const LevelOption = {
 	type: 'dropdown',
 	label: 'Level',
-	id: 'leveldb',
+	id: SignalLevelOptionId,
 	default: 0,
 	choices: ((): DropdownChoice[] => {
 		const levels: DropdownChoice[] = []
@@ -77,14 +80,14 @@ const MsPerSecond = 1000
 export function getFadeType(instance: sqInstance, options: CompanionOptionValues): FadeType | null {
 	// Presets that incidentally invoke this function didn't always specify a
 	// fade time, so treat a missing fade as zero to support them.
-	const fade = options.fade
+	const fade = options[FadeDurationOptionId]
 	let fadeTimeMs = fade === undefined ? 0 : Number(fade) * MsPerSecond
 	if (!(fadeTimeMs >= 0)) {
 		instance.log('warn', `Bad fade time ${fadeTimeMs} milliseconds, treating as zero`)
 		fadeTimeMs = 0
 	}
 
-	const levelOption = options.leveldb
+	const levelOption = options[SignalLevelOptionId]
 	if ((typeof levelOption === 'number' && -90 < levelOption && levelOption <= 10) || levelOption === '-inf') {
 		return {
 			type: 'absolute',
