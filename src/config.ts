@@ -74,11 +74,7 @@ export type SQConfig = {
 	verbose: boolean
 }
 
-/**
- * All mixer secrets.
- *
- * @allowunused
- */
+/** All mixer secrets. */
 export type SQSecrets = undefined
 
 const ipRegExp = new RegExp(Regex.IP.slice(1, -1))
