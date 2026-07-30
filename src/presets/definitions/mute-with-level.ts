@@ -1,13 +1,13 @@
 import type { CompanionButtonPresetDefinition, CompanionPresetDefinitions } from '@companion-module/base'
-import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/schemas/mute.js'
-import { MuteFeedbackId } from '../feedbacks/schemas/mute.js'
-import type { sqInstance } from '../instance.js'
-import type { Model } from '../mixer/model.js'
-import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
-import { LevelNRPNCalculator } from '../mixer/nrpn/source-to-sink.js'
-import { MuteOperation } from '../types.js'
-import { White, Black } from '../utils/colors.js'
-import type { ZeroIndexed } from '../utils/indexed.js'
+import { MuteActionId, StatusOptionId, StripOptionId } from '../../actions/schemas/mute.js'
+import { MuteFeedbackId } from '../../feedbacks/schemas/mute.js'
+import type { sqInstance } from '../../instance.js'
+import type { Model } from '../../mixer/model.js'
+import { type NRPN, splitNRPN } from '../../mixer/nrpn/nrpn.js'
+import { LevelNRPNCalculator } from '../../mixer/nrpn/source-to-sink.js'
+import { MuteOperation } from '../../types.js'
+import { White, Black } from '../../utils/colors.js'
+import type { ZeroIndexed } from '../../utils/indexed.js'
 
 /* MUTE + FADER LEVEL */
 function createMuteInputPresetForChannelInMix(

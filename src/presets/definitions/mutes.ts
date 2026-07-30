@@ -5,11 +5,11 @@ import type {
 	CompanionPresetAction,
 	CompanionPresetDefinitions,
 } from '@companion-module/base'
-import { type MuteActionId, StatusOptionId, StripOptionId } from '../actions/schemas/mute.js'
-import type { MuteFeedbackId } from '../feedbacks/schemas/mute.js'
-import type { Model } from '../mixer/model.js'
-import { MuteOperation } from '../types.js'
-import { White, Black } from '../utils/colors.js'
+import { type MuteActionId, StatusOptionId, StripOptionId } from '../../actions/schemas/mute.js'
+import type { MuteFeedbackId } from '../../feedbacks/schemas/mute.js'
+import type { Model } from '../../mixer/model.js'
+import { MuteOperation } from '../../types.js'
+import { White, Black } from '../../utils/colors.js'
 
 const MutePresetStyleCommon = {
 	size: 'auto',

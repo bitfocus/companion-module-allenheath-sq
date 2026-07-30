@@ -11,7 +11,7 @@ import { getFeedbacks } from './feedbacks/feedbacks.js'
 import type { SQManifest } from './manifest.js'
 import { Mixer } from './mixer/mixer.js'
 import { canUpdateConfigWithoutRestarting, noConnectionConfig, validateConfig } from './config.js'
-import { getPresets } from './presets/presets.js'
+import { getPresetDefinitions } from './presets/definitions.js'
 import {
 	CurrentSceneId,
 	SceneRecalledTriggerId,
@@ -131,7 +131,7 @@ export class sqInstance extends InstanceBase<SQConfig> {
 					// presets, so if the label changes, we must redefine presets
 					// even if we don't have to restart the connection.
 					this.#lastLabel = label
-					this.setPresetDefinitions(getPresets(this, this.mixer.model))
+					this.setPresetDefinitions(getPresetDefinitions(this, this.mixer.model))
 				}
 				return
 			}
@@ -151,7 +151,7 @@ export class sqInstance extends InstanceBase<SQConfig> {
 		this.setFeedbackDefinitions(getFeedbacks(mixer))
 
 		this.#lastLabel = this.label
-		this.setPresetDefinitions(getPresets(this, model))
+		this.setPresetDefinitions(getPresetDefinitions(this, model))
 
 		//this.checkVariables();
 		this.checkFeedbacks()

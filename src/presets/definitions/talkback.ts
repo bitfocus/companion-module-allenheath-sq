@@ -5,14 +5,14 @@ import {
 	AssignSourceOptionId,
 	AssignStatus,
 	AssignStatusOptionId,
-} from '../actions/schemas/assign.js'
-import { FadeDurationOptionId, SignalLevelOptionId } from '../actions/schemas/fading.js'
-import { LevelActionId, LevelSetSinkOptionId, LevelSetSourceOptionId } from '../actions/schemas/level.js'
-import { MuteActionId, StatusOptionId, StripOptionId } from '../actions/schemas/mute.js'
-import type { Model } from '../mixer/model.js'
-import { LR, MuteOperation } from '../types.js'
-import { White, Black } from '../utils/colors.js'
-import type { ZeroIndexed } from '../utils/indexed.js'
+} from '../../actions/schemas/assign.js'
+import { FadeDurationOptionId, SignalLevelOptionId } from '../../actions/schemas/fading.js'
+import { LevelActionId, LevelSetSinkOptionId, LevelSetSourceOptionId } from '../../actions/schemas/level.js'
+import { MuteActionId, StatusOptionId, StripOptionId } from '../../actions/schemas/mute.js'
+import type { Model } from '../../mixer/model.js'
+import { LR, MuteOperation } from '../../types.js'
+import { White, Black } from '../../utils/colors.js'
+import type { ZeroIndexed } from '../../utils/indexed.js'
 
 export function talkbackPresets(talkbackChannel: ZeroIndexed, model: Model): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
