@@ -120,7 +120,7 @@ const customConfig = [
 						{
 							name: '@companion-module/base',
 							importNames: ['combineRgb'],
-							message: 'Please define a named constant in src/utils/colors.ts.',
+							message: 'Define a named constant in src/utils/colors.ts using `0xABCDEF`.',
 						},
 						{
 							name: 'type-testing',
