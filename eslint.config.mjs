@@ -119,6 +119,11 @@ const customConfig = [
 						},
 						{
 							name: '@companion-module/base',
+							importNames: ['CompanionInputFieldNumber'],
+							message: "Use `CompanionInputFieldNumber` from 'src/compat.ts' instead.",
+						},
+						{
+							name: '@companion-module/base',
 							importNames: ['combineRgb'],
 							message: 'Define a named constant in src/utils/colors.ts using `0xABCDEF`.',
 						},

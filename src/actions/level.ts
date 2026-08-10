@@ -1,13 +1,12 @@
 import type { Equal, Expect, IsNever } from 'type-testing'
 import type {
 	CompanionInputFieldDropdown,
-	CompanionInputFieldNumber,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 	DropdownChoice,
 } from '@companion-module/base'
 import { mixOrLROption } from '../choices.js'
-import type { CompanionActionDefinitions } from '../compat.js'
+import type { CompanionActionDefinitions, CompanionInputFieldNumber } from '../compat.js'
 import { faderNumber } from '../fader-number.js'
 import { FadingOption, getFadeType, LevelOption } from './fading.js'
 import type { sqInstance } from '../instance.js'
@@ -244,9 +243,9 @@ export function levelActions(
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 
-	type Source = CompanionInputFieldNumber
+	type Source = CompanionInputFieldNumber<typeof LevelSetSourceOptionId>
 	type MixOrLRSource = CompanionInputFieldDropdown
-	type Sink = CompanionInputFieldNumber
+	type Sink = CompanionInputFieldNumber<typeof LevelSetSinkOptionId>
 	type MixOrLRSink = CompanionInputFieldDropdown
 
 	let InputChannelSource: Source

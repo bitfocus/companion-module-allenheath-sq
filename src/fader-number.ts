@@ -1,4 +1,5 @@
-import type { CompanionInputFieldBase, CompanionInputFieldNumber } from '@companion-module/base'
+import type { CompanionInputFieldBase } from '@companion-module/base'
+import type { CompanionInputFieldNumber } from './compat.js'
 import type { InputOutputType, Model } from './mixer/model.js'
 
 /**
@@ -10,7 +11,7 @@ export function faderNumber<Id extends CompanionInputFieldBase['id']>(
 	id: Id,
 	counts: Model['inputOutputCounts'],
 	type: Exclude<InputOutputType, 'lr'>,
-): CompanionInputFieldNumber {
+): CompanionInputFieldNumber<Id> {
 	return {
 		type: 'number',
 		label,

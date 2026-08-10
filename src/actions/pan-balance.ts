@@ -1,13 +1,12 @@
 import type { Equal, Expect, IsNever } from 'type-testing'
 import type {
 	CompanionInputFieldDropdown,
-	CompanionInputFieldNumber,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 	DropdownChoice,
 } from '@companion-module/base'
 import { mixOrLROption } from '../choices.js'
-import type { CompanionActionDefinitions } from '../compat.js'
+import type { CompanionActionDefinitions, CompanionInputFieldNumber } from '../compat.js'
 import { faderNumber } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import {
@@ -210,12 +209,12 @@ export function panBalanceActions(
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 
-	let InputChannelSource: CompanionInputFieldNumber
-	let GroupSource: CompanionInputFieldNumber
-	let FXReturnSource: CompanionInputFieldNumber
+	let InputChannelSource: CompanionInputFieldNumber<typeof PanBalanceSourceOptionId>
+	let GroupSource: CompanionInputFieldNumber<typeof PanBalanceSourceOptionId>
+	let FXReturnSource: CompanionInputFieldNumber<typeof PanBalanceSourceOptionId>
 	let MixOrLRSource: CompanionInputFieldDropdown
 
-	let MatrixSink: CompanionInputFieldNumber
+	let MatrixSink: CompanionInputFieldNumber<typeof PanBalanceSinkOptionId>
 	let MixOrLRSink: CompanionInputFieldDropdown
 	{
 		const sourceNumber = (label: string, type: 'inputChannel' | 'group' | 'fxReturn') =>

@@ -2,12 +2,11 @@ import type {
 	CompanionInputFieldBase,
 	CompanionInputFieldDropdown,
 	CompanionInputFieldMultiDropdown,
-	CompanionInputFieldNumber,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
 import type { Choices } from '../choices.js'
-import type { CompanionActionDefinitions } from '../compat.js'
+import type { CompanionActionDefinitions, CompanionInputFieldNumber } from '../compat.js'
 import type { sqInstance } from '../instance.js'
 import {
 	convertZeroIndexedLowercaseLRArrayOptionToOneIndexedUppercaseLRArrayOption,
@@ -263,7 +262,7 @@ function sourceOption<Id extends CompanionInputFieldNumber['id']>(
 	id: Id,
 	counts: Model['inputOutputCounts'],
 	type: 'inputChannel' | 'group' | 'mix' | 'fxReturn',
-): CompanionInputFieldNumber {
+): CompanionInputFieldNumber<Id> {
 	return {
 		type: 'number',
 		label,
@@ -344,7 +343,7 @@ export function assignActions(
 		minChoicesForSearch: 0,
 	} satisfies CompanionInputFieldDropdown
 
-	type Source = CompanionInputFieldNumber
+	type Source = CompanionInputFieldNumber<typeof AssignSourceOptionId>
 	type Sinks = CompanionInputFieldMultiDropdown
 
 	let InputChannelSource: Source
