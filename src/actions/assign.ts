@@ -1,12 +1,11 @@
 import type {
 	CompanionInputFieldBase,
-	CompanionInputFieldDropdown,
 	CompanionInputFieldMultiDropdown,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
 import type { Choices } from '../choices.js'
-import type { CompanionActionDefinitions, CompanionInputFieldNumber } from '../compat.js'
+import type { CompanionActionDefinitions, CompanionInputFieldDropdown, CompanionInputFieldNumber } from '../compat.js'
 import type { sqInstance } from '../instance.js'
 import {
 	convertZeroIndexedLowercaseLRArrayOptionToOneIndexedUppercaseLRArrayOption,
@@ -310,7 +309,7 @@ const StatusOption = {
 		{ id: 'inactive', label: 'Inactive' },
 	],
 	default: 'active',
-} as const satisfies CompanionInputFieldDropdown
+} as const satisfies CompanionInputFieldDropdown<typeof AssignStatusOptionId>
 
 /**
  * Generate action definitions for assigning sources to sinks: input channel to
@@ -341,7 +340,7 @@ export function assignActions(
 		default: 1,
 		choices: choices.mixesAndLR,
 		minChoicesForSearch: 0,
-	} satisfies CompanionInputFieldDropdown
+	} satisfies CompanionInputFieldDropdown<typeof AssignSourceOptionId>
 
 	type Source = CompanionInputFieldNumber<typeof AssignSourceOptionId>
 	type Sinks = CompanionInputFieldMultiDropdown

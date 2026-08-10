@@ -1,10 +1,6 @@
 import type { Equal, Expect } from 'type-testing'
-import type {
-	CompanionInputFieldDropdown,
-	CompanionMigrationAction,
-	CompanionOptionValues,
-} from '@companion-module/base'
-import type { CompanionActionDefinitions } from '../compat.js'
+import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionActionDefinitions, CompanionInputFieldDropdown } from '../compat.js'
 import { faderNumber } from '../fader-number.js'
 import type { sqInstance } from '../instance.js'
 import { type Mixer } from '../mixer/mixer.js'
@@ -113,7 +109,7 @@ const MuteOption = {
 		{ label: 'On', id: MuteOperation.On },
 		{ label: 'Off', id: MuteOperation.Off },
 	],
-} satisfies CompanionInputFieldDropdown
+} satisfies CompanionInputFieldDropdown<typeof StatusOptionId>
 
 type MuteOptions = {
 	n: ZeroIndexed

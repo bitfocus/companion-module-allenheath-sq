@@ -1,4 +1,5 @@
-import type { CompanionInputFieldDropdown, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type { CompanionInputFieldDropdown } from '../compat.js'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
 import { FadeDurationOptionId, SignalLevelOptionId } from './schemas/fading.js'
@@ -19,7 +20,7 @@ export const FadingOption = {
 		//{label: `10s`, id: 10}, //added
 	],
 	minChoicesForSearch: 0,
-} as const satisfies CompanionInputFieldDropdown
+} as const satisfies CompanionInputFieldDropdown<typeof FadeDurationOptionId>
 
 /**
  * An option specifying all potential levels of a source in a sink or as output.
@@ -55,7 +56,7 @@ export const LevelOption = {
 		return levels
 	})(),
 	minChoicesForSearch: 0,
-} as const satisfies CompanionInputFieldDropdown
+} as const satisfies CompanionInputFieldDropdown<typeof SignalLevelOptionId>
 
 type FadeType =
 	| {

@@ -1,9 +1,5 @@
-import type {
-	CompanionInputFieldDropdown,
-	CompanionInputFieldTextInput,
-	CompanionOptionValues,
-	DropdownChoice,
-} from '@companion-module/base'
+import type { CompanionInputFieldTextInput, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type { CompanionInputFieldDropdown } from '../compat.js'
 import type { sqInstance } from '../instance.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { PanBalanceLevelOptionId, ShowVarOptionId } from './schemas/panning.js'
@@ -44,7 +40,7 @@ export const PanLevelOption = {
 		return panLevels
 	})(),
 	minChoicesForSearch: 0,
-} as const satisfies CompanionInputFieldDropdown
+} as const satisfies CompanionInputFieldDropdown<typeof PanBalanceLevelOptionId>
 
 /**
  * Compute the pan/balance operation defined in the given options.

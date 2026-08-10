@@ -1,4 +1,5 @@
-import type { CompanionInputFieldBase, CompanionInputFieldDropdown, DropdownChoice } from '@companion-module/base'
+import type { CompanionInputFieldBase, DropdownChoice } from '@companion-module/base'
+import type { CompanionInputFieldDropdown } from './compat.js'
 import type { Model } from './mixer/model.js'
 import { LR } from './types.js'
 
@@ -53,7 +54,7 @@ export function mixOrLROption<Id extends CompanionInputFieldBase['id']>(
 	label: string,
 	id: Id,
 	choices: DropdownChoice[],
-): CompanionInputFieldDropdown {
+): CompanionInputFieldDropdown<Id> {
 	return {
 		type: 'dropdown',
 		label,
