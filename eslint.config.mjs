@@ -119,6 +119,11 @@ const customConfig = [
 						},
 						{
 							name: '@companion-module/base',
+							importNames: ['CompanionInputFieldCheckbox'],
+							message: "Use `CompanionInputFieldCheckbox` from 'src/compat.ts' instead.",
+						},
+						{
+							name: '@companion-module/base',
 							importNames: ['CompanionInputFieldDropdown'],
 							message: "Use `CompanionInputFieldDropdown` from 'src/compat.ts' instead.",
 						},
