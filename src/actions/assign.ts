@@ -1,11 +1,11 @@
-import type {
-	CompanionInputFieldBase,
-	CompanionInputFieldMultiDropdown,
-	CompanionMigrationAction,
-	CompanionOptionValues,
-} from '@companion-module/base'
+import type { CompanionInputFieldBase, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import type { Choices } from '../choices.js'
-import type { CompanionActionDefinitions, CompanionInputFieldDropdown, CompanionInputFieldNumber } from '../compat.js'
+import type {
+	CompanionActionDefinitions,
+	CompanionInputFieldDropdown,
+	CompanionInputFieldMultiDropdown,
+	CompanionInputFieldNumber,
+} from '../compat.js'
 import type { sqInstance } from '../instance.js'
 import {
 	convertZeroIndexedLowercaseLRArrayOptionToOneIndexedUppercaseLRArrayOption,
@@ -276,7 +276,7 @@ function sinksOption(
 	sinkLabel: string,
 	sinkChoices: keyof Choices,
 	choices: Choices,
-): CompanionInputFieldMultiDropdown {
+): CompanionInputFieldMultiDropdown<typeof AssignSinksOptionId> {
 	return {
 		type: 'multidropdown',
 		label: sinkLabel,
@@ -343,7 +343,7 @@ export function assignActions(
 	} satisfies CompanionInputFieldDropdown<typeof AssignSourceOptionId>
 
 	type Source = CompanionInputFieldNumber<typeof AssignSourceOptionId>
-	type Sinks = CompanionInputFieldMultiDropdown
+	type Sinks = CompanionInputFieldMultiDropdown<typeof AssignSinksOptionId>
 
 	let InputChannelSource: Source
 	let GroupSource: Source

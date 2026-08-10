@@ -124,6 +124,11 @@ const customConfig = [
 						},
 						{
 							name: '@companion-module/base',
+							importNames: ['CompanionInputFieldMultiDropdown'],
+							message: "Use `CompanionInputFieldMultiDropdown` from 'src/compat.ts' instead.",
+						},
+						{
+							name: '@companion-module/base',
 							importNames: ['CompanionInputFieldNumber'],
 							message: "Use `CompanionInputFieldNumber` from 'src/compat.ts' instead.",
 						},
