@@ -297,17 +297,6 @@ function sourceOption<Id extends CompanionInputFieldNumber['id']>(
 	}
 }
 
-function sourceMixOrLROption(sourceLabel: string, choices: Choices): CompanionInputFieldDropdown {
-	return {
-		type: 'dropdown',
-		label: sourceLabel,
-		id: AssignSourceOptionId,
-		default: 1,
-		choices: choices.mixesAndLR,
-		minChoicesForSearch: 0,
-	}
-}
-
 function sinksOption(
 	sinkLabel: string,
 	sinkChoices: keyof Choices,
@@ -369,11 +358,41 @@ export function assignActions(
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 
-	const sourceNumber = (label: string, type: 'inputChannel' | 'group' | 'mix' | 'fxReturn') =>
-		sourceOption(label, AssignSourceOptionId, counts, type)
-	const sinkNumbers = (label: string, sinkChoice: Exclude<keyof Choices, 'mixesAndLR'>) =>
-		sinksOption(label, sinkChoice, choices)
-	const mixOrLRSinks = () => sinksOption('Mix', 'mixesAndLR', choices)
+	const MixOrLRSource = {
+		type: 'dropdown',
+		label: 'Mix',
+		id: AssignSourceOptionId,
+		default: 1,
+		choices: choices.mixesAndLR,
+		minChoicesForSearch: 0,
+	} satisfies CompanionInputFieldDropdown
+
+	type Source = CompanionInputFieldNumber
+	type Sinks = CompanionInputFieldMultiDropdown
+
+	let InputChannelSource: Source
+	let GroupSource: Source
+	let FXReturnSource: Source
+
+	let GroupSinks: Sinks
+	let FXSendSinks: Sinks
+	let MixOrLRSinks: Sinks
+	let MatrixSinks: Sinks
+	{
+		const sourceNumber = (label: string, type: 'inputChannel' | 'group' | 'fxReturn') =>
+			sourceOption(label, AssignSourceOptionId, counts, type)
+		const sinkNumbers = (label: string, sinkChoice: 'groups' | 'fxSends' | 'matrixes') =>
+			sinksOption(label, sinkChoice, choices)
+
+		InputChannelSource = sourceNumber('Input Channel', 'inputChannel')
+		GroupSource = sourceNumber('Group', 'group')
+		FXReturnSource = sourceNumber('FX Return', 'fxReturn')
+
+		GroupSinks = sinkNumbers('Group', 'groups')
+		FXSendSinks = sinkNumbers('FX Send', 'fxSends')
+		MixOrLRSinks = sinksOption('Mix', 'mixesAndLR', choices)
+		MatrixSinks = sinkNumbers('Matrix', 'matrixes')
+	}
 
 	const getSource = (options: CompanionOptionValues, type: 'inputChannel' | 'group' | 'fxReturn') =>
 		toSourceOrSink(instance, model, options[AssignSourceOptionId], type)
@@ -385,7 +404,7 @@ export function assignActions(
 	return {
 		[AssignActionId.InputChannelToMix]: {
 			name: 'Assign channel to mix',
-			options: [sourceNumber('Input Channel', 'inputChannel'), mixOrLRSinks(), StatusOption],
+			options: [InputChannelSource, MixOrLRSinks, StatusOption],
 			callback: async ({ options }) => {
 				const inputChannel = getSource(options, 'inputChannel')
 				if (inputChannel === null) {
@@ -399,7 +418,7 @@ export function assignActions(
 
 		[AssignActionId.InputChannelToGroup]: {
 			name: 'Assign channel to group',
-			options: [sourceNumber('Input Channel', 'inputChannel'), sinkNumbers('Group', 'groups'), StatusOption],
+			options: [InputChannelSource, GroupSinks, StatusOption],
 			callback: async ({ options }) => {
 				const inputChannel = getSource(options, 'inputChannel')
 				if (inputChannel === null) {
@@ -413,7 +432,7 @@ export function assignActions(
 
 		[AssignActionId.GroupToMix]: {
 			name: 'Assign group to mix',
-			options: [sourceNumber('Group', 'group'), mixOrLRSinks(), StatusOption],
+			options: [GroupSource, MixOrLRSinks, StatusOption],
 			callback: async ({ options }) => {
 				const group = getSource(options, 'group')
 				if (group === null) {
@@ -427,7 +446,7 @@ export function assignActions(
 
 		[AssignActionId.FXReturnToMix]: {
 			name: 'Assign FX return to mix',
-			options: [sourceNumber('FX Return', 'fxReturn'), mixOrLRSinks(), StatusOption],
+			options: [FXReturnSource, MixOrLRSinks, StatusOption],
 			callback: async ({ options }) => {
 				const fxReturn = getSource(options, 'fxReturn')
 				if (fxReturn === null) {
@@ -441,7 +460,7 @@ export function assignActions(
 
 		[AssignActionId.FXReturnToGroup]: {
 			name: 'Assign FX Return to group',
-			options: [sourceNumber('FX Return', 'fxReturn'), sinkNumbers('Group', 'groups'), StatusOption],
+			options: [FXReturnSource, GroupSinks, StatusOption],
 			callback: async ({ options }) => {
 				const fxReturn = getSource(options, 'fxReturn')
 				if (fxReturn === null) {
@@ -455,7 +474,7 @@ export function assignActions(
 
 		[AssignActionId.InputChannelToFXSend]: {
 			name: 'Assign channel to FX Send',
-			options: [sourceNumber('Input Channel', 'inputChannel'), sinkNumbers('FX Send', 'fxSends'), StatusOption],
+			options: [InputChannelSource, FXSendSinks, StatusOption],
 			callback: async ({ options }) => {
 				const inputChannel = getSource(options, 'inputChannel')
 				if (inputChannel === null) {
@@ -469,7 +488,7 @@ export function assignActions(
 
 		[AssignActionId.GroupToFXSend]: {
 			name: 'Assign group to FX send',
-			options: [sourceNumber('Group', 'group'), sinkNumbers('FX Send', 'fxSends'), StatusOption],
+			options: [GroupSource, FXSendSinks, StatusOption],
 			callback: async ({ options }) => {
 				const group = getSource(options, 'group')
 				if (group === null) {
@@ -483,7 +502,7 @@ export function assignActions(
 
 		[AssignActionId.FXReturnToFXSend]: {
 			name: 'Assign FX return to FX send',
-			options: [sourceNumber('FX return', 'fxReturn'), sinkNumbers('FX Send', 'fxSends'), StatusOption],
+			options: [FXReturnSource, FXSendSinks, StatusOption],
 			callback: async ({ options }) => {
 				const fxReturn = getSource(options, 'fxReturn')
 				if (fxReturn === null) {
@@ -497,7 +516,7 @@ export function assignActions(
 
 		[AssignActionId.MixToMatrix]: {
 			name: 'Assign mix to matrix',
-			options: [sourceMixOrLROption('Mix', choices), sinkNumbers('Matrix', 'matrixes'), StatusOption],
+			options: [MixOrLRSource, MatrixSinks, StatusOption],
 			callback: async ({ options }) => {
 				const mixOrLR = getMixOrLRSource(options)
 				if (mixOrLR === null) {
@@ -516,7 +535,7 @@ export function assignActions(
 
 		[AssignActionId.GroupToMatrix]: {
 			name: 'Assign group to matrix',
-			options: [sourceNumber('Group', 'group'), sinkNumbers('Matrix', 'matrixes'), StatusOption],
+			options: [GroupSource, MatrixSinks, StatusOption],
 			callback: async ({ options }) => {
 				const group = getSource(options, 'group')
 				if (group === null) {
