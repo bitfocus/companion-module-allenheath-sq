@@ -1,6 +1,8 @@
 import type { Equal, Expect, IsNever } from 'type-testing'
 import type {
 	CompanionActionDefinition,
+	CompanionInputFieldDropdown,
+	CompanionInputFieldNumber,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 	DropdownChoice,
@@ -220,11 +222,28 @@ export function panBalanceActions(
 	const model = mixer.model
 	const counts = model.inputOutputCounts
 
-	const sourceNumber = (label: string, type: 'inputChannel' | 'group' | 'fxReturn') =>
-		faderNumber(label, PanBalanceSourceOptionId, counts, type)
-	const sinkNumber = (label: string, type: 'matrix') => faderNumber(label, PanBalanceSinkOptionId, counts, type)
-	const mixNumberOrLRSource = (label: string) => mixOrLROption(label, PanBalanceSourceOptionId, mixesAndLR)
-	const mixNumberOrLRSink = (label: string) => mixOrLROption(label, PanBalanceSinkOptionId, mixesAndLR)
+	let InputChannelSource: CompanionInputFieldNumber
+	let GroupSource: CompanionInputFieldNumber
+	let FXReturnSource: CompanionInputFieldNumber
+	let MixOrLRSource: CompanionInputFieldDropdown
+
+	let MatrixSink: CompanionInputFieldNumber
+	let MixOrLRSink: CompanionInputFieldDropdown
+	{
+		const sourceNumber = (label: string, type: 'inputChannel' | 'group' | 'fxReturn') =>
+			faderNumber(label, PanBalanceSourceOptionId, counts, type)
+		const sinkNumber = (label: string, type: 'matrix') => faderNumber(label, PanBalanceSinkOptionId, counts, type)
+		const mixNumberOrLRSource = (label: string) => mixOrLROption(label, PanBalanceSourceOptionId, mixesAndLR)
+		const mixNumberOrLRSink = (label: string) => mixOrLROption(label, PanBalanceSinkOptionId, mixesAndLR)
+
+		InputChannelSource = sourceNumber('Input channel', 'inputChannel')
+		GroupSource = sourceNumber('Group', 'group')
+		FXReturnSource = sourceNumber('FX return', 'fxReturn')
+		MixOrLRSource = mixNumberOrLRSource('Mix')
+
+		MatrixSink = sinkNumber('Matrix', 'matrix')
+		MixOrLRSink = mixNumberOrLRSink('Mix')
+	}
 
 	const setPanBalance = <Options extends CompanionOptionValues>(options: Options, nrpn: NRPN<'panBalance'>) => {
 		const panBalance = getPanBalanceOperation(instance, options)
@@ -251,7 +270,7 @@ export function panBalanceActions(
 	return {
 		[PanBalanceActionId.InputChannelPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal channel level to mix',
-			options: [sourceNumber('Input channel', 'inputChannel'), mixNumberOrLRSink('Mix'), PanLevelOption, ShowVarOption],
+			options: [InputChannelSource, MixOrLRSink, PanLevelOption, ShowVarOption],
 			learn: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['inputChannel', 'mix-or-lr'], options)
 				if (nrpn === null) {
@@ -279,7 +298,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.GroupPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal group level to mix',
-			options: [sourceNumber('Group', 'group'), mixNumberOrLRSink('Mix'), PanLevelOption, ShowVarOption],
+			options: [GroupSource, MixOrLRSink, PanLevelOption, ShowVarOption],
 			learn: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['inputChannel', 'mix-or-lr'], options)
 				if (nrpn === null) {
@@ -307,7 +326,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.FXReturnPanBalanceInMixOrLR]: {
 			name: 'Pan/Bal FX return level to mix',
-			options: [sourceNumber('FX return', 'fxReturn'), mixNumberOrLRSink('Mix'), PanLevelOption, ShowVarOption],
+			options: [FXReturnSource, MixOrLRSink, PanLevelOption, ShowVarOption],
 			learn: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['fxReturn', 'mix-or-lr'], options)
 				if (nrpn === null) {
@@ -349,7 +368,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.MixOrLRPanBalanceInMatrix]: {
 			name: 'Pan/Bal mix level to matrix',
-			options: [mixNumberOrLRSource('Mix'), sinkNumber('Matrix', 'matrix'), PanLevelOption, ShowVarOption],
+			options: [MixOrLRSource, MatrixSink, PanLevelOption, ShowVarOption],
 			learn: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['mix-or-lr', 'matrix'], options)
 				if (nrpn === null) {
@@ -378,7 +397,7 @@ export function panBalanceActions(
 		},
 		[PanBalanceActionId.GroupPanBalanceInMatrix]: {
 			name: 'Pan/Bal group level to matrix',
-			options: [sourceNumber('Group', 'group'), sinkNumber('Matrix', 'matrix'), PanLevelOption, ShowVarOption],
+			options: [GroupSource, MatrixSink, PanLevelOption, ShowVarOption],
 			learn: ({ options }) => {
 				const nrpn = getPanBalanceNRPN(instance, model, ['fxReturn', 'mix-or-lr'], options)
 				if (nrpn === null) {
