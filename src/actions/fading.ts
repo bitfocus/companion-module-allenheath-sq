@@ -1,7 +1,6 @@
 import type { CompanionInputFieldDropdown, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
-import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { repr } from '../utils/pretty.js'
 
 export const FadingOption = {
@@ -57,99 +56,64 @@ export const LevelOption = {
 	minChoicesForSearch: 0,
 } as const satisfies CompanionInputFieldDropdown
 
-type FadeParameters = {
-	start: Level
-	end: Level
-	fadeTimeMs: number
-}
+type FadeType =
+	| {
+			type: 'absolute'
+			fadeTimeMs: number
+			level: Level
+	  }
+	| {
+			type: 'relative'
+			fadeTimeMs: number
+			dbDelta: number
+	  }
+	| {
+			type: 'last-value'
+			fadeTimeMs: number
+	  }
 
 const MsPerSecond = 1000
 
-/**
- * Get the start, end, and duration of a fade of the given NRPN.
- *
- * @param instance
- *   The instance in use.
- * @param options
- *   Options specified for the action.
- * @param nrpn
- *   The NRPN.
- * @returns
- *   Information about the requested fade.
- */
-export function getFadeParameters(
-	instance: sqInstance,
-	options: CompanionOptionValues,
-	nrpn: NRPN<'level'>,
-): FadeParameters | null {
+export function getFadeType(instance: sqInstance, options: CompanionOptionValues): FadeType | null {
 	// Presets that incidentally invoke this function didn't always specify a
 	// fade time, so treat a missing fade as zero to support them.
 	const fade = options.fade
-	const fadeTimeMs = fade === undefined ? 0 : Number(fade) * MsPerSecond
+	let fadeTimeMs = fade === undefined ? 0 : Number(fade) * MsPerSecond
 	if (!(fadeTimeMs >= 0)) {
-		instance.log('error', `Bad fade time ${fadeTimeMs} milliseconds, aborting`)
-		return null
+		instance.log('warn', `Bad fade time ${fadeTimeMs} milliseconds, treating as zero`)
+		fadeTimeMs = 0
 	}
 
-	// XXX It should be possible to eliminate the fallibility and range/type
-	//     errors by not storing the previous level in a barely-typed
-	//     variable.
-	let start: Level
-	{
-		const { MSB, LSB } = splitNRPN(nrpn)
-		const levelValue = instance.getVariableValue(`level_${MSB}.${LSB}`)
-		switch (typeof levelValue) {
-			case 'string':
-				if (levelValue !== '-inf') {
-					instance.log('error', `Bad start level: ${levelValue}`)
-					return null
-				}
-				start = '-inf'
-				break
-			case 'number':
-				if (!(-90 < levelValue && levelValue <= 10)) {
-					instance.log('error', `Bad start level: ${levelValue}`)
-					return null
-				}
-				start = levelValue
-				break
-			default:
-				instance.log('error', `Bad start level`)
-				return null
+	const levelOption = options.leveldb
+	if ((typeof levelOption === 'number' && -90 < levelOption && levelOption <= 10) || levelOption === '-inf') {
+		return {
+			type: 'absolute',
+			fadeTimeMs,
+			level: levelOption,
 		}
 	}
 
-	let end: Level
-	const levelOption = options.leveldb
-	if (typeof levelOption === 'number' && -90 < levelOption && levelOption <= 10) {
-		end = levelOption
-	} else if (levelOption === '-inf') {
-		end = '-inf'
-	} else if (levelOption === 1000) {
-		end = start
-	} else if (typeof levelOption === 'string' && levelOption.startsWith('step')) {
+	if (levelOption === 1000) {
+		return {
+			type: 'last-value',
+			fadeTimeMs,
+		}
+	}
+
+	if (typeof levelOption === 'string' && levelOption.startsWith('step')) {
 		const stepAmount = Number(levelOption.slice(4))
 		if (Number.isNaN(stepAmount)) {
 			instance.log('error', `Unexpected step amount: ${repr(levelOption)}`)
 			return null
 		}
 
-		const endLevel = (start === '-inf' ? -90 : start) + stepAmount
-		if (endLevel <= -90) {
-			end = '-inf'
-		} else if (10 <= endLevel) {
-			end = 10
-		} else {
-			end = endLevel
+		return {
+			type: 'relative',
+			fadeTimeMs,
+			dbDelta: stepAmount,
 		}
-	} else {
-		instance.log('error', `Bad level request: ${repr(levelOption)}`)
-		return null
 	}
 
-	return {
-		start,
-		end,
-		fadeTimeMs,
-	}
+	instance.log('error', `Bad level request: ${repr(levelOption)}`)
+	return null
 }

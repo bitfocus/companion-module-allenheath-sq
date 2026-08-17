@@ -1,7 +1,8 @@
+import type { Expect, IsNever } from 'type-testing'
 import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import type { Choices } from '../../choices.js'
 import { faderOption, OutputFaderOptionId } from './common.js'
-import { FadingOption, getFadeParameters, LevelOption } from '../fading.js'
+import { FadingOption, getFadeType, LevelOption } from '../fading.js'
 import type { sqInstance } from '../../instance.js'
 import type { Mixer } from '../../mixer/mixer.js'
 import type { Model } from '../../mixer/model.js'
@@ -10,7 +11,6 @@ import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputLevelNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
-import type { ZeroIndexed } from '../../utils/indexed.js'
 
 /**
  * Action IDs for all actions affecting the level of sinks when used as direct
@@ -141,24 +141,18 @@ export function tryConvertOldLevelToOutputActionToSinkSpecific(action: Companion
 	return true
 }
 
-type FadeLevelInfo = {
-	sink: ZeroIndexed
-	nrpn: NRPN<'level'>
-}
-
-function getLevelType(
+function getOutputLevelNRPN(
 	instance: sqInstance,
 	model: Model,
 	options: CompanionOptionValues,
 	sinkType: Exclude<SinkAsOutputForNRPN<'level'>, 'lr'>,
-): FadeLevelInfo | null {
+): NRPN<'level'> | null {
 	const sink = toSourceOrSink(instance, model, options[OutputFaderOptionId], sinkType)
 	if (sink === null) {
 		return null
 	}
 
-	const nrpn = OutputLevelNRPNCalculator.get(model, sinkType).calculate(sink)
-	return { sink, nrpn }
+	return OutputLevelNRPNCalculator.get(model, sinkType).calculate(sink)
 }
 
 /**
@@ -181,6 +175,35 @@ export function outputLevelActions(
 ): Record<OutputLevelActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
+	const fadeAction = <Options extends CompanionOptionValues>(nrpn: NRPN<'level'>, options: Options) => {
+		const fadeType = getFadeType(instance, options)
+		if (fadeType === null) {
+			return
+		}
+
+		switch (fadeType.type) {
+			case 'absolute':
+				mixer.absoluteFade(nrpn, fadeType.fadeTimeMs, fadeType.level)
+				return
+			case 'relative':
+				mixer.relativeFade(nrpn, fadeType.fadeTimeMs, fadeType.dbDelta)
+				return
+			case 'last-value':
+				// XXX It's not clear if this ever even worked, and also it's
+				//     wildly unclear what "last value" even means/meant, in the
+				//     presence of fades of nonzero duration (not to mention
+				//     stuff like manually adjusting the fader on the mixer
+				//     surface generating a series of level messages).  Just
+				//     don't do anything in this case for now.
+				return
+			default: {
+				type assert_FadeTypeIsNever = Expect<IsNever<typeof fadeType>>
+				instance.log('warn', `Invalid fade type ${(fadeType as any).type}, ignoring`)
+				return
+			}
+		}
+	}
+
 	return {
 		[OutputLevelActionId.LRLevelOutput]: {
 			name: 'LR fader level to output',
@@ -191,13 +214,7 @@ export function outputLevelActions(
 			],
 			callback: async ({ options }) => {
 				const nrpn = OutputLevelNRPNCalculator.get(model, 'lr').calculate(LRStrip)
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeLROutputLevel(start, end, fadeTimeMs)
+				fadeAction(nrpn, options)
 			},
 		},
 
@@ -205,19 +222,11 @@ export function outputLevelActions(
 			name: 'Mix fader level to output',
 			options: [faderOption('mixes', choices), LevelOption, FadingOption],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, 'mix')
-				if (levelType === null) {
+				const nrpn = getOutputLevelNRPN(instance, model, options, 'mix')
+				if (nrpn === null) {
 					return
 				}
-				const { sink: mix, nrpn } = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeMixOutputLevel(mix, start, end, fadeTimeMs)
+				fadeAction(nrpn, options)
 			},
 		},
 
@@ -225,19 +234,11 @@ export function outputLevelActions(
 			name: 'FX Send fader level to output',
 			options: [faderOption('fxSends', choices), LevelOption, FadingOption],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, 'fxSend')
-				if (levelType === null) {
+				const nrpn = getOutputLevelNRPN(instance, model, options, 'fxSend')
+				if (nrpn === null) {
 					return
 				}
-				const { sink: fxSend, nrpn } = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeFXSendOutputLevel(fxSend, start, end, fadeTimeMs)
+				fadeAction(nrpn, options)
 			},
 		},
 
@@ -245,19 +246,11 @@ export function outputLevelActions(
 			name: 'Matrix fader level to output',
 			options: [faderOption('matrixes', choices), LevelOption, FadingOption],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, 'matrix')
-				if (levelType === null) {
+				const nrpn = getOutputLevelNRPN(instance, model, options, 'matrix')
+				if (nrpn === null) {
 					return
 				}
-				const { sink: matrix, nrpn } = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeMatrixOutputLevel(matrix, start, end, fadeTimeMs)
+				fadeAction(nrpn, options)
 			},
 		},
 
@@ -265,19 +258,11 @@ export function outputLevelActions(
 			name: 'DCA fader level to output',
 			options: [faderOption('dcas', choices), LevelOption, FadingOption],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, 'dca')
-				if (levelType === null) {
+				const nrpn = getOutputLevelNRPN(instance, model, options, 'dca')
+				if (nrpn === null) {
 					return
 				}
-				const { sink: dca, nrpn } = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeDCAOutputLevel(dca, start, end, fadeTimeMs)
+				fadeAction(nrpn, options)
 			},
 		},
 	}

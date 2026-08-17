@@ -1,4 +1,4 @@
-import type { Equal, Expect } from 'type-testing'
+import type { Equal, Expect, IsNever } from 'type-testing'
 import type {
 	CompanionActionDefinition,
 	CompanionInputFieldDropdown,
@@ -6,7 +6,7 @@ import type {
 	CompanionOptionValues,
 } from '@companion-module/base'
 import type { Choices } from '../choices.js'
-import { FadingOption, getFadeParameters, LevelOption } from './fading.js'
+import { FadingOption, getFadeType, LevelOption } from './fading.js'
 import type { sqInstance } from '../instance.js'
 import { tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
@@ -91,57 +91,43 @@ export function tryUpgradeLevelMixOrLREncoding(action: CompanionMigrationAction)
 	}
 }
 
-type LevelType = {
-	source: ZeroIndexed
-	sink: ZeroIndexed
-	sourceSinkType: SourceSinkForNRPN<'level'>
-	nrpn: NRPN<'level'>
-}
+type LevelSourceToSink = SourceSinkForNRPN<'level'>
+type LevelSourceToMixOrLR = [SourceForSourceInMixAndLRForNRPN<'level'>, 'mix-or-lr']
+type LevelMixOrLRToSink = ['mix-or-lr', SinkForMixAndLRInSinkForNRPN<'level'>]
 
-type SourceToMixOrLR = [SourceForSourceInMixAndLRForNRPN<'level'>, 'mix-or-lr']
-type MixOrLRToSink = ['mix-or-lr', SinkForMixAndLRInSinkForNRPN<'level'>]
+type LevelSourceSinkOptions =
+	| [CompanionOptionValues, LevelSourceToSink]
+	| [CompanionOptionValues, ...LevelSourceToMixOrLR]
+	| [CompanionOptionValues, ...LevelMixOrLRToSink]
 
-function getLevelType(
+function getLevelNRPN(
 	instance: sqInstance,
 	model: Model,
-	options: CompanionOptionValues,
-	srcSnkType: SourceSinkForNRPN<'level'>,
-): LevelType | null
-function getLevelType(
-	instance: sqInstance,
-	model: Model,
-	options: CompanionOptionValues,
-	srcSnkType: SourceToMixOrLR,
-): LevelType | null
-function getLevelType(
-	instance: sqInstance,
-	model: Model,
-	options: CompanionOptionValues,
-	srcSnkType: MixOrLRToSink,
-): LevelType | null
-function getLevelType(
-	instance: sqInstance,
-	model: Model,
-	options: CompanionOptionValues,
-	srcSnkType: SourceSinkForNRPN<'level'> | SourceToMixOrLR | MixOrLRToSink,
-): LevelType | null {
+	sourceSinkOptions: LevelSourceSinkOptions,
+): NRPN<'level'> | null {
 	let sourceSinkType: SourceSinkForNRPN<'level'>
 	let source, sink
-	if (srcSnkType[0] === 'mix-or-lr') {
+	if (sourceSinkOptions[1] === 'mix-or-lr') {
+		const options = sourceSinkOptions[0]
+		const sinkType = sourceSinkOptions[2]
+
 		const src = toMixOrLR(instance, model, options[LevelSetSourceOptionId])
 		if (src === null) {
 			return null
 		}
 
-		sink = toSourceOrSink(instance, model, options[LevelSetSinkOptionId], srcSnkType[1])
+		sink = toSourceOrSink(instance, model, options[LevelSetSinkOptionId], sinkType)
 		if (sink === null) {
 			return null
 		}
 
-		sourceSinkType = [src === LR ? 'lr' : 'mix', srcSnkType[1]]
+		sourceSinkType = [src === LR ? 'lr' : 'mix', sinkType]
 		source = src === LR ? LRStrip : src
-	} else if (srcSnkType[1] === 'mix-or-lr') {
-		source = toSourceOrSink(instance, model, options[LevelSetSourceOptionId], srcSnkType[0])
+	} else if (sourceSinkOptions[2] === 'mix-or-lr') {
+		const options = sourceSinkOptions[0]
+		const sourceType = sourceSinkOptions[1]
+
+		source = toSourceOrSink(instance, model, options[LevelSetSourceOptionId], sourceType)
 		if (source === null) {
 			return null
 		}
@@ -151,20 +137,21 @@ function getLevelType(
 			return null
 		}
 
-		sourceSinkType = [srcSnkType[0], snk === LR ? 'lr' : 'mix']
+		sourceSinkType = [sourceType, snk === LR ? 'lr' : 'mix']
 		sink = snk === LR ? LRStrip : snk
 	} else {
-		source = toSourceOrSink(instance, model, options[LevelSetSourceOptionId], srcSnkType[0])
+		const options = sourceSinkOptions[0]
+		sourceSinkType = sourceSinkOptions[1]
+
+		source = toSourceOrSink(instance, model, options[LevelSetSourceOptionId], sourceSinkType[0])
 		if (source === null) {
 			return null
 		}
 
-		sink = toSourceOrSink(instance, model, options[LevelSetSinkOptionId], srcSnkType[1])
+		sink = toSourceOrSink(instance, model, options[LevelSetSinkOptionId], sourceSinkType[1])
 		if (sink === null) {
 			return null
 		}
-
-		sourceSinkType = srcSnkType
 	}
 
 	const calc = LevelNRPNCalculator.get(model, sourceSinkType)
@@ -172,12 +159,7 @@ function getLevelType(
 	type assert_SourceIsZeroIndexed = Expect<Equal<typeof source, ZeroIndexed>>
 	type assert_SinkIsZeroIndexed = Expect<Equal<typeof sink, ZeroIndexed>>
 
-	return {
-		source,
-		sink,
-		sourceSinkType,
-		nrpn: calc.calculate(source, sink),
-	}
+	return calc.calculate(source, sink)
 }
 
 function sourceOption(
@@ -252,6 +234,40 @@ export function levelActions(
 ): Record<LevelActionId, CompanionActionDefinition> {
 	const model = mixer.model
 
+	const fadeAction = (...sourceSinkOptions: LevelSourceSinkOptions) => {
+		const nrpn = getLevelNRPN(instance, model, sourceSinkOptions)
+		if (nrpn === null) {
+			return
+		}
+
+		const fadeType = getFadeType(instance, sourceSinkOptions[0])
+		if (fadeType === null) {
+			return
+		}
+
+		switch (fadeType.type) {
+			case 'absolute':
+				mixer.absoluteFade(nrpn, fadeType.fadeTimeMs, fadeType.level)
+				return
+			case 'relative':
+				mixer.relativeFade(nrpn, fadeType.fadeTimeMs, fadeType.dbDelta)
+				return
+			case 'last-value':
+				// XXX It's not clear if this ever even worked, and also it's
+				//     wildly unclear what "last value" even means/meant, in the
+				//     presence of fades of nonzero duration (not to mention
+				//     stuff like manually adjusting the fader on the mixer
+				//     surface generating a series of level messages).  Just
+				//     don't do anything in this case for now.
+				return
+			default: {
+				type assert_FadeTypeIsNever = Expect<IsNever<typeof fadeType>>
+				instance.log('warn', `Invalid fade type ${(fadeType as any).type}, ignoring`)
+				return
+			}
+		}
+	}
+
 	return {
 		[LevelActionId.InputChannelLevelInMixOrLR]: {
 			name: 'Fader channel level to mix',
@@ -262,56 +278,14 @@ export function levelActions(
 				FadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['inputChannel', 'mix-or-lr'])
-				if (levelType === null) {
-					return
-				}
-				const {
-					source: inputChannel,
-					sink: mix,
-					sourceSinkType: { 1: sinkType },
-					nrpn,
-				} = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				if (sinkType === 'lr') {
-					mixer.fadeInputChannelLevelInLR(inputChannel, start, end, fadeTimeMs)
-				} else {
-					mixer.fadeInputChannelLevelInMix(inputChannel, mix, start, end, fadeTimeMs)
-				}
+				fadeAction(options, 'inputChannel', 'mix-or-lr')
 			},
 		},
 		[LevelActionId.GroupLevelInMixOrLR]: {
 			name: 'Fader group level to mix',
 			options: [sourceOption('Group', 'groups', choices), mixOrLRSink('Mix', choices), LevelOption, FadingOption],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['group', 'mix-or-lr'])
-				if (levelType === null) {
-					return
-				}
-				const {
-					source: group,
-					sink: mix,
-					sourceSinkType: { 1: sinkType },
-					nrpn,
-				} = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				if (sinkType === 'lr') {
-					mixer.fadeGroupLevelInLR(group, start, end, fadeTimeMs)
-				} else {
-					mixer.fadeGroupLevelInMix(group, mix, start, end, fadeTimeMs)
-				}
+				fadeAction(options, 'group', 'mix-or-lr')
 			},
 		},
 		[LevelActionId.FXReturnLevelInMixOrLR]: {
@@ -323,28 +297,7 @@ export function levelActions(
 				FadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['fxReturn', 'mix-or-lr'])
-				if (levelType === null) {
-					return
-				}
-				const {
-					source: fxReturn,
-					sink: mix,
-					sourceSinkType: { 1: sinkType },
-					nrpn,
-				} = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				if (sinkType === 'lr') {
-					mixer.fadeFXReturnLevelInLR(fxReturn, start, end, fadeTimeMs)
-				} else {
-					mixer.fadeFXReturnLevelInMix(fxReturn, mix, start, end, fadeTimeMs)
-				}
+				fadeAction(options, 'fxReturn', 'mix-or-lr')
 			},
 		},
 		[LevelActionId.FXReturnLevelInGroup]: {
@@ -370,19 +323,7 @@ export function levelActions(
 				FadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['inputChannel', 'fxSend'])
-				if (levelType === null) {
-					return
-				}
-				const { source: inputChannel, sink: fxSend, nrpn } = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeInputChannelLevelInFXSend(inputChannel, fxSend, start, end, fadeTimeMs)
+				fadeAction(options, ['inputChannel', 'fxSend'])
 			},
 		},
 		[LevelActionId.GroupLevelInFXSend]: {
@@ -394,19 +335,7 @@ export function levelActions(
 				FadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['group', 'fxSend'])
-				if (levelType === null) {
-					return
-				}
-				const { source: group, sink: fxSend, nrpn } = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeGroupLevelInFXSend(group, fxSend, start, end, fadeTimeMs)
+				fadeAction(options, ['group', 'fxSend'])
 			},
 		},
 		[LevelActionId.FXReturnLevelInFXSend]: {
@@ -418,47 +347,14 @@ export function levelActions(
 				FadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['fxReturn', 'fxSend'])
-				if (levelType === null) {
-					return
-				}
-				const { source: fxReturn, sink: fxSend, nrpn } = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeFXReturnLevelInFXSend(fxReturn, fxSend, start, end, fadeTimeMs)
+				fadeAction(options, ['fxReturn', 'fxSend'])
 			},
 		},
 		[LevelActionId.MixOrLRLevelInMatrix]: {
 			name: 'Fader mix level to matrix',
 			options: [mixOrLRSource('Mix', choices), sinkOption('Matrix', 'matrixes', choices), LevelOption, FadingOption],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['mix-or-lr', 'matrix'])
-				if (levelType === null) {
-					return
-				}
-				const {
-					source: mix,
-					sourceSinkType: [sourceType],
-					sink: matrix,
-					nrpn,
-				} = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				if (sourceType === 'lr') {
-					mixer.fadeLRLevelInMatrix(matrix, start, end, fadeTimeMs)
-				} else {
-					mixer.fadeMixLevelInMatrix(mix, matrix, start, end, fadeTimeMs)
-				}
+				fadeAction(options, 'mix-or-lr', 'matrix')
 			},
 		},
 		[LevelActionId.GroupLevelInMatrix]: {
@@ -470,19 +366,7 @@ export function levelActions(
 				FadingOption,
 			],
 			callback: async ({ options }) => {
-				const levelType = getLevelType(instance, model, options, ['group', 'matrix'])
-				if (levelType === null) {
-					return
-				}
-				const { source: group, sink: matrix, nrpn } = levelType
-
-				const fade = getFadeParameters(instance, options, nrpn)
-				if (fade === null) {
-					return
-				}
-				const { start, end, fadeTimeMs } = fade
-
-				mixer.fadeGroupLevelInMatrix(group, matrix, start, end, fadeTimeMs)
+				fadeAction(options, ['group', 'matrix'])
 			},
 		},
 	}

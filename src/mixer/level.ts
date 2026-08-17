@@ -132,3 +132,23 @@ export function nrpnDataFromLevel(level: Level, faderLaw: FaderLaw): [number, nu
 		}
 	}
 }
+
+/** Adjust `level` by `dbDelta` dBs, clamping to -∞ and +10dB. */
+export function adjustLevel(level: Level, dbDelta: number): Level {
+	return numericToLevel(levelToNumeric(level) + dbDelta)
+}
+
+/**
+ * Convert a `Level` to a numeric value in range `[-90, 10]`, where -90 encodes
+ * -∞dB.
+ */
+export function levelToNumeric(level: Level): number {
+	return level === '-inf' ? -90 : level
+}
+
+/**
+ * Convert a number in range `[-90, 10]` to a level, where `-90` encodes -∞dB.
+ */
+export function numericToLevel(numeric: number): Level {
+	return numeric <= -90 ? '-inf' : numeric > 10 ? 10 : numeric
+}

@@ -14,7 +14,14 @@ import {
 } from '../config.js'
 import { typeToMuteFeedback } from '../feedbacks/mute.js'
 import type { sqInstance } from '../instance.js'
-import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
+import {
+	adjustLevel,
+	type Level,
+	levelFromNRPNData,
+	levelToNumeric,
+	nrpnDataFromLevel,
+	numericToLevel,
+} from './level.js'
 import type { MixOrLR } from './lr.js'
 import { ChannelParser } from '../midi/parse/channel-parser.js'
 import { parseMidi } from '../midi/parse/parse-midi.js'
@@ -22,17 +29,11 @@ import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
 import { type InputOutputType, Model } from './model.js'
 import { calculateMuteNRPN, forEachMute } from './nrpn/mute.js'
 import { type NRPN, type NRPNType, prettyNRPN, splitNRPN } from './nrpn/nrpn.js'
-import {
-	forEachOutputLevel,
-	OutputBalanceNRPNCalculator,
-	OutputLevelNRPNCalculator,
-	type SinkAsOutputForNRPN,
-} from './nrpn/output.js'
+import { forEachOutputLevel, OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from './nrpn/output.js'
 import {
 	AssignNRPNCalculator,
 	BalanceNRPNCalculator,
 	forEachSourceSinkNRPN,
-	LevelNRPNCalculator,
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
 	type SourceSinkNRPNType,
@@ -114,7 +115,11 @@ const FadeStepDurationMs = 50
 
 // If two fade steps would be performed closer than this duration to each other,
 // eliminate the first step and do it all in the second step.
-const FadeStepCoalesceMs = 5
+const FadeStepCoalesceMs = 10
+
+// If the final fade step should happen closer than this duration to now, do it
+// now rather than try to be imperceptibly precise.
+const FadeStepExpediteMs = 5
 
 /**
  * The type of the array of bytes making up a MIDI NRPN data message, consisting
@@ -852,44 +857,58 @@ export class Mixer {
 	}
 
 	/**
-	 * Perform a fade of the level identified by MSB/LSB from level `start` to
-	 * level `end` over `fadeTimeMs` milliseconds.  (If `fadeTimeMs === 0`, this
-	 * decays into an immediate set to the `end` level.)
+	 * Incrementally fade the given NRPN to `endLevel` , completing the fade at
+	 * time `endTimeMs`.
 	 *
-	 * @nrpn nrpn
-	 *   The level NRPN to fade.
-	 * @param start
-	 *   The presumed level before fading starts.
-	 * @param end
-	 *   The final level upon completion of fading.
-	 * @param fadeTimeMs
-	 *   The length of time, in milliseconds, that the fading should take.
+	 * @param nrpn
+	 *   The NRPN to fade.
+	 * @param startLevel
+	 *   The presumed starting level of the NRPN, i.e. fading will proceed from
+	 *   `startLevel` initially to the ending level.
+	 * @param endTimeMs
+	 *   The wall-clock time at which the fade should end, as computed by
+	 *   `Date.now()`.
+	 * @param endLevel
+	 *   The ending level when the fading operation completes, or a function to
+	 *   compute the ending level from the starting level.
 	 */
-	#fadeToLevel(nrpn: NRPN<'level'>, start: Level, end: Level, fadeTimeMs: number): void {
-		if (start === end) {
-			// *In principle* this function is only called to fade from the
-			// actual current level to the desired end level.  But at least the
-			// SQ-5 doesn't send updates for parameters changed by recalling a
-			// scene, which could result in the end level *never* being
-			// established in some edge cases.  Make this case an immediate set
-			// to eliminate them.
-			fadeTimeMs = 0
-		}
-
-		if (fadeTimeMs < 0) {
-			this.#instance.log('warn', `Treating fade=${fadeTimeMs} as zero`)
-			fadeTimeMs = 0
-		}
-
+	#performFade(
+		nrpn: NRPN<'level'>,
+		startLevel: Level,
+		endTimeMs: number,
+		endLevel: Level | ((start: Level) => Level),
+	): void {
 		// The SQ doesn't expose functionality to smoothly fade to a level over
-		// a specified time, so we have to fake it with discrete level-sets.
+		// a specified time, so we fake it with discrete level-sets.
 		//
-		// We perform the discrete level-sets as an immediate set and a set at
-		// end of the fade, with incremental sets at regular intervals in
-		// between.  But if two sets would occur so close to each other as to be
-		// effectively impossible to hear (generating TCP traffic to little
-		// effect), we only do the second set.
+		// To the extent possible, we perform an immediate set, a final set at
+		// the specified end of the fade, and intermediate sets at regular
+		// intervals in between.  This isn't always completely possible because:
 		//
+		//   1. The current level may not already be cached, requiring a small
+		//      initial delay to (eventually: we don't yet) query it.
+		//   2. There may be clock drift across timer intervals.
+		//   3. Set timing might inadvertently schedule two sets so close
+		//      together that it becomes sensible (because the difference is
+		//      effectively inaudible, and to minimize TCP traffic) to coalesce
+		//      two sets into one.
+		//
+		// We perform the first level-set as immediately as possible so the fade
+		// starts when the user requests it.  Then we perform level-sets at
+		// regular intervals until we're too close to the fade end time and set
+		// the final level.  But if two sets would occur so close to each other
+		// that the difference would be nearly inaudible (generating TCP traffic
+		// to little effect), we coalesce them into one.
+
+		let currentNumeric = levelToNumeric(startLevel)
+		const end = typeof endLevel === 'number' ? endLevel : typeof endLevel === 'string' ? endLevel : endLevel(startLevel)
+		const endNumeric = levelToNumeric(end)
+
+		const done = () => {
+			this.#setLevel(nrpn, end)
+			this.#instance.log('debug', `Fade end: NRPN=${prettyNRPN(nrpn)}, t=${Date.now()}`)
+		}
+
 		// To best approximate the smooth line of an ideal fade, *ideally* at
 		// each step we'd set the level not of the ideal line at that point, but
 		// of the line at time halfway between the current time delta and the
@@ -908,211 +927,116 @@ export class Mixer {
 		// has always done: linearly interpolate in dB space.  Fades will spend
 		// too much time in lower dB and too little in higher dB, but it's *a*
 		// choice that suffices in the absence of better information.
-
-		if (fadeTimeMs <= FadeStepCoalesceMs) {
-			if (fadeTimeMs === 0) {
-				this.#setLevel(nrpn, end)
-			} else {
-				// If the entire duration is short enough to coalesce, only
-				// do the end set.
-				setTimeout(() => {
-					this.#setLevel(nrpn, end)
-				}, fadeTimeMs)
-			}
-			return
-		}
-
-		const numericStart = start === '-inf' ? -90 : start
-		const totalLevelChange = (end === '-inf' ? -90 : end) - numericStart
-
-		let elapsedMs = 0
-
 		const step = () => {
-			// Be defensive and use >=.  This is floating point math, after all.
-			if (elapsedMs >= fadeTimeMs) {
-				this.#setLevel(nrpn, end)
+			const remainingLevelChange = endNumeric - currentNumeric
+			const remainingMs = endTimeMs - Date.now()
+
+			// If this set is either the final set or should be coalesced into
+			// it...
+			if (remainingMs <= FadeStepCoalesceMs) {
+				// If we're actually done, or so close to done that we're just
+				// going to say we're done, perform the end set.  (Note that the
+				// remaining time can be negative when the final timeout fires
+				// late or if it takes longer to query the starting level than
+				// the actual fade duration.)
+				if (remainingMs <= FadeStepExpediteMs) {
+					done()
+					return
+				}
+
+				// Otherwise skip this set and do only the end level-set.
+				setTimeout(done, remainingMs)
 				return
 			}
 
-			// Determine when the next step happens.  (Step coalescing
-			// guarantees `remainingMs > FadeStepCoalesceMs` here.)
-			const nextStepDeltaMs =
-				elapsedMs + FadeStepDurationMs + FadeStepCoalesceMs > fadeTimeMs ? fadeTimeMs - elapsedMs : FadeStepDurationMs
+			// Determine when the next step happens.
+			const nextStepDeltaMs = FadeStepDurationMs + FadeStepCoalesceMs > remainingMs ? remainingMs : FadeStepDurationMs
 
 			// Compute the midpoint time between steps, then the level at that
 			// midpoint time on a line in dB space.  (As explained above,
 			// equal-dB steps aren't ideal, but they get the job done.)  Then
 			// jump to that level.
-			const numericLevel =
-				numericStart + Math.floor(totalLevelChange * ((elapsedMs + nextStepDeltaMs / 2) / fadeTimeMs))
-			const level: Level = numericLevel <= -90 ? '-inf' : 10 <= numericLevel ? 10 : numericLevel
-			this.#setLevel(nrpn, level)
+			currentNumeric += Math.floor(remainingLevelChange * (nextStepDeltaMs / 2 / remainingMs))
+			this.#setLevel(nrpn, numericToLevel(currentNumeric))
 
 			// Wait and take the next step.
-			setTimeout(() => {
-				elapsedMs += nextStepDeltaMs
-				step()
-			}, nextStepDeltaMs)
+			setTimeout(step, nextStepDeltaMs)
 		}
 
 		step()
 	}
 
 	/**
-	 * Fade the level of the given source in the given sink from `start` to
-	 * `end` over `fadeTimeMs` milliseconds.  (If the current level is not
-	 * `start`, the fade will begin with an immediate jump to a level
-	 * approximately `start`, then fade to `end` as instructed.)
+	 * Perform a fade of the level identified by `nrpn` to `end` over
+	 * `fadeTimeMs` milliseconds.  (If `fadeTimeMs === 0`, this decays into an
+	 * immediate set to the `end` level.)
 	 *
-	 * For this method's purposes, LR is not a mix, rather its own source/sink
-	 * type.  To specify LR as source or sink, specify `0, 'lr'` as the relevant
-	 * argument pair.
-	 *
-	 * @param source
-	 *   The number of the source within its type, e.g. `0` for input channel 1.
-	 * @param sourceType
-	 *   The type that `source` is, e.g. `'inputChannel'` for input channel 1.
-	 * @param sink
-	 *   The number of the sink within its type, e.g. `2` for group 3.
-	 * @param sinkType
-	 *   The type that `sink` is, e.g. `'group'` for group 3.
-	 * @param levelType
-	 *   The particular level type being faded.
-	 * @param start
-	 *   The presumed level at start of the fade.  (This *should* be equal to
-	 *   the current level; if it isn't, the effect will be to immediately jump
-	 *   to a level near `start` and then fade from that to `end` over
-	 *   `fadeTimeMs`.)
-	 * @param end
-	 *   The desired level at end of the fade.
+	 * @nrpn nrpn
+	 *   The level NRPN to fade.
+	 * @param endLevel
+	 *   The final level upon completion of fading.
 	 * @param fadeTimeMs
-	 *   The duration of the fade in milliseconds.  (The fade decays into a
-	 *   direct jump to `end` if `fadeTimeMs === 0`.)
+	 *   The length of time, in milliseconds, that the fading should take.
 	 */
-	#fadeSourceLevelInSink(
-		source: ZeroIndexed,
-		sink: ZeroIndexed,
-		sourceSink: SourceSinkForNRPN<'level'>,
-		start: Level,
-		end: Level,
-		fadeTimeMs: number,
-	): void {
-		const nrpn = LevelNRPNCalculator.get(this.model, sourceSink).calculate(source, sink)
-		this.#fadeToLevel(nrpn, start, end, fadeTimeMs)
+	#fadeToLevel(nrpn: NRPN<'level'>, fadeTimeMs: number, endLevel: Level | ((start: Level) => Level)): void {
+		if (fadeTimeMs < 0) {
+			throw new RangeError(`Negative fade time ${fadeTimeMs} is not allowed`)
+		}
+
+		const now = Date.now()
+		this.#instance.log('debug', `Fade start: NRPN=${prettyNRPN(nrpn)}, t=${now}`)
+
+		// Compute the end time before any delays from querying the mixer to
+		// determine the starting level/etc. enter the picture.
+		const endTimeMs = now + fadeTimeMs
+
+		const getStartLevel = (): Level | Promise<Level> => {
+			const instance = this.#instance
+
+			// XXX If we stored levels in a well-typed store rather than relying
+			//     on variable storage, we wouldn't need to do any testing here.
+			const { MSB, LSB } = splitNRPN(nrpn)
+			const levelValue = instance.getVariableValue(`level_${MSB}.${LSB}`)
+			if (levelValue === '-inf' || (typeof levelValue === 'number' && -90 < levelValue && levelValue <= 10)) {
+				return levelValue
+			}
+			return Promise.reject(new TypeError('No cached level found'))
+		}
+
+		const startLevel = getStartLevel()
+		if (startLevel === '-inf' || typeof startLevel === 'number') {
+			this.#performFade(nrpn, startLevel, endTimeMs, endLevel)
+		} else {
+			startLevel
+				.then((start: Level) => this.#performFade(nrpn, start, endTimeMs, endLevel))
+				.catch((reason) => {
+					this.#instance.log('error', `Failure performing fade: ${reason}`)
+				})
+		}
 	}
 
-	/**
-	 * Fade the level of the given input channel in the given mix from `start`
-	 * to `end` over `fadeTimeMs` milliseconds.
-	 */
-	fadeInputChannelLevelInMix(
-		inputChannel: ZeroIndexed,
-		mix: ZeroIndexed,
-		start: Level,
-		end: Level,
-		fadeTimeMs: number,
-	): void {
-		this.#fadeSourceLevelInSink(inputChannel, mix, ['inputChannel', 'mix'], start, end, fadeTimeMs)
+	absoluteFade(nrpn: NRPN<'level'>, fadeTimeMs: number, level: Level): void {
+		if (fadeTimeMs < 0) {
+			throw new RangeError(`Negative fade time ${fadeTimeMs} is not allowed`)
+		}
+
+		if (fadeTimeMs === 0) {
+			this.#setLevel(nrpn, level)
+			return
+		}
+
+		this.#fadeToLevel(nrpn, fadeTimeMs, level)
 	}
 
-	/**
-	 * Fade the level of the given input channel in LR from `start` to `end`
-	 * over `fadeTimeMs` milliseconds.
-	 */
-	fadeInputChannelLevelInLR(inputChannel: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(inputChannel, LRStrip, ['inputChannel', 'lr'], start, end, fadeTimeMs)
-	}
+	relativeFade(nrpn: NRPN<'level'>, fadeTimeMs: number, dbDelta: number): void {
+		if (fadeTimeMs === 0 && (dbDelta === 1 || dbDelta === -1)) {
+			// A ±1dB immediate fade can be performed without knowing the
+			// current level.
+			this.send(dbDelta === 1 ? this.#nrpnIncrement(nrpn, 0) : this.#nrpnDecrement(nrpn, 0))
+			return
+		}
 
-	/**
-	 * Fade the level of the given group in the given mix from `start` to `end`
-	 * over `fadeTimeMs` milliseconds.
-	 */
-	fadeGroupLevelInMix(group: ZeroIndexed, mix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, mix, ['group', 'mix'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given group in LR from `start` to `end` over
-	 * `fadeTimeMs` milliseconds.
-	 */
-	fadeGroupLevelInLR(group: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, LRStrip, ['group', 'lr'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given FX return in the given mix from `start` to
-	 * `end` over `fadeTimeMs` milliseconds.
-	 */
-	fadeFXReturnLevelInMix(fxReturn: ZeroIndexed, mix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(fxReturn, mix, ['fxReturn', 'mix'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given FX return in LR from `start` to `end` over
-	 * `fadeTimeMs` milliseconds.
-	 */
-	fadeFXReturnLevelInLR(fxReturn: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(fxReturn, LRStrip, ['fxReturn', 'lr'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given input channel in the given FX send from
-	 * `start` to `end` over `fadeTimeMs` milliseconds.
-	 */
-	fadeInputChannelLevelInFXSend(
-		inputChannel: ZeroIndexed,
-		fxSend: ZeroIndexed,
-		start: Level,
-		end: Level,
-		fadeTimeMs: number,
-	): void {
-		this.#fadeSourceLevelInSink(inputChannel, fxSend, ['inputChannel', 'fxSend'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given group in the given FX send from `start` to
-	 * `end` over `fadeTimeMs` milliseconds.
-	 */
-	fadeGroupLevelInFXSend(group: ZeroIndexed, fxSend: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, fxSend, ['group', 'fxSend'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given FX return in the given FX send from `start`
-	 * to `end` over `fadeTimeMs` milliseconds.
-	 */
-	fadeFXReturnLevelInFXSend(
-		fxReturn: ZeroIndexed,
-		fxSend: ZeroIndexed,
-		start: Level,
-		end: Level,
-		fadeTimeMs: number,
-	): void {
-		this.#fadeSourceLevelInSink(fxReturn, fxSend, ['fxReturn', 'fxSend'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given mix in the given matrix from `start` to `end`
-	 * over `fadeTimeMs` milliseconds.
-	 */
-	fadeMixLevelInMatrix(mix: ZeroIndexed, matrix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(mix, matrix, ['mix', 'matrix'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of LR in the given matrix from `start` to `end` over
-	 * `fadeTimeMs` milliseconds.
-	 */
-	fadeLRLevelInMatrix(matrix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(LRStrip, matrix, ['lr', 'matrix'], start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given group in the given matrix from `start` to
-	 * `end` over `fadeTimeMs` milliseconds.
-	 */
-	fadeGroupLevelInMatrix(group: ZeroIndexed, matrix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSourceLevelInSink(group, matrix, ['group', 'matrix'], start, end, fadeTimeMs)
+		this.#fadeToLevel(nrpn, fadeTimeMs, (start: Level) => adjustLevel(start, dbDelta))
 	}
 
 	/**
@@ -1293,140 +1217,6 @@ export class Mixer {
 	 */
 	setGroupPanBalanceInMatrix(group: ZeroIndexed, panBalance: PanBalanceChoice, matrix: ZeroIndexed): void {
 		this.#setPanBalanceInSink(group, panBalance, matrix, ['group', 'matrix'])
-	}
-
-	/**
-	 * Fade the level of the given sink used as a mixer output from `start` to
-	 * `end` over `fadeTimeMs` milliseconds.
-	 *
-	 * @param sink
-	 *   The number of the sink within its type, e.g. `2` for mix 3.
-	 * @param sinkType
-	 *   The type that `sink` is, e.g. `'mix'` for mix 3.
-	 * @param start
-	 *   The presumed level at start of the fade.  (This *should* be equal to
-	 *   the current level; if it isn't, the effect will be to immediately jump
-	 *   to a level near `start` and then fade from that to `end` over
-	 *   `fadeTimeMs`.)
-	 * @param end
-	 *   The desired level at end of the fade.
-	 * @param fadeTimeMs
-	 *   The amount of time, in milliseconds, that the fade should take.  (The
-	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
-	 */
-	#fadeSinkAsOutput(
-		sink: ZeroIndexed,
-		sinkType: SinkAsOutputForNRPN<'level'>,
-		start: Level,
-		end: Level,
-		fadeTimeMs: number,
-	): void {
-		const calc = OutputLevelNRPNCalculator.get(this.model, sinkType)
-		const param = calc.calculate(sink)
-		this.#fadeToLevel(param, start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of LR used as a mixer output from `start` to `end` over
-	 * `fadeTimeMs` milliseconds.
-	 *
-	 * @param start
-	 *   The presumed level at start of the fade.  (This *should* be equal to
-	 *   the current level; if it isn't, the effect will be to immediately jump
-	 *   to a level near `start` and then fade from that to `end` over
-	 *   `fadeTimeMs`.)
-	 * @param end
-	 *   The desired level at end of the fade.
-	 * @param fadeTimeMs
-	 *   The amount of time, in milliseconds, that the fade should take.  (The
-	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
-	 */
-	fadeLROutputLevel(start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSinkAsOutput(LRStrip, 'lr', start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given mix used as a mixer output from `start` to
-	 * `end` over `fadeTimeMs` milliseconds.
-	 *
-	 * @param mix
-	 *   The particular mix to fade as output, zero-indexed.
-	 * @param start
-	 *   The presumed level at start of the fade.  (This *should* be equal to
-	 *   the current level; if it isn't, the effect will be to immediately jump
-	 *   to a level near `start` and then fade from that to `end` over
-	 *   `fadeTimeMs`.)
-	 * @param end
-	 *   The desired level at end of the fade.
-	 * @param fadeTimeMs
-	 *   The amount of time, in milliseconds, that the fade should take.  (The
-	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
-	 */
-	fadeMixOutputLevel(mix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSinkAsOutput(mix, 'mix', start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given FX send used as a mixer output from `start`
-	 * to `end` over `fadeTimeMs` milliseconds.
-	 *
-	 * @param fxSend
-	 *   The particular FX send to fade as output, zero-indexed.
-	 * @param start
-	 *   The presumed level at start of the fade.  (This *should* be equal to
-	 *   the current level; if it isn't, the effect will be to immediately jump
-	 *   to a level near `start` and then fade from that to `end` over
-	 *   `fadeTimeMs`.)
-	 * @param end
-	 *   The desired level at end of the fade.
-	 * @param fadeTimeMs
-	 *   The amount of time, in milliseconds, that the fade should take.  (The
-	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
-	 */
-	fadeFXSendOutputLevel(fxSend: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSinkAsOutput(fxSend, 'fxSend', start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given matrix used as a mixer output from `start`
-	 * to `end` over `fadeTimeMs` milliseconds.
-	 *
-	 * @param matrix
-	 *   The particular matrix to fade as output, zero-indexed.
-	 * @param start
-	 *   The presumed level at start of the fade.  (This *should* be equal to
-	 *   the current level; if it isn't, the effect will be to immediately jump
-	 *   to a level near `start` and then fade from that to `end` over
-	 *   `fadeTimeMs`.)
-	 * @param end
-	 *   The desired level at end of the fade.
-	 * @param fadeTimeMs
-	 *   The amount of time, in milliseconds, that the fade should take.  (The
-	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
-	 */
-	fadeMatrixOutputLevel(matrix: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSinkAsOutput(matrix, 'matrix', start, end, fadeTimeMs)
-	}
-
-	/**
-	 * Fade the level of the given DCA used as a mixer output from `start` to
-	 * `end` over `fadeTimeMs` milliseconds.
-	 *
-	 * @param dca
-	 *   The particular DCA to fade as output, zero-indexed.
-	 * @param start
-	 *   The presumed level at start of the fade.  (This *should* be equal to
-	 *   the current level; if it isn't, the effect will be to immediately jump
-	 *   to a level near `start` and then fade from that to `end` over
-	 *   `fadeTimeMs`.)
-	 * @param end
-	 *   The desired level at end of the fade.
-	 * @param fadeTimeMs
-	 *   The amount of time, in milliseconds, that the fade should take.  (The
-	 *   fade will decay into a direct jump to `end` if `fadeTimeMs === 0`.)
-	 */
-	fadeDCAOutputLevel(dca: ZeroIndexed, start: Level, end: Level, fadeTimeMs: number): void {
-		this.#fadeSinkAsOutput(dca, 'dca', start, end, fadeTimeMs)
 	}
 
 	/**
