@@ -136,6 +136,10 @@ type NRPNDataMessage = [number, 0x63, number, number, 0x62, number, number, 0x06
  */
 type NRPNIncDecMessage = [number, 0x63, number, number, 0x62, number, number, 0x60 | 0x61, number]
 
+type LevelQuery = PromiseWithResolvers<Level> & {
+	timeout: NodeJS.Timeout
+}
+
 /**
  * An abstract representation of an SQ mixer.
  */
@@ -206,6 +210,8 @@ export class Mixer {
 	 */
 	sceneRecalledTrigger = Math.floor(Math.random() * 65536)
 
+	readonly #levelQueries = new Map<NRPN<'level'>, LevelQuery>()
+
 	/**
 	 * Send the given bytes to the mixer.
 	 */
@@ -247,6 +253,11 @@ export class Mixer {
 			socket.destroy()
 			this.#socket = null
 		}
+		for (const { reject, timeout } of this.#levelQueries.values()) {
+			clearTimeout(timeout)
+			reject(new Error(`Mixer connection closing`))
+		}
+		this.#levelQueries.clear()
 	}
 
 	/** Stop operating and disconnect from the mixer. */
@@ -419,6 +430,12 @@ export class Mixer {
 			instance.setVariableValues({
 				[levelKey]: level,
 			})
+			const query = this.#levelQueries.get(nrpn)
+			if (query !== undefined) {
+				query.resolve(level)
+				clearTimeout(query.timeout)
+				this.#levelQueries.delete(nrpn)
+			}
 
 			if (!ost) {
 				this.lastValue[levelKey] = level
@@ -967,6 +984,51 @@ export class Mixer {
 	}
 
 	/**
+	 * Get the level of the identified NRPN from the mixer.
+	 *
+	 * @param nrpn
+	 *   The NRPN level to get.
+	 * @param timeoutMs
+	 *   The amount of time after which the promise returned by this function
+	 *   should reject.  (This time limit applies to all level-gets occurring
+	 *   over the timeout of the initial query, so the returned promise may
+	 *   reject faster than this amount of time.)
+	 */
+	async #getLevel(nrpn: NRPN<'level'>, timeoutMs: number): Promise<Level> {
+		const query = this.#levelQueries.get(nrpn)
+		if (query !== undefined) {
+			return query.promise
+		}
+
+		this.#instance.log('debug', `Querying level NRPN=${prettyNRPN(nrpn)}, timeout ${timeoutMs}ms`)
+		const { promise: rawPromise, resolve, reject } = Promise.withResolvers<Level>()
+		let promise = rawPromise
+		try {
+			const timeout = setTimeout(() => {
+				reject(new Error(`Mixer level get of NRPN=${prettyNRPN(nrpn)} timed out`))
+			}, timeoutMs)
+			promise = rawPromise.finally(() => {
+				const query = this.#levelQueries.get(nrpn)
+				if (query?.promise === promise) {
+					// Ensure that the promise cleans up *only its own query*.
+					// (The query reuse above *seems like* it should ensure only
+					// this exact query is deleted here, but the logic is tricky
+					// enough to warrant extra care to be sure.)
+					this.#instance.log('debug', `Level query NRPN=${prettyNRPN(nrpn)} complete`)
+					this.#levelQueries.delete(nrpn)
+				}
+			})
+			this.#levelQueries.set(nrpn, { promise, resolve, reject, timeout })
+
+			this.send(this.getNRPNValue(nrpn))
+		} catch (e) {
+			reject(new Error(`Error getting mixer level NRPN=${prettyNRPN(nrpn)}`, { cause: e }))
+		}
+
+		return promise
+	}
+
+	/**
 	 * Perform a fade of the level identified by `nrpn` to `end` over
 	 * `fadeTimeMs` milliseconds.  (If `fadeTimeMs === 0`, this decays into an
 	 * immediate set to the `end` level.)
@@ -1000,7 +1062,7 @@ export class Mixer {
 			if (levelValue === '-inf' || (typeof levelValue === 'number' && -90 < levelValue && levelValue <= 10)) {
 				return levelValue
 			}
-			return Promise.reject(new TypeError('No cached level found'))
+			return this.#getLevel(nrpn, fadeTimeMs)
 		}
 
 		const startLevel = getStartLevel()
