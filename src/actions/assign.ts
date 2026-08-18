@@ -15,8 +15,14 @@ import {
 	tryUpgradeMixOrLRArrayEncoding,
 	tryUpgradeMixOrLROptionEncoding,
 } from '../mixer/lr.js'
+import { MixOrLRArrayExpressionDescription, MixOrLRExpressionDescription } from '../mixer/model.js'
 import type { Mixer } from '../mixer/mixer.js'
-import type { InputOutputType, Model } from '../mixer/model.js'
+import {
+	type InputOutputType,
+	type Model,
+	SignalArrayExpressionDescription,
+	SignalExpressionDescription,
+} from '../mixer/model.js'
 import {
 	AssignActionId,
 	type AssignActions,
@@ -272,6 +278,8 @@ function sourceOption<Id extends CompanionInputFieldNumber['id']>(
 		type: 'number',
 		label,
 		id,
+		expressionDescription: SignalExpressionDescription(counts, type),
+		asInteger: true,
 		default: 1,
 		min: 1,
 		max: counts[type],
@@ -283,12 +291,17 @@ function sinksOption(
 	sinkChoices: keyof Choices,
 	choices: Choices,
 ): CompanionInputFieldMultiDropdown<typeof AssignSinksOptionId> {
+	const dropdownChoices = choices[sinkChoices]
 	return {
 		type: 'multidropdown',
 		label: sinkLabel,
 		id: AssignSinksOptionId,
+		expressionDescription:
+			sinkChoices === 'mixesAndLR'
+				? MixOrLRArrayExpressionDescription(dropdownChoices.length - 1)
+				: SignalArrayExpressionDescription(dropdownChoices.length),
 		default: [],
-		choices: choices[sinkChoices],
+		choices: dropdownChoices,
 	}
 }
 
@@ -314,7 +327,8 @@ const StatusOption = {
 		{ id: 'active', label: 'Active' },
 		{ id: 'inactive', label: 'Inactive' },
 	],
-	default: 'active',
+	expressionDescription: `Expression must evaluate to 'active' to assign or 'inactive' to unassign`,
+	default: AssignStatus.Active,
 } as const satisfies CompanionInputFieldDropdown<typeof AssignStatusOptionId>
 
 /**
@@ -343,6 +357,7 @@ export function assignActions(
 		type: 'dropdown',
 		label: 'Mix',
 		id: AssignSourceOptionId,
+		expressionDescription: MixOrLRExpressionDescription(counts.mix),
 		default: 1,
 		choices: choices.mixesAndLR,
 		minChoicesForSearch: 0,

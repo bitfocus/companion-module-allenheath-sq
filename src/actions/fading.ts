@@ -18,6 +18,10 @@ export const FadingOption = {
 		//{label: `5s`, id: 5}, //added
 		//{label: `10s`, id: 10}, //added
 	],
+	// XXX We could expand this to allow computing the fade duration -- the
+	//     underlying code should support it -- but that somewhat opens up the
+	//     "how long can an action run" can of worms, so keep it closed for now.
+	disableAutoExpression: true,
 	minChoicesForSearch: 0,
 } as const satisfies CompanionInputFieldDropdown<typeof FadeDurationOptionId>
 
@@ -54,6 +58,17 @@ export const LevelOption = {
 		}
 		return levels
 	})(),
+	// XXX The "Last dB value" option is horribly underdefined in its effect
+	//     (especially in light of non-immediate fades), and 1000 is a terrible
+	//     way to expose...whatever the heck it should be doing.  The "step"
+	//     option values are also a questionable way to expose this effect --
+	//     perhaps the existing "fade" actions should be split into absolute and
+	//     relative forms.  And exposing dB levels only in the discrete levels
+	//     defined specifically in options is...dubious, compared to just
+	//     allowing '-inf' or (-90, 10] numbers directly.  In light of all this
+	//     mess, punt on rigorizing values and exposing them as expressionable
+	//     for now.
+	disableAutoExpression: true,
 	minChoicesForSearch: 0,
 } as const satisfies CompanionInputFieldDropdown<typeof SignalLevelOptionId>
 

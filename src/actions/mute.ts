@@ -111,6 +111,9 @@ const MuteOption = {
 	type: 'dropdown',
 	label: 'Mute',
 	id: StatusOptionId,
+	expressionDescription: `Expression must evaluate to one of ${Object.values(MuteOperation)
+		.map((v) => `"${v}"`)
+		.join(', ')}`,
 	default: MuteOperation.Toggle,
 	choices: [
 		{ label: 'Toggle', id: MuteOperation.Toggle },

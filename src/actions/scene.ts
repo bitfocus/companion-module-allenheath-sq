@@ -39,8 +39,8 @@ function toScene(instance: sqInstance, model: Model, sceneOption: OptionValue): 
 	return null
 }
 
-const StepMin = -50
-const StepMax = 50
+const StepMin = -(300 - 1)
+const StepMax = 300 - 1
 
 function toSceneStep(instance: sqInstance, stepOption: OptionValue): number | null {
 	const step = Number(stepOption)
@@ -77,6 +77,7 @@ export function sceneActions(instance: sqInstance, mixer: Mixer): CompanionActio
 					min: 1,
 					max: model.scenes,
 					asInteger: true,
+					expressionDescription: `Expression must evaluate to an integer between 1 and ${model.scenes}`,
 				},
 			],
 			callback: async ({ options }) => {
@@ -96,9 +97,10 @@ export function sceneActions(instance: sqInstance, mixer: Mixer): CompanionActio
 					label: 'Scene +/-',
 					id: SceneAdjustOptionId,
 					default: 1,
+					asInteger: true,
 					min: StepMin,
 					max: StepMax,
-					asInteger: true,
+					expressionDescription: `Expression should evaluate to the integer to add/subtract to the current scene`,
 				},
 			],
 			callback: async ({ options }) => {

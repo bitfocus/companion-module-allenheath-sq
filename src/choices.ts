@@ -1,5 +1,5 @@
 import type { CompanionInputFieldBase, CompanionInputFieldDropdown, DropdownChoice } from '@companion-module/base'
-import type { Model } from './mixer/model.js'
+import { MixOrLRExpressionDescription, type Model } from './mixer/model.js'
 import { LR } from './types.js'
 
 function createMixesAndLR(model: Model): DropdownChoice[] {
@@ -58,6 +58,7 @@ export function mixOrLROption<Id extends CompanionInputFieldBase['id']>(
 		type: 'dropdown',
 		label,
 		id,
+		expressionDescription: MixOrLRExpressionDescription(choices.length - 1),
 		default: 1,
 		choices,
 		minChoicesForSearch: 0,

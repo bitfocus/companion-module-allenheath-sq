@@ -44,6 +44,12 @@ export const PanLevelOption = {
 		return panLevels
 	})(),
 	minChoicesForSearch: 0,
+	// XXX Current pan/balance option values are not ready for prime-time
+	//     exposure for computation from expression yet.  (Perhaps we should
+	//     change from "L100", "L95", ..., "CTR", "R5", ..., "R100" to a flat
+	//     [-100, +100] instead?)  Forbid targeting this with an expression for
+	//     now so that we can put off improving this until later.
+	disableAutoExpression: true,
 } as const satisfies CompanionInputFieldDropdown<typeof PanBalanceLevelOptionId>
 
 /**
@@ -89,6 +95,9 @@ export const ShowVarOption = {
 	label: 'Instance variable containing pan/balance level (click Learn to refresh)',
 	id: ShowVarOptionId,
 	default: '',
+	// This exists entirely to "learn" the name of the associated variable, so
+	// there's no point in it being expressionable.
+	disableAutoExpression: true,
 } as const satisfies CompanionInputFieldTextInput<typeof ShowVarOptionId>
 
 /**

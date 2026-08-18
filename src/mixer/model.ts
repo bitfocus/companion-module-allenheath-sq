@@ -246,6 +246,25 @@ export class Model {
 	}
 }
 
+export function SignalExpressionDescription(
+	counts: Model['inputOutputCounts'],
+	type: Exclude<keyof typeof counts, 'lr'>,
+): string {
+	return `Expression must evaluate to an integer between 1 and ${counts[type]}`
+}
+
+export function SignalArrayExpressionDescription(signalCount: number): string {
+	return `Expression must evaluate to an array whose elements are integers between 1 and ${signalCount}`
+}
+
+export function MixOrLRExpressionDescription(mixCount: number): string {
+	return `Expression must evaluate to the string "LR" or an integer between 1 and ${mixCount}`
+}
+
+export function MixOrLRArrayExpressionDescription(mixCount: number): string {
+	return `Expression must evaluate to an array whose elements are the string "LR" or integers between 1 and ${mixCount}`
+}
+
 export function getOutputCalculator<NRPN extends OutputNRPN>(
 	model: Model,
 	nrpnType: NRPN,
