@@ -6,7 +6,7 @@ import {
 	tryConvertOldPanToOutputActionToSinkSpecific,
 	tryMakeOutputPanBalanceItemOneIndexed,
 } from './pan-balance.js'
-import type { PanBalanceChoice } from '../pan-balance.js'
+import type { PanBalanceChoice } from '../panning.js'
 
 function makeObsoleteOutputPanBalanceAction(input: number, panBalance: PanBalanceChoice): CompanionActionInfo {
 	const cai: CompanionActionInfo = {

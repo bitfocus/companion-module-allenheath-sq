@@ -1,16 +1,17 @@
+import type { Expect, IsNever } from 'type-testing'
 import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import { faderNumber } from '../../fader-number.js'
 import type { sqInstance } from '../../instance.js'
 import type { Mixer } from '../../mixer/mixer.js'
-import type { InputOutputType, Model } from '../../mixer/model.js'
+import type { InputOutputType } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
-import { splitNRPN } from '../../mixer/nrpn/nrpn.js'
+import type { NRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
-import { getPanBalance, type PanBalanceChoice, PanLevelOption } from '../pan-balance.js'
+import { getPanBalanceOperation, learnShowVar, PanLevelOption, ShowVarOption } from '../panning.js'
 import { sourceOrSinkFromOneIndexed } from '../to-source-or-sink.js'
 import { LRStrip } from '../../types.js'
 import { moveZeroIndexedOptionToOneIndexed } from '../../upgrades/zero-indexed-to-one.js'
-import type { ZeroIndexed } from '../../utils/indexed.js'
+import { repr } from '../../utils/pretty.js'
 
 /**
  * Action IDs for all actions affecting the pan/balance of sinks when used as
@@ -149,54 +150,6 @@ export function tryMakeOutputPanBalanceItemOneIndexed(action: CompanionMigration
 }
 
 /**
- * Get the number of the specified fader from options for a fading action.
- *
- * @param instance
- *   The instance in use.
- * @param model
- *   The model of the mixer.
- * @param options
- *   Options specified for the action.
- * @param type
- *   The type of the fader.
- */
-function getFader(
-	instance: sqInstance,
-	model: Model,
-	options: CompanionOptionValues,
-	type: Exclude<InputOutputType, 'lr'>,
-): ZeroIndexed | null {
-	return sourceOrSinkFromOneIndexed(instance, model, options[OutputPanBalanceFaderOptionId], type)
-}
-
-type PanBalanceInfo = {
-	fader: ZeroIndexed
-	panBalanceChoice: PanBalanceChoice
-}
-
-function getPanBalanceType(
-	instance: sqInstance,
-	model: Model,
-	options: CompanionOptionValues,
-	type: Exclude<SinkAsOutputForNRPN<'panBalance'>, 'lr'>,
-): PanBalanceInfo | null {
-	const fader = getFader(instance, model, options, type)
-	if (fader === null) {
-		return null
-	}
-
-	const panBalanceChoice = getPanBalance(instance, options)
-	if (panBalanceChoice === null) {
-		return null
-	}
-
-	return {
-		fader,
-		panBalanceChoice,
-	}
-}
-
-/**
  * Generate action definitions for adjusting the pan/balance of various mixer
  * sinks when they're assigned to mixer outputs.
  *
@@ -217,12 +170,46 @@ export function outputPanBalanceActions(
 	const faderOption = (label: string, type: Exclude<InputOutputType, 'lr'>) =>
 		faderNumber(label, OutputPanBalanceFaderOptionId, counts, type)
 
-	const ShowVar = {
-		type: 'textinput',
-		label: 'Instance variable containing pan/balance level (click Learn to refresh)',
-		id: 'showvar',
-		default: '',
-	} as const
+	const getNRPN = (
+		options: CompanionOptionValues,
+		type: Exclude<SinkAsOutputForNRPN<'panBalance'>, 'lr'>,
+	): NRPN<'panBalance'> | null => {
+		const n = sourceOrSinkFromOneIndexed(instance, model, options[OutputPanBalanceFaderOptionId], type)
+		if (n === null) {
+			return null
+		}
+
+		return OutputBalanceNRPNCalculator.get(model, type).calculate(n)
+	}
+
+	const queryNRPN = (nrpn: NRPN<'panBalance'>) => {
+		// Send a "get" so the pan/balance variable is defined.
+		void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
+	}
+
+	const setPanBalance = (options: CompanionOptionValues, nrpn: NRPN<'panBalance'>) => {
+		const panBalance = getPanBalanceOperation(instance, options)
+		if (panBalance === null) {
+			return
+		}
+
+		switch (panBalance.type) {
+			case 'step-right':
+				mixer.panStepRight(nrpn)
+				return
+			case 'step-left':
+				mixer.panStepLeft(nrpn)
+				return
+			case 'absolute':
+				mixer.panAbsolute(nrpn, panBalance.position)
+				return
+			default: {
+				type assert_AllTypesHandled = Expect<IsNever<typeof panBalance>>
+				instance.log('warn', `Invalid pan/balance type ${repr(panBalance)}, ignoring`)
+				return
+			}
+		}
+	}
 
 	return {
 		[OutputPanBalanceActionId.LRPanBalanceOutput]: {
@@ -230,104 +217,76 @@ export function outputPanBalanceActions(
 			options: [
 				// There's only one LR, so don't include a fader option.
 				PanLevelOption,
-				ShowVar,
+				ShowVarOption,
 			],
 			learn: async ({ options }) => {
-				const { MSB, LSB } = splitNRPN(OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip))
-
-				return {
-					...options,
-					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
-				}
+				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip)
+				return learnShowVar(instance, options, nrpn)
 			},
 			subscribe: async (_action) => {
 				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip)
-
-				// Send a "get" so the pan/balance variable is defined.
-				void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
+				queryNRPN(nrpn)
 			},
 			callback: async ({ options }) => {
-				const panBalanceChoice = getPanBalance(instance, options)
-				if (panBalanceChoice === null) {
-					return
-				}
-
-				mixer.setLROutputPanBalance(panBalanceChoice)
+				const nrpn = OutputBalanceNRPNCalculator.get(model, 'lr').calculate(LRStrip)
+				setPanBalance(options, nrpn)
 			},
 		},
 		[OutputPanBalanceActionId.MixPanBalanceOutput]: {
 			name: 'Mix Pan/Bal to output',
-			options: [faderOption('Mix', 'mix'), PanLevelOption, ShowVar],
+			options: [faderOption('Mix', 'mix'), PanLevelOption, ShowVarOption],
 			learn: async ({ options }) => {
-				const mix = getFader(instance, model, options, 'mix')
-				if (mix === null) {
-					return
+				const nrpn = getNRPN(options, 'mix')
+				if (nrpn === null) {
+					return undefined
 				}
 
-				const { MSB, LSB } = splitNRPN(OutputBalanceNRPNCalculator.get(model, 'mix').calculate(mix))
-
-				return {
-					...options,
-					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
-				}
+				return learnShowVar(instance, options, nrpn)
 			},
 			subscribe: async ({ options }) => {
-				const mix = getFader(instance, model, options, 'mix')
-				if (mix === null) {
+				const nrpn = getNRPN(options, 'mix')
+				if (nrpn === null) {
 					return
 				}
 
-				const nrpn = OutputBalanceNRPNCalculator.get(model, 'mix').calculate(mix)
-
-				// Send a "get" so the pan/balance variable is defined.
-				void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
+				queryNRPN(nrpn)
 			},
 			callback: async ({ options }) => {
-				const panBalance = getPanBalanceType(instance, model, options, 'mix')
-				if (panBalance === null) {
+				const nrpn = getNRPN(options, 'mix')
+				if (nrpn === null) {
 					return
 				}
-				const { fader: mix, panBalanceChoice } = panBalance
 
-				mixer.setMixOutputPanBalance(mix, panBalanceChoice)
+				setPanBalance(options, nrpn)
 			},
 		},
 
 		[OutputPanBalanceActionId.MatrixPanBalanceOutput]: {
 			name: 'Matrix Pan/Bal to output',
-			options: [faderOption('Matrix', 'matrix'), PanLevelOption, ShowVar],
+			options: [faderOption('Matrix', 'matrix'), PanLevelOption, ShowVarOption],
 			learn: async ({ options }) => {
-				const matrix = getFader(instance, model, options, 'matrix')
-				if (matrix === null) {
-					return
+				const nrpn = getNRPN(options, 'matrix')
+				if (nrpn === null) {
+					return undefined
 				}
 
-				const { MSB, LSB } = splitNRPN(OutputBalanceNRPNCalculator.get(model, 'matrix').calculate(matrix))
-
-				return {
-					...options,
-					showvar: `$(${instance.label}:pan_${MSB}.${LSB})`,
-				}
+				return learnShowVar(instance, options, nrpn)
 			},
 			subscribe: async ({ options }) => {
-				const matrix = getFader(instance, model, options, 'matrix')
-				if (matrix === null) {
+				const nrpn = getNRPN(options, 'matrix')
+				if (nrpn === null) {
 					return
 				}
 
-				const nrpn = OutputBalanceNRPNCalculator.get(model, 'matrix').calculate(matrix)
-
-				// Send a "get" so the pan/balance variable is defined.
-				void mixer.sendCommands([mixer.getNRPNValue(nrpn)])
+				queryNRPN(nrpn)
 			},
 			callback: async ({ options }) => {
-				const panBalance = getPanBalanceType(instance, model, options, 'matrix')
-				if (panBalance === null) {
+				const nrpn = getNRPN(options, 'matrix')
+				if (nrpn === null) {
 					return
 				}
-				const { fader: matrix, panBalanceChoice } = panBalance
 
-				mixer.setMatrixOutputPanBalance(matrix, panBalanceChoice)
+				setPanBalance(options, nrpn)
 			},
 		},
 	}

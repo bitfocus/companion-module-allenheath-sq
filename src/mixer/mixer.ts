@@ -1,7 +1,7 @@
 import type { Equal, Expect } from 'type-testing'
 import { type CompanionVariableValue, InstanceStatus, TCPHelper } from '@companion-module/base'
 import { OutputPanBalanceActionId } from '../actions/output/pan-balance.js'
-import { PanBalanceActionId, type PanBalanceChoice } from '../actions/pan-balance.js'
+import { PanBalanceActionId } from '../actions/pan-balance.js'
 import { type CallbackInfoType, CallbackInfo } from '../callback.js'
 import {
 	getFaderLaw,
@@ -29,16 +29,15 @@ import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
 import { type InputOutputType, Model } from './model.js'
 import { calculateMuteNRPN, forEachMute } from './nrpn/mute.js'
 import { type NRPN, type NRPNType, prettyNRPN, splitNRPN } from './nrpn/nrpn.js'
-import { forEachOutputLevel, OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from './nrpn/output.js'
+import { forEachOutputLevel } from './nrpn/output.js'
 import {
 	AssignNRPNCalculator,
-	BalanceNRPNCalculator,
 	forEachSourceSinkNRPN,
 	type SourceForSourceInMixAndLRForNRPN,
 	type SourceSinkForNRPN,
 	type SourceSinkNRPNType,
 } from './nrpn/source-to-sink.js'
-import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
+import { type PanBalance, panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
 import { LR, LRStrip } from '../types.js'
 import { type OneIndexed, oneIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
@@ -1144,241 +1143,29 @@ export class Mixer {
 		this.#fadeToLevel(nrpn, fadeTimeMs, (start: Level) => adjustLevel(start, dbDelta))
 	}
 
-	/**
-	 * Set the pan/balance of a source-to-sink parameter (or sink used as
-	 * output) identified by its NRPN.
-	 *
-	 * @param nrpn
-	 *   The NRPN of the desired pan/balance parameter.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 */
-	#setPanBalance(nrpn: NRPN<'panBalance'>, panBalance: PanBalanceChoice): void {
-		let modifyPanBalanceCommand
-		switch (panBalance) {
-			// Step Right
-			case 998:
-				modifyPanBalanceCommand = this.#nrpnIncrement(nrpn, 0)
-				break
-			// Step Left
-			case 999:
-				modifyPanBalanceCommand = this.#nrpnDecrement(nrpn, 0)
-				break
-			// 'L100', 'L95', ..., 'L5', CTR', 'R5', ..., 'R95', 'R100'
-			default: {
-				const [VC, VF] = panBalanceLevelToVCVF(panBalance)
-
-				modifyPanBalanceCommand = this.#nrpnData(nrpn, VC, VF)
-			}
-		}
-
-		// XXX
+	#sendPanCommand(command: readonly number[], affectedNRPN: NRPN<'panBalance'>): void {
 		void this.sendCommands([
-			modifyPanBalanceCommand,
+			command,
 			// Query the new pan/balance value to update its variable.
 			// XXX check later -- possibly only stepping left/right need this
-			this.getNRPNValue(nrpn),
+			this.getNRPNValue(affectedNRPN),
 		])
 	}
 
-	/**
-	 * Set the pan/balance of `source` within `mix` (which may be LR).
-	 *
-	 * @param source
-	 *   A source, e.g. a value in the range `[0, 12)` if `source` is a group
-	 *   and the mixer supports 12 groups.
-	 * @param sourceType
-	 *   The type of `source`.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param mixOrLR
-	 *   The mix (or LR) in which `source`'s pan/balance level will be adjusted,
-	 *   e.g. `2` for Mix 3.
-	 */
-	#setPanBalanceInMixOrLR(
-		source: ZeroIndexed,
-		sourceType: SourceForSourceInMixAndLRForNRPN<'panBalance'>,
-		panBalance: PanBalanceChoice,
-		mixOrLR: MixOrLR,
-	): void {
-		if (mixOrLR === LR) {
-			const calc = BalanceNRPNCalculator.get(this.model, [sourceType, 'lr'])
-			const nrpn = calc.calculate(source, LRStrip)
-			this.#setPanBalance(nrpn, panBalance)
-		} else {
-			const calc = BalanceNRPNCalculator.get(this.model, [sourceType, 'mix'])
-			const nrpn = calc.calculate(source, mixOrLR)
-			this.#setPanBalance(nrpn, panBalance)
-		}
+	panStepLeft(nrpn: NRPN<'panBalance'>): void {
+		const stepLeft = this.#nrpnDecrement(nrpn, 0)
+		this.#sendPanCommand(stepLeft, nrpn)
 	}
 
-	/**
-	 * Set the pan/balance of `source` within `sink`.
-	 *
-	 * @param source
-	 *   A source, e.g. a value in the range `[0, 12)` if `source` is a group
-	 *   being assigned to mixes and the mixer supports 12 groups.
-	 * @param sourceType
-	 *   The type of `source`.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param sink
-	 *   The numbered sink in which `source`'s pan/balance level will be
-	 *   adjusted, e.g. `2` for Mix 3.
-	 * @param sinkType
-	 *   The type of `sink`.
-	 * @param paramsType
-	 *   An identifier determining the base MSB/LSB for the desired
-	 *   pan/balance level of `source` in `sink`.
-	 */
-	#setPanBalanceInSink(
-		source: ZeroIndexed,
-		panBalance: PanBalanceChoice,
-		sink: ZeroIndexed,
-		sourceSink: SourceSinkForNRPN<'panBalance'>,
-	) {
-		const calc = BalanceNRPNCalculator.get(this.model, sourceSink)
-		const nrpn = calc.calculate(source, sink)
-		this.#setPanBalance(nrpn, panBalance)
+	panStepRight(nrpn: NRPN<'panBalance'>): void {
+		const stepRight = this.#nrpnIncrement(nrpn, 0)
+		this.#sendPanCommand(stepRight, nrpn)
 	}
 
-	/**
-	 * Set the pan/balance of an input channel within a mix (which may be LR).
-	 *
-	 * @param channel
-	 *   An input channel, e.g. `3` for input channel 4.
-	 * @param pan
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Mix 3, or LR.
-	 */
-	setInputChannelPanBalanceInMixOrLR(channel: ZeroIndexed, pan: PanBalanceChoice, mixOrLR: MixOrLR): void {
-		this.#setPanBalanceInMixOrLR(channel, 'inputChannel', pan, mixOrLR)
-	}
-
-	/**
-	 * Set the pan/balance of a group within a mix (which may be LR).
-	 *
-	 * @param group
-	 *   A group, e.g. `1` for group 2.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Mix 3, or LR.
-	 */
-	setGroupPanBalanceInMixOrLR(group: ZeroIndexed, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
-		this.#setPanBalanceInMixOrLR(group, 'group', panBalance, mixOrLR)
-	}
-
-	/**
-	 * Set the pan/balance of an FX return within a mix (which may be LR).
-	 *
-	 * @param fxReturn
-	 *   An FX return, e.g. `1` for FX return 2.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param mixOrLR
-	 *   A mix, e.g. `2` for Mix 3, or LR.
-	 */
-	setFXReturnPanBalanceInMixOrLR(fxReturn: ZeroIndexed, panBalance: PanBalanceChoice, mixOrLR: MixOrLR): void {
-		this.#setPanBalanceInMixOrLR(fxReturn, 'fxReturn', panBalance, mixOrLR)
-	}
-
-	/**
-	 * Set the pan/balance of LR within a matrix.
-	 *
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param matrix
-	 *   A matrix, e.g. `2` for matrix 3.
-	 */
-	setLRPanBalanceInMatrix(panBalance: PanBalanceChoice, matrix: ZeroIndexed): void {
-		this.#setPanBalanceInSink(LRStrip, panBalance, matrix, ['lr', 'matrix'])
-	}
-
-	/**
-	 * Set the pan/balance of a mix within a matrix.
-	 *
-	 * @param mix
-	 *   A mix, e.g. `2` for Mix 3.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param matrix
-	 *   A matrix, e.g. `2` for matrix 3.
-	 */
-	setMixPanBalanceInMatrix(mix: ZeroIndexed, panBalance: PanBalanceChoice, matrix: ZeroIndexed): void {
-		this.#setPanBalanceInSink(mix, panBalance, matrix, ['mix', 'matrix'])
-	}
-
-	/**
-	 * Set the pan/balance of a mix within a matrix.
-	 *
-	 * @param group
-	 *   A group, e.g. `2` for Group 3.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 * @param matrix
-	 *   A matrix, e.g. `2` for matrix 3.
-	 */
-	setGroupPanBalanceInMatrix(group: ZeroIndexed, panBalance: PanBalanceChoice, matrix: ZeroIndexed): void {
-		this.#setPanBalanceInSink(group, panBalance, matrix, ['group', 'matrix'])
-	}
-
-	/**
-	 * Set the pan/balance of a `sink` of type `sinkType` when assigned to
-	 * physical mixer outputs.
-	 *
-	 * @param sink
-	 *   A sink, e.g. a value in the range `[0, 3)` if `sink` is a matrix
-	 *   and the mixer supports 3 mixes.
-	 * @param sinkType
-	 *   The type of `sink`.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 */
-	#setPanBalanceSinkAsOutput(
-		sink: ZeroIndexed,
-		sinkType: SinkAsOutputForNRPN<'panBalance'>,
-		panBalance: PanBalanceChoice,
-	): void {
-		const calc = OutputBalanceNRPNCalculator.get(this.model, sinkType)
-		const nrpn = calc.calculate(sink)
-		this.#setPanBalance(nrpn, panBalance)
-	}
-
-	/**
-	 * Set the balance of LR when assigned to physical mixer outputs.
-	 *
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 */
-	setLROutputPanBalance(panBalance: PanBalanceChoice): void {
-		this.#setPanBalanceSinkAsOutput(LRStrip, 'lr', panBalance)
-	}
-
-	/**
-	 * Set the balance of a mix (not including LR) when assigned to physical
-	 * mixer outputs.
-	 *
-	 * @param mix
-	 *   The particular mix to pan/balance as output, zero-indexed.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 */
-	setMixOutputPanBalance(mix: ZeroIndexed, panBalance: PanBalanceChoice): void {
-		this.#setPanBalanceSinkAsOutput(mix, 'mix', panBalance)
-	}
-
-	/**
-	 * Set the balance of a matrix when assigned to physical mixer outputs.
-	 *
-	 * @param matrix
-	 *   The particular matrix to pan/balance as output, zero-indexed.
-	 * @param panBalance
-	 *   A pan/balance choice; see `createPanLevels` for details.
-	 */
-	setMatrixOutputPanBalance(matrix: ZeroIndexed, panBalance: PanBalanceChoice): void {
-		this.#setPanBalanceSinkAsOutput(matrix, 'matrix', panBalance)
+	panAbsolute(nrpn: NRPN<'panBalance'>, position: PanBalance): void {
+		const [VC, VF] = panBalanceLevelToVCVF(position)
+		const panAbsolute = this.#nrpnData(nrpn, VC, VF)
+		this.#sendPanCommand(panAbsolute, nrpn)
 	}
 
 	/** Press (and do not subsequently release) a softkey. */
