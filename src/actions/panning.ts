@@ -1,5 +1,5 @@
-import type { CompanionInputFieldTextInput, CompanionOptionValues, DropdownChoice } from '@companion-module/base'
-import type { CompanionInputFieldDropdown } from '../compat.js'
+import type { CompanionOptionValues, DropdownChoice } from '@companion-module/base'
+import type { CompanionInputFieldDropdown, CompanionInputFieldTextInput } from '../compat.js'
 import type { sqInstance } from '../instance.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
 import { PanBalanceLevelOptionId, ShowVarOptionId } from './schemas/panning.js'
@@ -88,7 +88,7 @@ export const ShowVarOption = {
 	label: 'Instance variable containing pan/balance level (click Learn to refresh)',
 	id: ShowVarOptionId,
 	default: '',
-} as const satisfies CompanionInputFieldTextInput
+} as const satisfies CompanionInputFieldTextInput<typeof ShowVarOptionId>
 
 /**
  * Return the desired learned variables to write a pan/balance variable

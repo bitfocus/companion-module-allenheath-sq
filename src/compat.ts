@@ -4,6 +4,7 @@ import type {
 	CompanionInputFieldDropdown as NativeCompanionInputFieldDropdown,
 	CompanionInputFieldMultiDropdown as NativeCompanionInputFieldMultiDropdown,
 	CompanionInputFieldNumber as NativeCompanionInputFieldNumber,
+	CompanionInputFieldTextInput as NativeCompanionInputFieldTextInput,
 } from '@companion-module/base'
 
 export type CompanionActionDefinitions<Actions extends Record<string, object>> = Record<
@@ -22,3 +23,5 @@ export type CompanionInputFieldMultiDropdown<
 > = NativeCompanionInputFieldMultiDropdown
 
 export type CompanionInputFieldNumber<_TKey extends string = string> = NativeCompanionInputFieldNumber
+
+export type CompanionInputFieldTextInput<_TKey extends string = string> = NativeCompanionInputFieldTextInput
