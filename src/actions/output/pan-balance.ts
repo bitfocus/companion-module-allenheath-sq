@@ -2,7 +2,6 @@ import type { CompanionActionDefinition, CompanionMigrationAction, CompanionOpti
 import type { Choices } from '../../choices.js'
 import { faderOption, OutputFaderOptionId } from './common.js'
 import type { sqInstance } from '../../instance.js'
-import { LRStrip } from '../../mixer/lr.js'
 import type { Mixer } from '../../mixer/mixer.js'
 import type { InputOutputType, Model } from '../../mixer/model.js'
 import { getCommonCount } from '../../mixer/models.js'
@@ -10,6 +9,7 @@ import { splitNRPN } from '../../mixer/nrpn/nrpn.js'
 import { OutputBalanceNRPNCalculator, type SinkAsOutputForNRPN } from '../../mixer/nrpn/output.js'
 import { getPanBalance, PanLevelOption, type PanBalanceChoice } from '../pan-balance.js'
 import { toSourceOrSink } from '../to-source-or-sink.js'
+import { LRStrip } from '../../types.js'
 import type { ZeroIndexed } from '../../utils/indexed.js'
 
 /**

@@ -7,10 +7,11 @@ import type {
 } from '@companion-module/base'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
-import { LR, type MixOrLR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
+import { type MixOrLR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
 import { type OptionValue, toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+import { LR } from '../types.js'
 import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 
 /**

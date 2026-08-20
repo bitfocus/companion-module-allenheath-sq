@@ -1,6 +1,6 @@
 import type { DropdownChoice } from '@companion-module/base'
-import { LR } from './mixer/lr.js'
 import type { Model } from './mixer/model.js'
+import { LR } from './types.js'
 
 function createInputChannels(model: Model): DropdownChoice[] {
 	const inputChannels: DropdownChoice[] = []

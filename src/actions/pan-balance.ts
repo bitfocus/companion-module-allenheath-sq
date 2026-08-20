@@ -7,7 +7,7 @@ import type {
 } from '@companion-module/base'
 import { type Choices } from '../choices.js'
 import type { sqInstance } from '../instance.js'
-import { LR, LRStrip, type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
+import { type MixOrLR, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
 import { type NRPN, splitNRPN } from '../mixer/nrpn/nrpn.js'
@@ -18,6 +18,7 @@ import {
 } from '../mixer/nrpn/source-to-sink.js'
 import { type PanBalance } from '../mixer/pan-balance.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+import { LR, LRStrip } from '../types.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 import { repr } from '../utils/pretty.js'
 

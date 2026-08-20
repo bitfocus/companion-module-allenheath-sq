@@ -15,7 +15,7 @@ import {
 import { typeToMuteFeedback } from '../feedbacks/mute.js'
 import type { sqInstance } from '../instance.js'
 import { type Level, levelFromNRPNData, nrpnDataFromLevel } from './level.js'
-import { LR, LRStrip, type MixOrLR } from './lr.js'
+import type { MixOrLR } from './lr.js'
 import { ChannelParser } from '../midi/parse/channel-parser.js'
 import { parseMidi } from '../midi/parse/parse-midi.js'
 import { MidiTokenizer } from '../midi/tokenize/tokenizer.js'
@@ -38,6 +38,7 @@ import {
 	type SourceSinkNRPNType,
 } from './nrpn/source-to-sink.js'
 import { panBalanceLevelToVCVF, vcvfToReadablePanBalance } from './pan-balance.js'
+import { LR, LRStrip } from '../types.js'
 import { type OneIndexed, oneIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
 import { sleep, asyncSleep } from '../utils/sleep.js'

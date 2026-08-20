@@ -1,6 +1,7 @@
 import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
-import { LR, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from './lr.js'
+import { tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from './lr.js'
+import { LR } from '../types.js'
 
 function makeUpgradeAction(options: CompanionOptionValues): CompanionMigrationAction {
 	return {

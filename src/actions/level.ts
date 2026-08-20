@@ -8,7 +8,7 @@ import type {
 import type { Choices } from '../choices.js'
 import { FadingOption, getFadeParameters, LevelOption } from './fading.js'
 import type { sqInstance } from '../instance.js'
-import { LR, LRStrip, tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
+import { tryUpgradeMixOrLRArrayEncoding, tryUpgradeMixOrLROptionEncoding } from '../mixer/lr.js'
 import type { Mixer } from '../mixer/mixer.js'
 import type { Model } from '../mixer/model.js'
 import type { NRPN } from '../mixer/nrpn/nrpn.js'
@@ -19,6 +19,7 @@ import {
 	type SourceSinkForNRPN,
 } from '../mixer/nrpn/source-to-sink.js'
 import { toMixOrLR, toSourceOrSink } from './to-source-or-sink.js'
+import { LR, LRStrip } from '../types.js'
 import type { ZeroIndexed } from '../utils/indexed.js'
 
 /**

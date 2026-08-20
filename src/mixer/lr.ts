@@ -2,7 +2,8 @@ import type { CompanionMigrationAction, CompanionOptionValues } from '@companion
 import { tryUpgradeAssignMixOrLREncoding } from '../actions/assign.js'
 import { tryUpgradeLevelMixOrLREncoding } from '../actions/level.js'
 import { tryUpgradePanBalanceMixOrLREncoding } from '../actions/pan-balance.js'
-import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
+import { LR } from '../types.js'
+import type { ZeroIndexed } from '../utils/indexed.js'
 
 /**
  * The value of `LR` before it was changed to the constant string `'lr'`.  This
@@ -12,20 +13,8 @@ import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
  */
 const ObsoleteLREncoding = 99
 
-/**
- * The value of the LR mix, in any interface that accepts either a mix (0
- * through 11 if there exist mixes 1 to 12) or LR.
- */
-export const LR = 'lr'
-
 /** A value specifying either the LR mix or a numbered mix. */
 export type MixOrLR = ZeroIndexed | typeof LR
-
-/**
- * In those APIs refer to LR as the sole member of a source/sink category, use
- * `LRStrip` to refer to that sole member.
- */
-export const LRStrip = zeroIndexedNumber(0)
 
 type OptionArrayElement = Extract<NonNullable<CompanionOptionValues[string]>, any[]>[0]
 

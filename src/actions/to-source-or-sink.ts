@@ -1,7 +1,8 @@
 import type { CompanionOptionValues } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
-import { LR, type MixOrLR } from '../mixer/lr.js'
+import type { MixOrLR } from '../mixer/lr.js'
 import type { InputOutputType, Model } from '../mixer/model.js'
+import { LR } from '../types.js'
 import { zeroIndexedNumber, type ZeroIndexed } from '../utils/indexed.js'
 
 /** The type of an option value. */
