@@ -48,5 +48,5 @@ export function toNRPN<T extends NRPNType>({ MSB, LSB }: Param<T>): NRPN<T> {
 /** Pretty-print an NRPN into its 7-bit MSB/LSB decomposition. */
 export function prettyNRPN<T extends NRPNType>(nrpn: NRPN<T>): string {
 	const { MSB, LSB } = splitNRPN(nrpn)
-	return `MSB=${prettyByte(MSB)}, LSB=${prettyByte(LSB)}`
+	return `${prettyByte(MSB)}:${prettyByte(LSB)}`
 }

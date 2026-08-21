@@ -29,6 +29,6 @@ describe('NRPN', () => {
 	})
 
 	test('prettyNRPN', () => {
-		expect(prettyNRPN(ip1ToGrp1)).toBe('MSB=66, LSB=74')
+		expect(prettyNRPN(ip1ToGrp1)).toBe('66:74')
 	})
 })
