@@ -32,7 +32,7 @@
 		]
 	},
 	"engines": {
-		"node": "^22.11"
+		"node": "^26"
 	},
 	"dependencies": {
 		"@companion-module/base": "~2.1.3",
