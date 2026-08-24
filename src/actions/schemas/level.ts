@@ -23,21 +23,21 @@ export type LevelActionId = (typeof LevelActionId)[keyof typeof LevelActionId]
 export const LevelSetSourceOptionId = 'source'
 export const LevelSetSinkOptionId = 'sink'
 
-export type LevelSourceInMixOrLROptions = {
+type LevelSourceInMixOrLROptions = {
 	[LevelSetSourceOptionId]: number
 	[LevelSetSinkOptionId]: number | typeof LR
 }
 
 export type LevelFadeSourceInMixOrLROptions = LevelSourceInMixOrLROptions & LevelAndFadeOptions
 
-export type LevelSourceInSinkOptions = {
+type LevelSourceInSinkOptions = {
 	[LevelSetSourceOptionId]: number
 	[LevelSetSinkOptionId]: number
 }
 
 export type LevelFadeSourceInSinkOptions = LevelSourceInSinkOptions & LevelAndFadeOptions
 
-export type LevelMixOrLRInSinkOptions = {
+type LevelMixOrLRInSinkOptions = {
 	[LevelSetSourceOptionId]: number | typeof LR
 	[LevelSetSinkOptionId]: number
 }

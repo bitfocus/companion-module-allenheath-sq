@@ -33,7 +33,7 @@ type SourceToSinkInfo = {
 	readonly panBalance?: UnbrandedParam
 }
 
-export type SourceSinkNRPN = keyof Required<SourceToSinkInfo>
+type SourceSinkNRPN = keyof Required<SourceToSinkInfo>
 
 type SinkInfo = {
 	readonly [sink in InputOutputType]?: SourceToSinkInfo

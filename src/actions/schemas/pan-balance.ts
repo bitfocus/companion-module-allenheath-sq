@@ -20,21 +20,21 @@ export type PanBalanceActionId = (typeof PanBalanceActionId)[keyof typeof PanBal
 export const PanBalanceSourceOptionId = 'source'
 export const PanBalanceSinkOptionId = 'sink'
 
-export type PanBalanceSourceAndMixOrLRSinkOptions = {
+type PanBalanceSourceAndMixOrLRSinkOptions = {
 	[PanBalanceSourceOptionId]: number
 	[PanBalanceSinkOptionId]: number | 'lr'
 }
 
 export type PanBalanceSourceInMixOrLROptions = PanBalanceSourceAndMixOrLRSinkOptions & PanBalanceOptions
 
-export type PanBalanceMixOrLRSourceAndSinkOptions = {
+type PanBalanceMixOrLRSourceAndSinkOptions = {
 	[PanBalanceSourceOptionId]: number | 'lr'
 	[PanBalanceSinkOptionId]: number
 }
 
 export type PanBalanceMixOrLRInSinkOptions = PanBalanceMixOrLRSourceAndSinkOptions & PanBalanceOptions
 
-export type PanBalanceSourceAndSinkOptions = {
+type PanBalanceSourceAndSinkOptions = {
 	[PanBalanceSourceOptionId]: number
 	[PanBalanceSinkOptionId]: number
 }
