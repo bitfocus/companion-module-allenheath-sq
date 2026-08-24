@@ -47,8 +47,8 @@ export const LevelOption = {
 			{ label: `Step -6 dB`, id: 'step-6' },
 		)
 		for (let i = -90; i <= -40; i = i + 5) {
-			const id = i === -90 ? '-inf' : i
-			levels.push({ label: `${i} dB`, id })
+			const [label, id] = i === -90 ? ['-∞ dB', '-inf'] : [`${i} dB`, i]
+			levels.push({ label, id })
 		}
 		for (let i = -39; i <= -10; i = i + 1) {
 			levels.push({ label: `${i} dB`, id: i })
