@@ -40,7 +40,7 @@
 	},
 	"devDependencies": {
 		"@companion-module/tools": "~3.0.2",
-		"@types/node": "^22.15.18",
+		"@types/node": "^26.2.0",
 		"eslint": "~10.7.0",
 		"eslint-plugin-n": "~18.3.0",
 		"husky": "^9.0.11",
