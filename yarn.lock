@@ -1086,7 +1086,7 @@ __metadata:
     husky: "npm:^9.1.7"
     knip: "npm:^5.46.0"
     lint-staged: "npm:^17.3.0"
-    prettier: "npm:^3.8.1"
+    prettier: "npm:^3.9.6"
     rimraf: "npm:^6.0.1"
     type-testing: "npm:^0.2.0"
     typescript: "npm:~6.0.3"
@@ -2778,7 +2778,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.8.1":
+"prettier@npm:^3.9.6":
   version: 3.9.6
   resolution: "prettier@npm:3.9.6"
   bin:
