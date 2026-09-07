@@ -152,6 +152,8 @@ type QueryInfo = {
 	reject: (err: Error) => void
 }
 
+const ReconnectDelayMs = 5000
+
 /**
  * An abstract representation of an SQ mixer.
  */
@@ -166,6 +168,9 @@ export class Mixer {
 
 	/** The TCP socket used to interact with the mixer. */
 	#socket: TCPHelper | null = null
+
+	/** A pending retry after an unexpected TCP disconnect. */
+	#reconnectTimer: ReturnType<typeof setTimeout> | null = null
 
 	readonly #queries = new Map<NRPN<NRPNType>, QueryInfo>()
 
@@ -336,8 +341,8 @@ export class Mixer {
 
 		const socket = this.#socket
 		if (socket !== null) {
-			socket.destroy()
 			this.#socket = null
+			socket.destroy()
 		}
 		for (const query of this.#queries.values()) {
 			query.reject(new Error(`Mixer connection closing`))
@@ -345,13 +350,42 @@ export class Mixer {
 		this.#queries.clear()
 	}
 
+	#clearReconnectTimer(): void {
+		if (this.#reconnectTimer !== null) {
+			clearTimeout(this.#reconnectTimer)
+			this.#reconnectTimer = null
+		}
+	}
+
+	#scheduleReconnect(host: Host, reason: string): void {
+		if (this.#reconnectTimer !== null) return
+
+		this.#instance.log('info', `Retrying mixer connection in ${ReconnectDelayMs}ms after: ${reason}`)
+		this.#reconnectTimer = setTimeout(() => {
+			this.#reconnectTimer = null
+			this.start(host)
+		}, ReconnectDelayMs)
+	}
+
+	#handleUnexpectedDisconnect(socket: TCPHelper, status: InstanceStatus, reason: string): void {
+		// A stale socket can still emit while a newer connection is being made.
+		if (socket !== this.#socket) return
+
+		const host = getHost(this.#instance.config)
+		this.#stop(status, reason)
+		if (host !== '') this.#scheduleReconnect(host, reason)
+	}
+
 	/** Stop operating and disconnect from the mixer. */
 	stop(reason: string): void {
+		this.#clearReconnectTimer()
 		this.#stop(InstanceStatus.Disconnected, reason)
 	}
 
 	/** Start operating the SQ mixer, using options from the instance. */
 	start(host: Host | ''): void {
+		this.#clearReconnectTimer()
+
 		if (host === '') {
 			this.#stop(InstanceStatus.BadConfig, 'No mixer TCP/IP host specified')
 			return
@@ -369,19 +403,19 @@ export class Mixer {
 		socket.on('error', (err) => {
 			const errStr = `Error: ${err}`
 			instance.log('error', errStr)
-			this.#stop(InstanceStatus.ConnectionFailure, errStr)
+			this.#handleUnexpectedDisconnect(socket, InstanceStatus.ConnectionFailure, errStr)
 		})
 
 		this.#processMixerReplies(socket).then(
 			() => {
 				const processingComplete = 'Mixer reply processing complete, disconnecting'
 				instance.log('info', processingComplete)
-				this.stop(processingComplete)
+				this.#handleUnexpectedDisconnect(socket, InstanceStatus.ConnectionFailure, processingComplete)
 			},
 			(reason: any) => {
 				const err = `Error processing replies: ${reason}`
 				instance.log('error', err)
-				this.#stop(InstanceStatus.ConnectionFailure, err)
+				this.#handleUnexpectedDisconnect(socket, InstanceStatus.ConnectionFailure, err)
 			},
 		)
 
