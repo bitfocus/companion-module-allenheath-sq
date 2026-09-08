@@ -1,6 +1,8 @@
 import type { CompanionInputFieldDropdown, DropdownChoice } from '@companion-module/base'
 import type { sqInstance } from '../instance.js'
 import type { Level } from '../mixer/level.js'
+import type { Mixer } from '../mixer/mixer.js'
+import { splitNRPN, type NRPN } from '../mixer/nrpn/nrpn.js'
 import { FadeDurationOptionId, type LevelAndFadeOptions, SignalLevelOptionId } from './schemas/fading.js'
 import { repr } from '../utils/pretty.js'
 
@@ -87,6 +89,40 @@ type FadeType =
 			type: 'last-value'
 			fadeTimeMs: number
 	  }
+
+function levelVariableId(nrpn: NRPN<'level'>): `level_${number}.${number}` {
+	const { MSB, LSB } = splitNRPN(nrpn)
+	return `level_${MSB}.${LSB}`
+}
+
+function asLevel(value: unknown): Level | null {
+	return value === '-inf' || (typeof value === 'number' && -90 < value && value <= 10) ? value : null
+}
+
+/** Capture the current fader level before applying a new level action. */
+export function rememberCurrentLevel(
+	instance: sqInstance,
+	mixer: Pick<Mixer, 'lastActionValue'>,
+	nrpn: NRPN<'level'>,
+): void {
+	const level = asLevel(instance.getVariableValue(levelVariableId(nrpn)))
+	if (level !== null) mixer.lastActionValue.set(nrpn, level)
+}
+
+/** Return the level captured before the most recent level action. */
+export function getLastLevel(
+	instance: sqInstance,
+	mixer: Pick<Mixer, 'lastActionValue'>,
+	nrpn: NRPN<'level'>,
+): Level | null {
+	const level = mixer.lastActionValue.get(nrpn)
+
+	if (level !== undefined) return level
+
+	const { MSB, LSB } = splitNRPN(nrpn)
+	instance.log('warn', `No previous dB value is available for fader ${MSB}:${LSB}`)
+	return null
+}
 
 const MsPerSecond = 1000
 

@@ -1,7 +1,7 @@
 import type { Expect, IsNever } from 'type-testing'
 import type { CompanionActionDefinitions } from '@companion-module/base'
 import { faderNumber } from '../../fader-number.js'
-import { FadingOption, getFadeType, LevelOption } from '../fading.js'
+import { FadingOption, getFadeType, getLastLevel, LevelOption, rememberCurrentLevel } from '../fading.js'
 import type { sqInstance } from '../../instance.js'
 import type { Mixer } from '../../mixer/mixer.js'
 import type { InputOutputType, Model } from '../../mixer/model.js'
@@ -200,18 +200,18 @@ export function outputLevelActions(instance: sqInstance, mixer: Mixer): Companio
 
 		switch (fadeType.type) {
 			case 'absolute':
+				rememberCurrentLevel(instance, mixer, nrpn)
 				mixer.absoluteFade(nrpn, fadeType.fadeTimeMs, fadeType.level)
 				return
 			case 'relative':
+				rememberCurrentLevel(instance, mixer, nrpn)
 				mixer.relativeFade(nrpn, fadeType.fadeTimeMs, fadeType.dbDelta)
 				return
 			case 'last-value':
-				// XXX It's not clear if this ever even worked, and also it's
-				//     wildly unclear what "last value" even means/meant, in the
-				//     presence of fades of nonzero duration (not to mention
-				//     stuff like manually adjusting the fader on the mixer
-				//     surface generating a series of level messages).  Just
-				//     don't do anything in this case for now.
+				{
+					const level = getLastLevel(instance, mixer, nrpn)
+					if (level !== null) mixer.absoluteFade(nrpn, fadeType.fadeTimeMs, level)
+				}
 				return
 			default: {
 				type assert_FadeTypeIsNever = Expect<IsNever<typeof fadeType>>

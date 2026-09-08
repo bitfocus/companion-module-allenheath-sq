@@ -277,6 +277,9 @@ export class Mixer {
 	 */
 	readonly lastValue: { [key: `level_${number}.${number}`]: CompanionVariableValue } = {}
 
+	/** Levels captured immediately before the most recent level action. */
+	readonly lastActionValue = new Map<NRPN<'level'>, Level>()
+
 	/**
 	 * The scene currently recalled on the mixer.  (The MIDI API doesn't allow us
 	 * to query the current scene, so this initial value is arbitrary.)
